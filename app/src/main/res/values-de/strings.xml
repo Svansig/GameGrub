@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameNative</string>
+    <string name="app_name">GameGrub</string>
     <string name="login_user">Benutzeranmeldung</string>
     <string name="login_2fa">Zwei-Faktor-Authentifizierung</string>
     <string name="home">Startseite</string>
@@ -791,9 +791,9 @@
     <string name="settings_info_source_title">Quellcode</string>
     <string name="settings_info_source_subtitle">Projektquellcode ansehen</string>
     <string name="settings_info_libraries_title">Verwendete Bibliotheken</string>
-    <string name="settings_info_libraries_subtitle">Welche Technologien GameNative möglich machen</string>
+    <string name="settings_info_libraries_subtitle">Welche Technologien GameGrub möglich machen</string>
     <string name="settings_info_privacy_title">Datenschutzerklärung</string>
-    <string name="settings_info_privacy_subtitle">Öffnet die Datenschutzerklärung von GameNative</string>
+    <string name="settings_info_privacy_subtitle">Öffnet die Datenschutzerklärung von GameGrub</string>
     <!-- Settings: Interface Group -->
     <string name="settings_interface_title">Oberfläche</string>
     <string name="settings_interface_external_links_title">Weblinks extern öffnen</string>
@@ -812,7 +812,7 @@
     <!-- Settings: Downloads Group -->
     <string name="settings_downloads_title">Downloads</string>
     <!-- Login Screen -->
-    <string name="login_app_name">GameNative</string>
+    <string name="login_app_name">GameGrub</string>
     <string name="login_privacy_policy">Datenschutzerklärung</string>
     <string name="login_welcome_back">Willkommen zurück</string>
     <string name="login_subtitle">Melde dich an, um auf deine Steam-Bibliothek zuzugreifen</string>
@@ -880,11 +880,11 @@
     <!-- PluviaMain: Crash & Support -->
     <string name="main_recent_crash_title">Kürzlicher Absturz</string>
     <string name="main_recent_crash_message">Tut uns leid!\nTeile uns gern mit, was passiert ist.\nDu kannst das letzte Crash-Log im App-Setup anzeigen/exportieren und bei Github als Issue einreichen.\nDer Link ist auch in den Einstellungen!</string>
-    <string name="main_thank_you_title">Danke, dass du GameNative nutzt!</string>
+    <string name="main_thank_you_title">Danke, dass du GameGrub nutzt!</string>
     <string name="main_thank_you_message">Unterstütze Open-Source-PC-Gaming auf Android, indem du die App weiterempfiehlst oder Mitglied auf Ko-fi wirst.</string>
     <string name="main_join_kofi">Auf Ko-fi unterstützen</string>
     <string name="main_share">Teilen</string>
-    <string name="main_share_text">Check out GameNative - play your PC Steam games on Android, with full support for cloud saves!\nhttps://gamenative.app\nJoin the community: https://discord.gg/2hKv4VfZfE</string>
+    <string name="main_share_text">Check out GameGrub - play your PC Steam games on Android, with full support for cloud saves!\nhttps://GameGrub.app\nJoin the community: https://discord.gg/2hKv4VfZfE</string>
     <string name="main_discord_support_title">Hat das Spiel funktioniert?</string>
     <string name="main_discord_support_message">Tritt dem Discord bei, um Hilfe für dein Spiel oder Performance zu erhalten.</string>
     <string name="main_open_discord">Discord öffnen</string>
@@ -1138,7 +1138,7 @@
     <string name="wine_proton_install_failed">Installationsfehler: %s</string>
     <string name="wine_proton_install_error">Installationsfehler: %s</string>
     <string name="wine_proton_install_success">%1$s %2$s erfolgreich installiert</string>
-    <string name="wine_proton_glibc_incompatible">Dieses Wine/Proton benötigt GLIBC-Container und ist mit GameNative nicht kompatibel. Bitte nur ARM64/Bionic-Builds verwenden.</string>
+    <string name="wine_proton_glibc_incompatible">Dieses Wine/Proton benötigt GLIBC-Container und ist mit GameGrub nicht kompatibel. Bitte nur ARM64/Bionic-Builds verwenden.</string>
     <string name="wine_proton_containers_in_use">Container, die diese Version verwenden:</string>
     <string name="wine_proton_no_containers_warning">Kein Container nutzt diese Version.</string>
     <string name="wine_proton_containers_will_break">Diese Container funktionieren danach nicht mehr:</string>

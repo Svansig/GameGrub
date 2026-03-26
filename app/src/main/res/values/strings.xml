@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameNative</string>
+    <string name="app_name">GameGrub</string>
     <string name="login_user">User Login</string>
     <string name="login_2fa">Two Factor</string>
     <string name="home">Home</string>
@@ -840,9 +840,9 @@
     <string name="settings_info_source_title">Source code</string>
     <string name="settings_info_source_subtitle">View the source code of this project</string>
     <string name="settings_info_libraries_title">Libraries Used</string>
-    <string name="settings_info_libraries_subtitle">See what technologies make GameNative possible</string>
+    <string name="settings_info_libraries_subtitle">See what technologies make GameGrub possible</string>
     <string name="settings_info_privacy_title">Privacy Policy</string>
-    <string name="settings_info_privacy_subtitle">Opens a link to GameNative\'s privacy policy</string>
+    <string name="settings_info_privacy_subtitle">Opens a link to GameGrub\'s privacy policy</string>
 
     <!-- Settings: Interface Group -->
     <string name="settings_interface_title">Interface</string>
@@ -864,7 +864,7 @@
     <string name="settings_downloads_title">Downloads</string>
 
     <!-- Login Screen -->
-    <string name="login_app_name">GameNative</string>
+    <string name="login_app_name">GameGrub</string>
     <string name="login_privacy_policy">Privacy Policy</string>
     <string name="login_welcome_back">Welcome Back</string>
     <string name="login_subtitle">Sign in to access your Steam library</string>
@@ -944,11 +944,11 @@
     <!-- PluviaMain: Crash & Support -->
     <string name="main_recent_crash_title">Recent Crash</string>
     <string name="main_recent_crash_message">Sorry about that!\nIt would be nice to know about the recent issue you\'ve had.\nYou can view and export the most recent crash log in the app\'s settings and attach it as a Github issue in the project\'s repository.\nLink to the Github repo is also in settings!</string>
-    <string name="main_thank_you_title">Thank you for using GameNative!</string>
+    <string name="main_thank_you_title">Thank you for using GameGrub!</string>
     <string name="main_thank_you_message">Support open-source PC gaming on Android by sharing the app with your friends or becoming a member on Ko-fi.</string>
     <string name="main_join_kofi">Join on Ko-fi</string>
     <string name="main_share">Share</string>
-    <string name="main_share_text">Check out GameNative - play your PC Steam games on Android, with full support for cloud saves!\nhttps://gamenative.app\nJoin the community: https://discord.gg/2hKv4VfZfE</string>
+    <string name="main_share_text">Check out GameGrub - play your PC Steam games on Android, with full support for cloud saves!\nhttps://GameGrub.app\nJoin the community: https://discord.gg/2hKv4VfZfE</string>
     <string name="main_discord_support_title">Did the game work?</string>
     <string name="main_discord_support_message">Join the Discord to get support to fix your game or improve performance.</string>
     <string name="main_open_discord">Open Discord</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameNative</string>
+    <string name="app_name">GameGrub</string>
     <string name="login_user">Logowanie</string>
     <string name="login_2fa">Weryfikacja dwuetapowa</string>
     <string name="home">Start</string>
@@ -771,7 +771,7 @@
     <string name="driver_manager">Menedżer sterowników</string>
     <string name="select_a_driver">Wybierz sterownik</string>
     <string name="import_zip_from_device">Importuj ZIP z urządzenia</string>
-    
+
     <!-- Contents Manager -->
     <string name="contents_manager">Menedżer zawartości</string>
     <string name="import_wcp_from_device">Importuj .wcp z urządzenia</string>
@@ -839,9 +839,9 @@
     <string name="settings_info_source_title">Kod źródłowy</string>
     <string name="settings_info_source_subtitle">Zobacz kod źródłowy tego projektu</string>
     <string name="settings_info_libraries_title">Użyte biblioteki</string>
-    <string name="settings_info_libraries_subtitle">Zobacz, jakie technologie umożliwiają działanie GameNative</string>
+    <string name="settings_info_libraries_subtitle">Zobacz, jakie technologie umożliwiają działanie GameGrub</string>
     <string name="settings_info_privacy_title">Polityka prywatności</string>
-    <string name="settings_info_privacy_subtitle">Otwiera link do polityki prywatności GameNative</string>
+    <string name="settings_info_privacy_subtitle">Otwiera link do polityki prywatności GameGrub</string>
 
     <!-- Settings: Interface Group -->
     <string name="settings_interface_title">Interfejs</string>

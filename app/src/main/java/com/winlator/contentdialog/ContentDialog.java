@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import app.gamenative.R;
+import app.gamegrub.R;
 import com.winlator.core.AppUtils;
 import com.winlator.core.Callback;
 

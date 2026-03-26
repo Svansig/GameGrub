@@ -1,13 +1,10 @@
 package com.winlator.contentdialog;
 
-import android.content.Context;
 import android.view.View;
-import android.widget.Spinner;
-import app.gamenative.R;
-import com.winlator.core.AppUtils;
+
+import app.gamegrub.R;
+
 import com.winlator.core.GPUHelper;
-import com.winlator.core.KeyValueSet;
-import com.winlator.core.StringUtils;
 import com.winlator.xenvironment.components.VortekRendererComponent;
 
 /* loaded from: classes.dex */

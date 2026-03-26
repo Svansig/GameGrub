@@ -13,19 +13,15 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.util.Log;
 
-import androidx.compose.ui.input.pointer.PointerIcon;
 import androidx.core.graphics.ColorUtils;
 
-import app.gamenative.R;
+import app.gamegrub.R;
 import com.winlator.inputcontrols.Binding;
 import com.winlator.inputcontrols.ControlElement;
 import com.winlator.inputcontrols.ControlsProfile;
@@ -580,8 +576,8 @@ public class InputControlsView extends View {
         paint.setTextAlign(Paint.Align.CENTER);
         float textY = rect.centerY() - (paint.descent() + paint.ascent()) * 0.5f;
         String label = getContext().getString(containerShooterModeRuntime
-                ? app.gamenative.R.string.shooter_mode_on
-                : app.gamenative.R.string.shooter_mode_off);
+                ? app.gamegrub.R.string.shooter_mode_on
+                : app.gamegrub.R.string.shooter_mode_off);
         canvas.drawText(label, rect.centerX(), textY, paint);
     }
 

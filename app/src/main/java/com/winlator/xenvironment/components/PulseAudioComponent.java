@@ -16,7 +16,7 @@ import com.winlator.xenvironment.XEnvironment;
 
 import java.io.File;
 
-import app.gamenative.BuildConfig;
+import app.gamegrub.BuildConfig;
 
 public class PulseAudioComponent extends EnvironmentComponent {
     private final UnixSocketConfig socketConfig;

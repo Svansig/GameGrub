@@ -32,5 +32,5 @@
 
 # Timber Logging
 -keep class timber.log.Timber { *; }
--keep class app.gamenative.ReleaseTree { *; }
+-keep class app.gamegrub.ReleaseTree { *; }
 

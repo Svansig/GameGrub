@@ -2,12 +2,9 @@ package com.winlator.contentdialog;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
@@ -18,8 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
 
-import com.google.android.material.navigation.NavigationView;
-import app.gamenative.R;
+import app.gamegrub.R;
 import com.winlator.inputcontrols.ControllerManager;
 
 public class NavigationDialog extends ContentDialog {

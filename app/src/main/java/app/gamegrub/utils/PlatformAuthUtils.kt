@@ -1,0 +1,15 @@
+package app.gamegrub.utils
+
+import android.content.Context
+import app.gamegrub.service.SteamService
+import app.gamegrub.service.amazon.AmazonService
+import app.gamegrub.service.epic.EpicService
+import app.gamegrub.service.gog.GOGService
+
+object PlatformAuthUtils {
+    fun isSignedInToAnyPlatform(context: Context): Boolean =
+        SteamService.isLoggedIn ||
+                GOGService.hasStoredCredentials(context) ||
+                EpicService.hasStoredCredentials(context) ||
+                AmazonService.hasStoredCredentials(context)
+}

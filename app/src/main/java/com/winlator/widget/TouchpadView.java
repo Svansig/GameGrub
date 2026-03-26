@@ -1,21 +1,17 @@
 package com.winlator.widget;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.os.Handler;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
-import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import app.gamenative.R;
-import app.gamenative.data.TouchGestureConfig;
+import app.gamegrub.R;
+import app.gamegrub.data.TouchGestureConfig;
 import com.winlator.core.AppUtils;
 import com.winlator.math.Mathf;
 import com.winlator.math.XForm;

@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.winlator.xenvironment.ImageFs;
 
-import app.gamenative.R;
+import app.gamegrub.R;
 import timber.log.Timber;
 
 import java.io.File;

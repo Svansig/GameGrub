@@ -8,7 +8,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
-import app.gamenative.R;
+import app.gamegrub.R;
 import com.winlator.core.Callback;
 import com.winlator.core.FileUtils;
 

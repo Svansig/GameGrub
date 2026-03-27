@@ -23,59 +23,61 @@ val gameGrubSeedColor = Color(0x284561FF)
  * Raw color primitives for the GameGrub app.
  * These are the base colors used to construct theme palettes.
  */
-
 // Brand
-val GameGrubPrimary = Color(0xFFA21CAF)
-val GameGrubSeed = Color(0x284561FF)
+val GameGrubPrimary = Color(0xFF39D4C6)      // handheld screen teal
+val GameGrubSeed = Color(0xFF1B2A30)         // deep blue-black / cloak seed
 
 // Backgrounds
-val GameGrubBackground = Color(0xFF09090B)
-val GameGrubSurface = Color(0xFF12121A)
-val GameGrubSurfaceElevated = Color(0xFF1A1A24)
-val GameGrubCard = Color(0xFF09090B)
+val GameGrubBackground = Color(0xFF0B0F12)   // near-black with blue tint
+val GameGrubSurface = Color(0xFF12181D)      // dark cloak tone
+val GameGrubSurfaceElevated = Color(0xFF1A2329)
+val GameGrubCard = Color(0xFF10161B)
 
 // Foregrounds
-val GameGrubForeground = Color(0xFFFAFAFA)
-val GameGrubForegroundMuted = Color(0xFF94969C)
+val GameGrubForeground = Color(0xFFF2EBDD)   // bone-white
+val GameGrubForegroundMuted = Color(0xFF9AA3A8)
 
 // Secondary
-val GameGrubSecondary = Color(0xFF27272A)
+val GameGrubSecondary = Color(0xFF263239)    // muted slate / cloak gray
 
 // Accents
-val GameGrubCyan = Color(0xFF00D4FF)
-val GameGrubPurple = Color(0xFF8B5CF6)
-val GameGrubPink = Color(0xFFEC4899)
+val GameGrubCyan = Color(0xFF39D4C6)         // primary teal
+val GameGrubPurple = Color(0xFF2E4650)       // repurposed as deep slate-blue
+val GameGrubPink = Color(0xFFB7A98A)         // warm bone/tan accent
 
 // Semantic
-val GameGrubSuccess = Color(0xFF10B981)
-val GameGrubWarning = Color(0xFFF59E0B)
-val GameGrubDanger = Color(0xFFEF4444)
-val GameGrubDestructive = Color(0xFF7F1D1D)
+val GameGrubSuccess = Color(0xFF6FAF5D)      // moss green
+val GameGrubWarning = Color(0xFFD7A44A)      // lantern amber
+val GameGrubDanger = Color(0xFFD05C5C)       // softened red
+val GameGrubDestructive = Color(0xFF5A1F24)  // dark wine red
 
 // Border
-val GameGrubBorder = Color(0xFF3A3A4A)
+val GameGrubBorder = Color(0xFF2B3840)
 
 // Status - Installed/Download states
-val StatusInstalled = Color(0xFF4CAF50)
-val StatusDownloading = Color(0xFF00BCD4)
-val StatusAvailable = Color(0xFF2196F3)
-val StatusAway = Color(0xFFFF9800)
-val StatusOffline = Color(0xFF9E9E9E)
+val StatusInstalled = Color(0xFF6FAF5D)
+val StatusDownloading = Color(0xFF39D4C6)
+val StatusAvailable = Color(0xFF4C9FD9)
+val StatusAway = Color(0xFFD7A44A)
+val StatusOffline = Color(0xFF6F787D)
 
 // Friend states
-val FriendOnline = Color(0xFF6DCFF6)
-val FriendOffline = Color(0xFF7A7A7A)
-val FriendInGame = Color(0xFF90BA3C)
-val FriendAwayOrSnooze = Color(0x806DCFF6)
-val FriendInGameAwayOrSnooze = Color(0x8090BA3C)
-val FriendBlocked = Color(0xFF983D3D)
+val FriendOnline = Color(0xFF63C7D8)
+val FriendOffline = Color(0xFF6F787D)
+val FriendInGame = Color(0xFF7FAE4F)
+val FriendAwayOrSnooze = Color(0x8063C7D8)
+val FriendInGameAwayOrSnooze = Color(0x807FAE4F)
+val FriendBlocked = Color(0xFF8E4A4A)
 
 // Compatibility
-val CompatibilityGood = Color(0xFF4CAF50)
-val CompatibilityGoodBg = Color(0xFF1B5E20)
-val CompatibilityPartial = Color(0xFF8BC34A)
-val CompatibilityPartialBg = Color(0xFF33691E)
-val CompatibilityUnknown = Color(0xFF9E9E9E)
-val CompatibilityUnknownBg = Color(0xFF424242)
-val CompatibilityBad = Color(0xFFEF5350)
-val CompatibilityBadBg = Color(0xFFB71C1C)
+val CompatibilityGood = Color(0xFF6FAF5D)
+val CompatibilityGoodBg = Color(0xFF1F3A24)
+
+val CompatibilityPartial = Color(0xFFA0B85A)
+val CompatibilityPartialBg = Color(0xFF313E1F)
+
+val CompatibilityUnknown = Color(0xFF7E8A90)
+val CompatibilityUnknownBg = Color(0xFF263037)
+
+val CompatibilityBad = Color(0xFFD05C5C)
+val CompatibilityBadBg = Color(0xFF4A1F24)

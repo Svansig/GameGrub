@@ -50,6 +50,7 @@ import androidx.navigation.navDeepLink
 import app.gamegrub.BuildConfig
 import app.gamegrub.Constants
 import app.gamegrub.GameGrubApp
+import app.gamegrub.LaunchRequestManager
 import app.gamegrub.MainActivity
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -211,9 +212,9 @@ private fun needsSteamLogin(context: Context, appId: String): Boolean {
 
 /** Consume pending launch request only if it's a Steam game needing login, and show failure snackbar. */
 private fun consumePendingLaunchWithError(context: Context) {
-    val request = MainActivity.peekPendingLaunchRequest() ?: return
+    val request = LaunchRequestManager.peekPendingLaunchRequest() ?: return
     if (!needsSteamLogin(context, request.appId)) return
-    MainActivity.consumePendingLaunchRequest()
+    LaunchRequestManager.consumePendingLaunchRequest()
     SnackbarManager.show(context.getString(R.string.intent_launch_steam_login_failed))
 }
 
@@ -294,13 +295,13 @@ fun GameGrubMain(
 
     // process pending launch request from cold start (event bus has no replay)
     LaunchedEffect(Unit) {
-        MainActivity.consumePendingLaunchRequest()?.let { launchRequest ->
+        LaunchRequestManager.consumePendingLaunchRequest()?.let { launchRequest ->
             Timber.i("[PluviaMain]: Processing pending launch request for app ${launchRequest.appId}")
             // Steam games needing login will be handled by OnLogonEnded/SteamDisconnected.
             // consume+requeue is safe: both calls are non-suspending, so no other coroutine
             // can interleave between them on the main dispatcher (cooperative scheduling).
             if (needsSteamLogin(context, launchRequest.appId)) {
-                MainActivity.setPendingLaunchRequest(launchRequest)
+                LaunchRequestManager.setPendingLaunchRequest(launchRequest)
                 shownPendingLaunchSnackbar = false
                 // stay quiet on first pass; snackbar shows after a failure
                 if (SteamService.isConnected) {
@@ -316,7 +317,7 @@ fun GameGrubMain(
                             context, launchRequest.appId, launchRequest.containerConfig,
                         )
                     }
-                    MainActivity.wasLaunchedViaExternalIntent = true
+                    LaunchRequestManager.markAsExternalLaunch()
                     trackGameLaunched(resolution.finalAppId)
                     viewModel.setLaunchedAppId(resolution.finalAppId)
                     viewModel.setBootToContainer(false)
@@ -360,7 +361,7 @@ fun GameGrubMain(
                     // Steam games need login before launch (cloud sync uses userSteamId)
                     if (needsSteamLogin(context, event.appId)) {
                         // preserve any container config override already applied by handleLaunchIntent
-                        MainActivity.setPendingLaunchRequest(
+                        LaunchRequestManager.setPendingLaunchRequest(
                             IntentLaunchManager.LaunchRequest(
                                 appId = event.appId,
                                 containerConfig = IntentLaunchManager.getTemporaryOverride(event.appId),
@@ -378,7 +379,7 @@ fun GameGrubMain(
                         is GameResolutionResult.Success -> {
                             Timber.i("[PluviaMain]: Using appId: ${resolution.finalAppId} (original: ${event.appId}, isSteamInstalled: ${resolution.isSteamInstalled}, isCustomGame: ${resolution.isCustomGame})")
 
-                            MainActivity.wasLaunchedViaExternalIntent = true
+                            LaunchRequestManager.markAsExternalLaunch()
                             trackGameLaunched(resolution.finalAppId)
                             viewModel.setLaunchedAppId(resolution.finalAppId)
                             viewModel.setBootToContainer(false)
@@ -433,8 +434,8 @@ fun GameGrubMain(
                 is MainViewModel.MainUiEvent.OnLogonEnded -> {
                     when (event.result) {
                         LoginResult.Success -> {
-                            if (MainActivity.hasPendingLaunchRequest()) {
-                                MainActivity.consumePendingLaunchRequest()?.let { launchRequest ->
+                            if (LaunchRequestManager.hasPendingLaunchRequest()) {
+                                LaunchRequestManager.consumePendingLaunchRequest()?.let { launchRequest ->
                                     Timber.tag("IntentLaunch")
                                         .i("Processing pending launch request for app ${launchRequest.appId} (user is now logged in)")
                                     when (val resolution = resolveGameAppId(context, launchRequest.appId)) {
@@ -471,7 +472,7 @@ fun GameGrubMain(
                                                 }
                                             }
 
-                                            MainActivity.wasLaunchedViaExternalIntent = true
+                                            LaunchRequestManager.markAsExternalLaunch()
                                             trackGameLaunched(launchRequest.appId)
                                             viewModel.setLaunchedAppId(launchRequest.appId)
                                             viewModel.setBootToContainer(false)
@@ -523,7 +524,7 @@ fun GameGrubMain(
                         shownPendingLaunchSnackbar = false
                         consumePendingLaunchWithError(context)
                     } else if (!shownPendingLaunchSnackbar) {
-                        val appId = MainActivity.peekPendingLaunchRequest()?.appId
+                        val appId = LaunchRequestManager.peekPendingLaunchRequest()?.appId
                         if (appId != null && needsSteamLogin(context, appId)) {
                             shownPendingLaunchSnackbar = true
                             SnackbarManager.show(context.getString(R.string.intent_launch_steam_pending))
@@ -1242,7 +1243,7 @@ fun GameGrubMain(
                             !state.annoyingDialogShown &&
                             GameGrubApp.xEnvironment == null &&
                             !SteamService.keepAlive &&
-                            !MainActivity.wasLaunchedViaExternalIntent
+                            !LaunchRequestManager.wasLaunchedViaExternalIntent
                         ) {
                             val currentUpdateInfo = updateInfo
                             if (currentUpdateInfo != null) {
@@ -1382,9 +1383,9 @@ fun GameGrubMain(
                                     ?.route
 
                                 if (currentRoute == GameGrubScreen.XServer.route) {
-                                    if (MainActivity.wasLaunchedViaExternalIntent) {
+                                    if (LaunchRequestManager.wasLaunchedViaExternalIntent) {
                                         Timber.d("[IntentLaunch]: Finishing activity to return to external launcher")
-                                        MainActivity.wasLaunchedViaExternalIntent = false
+                                        LaunchRequestManager.clearExternalLaunchFlag()
                                         (context as? android.app.Activity)?.finish()
                                     } else {
                                         navController.popBackStack()

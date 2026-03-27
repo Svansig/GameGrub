@@ -64,6 +64,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.gamegrub.GameGrubApp
+import app.gamegrub.LaunchRequestManager
 import app.gamegrub.MainActivity
 import app.gamegrub.PrefManager
 import app.gamegrub.data.GameSource
@@ -3471,7 +3472,7 @@ private fun exit(
     // PluviaApp.keyboard = null
     frameRating?.writeSessionSummary()
 
-    if (MainActivity.wasLaunchedViaExternalIntent) {
+    if (LaunchRequestManager.wasLaunchedViaExternalIntent) {
         Timber.i("[IntentLaunch]: Waiting for exit handling before returning to external launcher")
         onExit(navigateBack)
     } else {

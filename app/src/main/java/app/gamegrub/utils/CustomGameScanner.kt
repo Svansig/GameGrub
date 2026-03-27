@@ -2,12 +2,9 @@ package app.gamegrub.utils
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.Settings
-import androidx.core.content.ContextCompat
 import app.gamegrub.PrefManager
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
@@ -396,17 +393,8 @@ object CustomGameScanner {
             return true
         }
 
-        // For paths outside sandbox, check permissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11+ requires MANAGE_EXTERNAL_STORAGE for broad access
-            return Environment.isExternalStorageManager()
-        } else {
-            // Android 10 and below use standard storage permissions
-            return ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            ) == PackageManager.PERMISSION_GRANTED
-        }
+        // For paths outside sandbox, check MANAGE_EXTERNAL_STORAGE permission
+        return Environment.isExternalStorageManager()
     }
 
     /**
@@ -415,27 +403,24 @@ object CustomGameScanner {
      * Returns true if the intent was launched, false otherwise.
      */
     fun requestManageExternalStoragePermission(context: Context): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            try {
+        try {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                 intent.data = Uri.parse("package:${context.packageName}")
                 context.startActivity(intent)
                 return true
-            } catch (e: Exception) {
-                Timber.tag("CustomGameScanner").e(e, "Failed to open settings for MANAGE_EXTERNAL_STORAGE")
-                // Fallback: try generic app settings
-                try {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.parse("package:${context.packageName}")
-                    context.startActivity(intent)
-                    return true
-                } catch (e2: Exception) {
-                    Timber.tag("CustomGameScanner").e(e2, "Failed to open app settings")
-                    return false
-                }
+        } catch (e: Exception) {
+            Timber.tag("CustomGameScanner").e(e, "Failed to open settings for MANAGE_EXTERNAL_STORAGE")
+            // Fallback: try generic app settings
+            try {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:${context.packageName}")
+                context.startActivity(intent)
+                return true
+            } catch (e2: Exception) {
+                Timber.tag("CustomGameScanner").e(e2, "Failed to open app settings")
+                return false
             }
         }
-        return false
     }
 
     /**

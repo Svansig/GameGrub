@@ -65,7 +65,7 @@ object KeyAttestationHelper {
                 .setDigests(KeyProperties.DIGEST_SHA256)
                 .setAttestationChallenge(challenge)
 
-            if (useStrongBox && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (useStrongBox) {
                 specBuilder.setIsStrongBoxBacked(true)
             }
 

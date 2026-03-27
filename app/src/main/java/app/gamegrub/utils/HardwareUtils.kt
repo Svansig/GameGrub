@@ -32,16 +32,7 @@ object HardwareUtils {
      * otherwise returns null.
      */
     fun getSOCName(): String? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val socModel = Build.SOC_MODEL
-            if (!socModel.isNullOrEmpty()) {
-                socModel
-            } else {
-                null
-            }
-        } else {
-            null
-        }
+        return Build.SOC_MODEL?.takeIf { it.isNotEmpty() }
     }
 
     /**

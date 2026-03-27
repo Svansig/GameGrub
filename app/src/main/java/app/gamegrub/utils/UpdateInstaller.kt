@@ -2,8 +2,6 @@ package app.gamegrub.utils
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import androidx.core.content.FileProvider
 import app.gamegrub.BuildConfig
 import app.gamegrub.service.steam.SteamService
@@ -74,21 +72,15 @@ object UpdateInstaller {
 
             Timber.i("Installing APK from: ${apkFile.absolutePath}, size: ${apkFile.length()} bytes")
 
-            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Use FileProvider for Android 7.0+
-                try {
-                    FileProvider.getUriForFile(
-                        context,
-                        "${BuildConfig.APPLICATION_ID}.fileprovider",
-                        apkFile,
-                    )
-                } catch (e: Exception) {
-                    Timber.e(e, "Error getting FileProvider URI")
-                    return
-                }
-            } else {
-                // Use file:// URI for older versions
-                Uri.fromFile(apkFile)
+            val uri = try {
+                FileProvider.getUriForFile(
+                    context,
+                    "${BuildConfig.APPLICATION_ID}.fileprovider",
+                    apkFile,
+                )
+            } catch (e: Exception) {
+                Timber.e(e, "Error getting FileProvider URI")
+                return
             }
 
             Timber.i("FileProvider URI: $uri")

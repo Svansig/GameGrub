@@ -289,8 +289,8 @@ app/src/
 ## Build Configuration
 
 - **Compile SDK**: 35
-- **Min SDK**: 26
-- **Target SDK**: 28
+- **Min SDK**: 33 (Android 13)
+- **Target SDK**: 35 (Android 15)
 - **Java Version**: 17
 - **Kotlin Version**: 2.1.21 (see `gradle/libs.versions.toml`)
 

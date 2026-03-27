@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.hardware.input.InputManager
-import android.os.Build
 import android.util.Log
 import android.view.Display
 import app.gamegrub.R
@@ -681,7 +680,7 @@ fun XServerScreen(
         val deviceIds = InputDevice.getDeviceIds()
         hasPhysicalKeyboard = deviceIds.any { id ->
             val device = InputDevice.getDevice(id) ?: return@any false
-            val isExternal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) device.isExternal else true
+            val isExternal = device.isExternal
             Keyboard.isKeyboardDevice(device) && !device.isVirtual && isExternal
         }
         hasPhysicalMouse = deviceIds.any { id ->
@@ -689,7 +688,7 @@ fun XServerScreen(
             val isMouse = device.supportsSource(InputDevice.SOURCE_MOUSE) ||
                     device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
                     device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
-            val isExternal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) device.isExternal else true
+            val isExternal = device.isExternal
             isMouse && !device.isVirtual && isExternal
         }
         val controllerManager = ControllerManager.getInstance()
@@ -743,7 +742,7 @@ fun XServerScreen(
     fun evaluateDevice(device: InputDevice) {
         // Some devices advertise all its capabilities on onInputDeviceAdded callback
         // but some can also do basic advertise on onInputDeviceAdded and only expand on onInputDeviceChanged
-        val isExternal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) device.isExternal else true
+        val isExternal = device.isExternal
         if (!device.isVirtual && isExternal) {
             if (Keyboard.isKeyboardDevice(device)) {
                 hasPhysicalKeyboard = true
@@ -811,11 +810,6 @@ fun XServerScreen(
             QuickMenuAction.KEYBOARD -> {
                 keyboardRequestedFromOverlay = true
                 val anchor = view // use the same composable root view
-                val c = if (Build.VERSION.SDK_INT >= 30) {
-                    anchor.windowInsetsController
-                } else {
-                    null
-                }
 
                 anchor.post {
                     if (anchor.windowToken == null) return@post
@@ -830,11 +824,7 @@ fun XServerScreen(
                             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
                         }
                     }
-                    if (Build.VERSION.SDK_INT > 29 && c != null) {
-                        anchor.postDelayed({ show() }, 500) // Pixel/Android-12+ quirk
-                    } else {
-                        show()
-                    }
+                    anchor.postDelayed({ show() }, 500)
                 }
                 true
             }
@@ -995,12 +985,7 @@ fun XServerScreen(
             PostHog.capture(event = "onscreen_keyboard_disabled")
             imeInputReceiver?.hideKeyboard()
             view.post {
-                if (Build.VERSION.SDK_INT >= 30) {
-                    view.windowInsetsController?.hide(WindowInsets.Type.ime())
-                } else {
-                    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    if (view.windowToken != null) imm.hideSoftInputFromWindow(view.windowToken, 0)
-                }
+                view.windowInsetsController?.hide(WindowInsets.Type.ime())
             }
             return@gameBack
         }
@@ -1152,7 +1137,7 @@ fun XServerScreen(
                 if (GameGrubApp.touchpadView?.hasPointerCapture() != true && !GameGrubApp.isOverlayPaused) {
                     if (it.event != null) {
                         val device = it.event.device
-                        val isExternal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) device.isExternal else true
+                        val isExternal = device.isExternal
                         if (device.supportsSource(InputDevice.SOURCE_TOUCHPAD) &&
                             !isExternal
                         ) {

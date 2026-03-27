@@ -26,7 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.lifecycleScope
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.ui.GameGrubMain

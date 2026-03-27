@@ -37,7 +37,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -66,7 +65,7 @@ import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService

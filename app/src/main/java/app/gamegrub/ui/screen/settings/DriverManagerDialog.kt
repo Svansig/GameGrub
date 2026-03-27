@@ -39,7 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.util.SnackbarManager

@@ -2,7 +2,7 @@ package app.gamegrub.gamefixes
 
 import android.content.Context
 import app.gamegrub.data.GameSource
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.GOGService

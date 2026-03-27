@@ -12,9 +12,15 @@ import androidx.core.net.toUri
 import app.gamegrub.MainActivity
 import app.gamegrub.PrefManager
 import app.gamegrub.R
+import app.gamegrub.service.steam.SteamService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
+/**
+ * Centralized notification management for all services.
+ *
+ * Creates and manages foreground service notifications for Steam, GOG, Epic, and Amazon.
+ */
 class NotificationHelper @Inject constructor(@ApplicationContext private val context: Context) {
 
     companion object {

@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.gamegrub.GameGrubApp
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.SteamEvent
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.ProfileDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.util.SteamIconImage

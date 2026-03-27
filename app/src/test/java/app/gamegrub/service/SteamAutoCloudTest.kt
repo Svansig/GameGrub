@@ -14,6 +14,8 @@ import app.gamegrub.enums.PathType
 import app.gamegrub.enums.ReleaseState
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
+import app.gamegrub.service.steam.SteamAutoCloud
+import app.gamegrub.service.steam.SteamService
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileChangeList

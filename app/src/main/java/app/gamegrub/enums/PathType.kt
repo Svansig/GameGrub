@@ -1,7 +1,7 @@
 package app.gamegrub.enums
 
 import android.content.Context
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import com.winlator.xenvironment.ImageFs
 import timber.log.Timber
 import java.nio.file.Paths

@@ -6,7 +6,7 @@ import android.util.Log;
 
 import app.gamegrub.R;
 import app.gamegrub.enums.Marker;
-import app.gamegrub.service.SteamService;
+import app.gamegrub.service.steam.SteamService;
 import app.gamegrub.utils.ContainerUtils;
 import app.gamegrub.utils.MarkerUtils;
 

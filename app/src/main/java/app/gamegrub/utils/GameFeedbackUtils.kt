@@ -6,7 +6,7 @@ import app.gamegrub.BuildConfig
 import app.gamegrub.api.ApiResult
 import app.gamegrub.api.GameRunApi
 import app.gamegrub.data.GameSource
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService

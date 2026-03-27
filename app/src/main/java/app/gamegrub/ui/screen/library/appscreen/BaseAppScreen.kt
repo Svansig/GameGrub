@@ -27,6 +27,7 @@ import app.gamegrub.R
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.ContainerConfigDialog
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
@@ -709,7 +710,7 @@ abstract class BaseAppScreen {
 
         // Get download info based on game source for progress tracking
         val downloadInfo = when (libraryItem.gameSource) {
-            GameSource.STEAM -> app.gamegrub.service.SteamService.getAppDownloadInfo(displayInfo.gameId)
+            GameSource.STEAM -> SteamService.getAppDownloadInfo(displayInfo.gameId)
             GameSource.EPIC -> app.gamegrub.service.epic.EpicService.getDownloadInfo(displayInfo.gameId)
             GameSource.GOG -> app.gamegrub.service.gog.GOGService.getDownloadInfo(displayInfo.gameId.toString())
             GameSource.CUSTOM_GAME -> null // Custom games don't support downloads yet

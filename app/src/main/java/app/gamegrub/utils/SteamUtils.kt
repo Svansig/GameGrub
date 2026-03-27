@@ -9,9 +9,9 @@ import app.gamegrub.data.ManifestInfo
 import app.gamegrub.data.SteamApp
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.SpecialGameSaveMapping
-import app.gamegrub.service.SteamService
-import app.gamegrub.service.SteamService.Companion.getAppDirName
-import app.gamegrub.service.SteamService.Companion.getAppInfoOf
+import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.SteamService.Companion.getAppDirName
+import app.gamegrub.service.steam.SteamService.Companion.getAppInfoOf
 import com.winlator.container.Container
 import com.winlator.core.TarCompressorUtils
 import com.winlator.core.WineRegistryEditor

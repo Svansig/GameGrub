@@ -44,7 +44,7 @@ import app.gamegrub.R
 import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.CompatibilityBadge
 import app.gamegrub.ui.util.ListItemImage
 import app.gamegrub.utils.CustomGameScanner

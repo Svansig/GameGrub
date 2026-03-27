@@ -3,7 +3,7 @@ package app.gamegrub.data
 import app.gamegrub.db.serializers.OsEnumSetSerializer
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.OSArch
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import kotlinx.serialization.Serializable
 import java.util.EnumSet
 

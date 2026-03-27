@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.core.content.FileProvider
 import app.gamegrub.BuildConfig
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber

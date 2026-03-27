@@ -82,7 +82,7 @@ import androidx.compose.ui.unit.dp
 import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.data.LibraryItem
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.GamepadAction
 import app.gamegrub.ui.component.GamepadActionBar
 import app.gamegrub.ui.component.GamepadButton

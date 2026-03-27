@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import app.gamegrub.CrashHandler
 import app.gamegrub.PrefManager
 import app.gamegrub.R
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.CrashLogDialog
 import app.gamegrub.ui.component.dialog.WineDebugChannelsDialog
 import app.gamegrub.ui.theme.settingsTileColors

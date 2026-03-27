@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import app.gamegrub.service.SteamService;
+import app.gamegrub.service.steam.SteamService;
 
 public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;

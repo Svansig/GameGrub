@@ -15,7 +15,7 @@ import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.PathType
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.ConnectionState
 import app.gamegrub.ui.screen.GameGrubScreen

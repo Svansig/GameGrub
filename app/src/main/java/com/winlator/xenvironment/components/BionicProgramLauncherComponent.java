@@ -37,7 +37,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.gamegrub.service.SteamService;
+import app.gamegrub.service.steam.SteamService;
 
 public class BionicProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;

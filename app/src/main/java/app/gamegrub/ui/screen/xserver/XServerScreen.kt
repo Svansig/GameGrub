@@ -76,8 +76,8 @@ import app.gamegrub.externaldisplay.ExternalDisplayInputController
 import app.gamegrub.externaldisplay.ExternalDisplaySwapController
 import app.gamegrub.externaldisplay.SwapInputOverlayView
 import app.gamegrub.gamefixes.GameFixesRegistry
-import app.gamegrub.service.AchievementWatcher
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.AchievementWatcher
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.ui.component.QuickMenu
@@ -170,7 +170,6 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.util.Arrays
 import java.util.EnumSet

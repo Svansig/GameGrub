@@ -10,7 +10,7 @@ import app.gamegrub.enums.AppType
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.ReleaseState
 import app.gamegrub.service.DownloadService
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.ContainerUtils
 import com.winlator.container.Container
 import com.winlator.container.ContainerData

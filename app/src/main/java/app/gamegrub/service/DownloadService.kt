@@ -2,12 +2,19 @@ package app.gamegrub.service
 
 import android.content.Context
 import android.os.Environment
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.StorageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 
+/**
+ * Shared download service - provides download paths across all platforms.
+ *
+ * Manages download directory paths for Steam, GOG, Epic, and Amazon games.
+ * This is a singleton object (no instance needed).
+ */
 object DownloadService {
     private var lastUpdateTime: Long = 0
     private var downloadDirectoryApps: MutableList<String>? = null

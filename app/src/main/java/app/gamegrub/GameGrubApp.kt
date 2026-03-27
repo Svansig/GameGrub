@@ -11,6 +11,7 @@ import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.events.EventDispatcher
 import app.gamegrub.service.DownloadService
+import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.utils.ContainerMigrator
 import app.gamegrub.utils.IntentLaunchManager
 import app.gamegrub.utils.PlayIntegrity
@@ -184,7 +185,7 @@ class GameGrubApp : SplitCompatApplication() {
         var inputControlsView: InputControlsView? = null
         var inputControlsManager: InputControlsManager? = null
         var touchpadView: TouchpadView? = null
-        var achievementWatcher: app.gamegrub.service.AchievementWatcher? = null
+        var achievementWatcher: AchievementWatcher? = null
 
         var isOverlayPaused by mutableStateOf(false)
 

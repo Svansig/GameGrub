@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
 import app.gamegrub.ui.components.rememberCustomGameFolderPicker
 import app.gamegrub.ui.components.requestPermissionsForPath

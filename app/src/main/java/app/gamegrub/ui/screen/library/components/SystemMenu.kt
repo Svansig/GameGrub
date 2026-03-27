@@ -80,7 +80,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.SteamEvent
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.SupportersDialog
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.theme.GameGrubTheme

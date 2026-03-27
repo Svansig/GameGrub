@@ -47,8 +47,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
 import app.gamegrub.data.DepotInfo
-import app.gamegrub.service.SteamService
-import app.gamegrub.service.SteamService.Companion.INVALID_APP_ID
+import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.SteamService.Companion.INVALID_APP_ID
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.component.topbar.BackButton
 import app.gamegrub.ui.data.GameDisplayInfo

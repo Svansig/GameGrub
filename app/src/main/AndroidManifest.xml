@@ -112,7 +112,7 @@
             </intent-filter>
         </activity-alias>
         <service
-            android:name=".service.SteamService"
+            android:name=".service.steam.SteamService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />

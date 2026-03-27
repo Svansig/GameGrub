@@ -7,7 +7,7 @@ import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamLicense
 import app.gamegrub.db.GameGrubDatabase
 import app.gamegrub.enums.AppType
-import app.gamegrub.service.SteamService.Companion.INVALID_PKG_ID
+import app.gamegrub.service.steam.SteamService.Companion.INVALID_PKG_ID
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.enums.ELicenseType
 import `in`.dragonbra.javasteam.enums.EPaymentMethod

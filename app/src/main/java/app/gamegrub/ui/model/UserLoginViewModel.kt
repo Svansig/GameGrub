@@ -8,7 +8,7 @@ import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.LoginScreen
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.UserLoginState
 import com.posthog.PostHog
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator

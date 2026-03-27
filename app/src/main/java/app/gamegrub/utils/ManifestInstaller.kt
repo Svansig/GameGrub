@@ -3,7 +3,7 @@ package app.gamegrub.utils
 import android.content.Context
 import android.net.Uri
 import app.gamegrub.R
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import com.winlator.contents.AdrenotoolsManager
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager

@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import app.gamegrub.data.SteamApp
-import app.gamegrub.service.SteamService.Companion.INVALID_PKG_ID
+import app.gamegrub.service.steam.SteamService.Companion.INVALID_PKG_ID
 import kotlinx.coroutines.flow.Flow
 
 @Dao

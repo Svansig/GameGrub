@@ -5,6 +5,7 @@ import app.gamegrub.data.ManifestInfo
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.OSArch
+import app.gamegrub.service.steam.SteamService
 import java.io.File
 import java.util.EnumSet
 import org.junit.Assert.*

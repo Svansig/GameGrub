@@ -8,7 +8,7 @@ import app.gamegrub.enums.ControllerSupport
 import app.gamegrub.enums.Language
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.ReleaseState
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import java.util.EnumSet
 

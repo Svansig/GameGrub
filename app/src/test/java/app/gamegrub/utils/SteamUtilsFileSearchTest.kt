@@ -14,7 +14,7 @@ import app.gamegrub.enums.OS
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.ReleaseState
 import app.gamegrub.service.DownloadService
-import app.gamegrub.service.SteamService
+import app.gamegrub.service.steam.SteamService
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
 import io.mockk.Runs

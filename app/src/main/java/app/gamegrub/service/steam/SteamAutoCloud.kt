@@ -1,4 +1,4 @@
-package app.gamegrub.service
+package app.gamegrub.service.steam
 
 import androidx.room.withTransaction
 import app.gamegrub.data.PostSyncInfo
@@ -9,7 +9,6 @@ import app.gamegrub.data.UserFilesUploadResult
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.service.SteamService.Companion.FileChanges
 import app.gamegrub.utils.FileUtils
 import app.gamegrub.utils.SteamUtils
 import `in`.dragonbra.javasteam.enums.EResult
@@ -81,7 +80,7 @@ object SteamAutoCloud {
     ): Deferred<PostSyncInfo?> = parentScope.async {
         val postSyncInfo: PostSyncInfo?
 
-        Timber.i("Retrieving save files of ${appInfo.name}")
+        Timber.Forest.i("Retrieving save files of ${appInfo.name}")
 
         val getPathTypePairs: (AppFileChangeList) -> List<Pair<String, String>> = { fileList ->
             fileList.pathPrefixes
@@ -89,10 +88,10 @@ object SteamAutoCloud {
                     var matchResults = findPlaceholderWithin(it).map { it.value }.toList()
                     val bare = if (it.startsWith("ROOT_MOD")) listOf("ROOT_MOD") else emptyList()
 
-                    Timber.i("Mapping prefix $it and found $matchResults")
+                    Timber.Forest.i("Mapping prefix $it and found $matchResults")
 
                     if (matchResults.isEmpty()) {
-                        matchResults = List(1) { PathType.DEFAULT.name }
+                        matchResults = List(1) { PathType.Companion.DEFAULT.name }
                     }
 
                     matchResults + bare
@@ -111,7 +110,7 @@ object SteamAutoCloud {
                 val prefixContainsNoPlaceholder = findPlaceholderWithin(prefix).none()
 
                 if (prefixContainsNoPlaceholder) {
-                    modified = Paths.get(PathType.DEFAULT.name, prefix).pathString
+                    modified = Paths.get(PathType.Companion.DEFAULT.name, prefix).pathString
                 }
 
                 pathTypePairs.forEach {
@@ -121,7 +120,7 @@ object SteamAutoCloud {
                 // if the prefix has not been modified then there were no placeholders in it
                 // so we need to set it to point to the default path
                 if (modified == prefix) {
-                    modified = Paths.get(prefixToPath(PathType.DEFAULT.name), modified).toString()
+                    modified = Paths.get(prefixToPath(PathType.Companion.DEFAULT.name), modified).toString()
                 }
 
                 modified
@@ -156,11 +155,11 @@ object SteamAutoCloud {
                 Paths.get(convertedPrefixes[file.pathPrefixIndex], file.filename)
             } else {
                 // if the file does not reference any prefix then we need to set it to the default path
-                Paths.get(prefixToPath(PathType.DEFAULT.name), file.filename)
+                Paths.get(prefixToPath(PathType.Companion.DEFAULT.name), file.filename)
             }
         }
 
-        val getFilesDiff: (List<UserFileInfo>, List<UserFileInfo>) -> Pair<Boolean, FileChanges> = { currentFiles, oldFiles ->
+        val getFilesDiff: (List<UserFileInfo>, List<UserFileInfo>) -> Pair<Boolean, SteamService.Companion.FileChanges> = { currentFiles, oldFiles ->
             val overlappingFiles = currentFiles.filter { currentFile ->
                 oldFiles.any { currentFile.prefixPath == it.prefixPath }
             }
@@ -177,8 +176,8 @@ object SteamAutoCloud {
                 oldFiles.first {
                     it.prefixPath == file.prefixPath
                 }.let {
-                    Timber.i("Comparing SHA of ${it.prefixPath} and ${file.prefixPath}")
-                    Timber.i("[${it.sha.joinToString(", ")}]\n[${file.sha.joinToString(", ")}]")
+                    Timber.Forest.i("Comparing SHA of ${it.prefixPath} and ${file.prefixPath}")
+                    Timber.Forest.i("[${it.sha.joinToString(", ")}]\n[${file.sha.joinToString(", ")}]")
 
                     !it.sha.contentEquals(file.sha)
                 }
@@ -186,22 +185,26 @@ object SteamAutoCloud {
 
             val changesExist = newFiles.isNotEmpty() || deletedFiles.isNotEmpty() || modifiedFiles.isNotEmpty()
 
-            changesExist to FileChanges(deletedFiles, modifiedFiles, newFiles)
+            changesExist to SteamService.Companion.FileChanges(
+                deletedFiles,
+                modifiedFiles,
+                newFiles
+            )
         }
 
         val hasHashConflicts: (Map<String, List<UserFileInfo>>, AppFileChangeList) -> Boolean =
             { localUserFiles, fileList ->
                 fileList.files.any { file ->
-                    Timber.i("Checking for " + "${getFilePrefix(file, fileList)} in ${localUserFiles.keys}")
+                    Timber.Forest.i("Checking for " + "${getFilePrefix(file, fileList)} in ${localUserFiles.keys}")
 
                     localUserFiles[getFilePrefix(file, fileList)]?.let { localUserFile ->
                         localUserFile.firstOrNull {
-                            Timber.i("Comparing ${file.filename} and ${it.filename}")
+                            Timber.Forest.i("Comparing ${file.filename} and ${it.filename}")
 
                             it.filename == file.filename
                         }?.let {
-                            Timber.i("Comparing SHA of ${getFilePrefixPath(file, fileList)} and ${it.prefixPath}")
-                            Timber.i("[${file.shaFile.joinToString(", ")}]\n[${it.sha.joinToString(", ")}]")
+                            Timber.Forest.i("Comparing SHA of ${getFilePrefixPath(file, fileList)} and ${it.prefixPath}")
+                            Timber.Forest.i("[${file.shaFile.joinToString(", ")}]\n[${it.sha.joinToString(", ")}]")
 
                             !file.shaFile.contentEquals(it.sha)
                         }
@@ -218,7 +221,7 @@ object SteamAutoCloud {
                 savePatterns.forEach { userFile ->
                     val basePath = Paths.get(prefixToPath(userFile.root.toString()), userFile.substitutedPath)
 
-                    Timber.i("Looking for saves in $basePath with pattern ${userFile.pattern} (prefix ${userFile.prefix})")
+                    Timber.Forest.i("Looking for saves in $basePath with pattern ${userFile.pattern} (prefix ${userFile.prefix})")
 
                     val files = FileUtils.findFilesRecursive(
                         rootPath = basePath,
@@ -227,14 +230,20 @@ object SteamAutoCloud {
                     ).map {
                         val sha = CryptoHelper.shaHash(Files.readAllBytes(it))
 
-                        Timber.i("Found ${it.pathString}\n\tin ${userFile.prefix}\n\twith sha [${sha.joinToString(", ")}]")
+                        Timber.Forest.i("Found ${it.pathString}\n\tin ${userFile.prefix}\n\twith sha [${sha.joinToString(", ")}]")
 
                         val relativePath = basePath.relativize(it).pathString
 
-                        UserFileInfo(userFile.root, userFile.substitutedPath, relativePath, Files.getLastModifiedTime(it).toMillis(), sha)
+                        UserFileInfo(
+                            userFile.root,
+                            userFile.substitutedPath,
+                            relativePath,
+                            Files.getLastModifiedTime(it).toMillis(),
+                            sha
+                        )
                     }.collect(Collectors.toList())
 
-                    Timber.i("Found ${files.size} file(s) in $basePath for pattern ${userFile.pattern}")
+                    Timber.Forest.i("Found ${files.size} file(s) in $basePath for pattern ${userFile.pattern}")
 
                     val prefixKey = Paths.get(userFile.prefix).pathString
                     result.getOrPut(prefixKey) { mutableListOf() }.addAll(files)
@@ -246,7 +255,7 @@ object SteamAutoCloud {
                 val rootType = PathType.SteamUserData
                 val basePath = Paths.get(prefixToPath(rootType.toString()))
 
-                Timber.i("No UFS patterns; scanning $basePath recursively (depth 5) under ${rootType.name}")
+                Timber.Forest.i("No UFS patterns; scanning $basePath recursively (depth 5) under ${rootType.name}")
 
                 val files = FileUtils.findFilesRecursive(
                     rootPath = basePath,
@@ -257,13 +266,19 @@ object SteamAutoCloud {
 
                     val relativePath = basePath.relativize(it).pathString
 
-                    Timber.i("Found ${it.pathString}\n\tin %${rootType.name}%\n\twith sha [${sha.joinToString(", ")}]")
+                    Timber.Forest.i("Found ${it.pathString}\n\tin %${rootType.name}%\n\twith sha [${sha.joinToString(", ")}]")
 
                     // Store relative path in filename; empty path component
-                    UserFileInfo(rootType, "", relativePath, Files.getLastModifiedTime(it).toMillis(), sha)
+                    UserFileInfo(
+                        rootType,
+                        "",
+                        relativePath,
+                        Files.getLastModifiedTime(it).toMillis(),
+                        sha
+                    )
                 }.collect(Collectors.toList())
 
-                Timber.i("Found ${files.size} file(s) in $basePath for fallback recursive scan")
+                Timber.Forest.i("Found ${files.size} file(s) in $basePath for fallback recursive scan")
 
                 mapOf(Paths.get("%${rootType.name}%").pathString to files)
             }
@@ -275,7 +290,7 @@ object SteamAutoCloud {
             appFileListChange.files.map {
                 UserFileInfo(
                     root = if (it.pathPrefixIndex < pathTypePairs.size) {
-                        PathType.from(pathTypePairs[it.pathPrefixIndex].first)
+                        PathType.Companion.from(pathTypePairs[it.pathPrefixIndex].first)
                     } else {
                         PathType.GameInstall
                     },
@@ -306,7 +321,7 @@ object SteamAutoCloud {
                     val prefixedPath = getFilePrefixPath(file, fileList)
                     val actualFilePath = getFullFilePath(file, fileList)
 
-                    Timber.i("$prefixedPath -> $actualFilePath")
+                    Timber.Forest.i("$prefixedPath -> $actualFilePath")
 
                     val fileDownloadInfo = steamCloud.clientFileDownload(appInfo.id, prefixedPath).await()
 
@@ -316,9 +331,9 @@ object SteamAutoCloud {
                             buildUrl(useHttps, urlHost, urlPath)
                         }
 
-                        Timber.i("Downloading $httpUrl")
+                        Timber.Forest.i("Downloading $httpUrl")
 
-                        val headers = Headers.headersOf(
+                        val headers = Headers.Companion.headersOf(
                             *fileDownloadInfo.requestHeaders
                                 .map { listOf(it.name, it.value) }
                                 .flatten()
@@ -337,7 +352,7 @@ object SteamAutoCloud {
                         }
 
                         if (!response.isSuccessful) {
-                            Timber.w("File download of $prefixedPath was unsuccessful")
+                            Timber.Forest.w("File download of $prefixedPath was unsuccessful")
                             response.close()
                             return@forEachIndexed
                         }
@@ -364,7 +379,7 @@ object SteamAutoCloud {
                                     }
 
                                     if (totalBytesRead != totalFileSize) {
-                                        Timber.w("Bytes read from stream of $prefixedPath does not match expected size")
+                                        Timber.Forest.w("Bytes read from stream of $prefixedPath does not match expected size")
                                     }
                                 }
                             }
@@ -376,14 +391,14 @@ object SteamAutoCloud {
                                             val entry = zipInput.nextEntry
 
                                             if (entry == null) {
-                                                Timber.w("Downloaded user file $prefixedPath has no zip entries")
+                                                Timber.Forest.w("Downloaded user file $prefixedPath has no zip entries")
                                                 return@withTimeout
                                             }
 
                                             copyToFile(zipInput)
 
                                             if (zipInput.nextEntry != null) {
-                                                Timber.e("Downloaded user file $prefixedPath has more than one zip entry")
+                                                Timber.Forest.e("Downloaded user file $prefixedPath has more than one zip entry")
                                             }
                                         }
                                     }
@@ -398,14 +413,14 @@ object SteamAutoCloud {
                                 bytesDownloaded += fileDownloadInfo.fileSize
                             }
                         } catch (e: FileSystemException) {
-                            Timber.w("Could not download $actualFilePath: %s", e.message)
+                            Timber.Forest.w("Could not download $actualFilePath: %s", e.message)
                         } catch (e: SocketTimeoutException) {
-                            Timber.w("Could not download $actualFilePath: %s", e.message)
+                            Timber.Forest.w("Could not download $actualFilePath: %s", e.message)
                         }
 
                         response.close()
                     } else {
-                        Timber.w("URL host of $prefixedPath was empty")
+                        Timber.Forest.w("URL host of $prefixedPath was empty")
                     }
                 }
 
@@ -417,7 +432,7 @@ object SteamAutoCloud {
             }
         }
 
-        val uploadFiles: (FileChanges, CoroutineScope) -> Deferred<UserFilesUploadResult> = { fileChanges, parentScope ->
+        val uploadFiles: (SteamService.Companion.FileChanges, CoroutineScope) -> Deferred<UserFilesUploadResult> = { fileChanges, parentScope ->
             parentScope.async {
                 var filesUploaded = 0
                 var bytesUploaded = 0L
@@ -432,7 +447,7 @@ object SteamAutoCloud {
 
                 val totalFiles = filesToUpload.size
 
-                Timber.i(
+                Timber.Forest.i(
                     "Beginning app upload batch with ${filesToDelete.size} file(s) to delete " +
                             "and ${filesToUpload.size} file(s) to upload",
                 )
@@ -455,12 +470,12 @@ object SteamAutoCloud {
                     val fileSize = try {
                         Files.size(absFilePath).toInt()
                     } catch (e: Exception) {
-                        Timber.w("Skipping upload of ${file.prefixPath}: ${e.javaClass.simpleName}: ${e.message}")
+                        Timber.Forest.w("Skipping upload of ${file.prefixPath}: ${e.javaClass.simpleName}: ${e.message}")
                         uploadBatchSuccess = false
                         return@forEachIndexed
                     }
 
-                    Timber.i("Beginning upload of ${file.prefixPath} whose timestamp is ${file.timestamp}")
+                    Timber.Forest.i("Beginning upload of ${file.prefixPath} whose timestamp is ${file.timestamp}")
 
                     // Report start of upload
                     onProgress?.invoke("Uploading ${file.filename}", 0f)
@@ -493,8 +508,8 @@ object SteamAutoCloud {
                                 blockRequest.urlPath,
                             )
 
-                            Timber.i("Uploading to $httpUrl")
-                            Timber.i(
+                            Timber.Forest.i("Uploading to $httpUrl")
+                            Timber.Forest.i(
                                 "Block Request:" +
                                         "\n\tblockOffset: ${blockRequest.blockOffset}" +
                                         "\n\tblockLength: ${blockRequest.blockLength}" +
@@ -515,7 +530,7 @@ object SteamAutoCloud {
 
                             val bytesRead = fs.read(byteArray, 0, blockRequest.blockLength)
 
-                            Timber.i("Read $bytesRead byte(s) for block")
+                            Timber.Forest.i("Read $bytesRead byte(s) for block")
 
                             val mediaType = if (blockRequest.requestHeaders.any { it.name.equals("Content-Type", ignoreCase = true) }) {
                                 blockRequest.requestHeaders.first {
@@ -529,7 +544,7 @@ object SteamAutoCloud {
 
                             // val requestBody = byteArray.toRequestBody()
 
-                            val headers = Headers.headersOf(
+                            val headers = Headers.Companion.headersOf(
                                 *blockRequest.requestHeaders
                                     .map { listOf(it.name, it.value) }
                                     .flatten()
@@ -548,13 +563,13 @@ object SteamAutoCloud {
 
                             val httpClient = steamInstance.steamClient!!.configuration.httpClient
 
-                            Timber.i("Sending request to ${request.url} using\n$request")
+                            Timber.Forest.i("Sending request to ${request.url} using\n$request")
 
                             withTimeout(SteamService.requestTimeout) {
                                 val response = httpClient.newCall(request).execute()
 
                                 if (!response.isSuccessful) {
-                                    Timber.w(
+                                    Timber.Forest.w(
                                         "Failed to upload part of %s: %s, %s",
                                         file.prefixPath,
                                         response.message,
@@ -567,10 +582,17 @@ object SteamAutoCloud {
                                     // Update progress after successful block upload
                                     bytesUploadedForFile += blockRequest.blockLength
                                     if (fileSize > 0) {
-                                        val currentProgress = (bytesUploadedForFile.toFloat() / fileSize).coerceIn(0f, 1f)
+                                        val currentProgress =
+                                            (bytesUploadedForFile.toFloat() / fileSize).coerceIn(
+                                                0f,
+                                                1f
+                                            )
                                         // Only update if progress changed by at least 1% or we're at 100%
                                         if (currentProgress - lastReportedProgress >= progressThreshold || currentProgress >= 1f) {
-                                            onProgress?.invoke("Uploading ${file.filename}", currentProgress)
+                                            onProgress?.invoke(
+                                                "Uploading ${file.filename}",
+                                                currentProgress
+                                            )
                                             lastReportedProgress = currentProgress
                                         }
                                     }
@@ -595,7 +617,7 @@ object SteamAutoCloud {
                         },
                     ).await()
 
-                    Timber.i("File ${file.prefixPath} commit success: $commitSuccess")
+                    Timber.Forest.i("File ${file.prefixPath} commit success: $commitSuccess")
                 }
 
                 steamCloud.completeAppUploadBatch(
@@ -608,7 +630,12 @@ object SteamAutoCloud {
                     onProgress?.invoke("Upload complete", 1.0f)
                 }
 
-                UserFilesUploadResult(uploadBatchSuccess, uploadBatchResponse.appChangeNumber, filesUploaded, bytesUploaded)
+                UserFilesUploadResult(
+                    uploadBatchSuccess,
+                    uploadBatchResponse.appChangeNumber,
+                    filesUploaded,
+                    bytesUploaded
+                )
             }
         }
 
@@ -637,14 +664,16 @@ object SteamAutoCloud {
 
         microsecTotal = measureTime {
             val localAppChangeNumber =
-                overrideLocalChangeNumber ?: steamInstance.changeNumbersDao.getByAppId(appInfo.id)?.changeNumber ?: -1
+                overrideLocalChangeNumber
+                    ?: steamInstance.changeNumbersDao.getByAppId(appInfo.id)?.changeNumber ?: -1
 
             val changeNumber = if (localAppChangeNumber >= 0) localAppChangeNumber else 0
-            val appFileListChange = steamCloud.getAppFileListChange(appInfo.id, changeNumber).await()
+            val appFileListChange =
+                steamCloud.getAppFileListChange(appInfo.id, changeNumber).await()
 
             val cloudAppChangeNumber = appFileListChange.currentChangeNumber
 
-            Timber.i("AppChangeNumber: $localAppChangeNumber -> $cloudAppChangeNumber")
+            Timber.Forest.i("AppChangeNumber: $localAppChangeNumber -> $cloudAppChangeNumber")
 
             appFileListChange.printFileChangeList(appInfo)
 
@@ -659,7 +688,7 @@ object SteamAutoCloud {
 
             val downloadUserFiles: (CoroutineScope) -> Deferred<PostSyncInfo?> = { parentScope ->
                 parentScope.async {
-                    Timber.i("Downloading cloud user files")
+                    Timber.Forest.i("Downloading cloud user files")
 
                     val remoteUserFiles = fileChangeListToUserFiles(appFileListChange)
                     val filesDiff = getFilesDiff(remoteUserFiles, allLocalUserFiles).second
@@ -699,7 +728,7 @@ object SteamAutoCloud {
                     //
 
                     if (hasLocalChanges) {
-                        Timber.e("Failed to download latest user files after $MAX_USER_FILE_RETRIES tries")
+                        Timber.Forest.e("Failed to download latest user files after $MAX_USER_FILE_RETRIES tries")
 
                         syncResult = SyncResult.DownloadFail
 
@@ -708,7 +737,10 @@ object SteamAutoCloud {
 
                     with(steamInstance) {
                         db.withTransaction {
-                            fileChangeListsDao.insert(appInfo.id, updatedLocalFiles.map { it.value }.flatten())
+                            fileChangeListsDao.insert(
+                                appInfo.id,
+                                updatedLocalFiles.map { it.value }.flatten()
+                            )
                             changeNumbersDao.insert(appInfo.id, cloudAppChangeNumber)
                         }
                     }
@@ -719,15 +751,17 @@ object SteamAutoCloud {
 
             val uploadUserFiles: (CoroutineScope) -> Deferred<Unit> = { parentScope ->
                 parentScope.async {
-                    Timber.i("Uploading local user files")
+                    Timber.Forest.i("Uploading local user files")
 
-                    val fileChanges = steamInstance.fileChangeListsDao.getByAppId(appInfo.id)!!.let {
-                        val result = getFilesDiff(allLocalUserFiles, it.userFileInfo)
+                    val fileChanges =
+                        steamInstance.fileChangeListsDao.getByAppId(appInfo.id)!!.let {
+                            val result = getFilesDiff(allLocalUserFiles, it.userFileInfo)
 
-                        result.second
-                    }
+                            result.second
+                        }
 
-                    uploadsRequired = fileChanges.filesCreated.isNotEmpty() || fileChanges.filesModified.isNotEmpty()
+                    uploadsRequired =
+                        fileChanges.filesCreated.isNotEmpty() || fileChanges.filesModified.isNotEmpty()
 
                     val uploadResult: UserFilesUploadResult
 
@@ -763,9 +797,10 @@ object SteamAutoCloud {
                     var hasLocalChanges: Boolean
 
                     microsecAcPrepUserFiles = measureTime {
-                        hasLocalChanges = steamInstance.fileChangeListsDao.getByAppId(appInfo.id)?.let {
-                            getFilesDiff(allLocalUserFiles, it.userFileInfo).first
-                        } == true
+                        hasLocalChanges =
+                            steamInstance.fileChangeListsDao.getByAppId(appInfo.id)?.let {
+                                getFilesDiff(allLocalUserFiles, it.userFileInfo).first
+                            } == true
                     }.inWholeMicroseconds
 
                     /*TODO: hasLocalChanges should be true if the user plays offline for the first time without ever pulling cloud saves
@@ -774,13 +809,13 @@ object SteamAutoCloud {
                         // we can safely download the new changes since no changes have been
                         // made locally
 
-                        Timber.i("No local changes but new cloud user files")
+                        Timber.Forest.i("No local changes but new cloud user files")
 
                         downloadUserFiles(parentScope).await()?.let {
                             return@async it
                         }
                     } else {
-                        Timber.i("Found local changes and new cloud user files, conflict resolution...")
+                        Timber.Forest.i("Found local changes and new cloud user files, conflict resolution...")
 
                         when (preferredSave) {
                             SaveLocation.Local -> {
@@ -797,8 +832,11 @@ object SteamAutoCloud {
 
                             SaveLocation.None -> {
                                 syncResult = SyncResult.Conflict
-                                remoteTimestamp = appFileListChange.files.map { it.timestamp.time }.maxOrNull() ?: 0L
-                                localTimestamp = allLocalUserFiles.map { it.timestamp }.maxOrNull() ?: 0L
+                                remoteTimestamp =
+                                    appFileListChange.files.map { it.timestamp.time }.maxOrNull()
+                                        ?: 0L
+                                localTimestamp =
+                                    allLocalUserFiles.map { it.timestamp }.maxOrNull() ?: 0L
                             }
                         }
                     }
@@ -818,11 +856,11 @@ object SteamAutoCloud {
                         } == true
 
                     if (hasLocalChanges) {
-                        Timber.i("Found local changes and no new cloud user files")
+                        Timber.Forest.i("Found local changes and no new cloud user files")
 
                         uploadUserFiles(parentScope).await()
                     } else {
-                        Timber.i("No local changes and no new cloud user files, doing nothing...")
+                        Timber.Forest.i("No local changes and no new cloud user files, doing nothing...")
 
                         syncResult = SyncResult.UpToDate
                     }
@@ -833,7 +871,7 @@ object SteamAutoCloud {
                 // believe, since we get the new app change number after having downloaded
                 // or uploaded from/to the cloud, so we should always be either behind or
                 // on par with the cloud change number, never ahead
-                Timber.e("Local change number greater than cloud $localAppChangeNumber > $cloudAppChangeNumber")
+                Timber.Forest.e("Local change number greater than cloud $localAppChangeNumber > $cloudAppChangeNumber")
 
                 syncResult = SyncResult.UnknownFail
             }
@@ -868,7 +906,7 @@ object SteamAutoCloud {
 
     private fun AppFileChangeList.printFileChangeList(appInfo: SteamApp) {
         with(this) {
-            Timber.i(
+            Timber.Forest.i(
                 "GetAppFileListChange(${appInfo.id}):" +
                         "\n\tTotal Files: ${files.size}" +
                         "\n\tCurrent Change Number: $currentChangeNumber" +

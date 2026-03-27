@@ -24,8 +24,8 @@ import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.DownloadService
-import app.gamegrub.service.SteamService
-import app.gamegrub.service.SteamService.Companion.getAppDirPath
+import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.ui.component.dialog.GameManagerDialog
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog

@@ -1,4 +1,4 @@
-package app.gamegrub.service
+package app.gamegrub.service.steam
 
 import android.app.Service
 import android.content.Context
@@ -47,7 +47,11 @@ import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
-import app.gamegrub.service.SteamService.Companion.getAppDirPath
+import app.gamegrub.service.DownloadService
+import app.gamegrub.service.NotificationHelper
+import app.gamegrub.service.steam.SteamAutoCloud
+import app.gamegrub.service.steam.SteamUnifiedFriends
+import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatType
 import app.gamegrub.statsgen.StatsAchievementsGenerator
 import app.gamegrub.statsgen.VdfParser
@@ -72,7 +76,7 @@ import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.networking.steam3.ProtocolTypes
-import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
+import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesFamilygroupsSteamclient
 import `in`.dragonbra.javasteam.rpc.service.FamilyGroups
 import `in`.dragonbra.javasteam.steam.authentication.AuthPollResult
@@ -116,6 +120,7 @@ import `in`.dragonbra.javasteam.types.KeyValue
 import `in`.dragonbra.javasteam.types.SteamID
 import `in`.dragonbra.javasteam.util.log.LogListener
 import `in`.dragonbra.javasteam.util.log.LogManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -157,14 +162,27 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Collections
 import java.util.EnumSet
-import java.util.concurrent.CancellationException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
+import kotlin.collections.contains
+import kotlin.collections.iterator
 import kotlin.io.path.pathString
 import kotlin.time.Duration.Companion.seconds
+
+/**
+ * Steam foreground service - handles all Steam integration.
+ *
+ * Core functionality:
+ * - Authentication (QR code, username/password)
+ * - Game library management
+ * - Game downloads and updates
+ * - Cloud save synchronization
+ *
+ * Note: This is a large coordinator (~3800 lines). Consider decomposing.
+ */
 
 @AndroidEntryPoint
 class SteamService : Service(), IChallengeUrlChanged {
@@ -173,12 +191,12 @@ class SteamService : Service(), IChallengeUrlChanged {
     private val logger = object : LogListener {
         override fun onLog(clazz: Class<*>, message: String?, throwable: Throwable?) {
             val logMessage = message ?: "No message given"
-            Timber.i(throwable, "[${clazz.simpleName}] -> $logMessage")
+            Timber.Forest.i(throwable, "[${clazz.simpleName}] -> $logMessage")
         }
 
         override fun onError(clazz: Class<*>, message: String?, throwable: Throwable?) {
             val logMessage = message ?: "No message given"
-            Timber.e(throwable, "[${clazz.simpleName}] -> $logMessage")
+            Timber.Forest.e(throwable, "[${clazz.simpleName}] -> $logMessage")
         }
     }
 
@@ -233,7 +251,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         capacity = 1_000,
         onBufferOverflow = BufferOverflow.SUSPEND,
         onUndeliveredElement = { droppedApps ->
-            Timber.w("App PICS Channel dropped: ${droppedApps.size} apps")
+            Timber.Forest.w("App PICS Channel dropped: ${droppedApps.size} apps")
         },
     )
 
@@ -241,7 +259,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         capacity = 1_000,
         onBufferOverflow = BufferOverflow.SUSPEND,
         onUndeliveredElement = { droppedPackages ->
-            Timber.w("Package PICS Channel dropped: ${droppedPackages.size} packages")
+            Timber.Forest.w("Package PICS Channel dropped: ${droppedPackages.size} packages")
         },
     )
 
@@ -297,7 +315,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         internal var instance: SteamService? = null
 
-        var cachedAchievements: List<app.gamegrub.statsgen.Achievement>? = null
+        var cachedAchievements: List<Achievement>? = null
             private set
         var cachedAchievementsAppId: Int? = null
             private set
@@ -316,7 +334,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 if (svc != null) {
                     svc.notificationHelper.notify(svc.getString(R.string.download_no_wifi))
                 } else {
-                    Timber.w("checkWifiOrNotify: no SteamService instance to notify")
+                    Timber.Forest.w("checkWifiOrNotify: no SteamService instance to notify")
                 }
                 return false
             }
@@ -326,11 +344,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         private val downloadJobs = ConcurrentHashMap<Int, DownloadInfo>()
 
         private fun notifyDownloadStarted(appId: Int) {
-            GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
+            GameGrubApp.Companion.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
         }
 
         private fun notifyDownloadStopped(appId: Int) {
-            GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, false))
+            GameGrubApp.Companion.events.emit(AndroidEvent.DownloadStatusChanged(appId, false))
         }
 
         private fun removeDownloadJob(appId: Int) {
@@ -435,7 +453,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             get() {
                 return if (PrefManager.useExternalStorage && File(PrefManager.externalStoragePath).exists()) {
                     // We still have an SD card file structure as expected
-                    Timber.i("External storage path is " + PrefManager.externalStoragePath)
+                    Timber.Forest.i("External storage path is " + PrefManager.externalStoragePath)
                     PrefManager.externalStoragePath
                 } else {
                     if (instance != null) {
@@ -449,11 +467,11 @@ class SteamService : Service(), IChallengeUrlChanged {
             get() {
                 return if (PrefManager.useExternalStorage && File(PrefManager.externalStoragePath).exists()) {
                     // We still have an SD card file structure as expected
-                    Timber.i("Using external storage")
-                    Timber.i("install path for external storage is " + externalAppInstallPath)
+                    Timber.Forest.i("Using external storage")
+                    Timber.Forest.i("install path for external storage is " + externalAppInstallPath)
                     externalAppInstallPath
                 } else {
-                    Timber.i("Using internal storage")
+                    Timber.Forest.i("Using internal storage")
                     internalAppInstallPath
                 }
             }
@@ -491,23 +509,24 @@ class SteamService : Service(), IChallengeUrlChanged {
             if (self.isPlayingGame) self.gameAppID else null
         }
 
-        suspend fun kickPlayingSession(onlyGame: Boolean = true): Boolean = withContext(Dispatchers.IO) {
-            val user = instance?._steamUser ?: return@withContext false
-            try {
-                instance?._isPlayingBlocked?.value = true
-                user.kickPlayingSession(onlyStopGame = onlyGame)
+        suspend fun kickPlayingSession(onlyGame: Boolean = true): Boolean =
+            withContext(Dispatchers.IO) {
+                val user = instance?._steamUser ?: return@withContext false
+                try {
+                    instance?._isPlayingBlocked?.value = true
+                    user.kickPlayingSession(onlyStopGame = onlyGame)
 
-                // Wait for PlayingSessionStateCallback to indicate unblocked
-                val deadline = System.currentTimeMillis() + 5000
-                while (System.currentTimeMillis() < deadline) {
-                    if (instance?._isPlayingBlocked?.value == false) return@withContext true
-                    delay(100)
+                    // Wait for PlayingSessionStateCallback to indicate unblocked
+                    val deadline = System.currentTimeMillis() + 5000
+                    while (System.currentTimeMillis() < deadline) {
+                        if (instance?._isPlayingBlocked?.value == false) return@withContext true
+                        delay(100)
+                    }
+                    false
+                } catch (_: Exception) {
+                    false
                 }
-                false
-            } catch (_: Exception) {
-                false
             }
-        }
 
         /**
          * Get licenses from database for use with DepotDownloader
@@ -532,7 +551,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun getDownloadingAppInfoOf(appId: Int): DownloadingAppInfo? {
-            return runBlocking(Dispatchers.IO) { instance?.downloadingAppInfoDao?.getDownloadingApp(appId) }
+            return runBlocking(Dispatchers.IO) {
+                instance?.downloadingAppInfoDao?.getDownloadingApp(
+                    appId
+                )
+            }
         }
 
         fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? {
@@ -653,7 +676,8 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                 missingAppIds.size
             }.onFailure { error ->
-                Timber.tag("SteamService").e(error, "Failed to refresh owned games from server")
+                Timber.Forest.tag("SteamService")
+                    .e(error, "Failed to refresh owned games from server")
             }.getOrDefault(0)
         }
 
@@ -898,7 +922,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             // 5️⃣ Executable | CustomExecutable flag
             if (hasExeFlag) s += 50
 
-            Timber.i("Score for $path: $s")
+            Timber.Forest.i("Score for $path: $s")
 
             return s
         }
@@ -909,7 +933,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val bad = listOf("launcher", "steam", "crash", "handler", "setup", "unins", "eac")
             val n = fileName.lowercase()
             val stub = generic.matches(n) || bad.any { it in n } || totalSize < 1_000_000
-            if (stub) Timber.d("Stub filtered: $fileName  size=$totalSize")
+            if (stub) Timber.Forest.d("Stub filtered: $fileName  size=$totalSize")
             return stub
         }
 
@@ -947,13 +971,13 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         d.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) }
                                 )
             }
-            Timber.i("Depots considered: $depots")
+            Timber.Forest.i("Depots considered: $depots")
 
             /* launch targets (lower-case) */
             val launchTargets = appInfo.config.launch
                 .mapNotNull { it.executable.lowercase() }.toSet() ?: emptySet()
 
-            Timber.i("Launch targets from appinfo: $launchTargets")
+            Timber.Forest.i("Launch targets from appinfo: $launchTargets")
 
             /* ---------------------------------------------------------- */
             val flagged = mutableListOf<Pair<FileData, Long>>() // (file, depotSize)
@@ -963,7 +987,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val steamClient = instance?.steamClient
             val licenses = runBlocking { getLicensesFromDb() }
             if (steamClient == null || licenses.isEmpty()) {
-                Timber.w("Cannot fetch manifests: steamClient or licenses not available")
+                Timber.Forest.w("Cannot fetch manifests: steamClient or licenses not available")
                 // Fallback to last resort
                 return (
                         getAppInfoOf(appId)?.let { appInfo ->
@@ -977,15 +1001,15 @@ class SteamService : Service(), IChallengeUrlChanged {
                 if (mi.size > largestDepotSize) largestDepotSize = mi.size
 
                 // Check cache first
-                val man = DepotManifest.loadFromFile("${getAppDirPath(appId)}/.DepotDownloader/${depot.depotId}_${mi.gid}.manifest")
+                val man = DepotManifest.Companion.loadFromFile("${getAppDirPath(appId)}/.DepotDownloader/${depot.depotId}_${mi.gid}.manifest")
 
-                Timber.d("Using manifest for depot ${depot.depotId}  size=${mi.size}")
+                Timber.Forest.d("Using manifest for depot ${depot.depotId}  size=${mi.size}")
 
                 /* 1️⃣ exact launch entry that isn't a stub */
                 man?.files?.firstOrNull { f ->
                     f.fileName.lowercase() in launchTargets && !f.isStub()
                 }?.let {
-                    Timber.i("Picked via launch entry: ${it.fileName}")
+                    Timber.Forest.i("Picked via launch entry: ${it.fileName}")
                     return it.fileName.replace('\\', '/').toString()
                 }
 
@@ -994,7 +1018,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     ?.forEach { flagged += it to mi.size }
             }
 
-            Timber.i("Flagged executable candidates: ${flagged.map { it.first.fileName }}")
+            Timber.Forest.i("Flagged executable candidates: ${flagged.map { it.first.fileName }}")
 
             /* 2️⃣ scorer (unchanged) */
             choosePrimaryExe(
@@ -1006,7 +1030,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     },
                 installDir.lowercase(),
             )?.let {
-                Timber.i("Picked via scorer: ${it.fileName}")
+                Timber.Forest.i("Picked via scorer: ${it.fileName}")
                 return it.fileName.replace('\\', '/')
             }
 
@@ -1015,12 +1039,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                 .filter { it.second == largestDepotSize }
                 .maxByOrNull { it.first.totalSize }
                 ?.let {
-                    Timber.i("Picked via largest-depot fallback: ${it.first.fileName}")
+                    Timber.Forest.i("Picked via largest-depot fallback: ${it.first.fileName}")
                     return it.first.fileName.replace('\\', '/').toString()
                 }
 
             /* 4️⃣ last resort */
-            Timber.w("No executable found; falling back to install dir")
+            Timber.Forest.w("No executable found; falling back to install dir")
             return (
                     getAppInfoOf(appId)?.let { appInfo ->
                         getWindowsLaunchInfos(appId).firstOrNull()
@@ -1030,7 +1054,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         /**
          * Resolves the effective launch executable for a Steam game (container config or auto-detected).
-         * Returns a non-empty sentinel when [Container.isLaunchRealSteam] is true so the launch is not blocked.
+         * Returns a non-empty sentinel when [com.winlator.container.Container.isLaunchRealSteam] is true so the launch is not blocked.
          */
         fun getLaunchExecutable(appId: String, container: Container): String {
             if (container.isLaunchRealSteam) return "steam"
@@ -1099,7 +1123,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     PrefManager.containerLanguage
                 }
 
-                Timber.tag("SteamService").d("downloadApp: downloading app $appId with language $containerLanguage")
+                Timber.Forest.tag("SteamService").d("downloadApp: downloading app $appId with language $containerLanguage")
 
                 val depots = getDownloadableDepots(appId = appId, preferredLanguage = containerLanguage)
                 downloadApp(
@@ -1185,7 +1209,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             try {
                 fetchFile(primaryUrl, dest, onProgress)
             } catch (e: Exception) {
-                Timber.w(e, "Primary download failed; retrying with fallback URL")
+                Timber.Forest.w(e, "Primary download failed; retrying with fallback URL")
                 try {
                     fetchFile(fallbackUrl, dest, onProgress)
                 } catch (e2: Exception) {
@@ -1221,13 +1245,17 @@ class SteamService : Service(), IChallengeUrlChanged {
             variant: String,
             context: Context,
         ) = parentScope.async {
-            Timber.i("imagefs will be downloaded")
+            Timber.Forest.i("imagefs will be downloaded")
             if (variant == Container.BIONIC) {
                 val dest = File(instance!!.filesDir, "imagefs_bionic.txz")
-                Timber.d("Downloading imagefs_bionic to " + dest.toString())
+                Timber.Forest.d("Downloading imagefs_bionic to " + dest.toString())
                 fetchFileWithFallback("imagefs_bionic.txz", dest, context, onDownloadProgress)
             } else {
-                Timber.d("Downloading imagefs_gamenative to " + File(instance!!.filesDir, "imagefs_gamenative.txz"))
+                Timber.Forest.d("Downloading imagefs_gamenative to " + File(
+                    instance!!.filesDir,
+                    "imagefs_gamenative.txz"
+                )
+                )
                 fetchFileWithFallback(
                     "imagefs_gamenative.txz",
                     File(instance!!.filesDir, "imagefs_gamenative.txz"),
@@ -1242,9 +1270,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             parentScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
             context: Context,
         ) = parentScope.async {
-            Timber.i("imagefs will be downloaded")
+            Timber.Forest.i("imagefs will be downloaded")
             val dest = File(instance!!.filesDir, "imagefs_patches_gamenative.tzst")
-            Timber.d("Downloading imagefs_patches_gamenative.tzst to " + dest.toString())
+            Timber.Forest.d("Downloading imagefs_patches_gamenative.tzst to " + dest.toString())
             fetchFileWithFallback("imagefs_patches_gamenative.tzst", dest, context, onDownloadProgress)
         }
 
@@ -1254,9 +1282,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             context: Context,
             fileName: String,
         ) = parentScope.async {
-            Timber.i("$fileName will be downloaded")
+            Timber.Forest.i("$fileName will be downloaded")
             val dest = File(instance!!.filesDir, fileName)
-            Timber.d("Downloading $fileName to " + dest.toString())
+            Timber.Forest.d("Downloading $fileName to " + dest.toString())
             fetchFileWithFallback(fileName, dest, context, onDownloadProgress)
         }
 
@@ -1265,9 +1293,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             parentScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
             context: Context,
         ) = parentScope.async {
-            Timber.i("imagefs will be downloaded")
+            Timber.Forest.i("imagefs will be downloaded")
             val dest = File(instance!!.filesDir, "steam.tzst")
-            Timber.d("Downloading steam.tzst to " + dest.toString())
+            Timber.Forest.d("Downloading steam.tzst to " + dest.toString())
             fetchFileWithFallback("steam.tzst", dest, context, onDownloadProgress)
         }
 
@@ -1320,7 +1348,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val configText = try {
                 parseManifestForConfig(manifestDirPath, manifestText)
             } catch (e: Exception) {
-                Timber.e(e, "Failed to parse Steam Input manifest config at ${manifestFile.path}")
+                Timber.Forest.e(e, "Failed to parse Steam Input manifest config at ${manifestFile.path}")
                 return null
             }
             return configText ?: manifestText
@@ -1331,16 +1359,16 @@ class SteamService : Service(), IChallengeUrlChanged {
             manifestText: String,
         ): String? {
             return try {
-                val kv = KeyValue.loadFromString(manifestText) ?: return null
+                val kv = KeyValue.Companion.loadFromString(manifestText) ?: return null
                 val actionManifest = if (kv.name?.equals("Action Manifest", ignoreCase = true) == true) {
                     kv
                 } else {
                     kv["Action Manifest"]
                 }
-                if (actionManifest === KeyValue.INVALID) return null
+                if (actionManifest === KeyValue.Companion.INVALID) return null
 
                 val configs = actionManifest["configurations"]
-                if (configs === KeyValue.INVALID || configs.children.isEmpty()) {
+                if (configs === KeyValue.Companion.INVALID || configs.children.isEmpty()) {
                     throw IllegalStateException("No configurations found in Action Manifest")
                 }
 
@@ -1353,12 +1381,12 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                 for (controllerType in preferredControllers) {
                     val controllerBlock = configs[controllerType]
-                    if (controllerBlock === KeyValue.INVALID) continue
+                    if (controllerBlock === KeyValue.Companion.INVALID) continue
 
                     for (entry in controllerBlock.children) {
                         val pathNode = entry["path"]
                         val configPath = pathNode.asString().orEmpty()
-                        if (pathNode === KeyValue.INVALID || configPath.isEmpty()) continue
+                        if (pathNode === KeyValue.Companion.INVALID || configPath.isEmpty()) continue
 
                         val configFile = resolvePathCaseInsensitive(manifestDirPath, configPath)
                             ?: continue
@@ -1368,7 +1396,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                 throw IllegalStateException("No valid controller configuration found in Action Manifest")
             } catch (e: Exception) {
-                Timber.e(e, "Failed to parse Steam Input manifest config")
+                Timber.Forest.e(e, "Failed to parse Steam Input manifest config")
                 null
             }
         }
@@ -1445,7 +1473,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             if (!checkWifiOrNotify()) return null
             if (downloadJobs.contains(appId)) return getAppDownloadInfo(appId)
-            Timber.d("depots is empty? " + downloadableDepots.isEmpty())
+            Timber.Forest.d("depots is empty? " + downloadableDepots.isEmpty())
             if (downloadableDepots.isEmpty()) return null
 
             val indirectDlcAppIds = getDownloadableDlcAppsOf(appId).orEmpty().map { it.id }
@@ -1504,14 +1532,14 @@ class SteamService : Service(), IChallengeUrlChanged {
                 downloadingAppIds.add(appId)
             }
 
-            Timber.i("selectedDepots is empty? " + selectedDepots.isEmpty())
+            Timber.Forest.i("selectedDepots is empty? " + selectedDepots.isEmpty())
 
             if (selectedDepots.isEmpty()) return null
 
-            Timber.i("Starting download for $appId")
-            Timber.i("App contains ${mainAppDepots.size} depot(s): ${mainAppDepots.keys}")
-            Timber.i("DLC contains ${dlcAppDepots.size} depot(s): ${dlcAppDepots.keys}")
-            Timber.i("downloadingAppIds: $downloadingAppIds")
+            Timber.Forest.i("Starting download for $appId")
+            Timber.Forest.i("App contains ${mainAppDepots.size} depot(s): ${mainAppDepots.keys}")
+            Timber.Forest.i("DLC contains ${dlcAppDepots.size} depot(s): ${dlcAppDepots.keys}")
+            Timber.Forest.i("downloadingAppIds: $downloadingAppIds")
 
             // Save downloading app info
             runBlocking {
@@ -1542,7 +1570,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 val persistedBytes = di.loadPersistedBytesDownloaded(appDirPath)
                 if (persistedBytes > 0L) {
                     di.initializeBytesDownloaded(persistedBytes)
-                    Timber.i("Resumed download: initialized with $persistedBytes bytes")
+                    Timber.Forest.i("Resumed download: initialized with $persistedBytes bytes")
                 }
 
                 val downloadJob = instance!!.scope.launch {
@@ -1550,7 +1578,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         // Get licenses from database
                         val licenses = getLicensesFromDb()
                         if (licenses.isEmpty()) {
-                            Timber.w("No licenses available for download")
+                            Timber.Forest.w("No licenses available for download")
                             return@launch
                         }
 
@@ -1586,9 +1614,9 @@ class SteamService : Service(), IChallengeUrlChanged {
                         val maxDownloads = (cpuCores * downloadRatio).toInt().coerceAtLeast(1)
                         val maxDecompress = (cpuCores * decompressRatio).toInt().coerceAtLeast(1)
 
-                        Timber.i("CPU Cores: $cpuCores")
-                        Timber.i("maxDownloads: $maxDownloads")
-                        Timber.i("maxDecompress: $maxDecompress")
+                        Timber.Forest.i("CPU Cores: $cpuCores")
+                        Timber.Forest.i("maxDownloads: $maxDownloads")
+                        Timber.Forest.i("maxDecompress: $maxDecompress")
 
                         // Create DepotDownloader instance
                         val depotDownloader = DepotDownloader(
@@ -1598,7 +1626,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                             androidEmulation = true,
                             maxDownloads = maxDownloads,
                             maxDecompress = maxDecompress,
-                            parentJob = coroutineContext[Job],
+                            parentJob = coroutineContext[Job.Key],
                             autoStartDownload = false,
                         )
 
@@ -1662,7 +1690,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                                     Net.http.newCall(request).execute().use { response ->
                                         if (!response.isSuccessful) {
-                                            Timber.w(
+                                            Timber.Forest.w(
                                                 "Failed to get steam controller config details " +
                                                         "for $publishedFileId: ${response.code}",
                                             )
@@ -1671,7 +1699,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                                         val responseBody = response.body?.string()
                                         if (responseBody.isNullOrEmpty()) {
-                                            Timber.w(
+                                            Timber.Forest.w(
                                                 "Empty response body for steam controller config " +
                                                         publishedFileId,
                                             )
@@ -1682,7 +1710,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         val responseJson = JSONObject(responseBody)
                                         val responseData = responseJson.optJSONObject("response")
                                         if (responseData == null) {
-                                            Timber.w(
+                                            Timber.Forest.w(
                                                 "Steam controller config $publishedFileId " +
                                                         "missing response data",
                                             )
@@ -1692,7 +1720,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         val result = responseData.optInt("result", 0)
                                         val resultCount = responseData.optInt("resultcount", 0)
                                         if (result != 1 || resultCount < 1) {
-                                            Timber.w(
+                                            Timber.Forest.w(
                                                 "Steam controller config $publishedFileId " +
                                                         "returned result=$result resultcount=$resultCount",
                                             )
@@ -1703,7 +1731,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                             .optJSONArray("publishedfiledetails")
                                             ?.optJSONObject(0)
                                         if (fileDetails == null) {
-                                            Timber.w(
+                                            Timber.Forest.w(
                                                 "Steam controller config $publishedFileId " +
                                                         "missing publishedfiledetails",
                                             )
@@ -1713,14 +1741,15 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         val fileUrl = fileDetails.optString("file_url", "").trim()
 
                                         if (fileUrl.isEmpty()) {
-                                            Timber.w(
+                                            Timber.Forest.w(
                                                 "Steam controller config $publishedFileId " +
                                                         "missing fileUrl",
                                             )
                                             return@use
                                         }
 
-                                        val configFile = File(appDirPath, STEAM_CONTROLLER_CONFIG_FILENAME)
+                                        val configFile =
+                                            File(appDirPath, STEAM_CONTROLLER_CONFIG_FILENAME)
 
                                         // Download the file
                                         val downloadRequest = Request.Builder()
@@ -1730,7 +1759,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                                         Net.http.newCall(downloadRequest).execute().use { downloadResponse ->
                                             if (!downloadResponse.isSuccessful) {
-                                                Timber.w(
+                                                Timber.Forest.w(
                                                     "Failed to download steam controller config " +
                                                             "$publishedFileId: ${downloadResponse.code}",
                                                 )
@@ -1739,7 +1768,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                                             val downloadBody = downloadResponse.body
                                             if (downloadBody == null) {
-                                                Timber.w(
+                                                Timber.Forest.w(
                                                     "Empty body for steam controller config " +
                                                             publishedFileId,
                                                 )
@@ -1752,14 +1781,14 @@ class SteamService : Service(), IChallengeUrlChanged {
                                                 }
                                             }
 
-                                            Timber.i(
+                                            Timber.Forest.i(
                                                 "Downloaded steam controller config " +
                                                         "$publishedFileId to ${configFile.path}",
                                             )
                                         }
                                     }
                                 }.onFailure { error ->
-                                    Timber.w(
+                                    Timber.Forest.w(
                                         error,
                                         "Steam controller config download failed for " +
                                                 publishedFileId,
@@ -1774,7 +1803,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         // Start Download
                         depotDownloader.startDownloading()
 
-                        Timber.i("Downloading game to " + defaultAppInstallPath)
+                        Timber.Forest.i("Downloading game to " + defaultAppInstallPath)
 
                         // Wait for completion
                         depotDownloader.getCompletion().await()
@@ -1803,7 +1832,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                             instance?.downloadingAppInfoDao?.deleteApp(appId)
                         }
                     } catch (e: Exception) {
-                        Timber.e(e, "Download failed for app $appId")
+                        Timber.Forest.e(e, "Download failed for app $appId")
                         di.persistProgressSnapshot()
                         // Mark all depots as failed
                         selectedDepots.keys.sorted().forEachIndexed { idx, _ ->
@@ -1814,8 +1843,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                     }
                 }
                 downloadJob.invokeOnCompletion { throwable ->
-                    if (throwable is kotlinx.coroutines.CancellationException) {
-                        Timber.d(throwable, "Download canceled for app $appId")
+                    if (throwable is CancellationException) {
+                        Timber.Forest.d(throwable, "Download canceled for app $appId")
                         removeDownloadJob(appId)
                     }
                 }
@@ -1834,7 +1863,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             selectedDlcAppIds: List<Int>,
             appDirPath: String,
         ) {
-            Timber.i("Item $downloadingAppId download completed, saving database")
+            Timber.Forest.i("Item $downloadingAppId download completed, saving database")
 
             // Update database
             val appInfo = instance?.appInfoDao?.getInstalledApp(downloadingAppId)
@@ -1878,7 +1907,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 // clean up DB record BEFORE notifying UI to avoid stale "Resume" button
                 instance?.downloadingAppInfoDao?.deleteApp(downloadInfo.gameId)
 
-                GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
+                GameGrubApp.Companion.events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
 
                 // Clear persisted bytes file on successful completion
                 downloadInfo.clearPersistedBytesDownloaded(appDirPath)
@@ -1896,19 +1925,19 @@ class SteamService : Service(), IChallengeUrlChanged {
             // (uncompressedBytes from onChunkCompleted is cumulative per depot)
             private val depotCumulativeUncompressedBytes = mutableMapOf<Int, Long>()
             override fun onItemAdded(item: DownloadItem) {
-                Timber.d("Item ${item.appId} added to queue")
+                Timber.Forest.d("Item ${item.appId} added to queue")
             }
 
             override fun onDownloadStarted(item: DownloadItem) {
-                Timber.i("Item ${item.appId} download started")
+                Timber.Forest.i("Item ${item.appId} download started")
             }
 
             override fun onDownloadCompleted(item: DownloadItem) {
-                Timber.i("Item ${item.appId} download completed")
+                Timber.Forest.i("Item ${item.appId} download completed")
             }
 
             override fun onDownloadFailed(item: DownloadItem, error: Throwable) {
-                Timber.e(error, "Item ${item.appId} failed to download")
+                Timber.Forest.e(error, "Item ${item.appId} failed to download")
                 downloadInfo.failedToDownload()
 
                 // Remove the downloading app info
@@ -1923,7 +1952,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
 
             override fun onStatusUpdate(message: String) {
-                Timber.d("Download status: $message")
+                Timber.Forest.d("Download status: $message")
                 downloadInfo.updateStatusMessage(message)
             }
 
@@ -1954,7 +1983,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
 
             override fun onDepotCompleted(depotId: Int, compressedBytes: Long, uncompressedBytes: Long) {
-                Timber.i("Depot $depotId completed (compressed: $compressedBytes, uncompressed: $uncompressedBytes)")
+                Timber.Forest.i("Depot $depotId completed (compressed: $compressedBytes, uncompressed: $uncompressedBytes)")
 
                 // Ensure we capture any remaining bytes
                 val previousBytes = depotCumulativeUncompressedBytes[depotId] ?: 0L
@@ -1983,64 +2012,68 @@ class SteamService : Service(), IChallengeUrlChanged {
             }.orEmpty()
         }
 
-        suspend fun notifyRunningProcesses(vararg gameProcesses: GameProcessInfo) = withContext(Dispatchers.IO) {
-            instance?.let { steamInstance ->
-                if (isConnected) {
-                    val gamesPlayed = gameProcesses.mapNotNull { gameProcess ->
-                        getAppInfoOf(gameProcess.appId)?.let { appInfo ->
-                            getPkgInfoOf(gameProcess.appId)?.let { pkgInfo ->
-                                appInfo.branches[gameProcess.branch]?.let { branch ->
-                                    val processId = gameProcess.processes
-                                        .firstOrNull { it.parentIsSteam }
-                                        ?.processId
-                                        ?: gameProcess.processes.firstOrNull()?.processId
-                                        ?: 0
+        suspend fun notifyRunningProcesses(vararg gameProcesses: GameProcessInfo) =
+            withContext(Dispatchers.IO) {
+                instance?.let { steamInstance ->
+                    if (isConnected) {
+                        val gamesPlayed = gameProcesses.mapNotNull { gameProcess ->
+                            getAppInfoOf(gameProcess.appId)?.let { appInfo ->
+                                getPkgInfoOf(gameProcess.appId)?.let { pkgInfo ->
+                                    appInfo.branches[gameProcess.branch]?.let { branch ->
+                                        val processId = gameProcess.processes
+                                            .firstOrNull { it.parentIsSteam }
+                                            ?.processId
+                                            ?: gameProcess.processes.firstOrNull()?.processId
+                                            ?: 0
 
-                                    val userAccountId = userSteamId!!.accountID.toInt()
-                                    GamePlayedInfo(
-                                        gameId = gameProcess.appId.toLong(),
-                                        processId = processId,
-                                        ownerId = if (pkgInfo.ownerAccountId.contains(userAccountId)) {
-                                            userAccountId
-                                        } else {
-                                            pkgInfo.ownerAccountId.first()
-                                        },
-                                        // TODO: figure out what this is and un-hardcode
-                                        launchSource = 100,
-                                        gameBuildId = branch.buildId.toInt(),
-                                        processIdList = gameProcess.processes,
-                                    )
+                                        val userAccountId = userSteamId!!.accountID.toInt()
+                                        GamePlayedInfo(
+                                            gameId = gameProcess.appId.toLong(),
+                                            processId = processId,
+                                            ownerId = if (pkgInfo.ownerAccountId.contains(
+                                                    userAccountId
+                                                )
+                                            ) {
+                                                userAccountId
+                                            } else {
+                                                pkgInfo.ownerAccountId.first()
+                                            },
+                                            // TODO: figure out what this is and un-hardcode
+                                            launchSource = 100,
+                                            gameBuildId = branch.buildId.toInt(),
+                                            processIdList = gameProcess.processes,
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Timber.i(
-                        "GameProcessInfo:%s",
-                        gamesPlayed.joinToString("\n") { game ->
-                            """
+                        Timber.Forest.i(
+                            "GameProcessInfo:%s",
+                            gamesPlayed.joinToString("\n") { game ->
+                                """
                         |   processId: ${game.processId}
                         |   gameId: ${game.gameId}
                         |   processes: ${
-                                game.processIdList.joinToString("\n") { process ->
-                                    """
+                                    game.processIdList.joinToString("\n") { process ->
+                                        """
                                 |   processId: ${process.processId}
                                 |   processIdParent: ${process.processIdParent}
                                 |   parentIsSteam: ${process.parentIsSteam}
                                     """.trimMargin()
+                                    }
                                 }
-                            }
                             """.trimMargin()
-                        },
-                    )
+                            },
+                        )
 
-                    steamInstance._steamApps?.notifyGamesPlayed(
-                        gamesPlayed = gamesPlayed,
-                        clientOsType = EOSType.AndroidUnknown,
-                    )
+                        steamInstance._steamApps?.notifyGamesPlayed(
+                            gamesPlayed = gamesPlayed,
+                            clientOsType = EOSType.AndroidUnknown,
+                        )
+                    }
                 }
             }
-        }
 
         fun beginLaunchApp(
             appId: Int,
@@ -2055,7 +2088,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 return@async PostSyncInfo(SyncResult.UpToDate)
             }
             if (!tryAcquireSync(appId)) {
-                Timber.w("Cannot launch app when sync already in progress for appId=$appId")
+                Timber.Forest.w("Cannot launch app when sync already in progress for appId=$appId")
                 return@async PostSyncInfo(SyncResult.InProgress)
             }
 
@@ -2084,7 +2117,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                             syncResult = info
 
                                             if (info.syncResult == SyncResult.Success || info.syncResult == SyncResult.UpToDate) {
-                                                Timber.i(
+                                                Timber.Forest.i(
                                                     "Signaling app launch:\n\tappId: %d\n\tclientId: %s\n\tosType: %s",
                                                     appId,
                                                     PrefManager.clientId,
@@ -2107,7 +2140,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                                 } else if (ignorePendingOperations &&
                                                     pendingRemoteOperations.any {
                                                         it.operation ==
-                                                                ECloudPendingRemoteOperation.k_ECloudPendingRemoteOperationAppSessionActive
+                                                                SteammessagesClientObjects.ECloudPendingRemoteOperation.k_ECloudPendingRemoteOperationAppSessionActive
                                                     }
                                                 ) {
                                                     steamInstance._steamUser!!.kickPlayingSession()
@@ -2121,10 +2154,10 @@ class SteamService : Service(), IChallengeUrlChanged {
                         break
                     } catch (e: AsyncJobFailedException) {
                         if (attempt == maxAttempts) {
-                            Timber.e(e, "Cloud sync failed after $maxAttempts attempts")
+                            Timber.Forest.e(e, "Cloud sync failed after $maxAttempts attempts")
                             syncResult = PostSyncInfo(SyncResult.UnknownFail)
                         } else {
-                            Timber.w("Cloud sync attempt $attempt failed (AsyncJobFailedException), retrying...")
+                            Timber.Forest.w("Cloud sync attempt $attempt failed (AsyncJobFailedException), retrying...")
                             delay(1000L * attempt)
                         }
                     }
@@ -2144,7 +2177,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             overrideLocalChangeNumber: Long? = null,
         ): Deferred<PostSyncInfo> = parentScope.async {
             if (!tryAcquireSync(appId)) {
-                Timber.w("Cannot force sync when sync already in progress for appId=$appId")
+                Timber.Forest.w("Cannot force sync when sync already in progress for appId=$appId")
                 return@async PostSyncInfo(SyncResult.InProgress)
             }
 
@@ -2171,7 +2204,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                                         postSyncInfo?.let { info ->
                                             syncResult = info
-                                            Timber.i("Force cloud sync completed for app $appId with result: ${info.syncResult}")
+                                            Timber.Forest.i("Force cloud sync completed for app $appId with result: ${info.syncResult}")
                                         }
                                     }
                                 }
@@ -2180,9 +2213,9 @@ class SteamService : Service(), IChallengeUrlChanged {
                         break
                     } catch (e: AsyncJobFailedException) {
                         if (attempt == maxAttempts) {
-                            Timber.e(e, "Force cloud sync failed after $maxAttempts attempts")
+                            Timber.Forest.e(e, "Force cloud sync failed after $maxAttempts attempts")
                         } else {
-                            Timber.w("Force cloud sync attempt $attempt failed (AsyncJobFailedException), retrying...")
+                            Timber.Forest.w("Force cloud sync attempt $attempt failed (AsyncJobFailedException), retrying...")
                             delay(1000L * attempt)
                         }
                     }
@@ -2202,7 +2235,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     }
 
                     if (!tryAcquireSync(appId)) {
-                        Timber.w("Cannot close app when sync already in progress for appId=$appId")
+                        Timber.Forest.w("Cannot close app when sync already in progress for appId=$appId")
                         return@async
                     }
 
@@ -2210,7 +2243,10 @@ class SteamService : Service(), IChallengeUrlChanged {
                         try {
                             syncAchievementsFromGoldberg(context, appId)
                         } catch (e: Exception) {
-                            Timber.e(e, "Achievement sync failed for appId=$appId, continuing with cloud save sync")
+                            Timber.Forest.e(
+                                e,
+                                "Achievement sync failed for appId=$appId, continuing with cloud save sync"
+                            )
                         }
 
                         val maxAttempts = 3
@@ -2242,9 +2278,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                                 break
                             } catch (e: AsyncJobFailedException) {
                                 if (attempt == maxAttempts) {
-                                    Timber.e(e, "Close app sync failed after $maxAttempts attempts")
+                                    Timber.Forest.e(
+                                        e,
+                                        "Close app sync failed after $maxAttempts attempts"
+                                    )
                                 } else {
-                                    Timber.w("Close app sync attempt $attempt failed (AsyncJobFailedException), retrying...")
+                                    Timber.Forest.w("Close app sync attempt $attempt failed (AsyncJobFailedException), retrying...")
                                     delay(1000L * attempt)
                                 }
                             }
@@ -2344,7 +2383,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
 
             val event = SteamEvent.LogonStarted(username)
-            GameGrubApp.events.emit(event)
+            GameGrubApp.Companion.events.emit(event)
 
             steamUser.logOn(
                 LogOnDetails(
@@ -2368,13 +2407,14 @@ class SteamService : Service(), IChallengeUrlChanged {
             authenticator: IAuthenticator,
         ) = withContext(Dispatchers.IO) {
             try {
-                Timber.i("Logging in via credentials.")
+                Timber.Forest.i("Logging in via credentials.")
                 instance!!._loginResult = LoginResult.InProgress
-                Timber.i("Set login result to InProgress.")
+                Timber.Forest.i("Set login result to InProgress.")
                 instance!!.steamClient?.let { steamClient ->
                     val authDetails = AuthSessionDetails().apply {
                         this.username = username.trim()
-                        this.password = password // Not trimming as some passwords have leading spaces.
+                        this.password =
+                            password // Not trimming as some passwords have leading spaces.
                         this.persistentSession = rememberSession
                         this.authenticator = authenticator
                         this.deviceFriendlyName = SteamUtils.getMachineName(instance!!)
@@ -2382,9 +2422,11 @@ class SteamService : Service(), IChallengeUrlChanged {
                     }
 
                     val event = SteamEvent.LogonStarted(username)
-                    GameGrubApp.events.emit(event)
+                    GameGrubApp.Companion.events.emit(event)
 
-                    val authSession = steamClient.authentication.beginAuthSessionViaCredentials(authDetails).await()
+                    val authSession =
+                        steamClient.authentication.beginAuthSessionViaCredentials(authDetails)
+                            .await()
 
                     val pollResult = authSession.pollingWaitForResult().await()
 
@@ -2400,34 +2442,39 @@ class SteamService : Service(), IChallengeUrlChanged {
                         rememberSession = rememberSession,
                     )
                 } ?: run {
-                    Timber.e("Could not logon: Failed to connect to Steam")
+                    Timber.Forest.e("Could not logon: Failed to connect to Steam")
 
-                    val event = SteamEvent.LogonEnded(username, LoginResult.Failed, "No connection to Steam")
-                    GameGrubApp.events.emit(event)
+                    val event = SteamEvent.LogonEnded(
+                        username,
+                        LoginResult.Failed,
+                        "No connection to Steam"
+                    )
+                    GameGrubApp.Companion.events.emit(event)
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Login failed")
+                Timber.Forest.e(e, "Login failed")
 
                 val message = when (e) {
-                    is CancellationException -> "Unknown cancellation"
+                    is java.util.concurrent.CancellationException -> "Unknown cancellation"
                     is AuthenticationException -> e.result?.name ?: e.message
                     else -> e.message ?: e.javaClass.name
                 }
 
                 val event = SteamEvent.LogonEnded(username, LoginResult.Failed, message)
-                GameGrubApp.events.emit(event)
+                GameGrubApp.Companion.events.emit(event)
             }
         }
 
         suspend fun startLoginWithQr() = withContext(Dispatchers.IO) {
             try {
-                Timber.i("Logging in via QR.")
+                Timber.Forest.i("Logging in via QR.")
 
                 val service = instance
                 if (service == null) {
-                    Timber.e("Could not start QR logon: Service not initialized")
-                    val event = SteamEvent.QrAuthEnded(success = false, message = "Service not initialized")
-                    GameGrubApp.events.emit(event)
+                    Timber.Forest.e("Could not start QR logon: Service not initialized")
+                    val event =
+                        SteamEvent.QrAuthEnded(success = false, message = "Service not initialized")
+                    GameGrubApp.Companion.events.emit(event)
                     return@withContext
                 }
 
@@ -2440,15 +2487,16 @@ class SteamService : Service(), IChallengeUrlChanged {
                         this.persistentSession = true
                     }
 
-                    val authSession = steamClient.authentication.beginAuthSessionViaQR(authDetails).await()
+                    val authSession =
+                        steamClient.authentication.beginAuthSessionViaQR(authDetails).await()
 
                     // Steam will periodically refresh the challenge url, this callback allows you to draw a new qr code.
                     authSession.challengeUrlChanged = service
 
                     val qrEvent = SteamEvent.QrChallengeReceived(authSession.challengeUrl)
-                    GameGrubApp.events.emit(qrEvent)
+                    GameGrubApp.Companion.events.emit(qrEvent)
 
-                    Timber.d("PollingInterval: ${authSession.pollingInterval.toLong()}")
+                    Timber.Forest.d("PollingInterval: ${authSession.pollingInterval.toLong()}")
 
                     var authPollResult: AuthPollResult? = null
 
@@ -2456,7 +2504,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         try {
                             authPollResult = authSession.pollAuthSessionStatus().await()
                         } catch (e: Exception) {
-                            Timber.e(e, "Poll auth session status error")
+                            Timber.Forest.e(e, "Poll auth session status error")
                             throw e
                         }
 
@@ -2477,11 +2525,11 @@ class SteamService : Service(), IChallengeUrlChanged {
                     isWaitingForQRAuth = false
 
                     val event = SteamEvent.QrAuthEnded(authPollResult != null)
-                    GameGrubApp.events.emit(event)
+                    GameGrubApp.Companion.events.emit(event)
 
                     // there is a chance qr got cancelled and there is no authPollResult
                     if (authPollResult == null) {
-                        Timber.e("Got no auth poll result")
+                        Timber.Forest.e("Got no auth poll result")
                         throw Exception("Got no auth poll result")
                     }
 
@@ -2492,27 +2540,28 @@ class SteamService : Service(), IChallengeUrlChanged {
                         refreshToken = authPollResult.refreshToken,
                     )
                 } ?: run {
-                    Timber.e("Could not start QR logon: Failed to connect to Steam")
+                    Timber.Forest.e("Could not start QR logon: Failed to connect to Steam")
 
-                    val event = SteamEvent.QrAuthEnded(success = false, message = "No connection to Steam")
-                    GameGrubApp.events.emit(event)
+                    val event =
+                        SteamEvent.QrAuthEnded(success = false, message = "No connection to Steam")
+                    GameGrubApp.Companion.events.emit(event)
                 }
             } catch (e: Exception) {
-                Timber.e(e, "QR failed")
+                Timber.Forest.e(e, "QR failed")
 
                 val message = when (e) {
-                    is CancellationException -> "QR Session timed out"
+                    is java.util.concurrent.CancellationException -> "QR Session timed out"
                     is AuthenticationException -> e.result?.name ?: e.message
                     else -> e.message ?: e.javaClass.name
                 }
 
                 val event = SteamEvent.QrAuthEnded(success = false, message = message)
-                GameGrubApp.events.emit(event)
+                GameGrubApp.Companion.events.emit(event)
             }
         }
 
         fun stopLoginWithQr() {
-            Timber.i("Stopping QR polling")
+            Timber.Forest.i("Stopping QR polling")
 
             isWaitingForQRAuth = false
         }
@@ -2592,7 +2641,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             clearUserData(clearCloudSyncState = clearCloudSyncState)
 
             val event = SteamEvent.LoggedOut(username)
-            GameGrubApp.events.emit(event)
+            GameGrubApp.Companion.events.emit(event)
 
             cancelLongLivedSteamJobs()
         }
@@ -2657,17 +2706,17 @@ class SteamService : Service(), IChallengeUrlChanged {
                     packageIds = emptyList(),
                 ).await()
 
-                Timber.d("Access tokens response:")
-                Timber.d("  - Granted tokens: ${tokens.appTokens.keys}")
-                Timber.d("  - Denied tokens: ${tokens.appTokensDenied}")
+                Timber.Forest.d("Access tokens response:")
+                Timber.Forest.d("  - Granted tokens: ${tokens.appTokens.keys}")
+                Timber.Forest.d("  - Denied tokens: ${tokens.appTokensDenied}")
 
                 // Step 2: Filter to only appIds that have tokens (we own them)
                 val ownedAppIds = tokens.appTokens.keys.filter { it in dlcAppIds }.toSet()
 
-                Timber.d("Owned appIds (from tokens): $ownedAppIds")
+                Timber.Forest.d("Owned appIds (from tokens): $ownedAppIds")
 
                 if (ownedAppIds.isEmpty()) {
-                    Timber.w("No owned DLCs found via access tokens")
+                    Timber.Forest.w("No owned DLCs found via access tokens")
                     return emptySet()
                 }
 
@@ -2677,7 +2726,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     PICSRequest(id = appId, accessToken = token)
                 }.filterNotNull()
 
-                Timber.d("Created ${picsRequests.size} PICS requests")
+                Timber.Forest.d("Created ${picsRequests.size} PICS requests")
 
                 if (picsRequests.isEmpty()) return emptySet()
 
@@ -2687,7 +2736,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 val allOwnedAppIds = mutableSetOf<Int>()
 
                 picsRequests.chunked(chunkSize).forEach { chunk ->
-                    Timber.d("Querying PICS chunk with ${chunk.size} apps")
+                    Timber.Forest.d("Querying PICS chunk with ${chunk.size} apps")
                     val callback = steamApps.picsGetProductInfo(
                         apps = chunk,
                         packages = emptyList(),
@@ -2696,17 +2745,17 @@ class SteamService : Service(), IChallengeUrlChanged {
                     // Collect all appIds that returned results
                     callback.results.forEach { picsCallback ->
                         val returnedAppIds = picsCallback.apps.keys
-                        Timber.d("  PICS result: ${returnedAppIds.size} apps returned")
+                        Timber.Forest.d("  PICS result: ${returnedAppIds.size} apps returned")
                         allOwnedAppIds.addAll(picsCallback.apps.keys)
                     }
                 }
 
-                Timber.i("Final owned DLC appIds: $allOwnedAppIds")
-                Timber.i("Total owned: ${allOwnedAppIds.size} out of ${dlcAppIds.size} checked")
+                Timber.Forest.i("Final owned DLC appIds: $allOwnedAppIds")
+                Timber.Forest.i("Total owned: ${allOwnedAppIds.size} out of ${dlcAppIds.size} checked")
 
                 return allOwnedAppIds
             } catch (e: Exception) {
-                Timber.e(e, "Failed to check DLC ownership via PICS batch for ${dlcAppIds.size} appIds")
+                Timber.Forest.e(e, "Failed to check DLC ownership via PICS batch for ${dlcAppIds.size} appIds")
                 return emptySet()
             }
         }
@@ -2721,7 +2770,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             cachedAchievementsAppId = appId
 
             val nameToBlockBit = result.nameToBlockBit
-            Timber.d("nameToBlockBit size=${nameToBlockBit.size} for appId=$appId")
+            Timber.Forest.d("nameToBlockBit size=${nameToBlockBit.size} for appId=$appId")
             if (nameToBlockBit.isNotEmpty()) {
                 val configDir = File(configDirectory)
                 if (!configDir.exists()) configDir.mkdirs()
@@ -2758,7 +2807,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         suspend fun syncAchievementsFromGoldberg(context: Context, appId: Int) {
             val gseSaveDirs = getGseSaveDirs(context, appId).filter { it.isDirectory }
             if (gseSaveDirs.isEmpty()) {
-                Timber.d("No GSE save directory found for appId=$appId")
+                Timber.Forest.d("No GSE save directory found for appId=$appId")
                 return
             }
 
@@ -2777,7 +2826,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                             }
                         }
                     } catch (e: Exception) {
-                        Timber.e(e, "Failed to parse Goldberg achievements.json in ${gseSaveDir.absolutePath} for appId=$appId")
+                        Timber.Forest.e(e, "Failed to parse Goldberg achievements.json in ${gseSaveDir.absolutePath} for appId=$appId")
                     }
                 }
 
@@ -2790,22 +2839,22 @@ class SteamService : Service(), IChallengeUrlChanged {
             val hasStats = gseStatsDir != null
 
             if (unlockedNames.isEmpty() && !hasStats) {
-                Timber.d("No earned achievements or stats found in Goldberg output for appId=$appId")
+                Timber.Forest.d("No earned achievements or stats found in Goldberg output for appId=$appId")
                 return
             }
 
             val configDirectory = findSteamSettingsDir(context, appId)
             if (configDirectory == null) {
-                Timber.w("Could not find steam_settings directory for appId=$appId")
+                Timber.Forest.w("Could not find steam_settings directory for appId=$appId")
                 return
             }
 
-            Timber.i("Found ${unlockedNames.size} earned achievements and ${if (hasStats) "stats" else "no stats"} for appId=$appId, syncing to Steam")
+            Timber.Forest.i("Found ${unlockedNames.size} earned achievements and ${if (hasStats) "stats" else "no stats"} for appId=$appId, syncing to Steam")
             val result = storeAchievementUnlocks(appId, configDirectory, unlockedNames, gseStatsDir ?: gseSaveDirs.first().resolve("stats"))
             result.onSuccess {
-                Timber.i("Successfully synced achievements and stats to Steam for appId=$appId")
+                Timber.Forest.i("Successfully synced achievements and stats to Steam for appId=$appId")
             }.onFailure { e ->
-                Timber.e(e, "Failed to sync achievements and stats to Steam for appId=$appId")
+                Timber.Forest.e(e, "Failed to sync achievements and stats to Steam for appId=$appId")
             }
         }
 
@@ -2893,7 +2942,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         }
                     }
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to parse schema for stat name mapping, appId=$appId")
+                    Timber.Forest.e(e, "Failed to parse schema for stat name mapping, appId=$appId")
                 }
 
                 if (statNameToId.isNotEmpty()) {
@@ -2904,19 +2953,19 @@ class SteamService : Service(), IChallengeUrlChanged {
                         if (bytes.size >= 4) {
                             val value = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).int
                             allStats[statId] = value
-                            Timber.d("Read GSE stat: ${statFile.name} -> statId=$statId, value=$value")
+                            Timber.Forest.d("Read GSE stat: ${statFile.name} -> statId=$statId, value=$value")
                         }
                     }
                 }
             }
 
             if (allStats.isEmpty()) {
-                Timber.d("No stats or achievements to store for appId=$appId")
+                Timber.Forest.d("No stats or achievements to store for appId=$appId")
                 return@runCatching
             }
 
             val statsToStore = allStats.map { (id, value) -> Stats(statId = id, statValue = value) }
-            Timber.d("storeUserStats: appId=$appId, crcStats=${userStats.crcStats}, stats=$statsToStore")
+            Timber.Forest.d("storeUserStats: appId=$appId, crcStats=${userStats.crcStats}, stats=$statsToStore")
             val mySteamId = steamUser.steamID!!
             val callback = instance?._steamUserStats!!.storeUserStats(
                 appId, statsToStore, mySteamId, mySteamId, userStats.crcStats,
@@ -2925,12 +2974,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                 throw IllegalStateException("storeUserStats failed: ${callback.result}")
             }
             if (callback.statsOutOfDate) {
-                Timber.w("Stats were out of date on server for appId=$appId")
+                Timber.Forest.w("Stats were out of date on server for appId=$appId")
             }
             if (callback.statsFailedValidation.isNotEmpty()) {
-                Timber.w("${callback.statsFailedValidation.size} stats failed validation for appId=$appId")
+                Timber.Forest.w("${callback.statsFailedValidation.size} stats failed validation for appId=$appId")
                 callback.statsFailedValidation.forEach { f ->
-                    Timber.w("  statId=${f.statId} reverted to ${f.revertedStatValue}")
+                    Timber.Forest.w("  statId=${f.statId} reverted to ${f.revertedStatValue}")
                 }
             }
         }
@@ -2951,7 +3000,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             )
         }
 
-        GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        GameGrubApp.Companion.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         // clear stale download records (completed games) but keep interrupted ones (preserves DLC selection)
         scope.launch {
@@ -2985,9 +3034,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             private fun checkAndPauseDownloads() {
                 if (PrefManager.downloadOnWifiOnly && !hasActiveWifiOrEthernet()) {
                     for ((appId, info) in downloadJobs.entries.toList()) {
-                        Timber.d("Pausing download for $appId — WiFi/Ethernet lost")
+                        Timber.Forest.d("Pausing download for $appId — WiFi/Ethernet lost")
                         info.cancel()
-                        GameGrubApp.events.emit(AndroidEvent.DownloadPausedDueToConnectivity(appId))
+                        GameGrubApp.Companion.events.emit(AndroidEvent.DownloadPausedDueToConnectivity(appId))
                         removeDownloadJob(appId)
                     }
                     notificationHelper.notify(getString(R.string.download_paused_wifi))
@@ -3006,20 +3055,20 @@ class SteamService : Service(), IChallengeUrlChanged {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // Notification intents
         when (intent?.action) {
-            NotificationHelper.ACTION_EXIT -> {
-                Timber.d("Exiting app via notification intent")
+            NotificationHelper.Companion.ACTION_EXIT -> {
+                Timber.Forest.d("Exiting app via notification intent")
 
                 val event = AndroidEvent.EndProcess
-                GameGrubApp.events.emit(event)
+                GameGrubApp.Companion.events.emit(event)
 
                 return START_NOT_STICKY
             }
         }
 
         if (!isRunning) {
-            Timber.i("Using server list path: $serverListPath")
+            Timber.Forest.i("Using server list path: $serverListPath")
 
-            val configuration = SteamConfiguration.create {
+            val configuration = SteamConfiguration.Companion.create {
                 it.withProtocolTypes(PROTOCOL_TYPES)
                 it.withCellID(PrefManager.cellId)
                 it.withServerListProvider(FileServerListProvider(File(serverListPath)))
@@ -3059,13 +3108,28 @@ class SteamService : Service(), IChallengeUrlChanged {
             // subscribe to the callbacks we are interested in
             with(callbackSubscriptions) {
                 with(callbackManager!!) {
-                    add(subscribe(ConnectedCallback::class.java, ::onConnected))
-                    add(subscribe(DisconnectedCallback::class.java, ::onDisconnected))
-                    add(subscribe(LoggedOnCallback::class.java, ::onLoggedOn))
-                    add(subscribe(LoggedOffCallback::class.java, ::onLoggedOff))
-                    add(subscribe(PersonaStateCallback::class.java, ::onPersonaStateReceived))
-                    add(subscribe(LicenseListCallback::class.java, ::onLicenseList))
-                    add(subscribe(PlayingSessionStateCallback::class.java, ::onPlayingSessionState))
+                    add(CallbackManager.subscribe(ConnectedCallback::class.java, ::onConnected))
+                    add(
+                        CallbackManager.subscribe(
+                            DisconnectedCallback::class.java,
+                            ::onDisconnected
+                        )
+                    )
+                    add(CallbackManager.subscribe(LoggedOnCallback::class.java, ::onLoggedOn))
+                    add(CallbackManager.subscribe(LoggedOffCallback::class.java, ::onLoggedOff))
+                    add(
+                        CallbackManager.subscribe(
+                            PersonaStateCallback::class.java,
+                            ::onPersonaStateReceived
+                        )
+                    )
+                    add(CallbackManager.subscribe(LicenseListCallback::class.java, ::onLicenseList))
+                    add(
+                        CallbackManager.subscribe(
+                            PlayingSessionStateCallback::class.java,
+                            ::onPlayingSessionState
+                        )
+                    )
                 }
             }
 
@@ -3083,7 +3147,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     try {
                         callbackManager!!.runWaitCallbacks(1000L)
                     } catch (e: Exception) {
-                        Timber.e("runWaitCallbacks failed: $e")
+                        Timber.Forest.e("runWaitCallbacks failed: $e")
                     }
                 }
             }
@@ -3124,14 +3188,14 @@ class SteamService : Service(), IChallengeUrlChanged {
             delay(5000)
 
             if (!isConnected) {
-                Timber.w("Failed to connect to Steam, marking endpoint bad and force disconnecting")
+                Timber.Forest.w("Failed to connect to Steam, marking endpoint bad and force disconnecting")
 
                 try {
                     steamClient!!.servers.tryMark(steamClient!!.currentEndpoint, PROTOCOL_TYPES, ServerQuality.BAD)
                 } catch (e: NullPointerException) {
                     // I don't care
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to mark endpoint as bad:")
+                    Timber.Forest.e(e, "Failed to mark endpoint as bad:")
                 }
 
                 try {
@@ -3139,14 +3203,14 @@ class SteamService : Service(), IChallengeUrlChanged {
                 } catch (e: NullPointerException) {
                     // I don't care
                 } catch (e: Exception) {
-                    Timber.e(e, "There was an issue when disconnecting:")
+                    Timber.Forest.e(e, "There was an issue when disconnecting:")
                 }
             }
         }
     }
 
     private suspend fun stop() {
-        Timber.i("Stopping Steam service")
+        Timber.Forest.i("Stopping Steam service")
         if (steamClient != null && steamClient!!.isConnected) {
             isStopping = true
 
@@ -3187,8 +3251,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         isStopping = false
         retryAttempt = 0
 
-        GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
-        GameGrubApp.events.clearAllListenersOf<SteamEvent<Any>>()
+        GameGrubApp.Companion.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        GameGrubApp.Companion.events.clearAllListenersOf<SteamEvent<Any>>()
 
         LogManager.removeListener(logger)
     }
@@ -3199,7 +3263,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         isConnected = false
 
         val event = SteamEvent.Disconnected(isTerminal = false)
-        GameGrubApp.events.emit(event)
+        GameGrubApp.Companion.events.emit(event)
 
         steamClient!!.disconnect()
     }
@@ -3207,7 +3271,7 @@ class SteamService : Service(), IChallengeUrlChanged {
     // region [REGION] callbacks
     @Suppress("UNUSED_PARAMETER", "unused")
     private fun onConnected(callback: ConnectedCallback) {
-        Timber.i("Connected to Steam")
+        Timber.Forest.i("Connected to Steam")
 
         reconnectJob?.cancel()
         retryAttempt = 0
@@ -3226,11 +3290,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         val event = SteamEvent.Connected(isAutoLoggingIn)
-        GameGrubApp.events.emit(event)
+        GameGrubApp.Companion.events.emit(event)
     }
 
     private fun onDisconnected(callback: DisconnectedCallback) {
-        Timber.i("Disconnected from Steam. User initiated: ${callback.isUserInitiated}")
+        Timber.Forest.i("Disconnected from Steam. User initiated: ${callback.isUserInitiated}")
 
         isConnected = false
 
@@ -3238,10 +3302,10 @@ class SteamService : Service(), IChallengeUrlChanged {
             retryAttempt++
             val backoffMs = (1000L * minOf(1 shl (retryAttempt - 1), 60)).coerceAtMost(60_000L)
 
-            Timber.w("Attempting to reconnect (retry $retryAttempt) after ${backoffMs}ms")
+            Timber.Forest.w("Attempting to reconnect (retry $retryAttempt) after ${backoffMs}ms")
 
             val event = SteamEvent.RemotelyDisconnected
-            GameGrubApp.events.emit(event)
+            GameGrubApp.Companion.events.emit(event)
 
             reconnectJob = scope.launch {
                 delay(backoffMs)
@@ -3250,7 +3314,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         } else {
             // only terminal when retries exhausted, not when user/system stopped the service
             val event = SteamEvent.Disconnected(isTerminal = !isStopping)
-            GameGrubApp.events.emit(event)
+            GameGrubApp.Companion.events.emit(event)
 
             clearValues()
 
@@ -3260,17 +3324,17 @@ class SteamService : Service(), IChallengeUrlChanged {
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     private fun onLoggedOn(callback: LoggedOnCallback) {
-        Timber.i("Logged onto Steam: ${callback.result}")
+        Timber.Forest.i("Logged onto Steam: ${callback.result}")
 
         if (userSteamId?.isValid == true) {
             if (PrefManager.steamUserAccountId != userSteamId!!.accountID.toInt()) {
                 PrefManager.steamUserAccountId = userSteamId!!.accountID.toInt()
-                Timber.d("Saving logged in Steam accountID ${userSteamId!!.accountID.toInt()}")
+                Timber.Forest.d("Saving logged in Steam accountID ${userSteamId!!.accountID.toInt()}")
             }
             val steamId64 = userSteamId!!.convertToUInt64()
             if (PrefManager.steamUserSteamId64 != steamId64) {
                 PrefManager.steamUserSteamId64 = steamId64
-                Timber.d("Saving logged in Steam ID64 $steamId64")
+                Timber.Forest.d("Saving logged in Steam ID64 $steamId64")
             }
         }
 
@@ -3299,13 +3363,13 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                         _steamFamilyGroups!!.getFamilyGroup(request).await().let {
                             if (it.result != EResult.OK) {
-                                Timber.w("An error occurred loading family group info.")
+                                Timber.Forest.w("An error occurred loading family group info.")
                                 return@launch
                             }
 
                             val response = it.body
 
-                            Timber.i("Found family share: ${response.name}, with ${response.membersCount} members.")
+                            Timber.Forest.i("Found family share: ${response.name}, with ${response.membersCount} members.")
 
                             response.membersList.forEach { member ->
                                 val accountID = SteamID(member.steamid).accountID.toInt()
@@ -3338,11 +3402,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         val event = SteamEvent.LogonEnded(PrefManager.username, _loginResult)
-        GameGrubApp.events.emit(event)
+        GameGrubApp.Companion.events.emit(event)
     }
 
     private fun onLoggedOff(callback: LoggedOffCallback) {
-        Timber.i("Logged off of Steam: ${callback.result}")
+        Timber.Forest.i("Logged off of Steam: ${callback.result}")
 
         notificationHelper.notify("Disconnected...")
 
@@ -3358,7 +3422,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             // received when a client runs an app and wants to forcibly close another
             // client running an app
             val event = SteamEvent.ForceCloseApp
-            GameGrubApp.events.emit(event)
+            GameGrubApp.Companion.events.emit(event)
 
             reconnect()
         } else {
@@ -3367,7 +3431,7 @@ class SteamService : Service(), IChallengeUrlChanged {
     }
 
     private fun onPlayingSessionState(callback: PlayingSessionStateCallback) {
-        Timber.d("onPlayingSessionState called with isPlayingBlocked = " + callback.isPlayingBlocked)
+        Timber.Forest.d("onPlayingSessionState called with isPlayingBlocked = " + callback.isPlayingBlocked)
         _isPlayingBlocked.value = callback.isPlayingBlocked
     }
 
@@ -3389,7 +3453,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             db.withTransaction {
                 // Send off an event if we change states.
                 if (callback.friendId == steamClient!!.steamID) {
-                    Timber.d("Local persona state received: ${callback.playerName}")
+                    Timber.Forest.d("Local persona state received: ${callback.playerName}")
 
                     val avatarHash = callback.avatarHash.toHexString()
                     val playerName = callback.playerName
@@ -3418,7 +3482,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     PrefManager.steamUserName = playerName
 
                     val event = SteamEvent.PersonaStateReceived(localPersona.value)
-                    GameGrubApp.events.emit(event)
+                    GameGrubApp.Companion.events.emit(event)
                 }
             }
         }
@@ -3426,11 +3490,11 @@ class SteamService : Service(), IChallengeUrlChanged {
 
     private fun onLicenseList(callback: LicenseListCallback) {
         if (callback.result != EResult.OK) {
-            Timber.w("Failed to get License list")
+            Timber.Forest.w("Failed to get License list")
             return
         }
 
-        Timber.i("Received License List ${callback.result}, size: ${callback.licenseList.size}")
+        Timber.Forest.i("Received License List ${callback.result}, size: ${callback.licenseList.size}")
 
         scope.launch {
             db.withTransaction {
@@ -3477,7 +3541,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     }
 
                 if (licensesToAdd.isNotEmpty()) {
-                    Timber.i("Adding ${licensesToAdd.size} licenses")
+                    Timber.Forest.i("Adding ${licensesToAdd.size} licenses")
                     licenseDao.insertAll(licensesToAdd)
                 }
 
@@ -3485,7 +3549,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     packageIds = callback.licenseList.map { it.packageID },
                 )
                 if (licensesToRemove.isNotEmpty()) {
-                    Timber.i("Removing ${licensesToRemove.size} (stale) licenses")
+                    Timber.Forest.i("Removing ${licensesToRemove.size} (stale) licenses")
                     val packageIds = licensesToRemove.map { it.packageId }
                     licenseDao.deleteStaleLicenses(packageIds)
                 }
@@ -3495,7 +3559,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     .map { PICSRequest(it.packageId, it.accessToken) }
                     .chunked(MAX_PICS_BUFFER)
                     .forEach { chunk ->
-                        Timber.d("onLicenseList: Queueing ${chunk.size} package(s) for PICS")
+                        Timber.Forest.d("onLicenseList: Queueing ${chunk.size} package(s) for PICS")
                         packagePicsChannel.send(chunk)
                     }
             }
@@ -3505,12 +3569,12 @@ class SteamService : Service(), IChallengeUrlChanged {
     override fun onChanged(qrAuthSession: QrAuthSession?) {
         qrAuthSession?.let { qr ->
             if (!BuildConfig.DEBUG) {
-                Timber.d("QR code changed -> ${qr.challengeUrl}")
+                Timber.Forest.d("QR code changed -> ${qr.challengeUrl}")
             }
 
             val event = SteamEvent.QrChallengeReceived(qr.challengeUrl)
-            GameGrubApp.events.emit(event)
-        } ?: run { Timber.w("QR challenge url was null") }
+            GameGrubApp.Companion.events.emit(event)
+        } ?: run { Timber.Forest.w("QR challenge url was null") }
     }
     // endregion
 
@@ -3540,14 +3604,14 @@ class SteamService : Service(), IChallengeUrlChanged {
                 ).await()
 
                 if (PrefManager.lastPICSChangeNumber == changesSince.currentChangeNumber) {
-                    Timber.w("Change number was the same as last change number, skipping")
+                    Timber.Forest.w("Change number was the same as last change number, skipping")
                     return@launch
                 }
 
                 // Set our last change number
                 PrefManager.lastPICSChangeNumber = changesSince.currentChangeNumber
 
-                Timber.d(
+                Timber.Forest.d(
                     "picsGetChangesSince:" +
                             "\n\tlastChangeNumber: ${changesSince.lastChangeNumber}" +
                             "\n\tcurrentChangeNumber: ${changesSince.currentChangeNumber}" +
@@ -3571,7 +3635,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         .chunked(MAX_PICS_BUFFER)
                         .forEach { chunk ->
                             ensureActive()
-                            Timber.d("onPicsChanges: Queueing ${chunk.size} app(s) for PICS")
+                            Timber.Forest.d("onPicsChanges: Queueing ${chunk.size} app(s) for PICS")
                             appPicsChannel.send(chunk)
                         }
                 }
@@ -3597,15 +3661,15 @@ class SteamService : Service(), IChallengeUrlChanged {
                             .map { PICSRequest(it.id, accessTokens[it.id] ?: 0) }
                             .chunked(MAX_PICS_BUFFER)
                             .forEach { chunk ->
-                                Timber.d("onPicsChanges: Queueing ${chunk.size} package(s) for PICS")
+                                Timber.Forest.d("onPicsChanges: Queueing ${chunk.size} package(s) for PICS")
                                 packagePicsChannel.send(chunk)
                             }
                     }
                 }
             } catch (e: NullPointerException) {
-                Timber.w("No lastPICSChangeNumber, skipping")
+                Timber.Forest.w("No lastPICSChangeNumber, skipping")
             } catch (e: AsyncJobFailedException) {
-                Timber.w("AsyncJobFailedException, skipping")
+                Timber.Forest.w("AsyncJobFailedException, skipping")
             }
         }
     }
@@ -3620,7 +3684,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 .filter { it.isNotEmpty() }
                 .buffer(capacity = MAX_PICS_BUFFER, onBufferOverflow = BufferOverflow.SUSPEND)
                 .collect { appRequests ->
-                    Timber.d("Processing ${appRequests.size} app PICS requests")
+                    Timber.Forest.d("Processing ${appRequests.size} app PICS requests")
 
                     ensureActive()
                     if (!isLoggedIn) return@collect
@@ -3632,7 +3696,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     ).await()
 
                     callback.results.forEachIndexed { index, picsCallback ->
-                        Timber.d(
+                        Timber.Forest.d(
                             "onPicsProduct: ${index + 1} of ${callback.results.size}" +
                                     "\n\tReceived PICS result of ${picsCallback.apps.size} app(s)." +
                                     "\n\tReceived PICS result of ${picsCallback.packages.size} package(s).",
@@ -3656,7 +3720,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                                     ownerAccountId = ownerAccountId,
                                     receivedPICS = true,
                                     lastChangeNumber = app.changeNumber,
-                                    licenseFlags = packageFromDb?.licenseFlags ?: EnumSet.noneOf(ELicenseFlags::class.java),
+                                    licenseFlags = packageFromDb?.licenseFlags ?: EnumSet.noneOf(
+                                        ELicenseFlags::class.java),
                                 )
                             } else {
                                 null
@@ -3664,7 +3729,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         }
 
                         if (steamAppsMap.isNotEmpty()) {
-                            Timber.i("Inserting ${steamAppsMap.size} PICS apps to database")
+                            Timber.Forest.i("Inserting ${steamAppsMap.size} PICS apps to database")
                             db.withTransaction {
                                 appDao.insertAll(steamAppsMap)
                             }
@@ -3678,7 +3743,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 .filter { it.isNotEmpty() }
                 .buffer(capacity = MAX_PICS_BUFFER, onBufferOverflow = BufferOverflow.SUSPEND)
                 .collect { packageRequests ->
-                    Timber.d("Processing ${packageRequests.size} package PICS requests")
+                    Timber.Forest.d("Processing ${packageRequests.size} package PICS requests")
 
                     ensureActive()
                     if (!isLoggedIn) return@collect
@@ -3733,11 +3798,11 @@ class SteamService : Service(), IChallengeUrlChanged {
                                 .map { PICSRequest(id = it, accessToken = appTokens[it] ?: 0L) }
                                 .chunked(MAX_PICS_BUFFER)
                                 .forEach { chunk ->
-                                    Timber.d("bufferedPICSGetProductInfo: Queueing ${chunk.size} for PICS")
+                                    Timber.Forest.d("bufferedPICSGetProductInfo: Queueing ${chunk.size} for PICS")
                                     appPicsChannel.send(chunk)
                                 }
                         } catch (e: AsyncJobFailedException) {
-                            Timber.w("Could not get PICS product info $e")
+                            Timber.Forest.w("Could not get PICS product info $e")
                         }
                     }
                 }
@@ -3756,7 +3821,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val thirtyMinutes = 30 * 60 * 1000L
 
             if (cachedTicket != null && (now - cachedTicket.timestamp) < thirtyMinutes) {
-                Timber.d("Using cached encrypted app ticket protobuf for app $appId")
+                Timber.Forest.d("Using cached encrypted app ticket protobuf for app $appId")
                 return cachedTicket.encryptedTicket
             }
 
@@ -3767,12 +3832,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                     steamApps?.requestEncryptedAppTicket(appId)?.await()
                 }
             } catch (e: Exception) {
-                Timber.e(e, "Failed to request encrypted app ticket for app $appId")
+                Timber.Forest.e(e, "Failed to request encrypted app ticket for app $appId")
                 return null
             }
 
             if (response?.result != EResult.OK || response.encryptedAppTicket == null) {
-                Timber.w("Failed to get encrypted app ticket for app $appId: ${response?.result}")
+                Timber.Forest.w("Failed to get encrypted app ticket for app $appId: ${response?.result}")
                 return null
             }
 
@@ -3791,11 +3856,11 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             // Store in database
             encryptedAppTicketDao.insert(ticket)
-            Timber.d("Stored new encrypted app ticket protobuf for app $appId")
+            Timber.Forest.d("Stored new encrypted app ticket protobuf for app $appId")
 
             ticket.encryptedTicket
         } catch (e: Exception) {
-            Timber.e(e, "Error getting encrypted app ticket for app $appId")
+            Timber.Forest.e(e, "Error getting encrypted app ticket for app $appId")
             null
         }
     }

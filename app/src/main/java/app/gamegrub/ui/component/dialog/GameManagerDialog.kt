@@ -47,6 +47,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
 import app.gamegrub.data.DepotInfo
+import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.INVALID_APP_ID
 import app.gamegrub.ui.component.LoadingScreen
@@ -200,7 +201,7 @@ fun GameManagerDialog(
     }
 
     fun getInstallSizeInfo(): InstallSizeInfo {
-        val availableBytes = StorageUtils.getAvailableSpace(SteamService.defaultStoragePath)
+        val availableBytes = StorageUtils.getAvailableSpace(SteamPaths.defaultStoragePath)
 
         // For Base Game
         val baseGameInstallBytes = if (installedApp == null) {

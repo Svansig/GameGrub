@@ -2,6 +2,7 @@ package app.gamegrub.service
 
 import android.content.Context
 import android.os.Environment
+import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.StorageUtils
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,7 @@ object DownloadService {
 
             // scan all install paths, deduplicate across volumes
             val dirs = mutableSetOf<String>()
-            for (installPath in SteamService.allInstallPaths) {
+            for (installPath in SteamPaths.allInstallPaths) {
                 dirs += getSubdirectories(installPath)
             }
 

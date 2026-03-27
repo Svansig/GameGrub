@@ -24,6 +24,7 @@ import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.DownloadService
+import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.ui.component.dialog.GameManagerDialog
@@ -999,7 +1000,7 @@ class SteamAppScreen : BaseAppScreen() {
         var moved by remember { mutableIntStateOf(0) }
         var total by remember { mutableIntStateOf(0) }
         val oldGamesDirectory = remember {
-            Paths.get(SteamService.defaultAppInstallPath).pathString
+            Paths.get(SteamPaths.defaultAppInstallPath).pathString
         }
         val initialStoragePermissionGranted = remember {
             val writePermissionGranted = ContextCompat.checkSelfPermission(
@@ -1063,7 +1064,7 @@ class SteamAppScreen : BaseAppScreen() {
                 val info = withContext(Dispatchers.IO) {
                     val depots = SteamService.getDownloadableDepots(gameId)
                     Timber.i("There are ${depots.size} depots belonging to ${libraryItem.appId}")
-                    val availableBytes = StorageUtils.getAvailableSpace(SteamService.defaultStoragePath)
+                    val availableBytes = StorageUtils.getAvailableSpace(SteamPaths.defaultStoragePath)
                     val downloadBytes = depots.values.sumOf {
                         SteamUtils.getDownloadBytes(it.manifests["public"])
                     }

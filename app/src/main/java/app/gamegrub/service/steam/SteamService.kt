@@ -415,75 +415,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         var isWaitingForQRAuth: Boolean = false
             private set
 
-        private val serverListPath: String
-            get() = Paths.get(DownloadService.baseCacheDirPath, "server_list.bin").pathString
 
-        val internalAppInstallPath: String
-            get() = Paths.get(DownloadService.baseDataDirPath, "Steam", "steamapps", "common").pathString
-
-        val externalAppInstallPath: String
-            get() = Paths.get(PrefManager.externalStoragePath, "Steam", "steamapps", "common").pathString
-
-        // all install paths: internal + configured external + all mounted volumes
-        val allInstallPaths: List<String>
-            get() {
-                val paths = mutableListOf(internalAppInstallPath)
-                // only include configured external path if it's a real absolute path
-                if (PrefManager.externalStoragePath.isNotBlank()) {
-                    paths += externalAppInstallPath
-                }
-                for (volPath in DownloadService.externalVolumePaths) {
-                    if (volPath.isNotBlank()) {
-                        paths += Paths.get(volPath, "Steam", "steamapps", "common").pathString
-                    }
-                }
-                return paths.distinct()
-            }
-
-        private val internalAppStagingPath: String
-            get() {
-                return Paths.get(DownloadService.baseDataDirPath, "Steam", "steamapps", "staging").pathString
-            }
-        private val externalAppStagingPath: String
-            get() {
-                return Paths.get(PrefManager.externalStoragePath, "Steam", "steamapps", "staging").pathString
-            }
-
-        val defaultStoragePath: String
-            get() {
-                return if (PrefManager.useExternalStorage && File(PrefManager.externalStoragePath).exists()) {
-                    // We still have an SD card file structure as expected
-                    Timber.Forest.i("External storage path is " + PrefManager.externalStoragePath)
-                    PrefManager.externalStoragePath
-                } else {
-                    if (instance != null) {
-                        return DownloadService.baseDataDirPath
-                    }
-                    return ""
-                }
-            }
-
-        val defaultAppInstallPath: String
-            get() {
-                return if (PrefManager.useExternalStorage && File(PrefManager.externalStoragePath).exists()) {
-                    // We still have an SD card file structure as expected
-                    Timber.Forest.i("Using external storage")
-                    Timber.Forest.i("install path for external storage is " + externalAppInstallPath)
-                    externalAppInstallPath
-                } else {
-                    Timber.Forest.i("Using internal storage")
-                    internalAppInstallPath
-                }
-            }
-
-        val defaultAppStagingPath: String
-            get() {
-                return if (PrefManager.useExternalStorage) {
-                    externalAppStagingPath
-                } else {
-                    internalAppStagingPath
-                }
-            }
 
         val userSteamId: SteamID?
             get() = instance?.steamClient?.steamID
@@ -829,22 +761,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             return firstExisting
         }
 
-        fun getAppDirPath(gameId: Int): String {
-            val info = getAppInfoOf(gameId)
-            val appName = getAppDirName(info)
-            val oldName = info?.name.orEmpty()
-            val names = if (oldName.isNotEmpty() && oldName != appName) listOf(appName, oldName) else listOf(appName)
-
-            // prefer completed installs over partial/stale directories
-            val resolved = resolveExistingAppDir(allInstallPaths, names)
-            if (resolved != null) return resolved
-
-            // nothing on disk yet — default to preferred install location
-            if (PrefManager.useExternalStorage) {
-                return Paths.get(externalAppInstallPath, appName).pathString
-            }
-            return Paths.get(internalAppInstallPath, appName).pathString
-        }
+        fun getAppDirPath(gameId: Int): String = SteamPaths.getAppDirPath(gameId)
 
         private fun isExecutable(flags: Any): Boolean = when (flags) {
             // SteamKit-JVM (most forks) – flags is EnumSet<EDepotFileFlag>
@@ -1803,7 +1720,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         // Start Download
                         depotDownloader.startDownloading()
 
-                        Timber.Forest.i("Downloading game to " + defaultAppInstallPath)
+//                        Timber.Forest.i("Downloading game to " + defaultAppInstallPath)
 
                         // Wait for completion
                         depotDownloader.getCompletion().await()
@@ -3066,6 +2983,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         if (!isRunning) {
+            val serverListPath = SteamPaths.serverListPath
             Timber.Forest.i("Using server list path: $serverListPath")
 
             val configuration = SteamConfiguration.Companion.create {

@@ -11,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -61,12 +60,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -413,12 +414,11 @@ private fun UserLoginScreenContent(
                         )
 
                         val scrollState = rememberScrollState()
-                        BoxWithConstraints(
+                        Box(
                             modifier = Modifier
                                 .padding(horizontal = 24.dp, vertical = 12.dp)
                                 .fillMaxWidth(),
                         ) {
-                            val cardContentMaxHeight = maxHeight
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -463,7 +463,6 @@ private fun UserLoginScreenContent(
                                                 isQrFailed = userLoginState.isQrFailed,
                                                 qrCode = userLoginState.qrCode,
                                                 onQrRetry = onQrRetry,
-                                                availableHeight = cardContentMaxHeight,
                                             )
                                             Box(
                                                 modifier = Modifier
@@ -593,13 +592,17 @@ private fun CredentialsForm(
     val isSteamConnected = connectionState == ConnectionState.CONNECTED
     var showDisconnected by remember { mutableStateOf(false) }
     LaunchedEffect(connectionState) {
-        if (connectionState == ConnectionState.CONNECTED || connectionState == ConnectionState.CONNECTING) {
-            showDisconnected = false
-        } else if (connectionState == ConnectionState.DISCONNECTED) {
-            delay(3000)
-            showDisconnected = true
-        } else {
-            showDisconnected = !isSteamConnected
+        when (connectionState) {
+            ConnectionState.CONNECTED, ConnectionState.CONNECTING -> {
+                showDisconnected = false
+            }
+            ConnectionState.DISCONNECTED -> {
+                delay(3000)
+                showDisconnected = true
+            }
+            else -> {
+                showDisconnected = !isSteamConnected
+            }
         }
     }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -823,13 +826,20 @@ private fun QRCodeLogin(
     onQrRetry: () -> Unit,
     availableHeight: Dp = Dp.Unspecified,
 ) {
-    BoxWithConstraints(modifier = modifier) {
+    Box(modifier = modifier) {
         val instructionTextHeight = 40.dp
         val qrPadding = 16.dp
-        val effectiveHeight = if (availableHeight != Dp.Unspecified) availableHeight else maxHeight
-        val availableForQr = effectiveHeight - instructionTextHeight - qrPadding
-        val qrSize = availableForQr.coerceIn(100.dp, 200.dp)
-        val showInstructionText = effectiveHeight - qrSize - qrPadding >= instructionTextHeight
+        val availableForQr = availableHeight - instructionTextHeight - qrPadding
+        val qrSize = if (availableHeight != Dp.Unspecified) {
+            availableForQr.coerceIn(120.dp, 200.dp)
+        } else {
+            160.dp
+        }
+        val showInstructionText = if (availableHeight != Dp.Unspecified) {
+            availableHeight - qrSize - qrPadding >= instructionTextHeight
+        } else {
+            true
+        }
 
         var showQrFailed by remember { mutableStateOf(false) }
         LaunchedEffect(isQrFailed) {
@@ -891,35 +901,19 @@ private fun QRCodeLogin(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
                         .size(qrSize)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.tertiary,
-                                    MaterialTheme.colorScheme.primary,
-                                ),
-                            ),
-                            shape = RoundedCornerShape(16.dp),
+                        .shadow(
+                            elevation = 16.dp,
+                            shape = RectangleShape,
+                            clip = false,
                         )
-                        .padding(2.dp),
+                        .background(Color.White, RectangleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = Color.White,
-                        shape = RoundedCornerShape(14.dp),
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            QrCodeImage(
-                                modifier = Modifier.fillMaxSize(0.95f),
-                                content = qrCode,
-                                size = qrSize,
-                            )
-                        }
-                    }
+                    QrCodeImage(
+                        modifier = Modifier.fillMaxSize(0.85f),
+                        content = qrCode,
+                        size = qrSize,
+                    )
                 }
 
                 if (showInstructionText) {

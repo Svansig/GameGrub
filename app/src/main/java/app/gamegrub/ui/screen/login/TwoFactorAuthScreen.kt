@@ -94,7 +94,7 @@ fun TwoFactorAuthScreenContent(
     }
 }
 
-// Someday: Redo this with the possibly of fancy OTP boxes with proper autofilling.
+// Someday: Redo this with the possibility of fancy OTP boxes with proper autofilling.
 @Composable
 private fun TwoFactorTextField(
     twoFactorText: String,

@@ -99,7 +99,7 @@ private fun rememberQrBitmap(content: String, size: Dp): Bitmap? {
             val qrCodeWriter = QRCodeWriter()
 
             val encodeHints = mutableMapOf<EncodeHintType, Any?>().apply {
-                this[EncodeHintType.MARGIN] = 0
+                this[EncodeHintType.MARGIN] = 2
             }
 
             val bitmapMatrix = try {

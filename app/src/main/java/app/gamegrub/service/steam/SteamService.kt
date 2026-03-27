@@ -3108,24 +3108,24 @@ class SteamService : Service(), IChallengeUrlChanged {
             // subscribe to the callbacks we are interested in
             with(callbackSubscriptions) {
                 with(callbackManager!!) {
-                    add(CallbackManager.subscribe(ConnectedCallback::class.java, ::onConnected))
+                    add(subscribe(ConnectedCallback::class.java, ::onConnected))
                     add(
-                        CallbackManager.subscribe(
+                        subscribe(
                             DisconnectedCallback::class.java,
                             ::onDisconnected
                         )
                     )
-                    add(CallbackManager.subscribe(LoggedOnCallback::class.java, ::onLoggedOn))
-                    add(CallbackManager.subscribe(LoggedOffCallback::class.java, ::onLoggedOff))
+                    add(subscribe(LoggedOnCallback::class.java, ::onLoggedOn))
+                    add(subscribe(LoggedOffCallback::class.java, ::onLoggedOff))
                     add(
-                        CallbackManager.subscribe(
+                        subscribe(
                             PersonaStateCallback::class.java,
                             ::onPersonaStateReceived
                         )
                     )
-                    add(CallbackManager.subscribe(LicenseListCallback::class.java, ::onLicenseList))
+                    add(subscribe(LicenseListCallback::class.java, ::onLicenseList))
                     add(
-                        CallbackManager.subscribe(
+                        subscribe(
                             PlayingSessionStateCallback::class.java,
                             ::onPlayingSessionState
                         )

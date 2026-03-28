@@ -205,6 +205,9 @@ class SteamService : Service(), IChallengeUrlChanged {
     lateinit var db: GameGrubDatabase
 
     @Inject
+    lateinit var steamClientProvider: app.gamegrub.service.steam.di.SteamClientProvider
+
+    @Inject
     lateinit var licenseDao: SteamLicenseDao
 
     @Inject
@@ -2682,6 +2685,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             _steamCloud = steamClient!!.getHandler(SteamCloud::class.java)
             _steamUserStats = steamClient!!.getHandler(SteamUserStats::class.java)
 
+            steamClientProvider.client = steamClient
+            steamClientProvider.steamUser = _steamUser
+
             _unifiedFriends = SteamUnifiedFriends(this)
             _steamFamilyGroups = steamClient!!.getHandler<SteamUnifiedMessages>()!!.createService<FamilyGroups>()
 
@@ -2819,6 +2825,9 @@ class SteamService : Service(), IChallengeUrlChanged {
         _steamApps = null
         _steamFriends = null
         _steamCloud = null
+
+        steamClientProvider.client = null
+        steamClientProvider.steamUser = null
 
         callbackSubscriptions.forEach { it.close() }
         callbackSubscriptions.clear()

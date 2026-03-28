@@ -1,82 +1,91 @@
 package app.gamegrub.service.steam.managers
 
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.service.steam.di.GameEventEmitter
+import app.gamegrub.service.steam.di.SteamConnection
+import app.gamegrub.service.steam.di.SteamPersona
+import app.gamegrub.service.steam.di.SteamPreferences
+import app.gamegrub.service.steam.di.SteamUserClient
 import `in`.dragonbra.javasteam.enums.EPersonaState
-import `in`.dragonbra.javasteam.steam.handlers.steamfriends.callback.PersonaStateCallback
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SteamFriendsManager @Inject constructor() {
+class SteamFriendsManager @Inject constructor(
+    private val userClient: SteamUserClient,
+    private val connection: SteamConnection,
+    private val preferences: SteamPreferences,
+    private val eventEmitter: GameEventEmitter,
+) {
 
-    private val _localPersona = MutableStateFlow(
-        SteamFriend(name = PrefManager.steamUserName, avatarHash = PrefManager.steamUserAvatarHash),
-    )
-    val localPersona: StateFlow<SteamFriend> = _localPersona.asStateFlow()
+    val personaState: StateFlow<SteamPersona> get() = userClient.personaState
 
     suspend fun setPersonaState(state: EPersonaState) = withContext(Dispatchers.IO) {
-        PrefManager.personaState = state
-        SteamService.instance?._steamFriends?.setPersonaState(state)
+        try {
+            userClient.setPersonaState(state.code)
+            preferences.personaState = state.code
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to set persona state")
+        }
     }
 
     suspend fun requestUserPersona() = withContext(Dispatchers.IO) {
-        val steamId = SteamService.instance?.steamClient?.steamID ?: return@withContext
-        SteamService.instance?._steamFriends?.requestFriendInfo(steamId)
+        val steamId = connection.steamId
+        if (steamId != null) {
+            userClient.requestPersonaInfo(steamId)
+        } else {
+            Timber.w("Cannot request persona - no Steam ID")
+        }
     }
 
     suspend fun getSelfCurrentlyPlayingAppId(): Int? = withContext(Dispatchers.IO) {
-        val self = _localPersona.value
-        if (self.isPlayingGame) self.gameAppID else null
+        val persona = userClient.personaState.value
+        if (persona.isPlayingGame) persona.gameAppID else null
     }
 
     suspend fun kickPlayingSession(onlyGame: Boolean = true): Boolean = withContext(Dispatchers.IO) {
-        val steamUser = SteamService.instance?._steamUser ?: return@withContext false
         try {
-            steamUser.kickPlayingSession(onlyStopGame = onlyGame)
-            true
+            userClient.kickPlayingSession(onlyGame)
         } catch (e: Exception) {
             Timber.e(e, "Failed to kick playing session")
             false
         }
     }
 
-    fun handlePersonaState(callback: PersonaStateCallback) {
-        val friendSteamId = callback.friendID ?: return
-        val localSteamId = SteamService.instance?.steamClient?.steamID
+    fun handlePersonaStateUpdate(
+        friendSteamId: Long,
+        personaName: String?,
+        avatarHash: String?,
+        gamePlayedID: Int?,
+        gamePlayedName: String?,
+        personaState: Int?,
+        friendRelationship: Int?,
+    ) {
+        val localSteamId = connection.steamId?.convertToUInt64()
 
         if (friendSteamId == localSteamId) {
-            val name = callback.personaName ?: PrefManager.steamUserName
-            _localPersona.value = SteamFriend(
-                name = name,
-                avatarHash = callback.avatarHash ?: "",
-                profileState = callback.profileState,
-                gameAppID = callback.gamePlayedID ?: 0,
-                gameName = callback.gamePlayedName,
-            )
+            val name = personaName ?: PrefManager.steamUserName
             PrefManager.steamUserName = name
-            if (callback.avatarHash != null) PrefManager.steamUserAvatarHash = callback.avatarHash
-            if (callback.gamePlayedID != null && callback.gamePlayedID > 0) {
-                PrefManager.steamUserAccountId = friendSteamId.accountID.toInt()
+            if (avatarHash != null) PrefManager.steamUserAvatarHash = avatarHash
+            if (gamePlayedID != null && gamePlayedID > 0) {
+                PrefManager.steamUserAccountId = `in`.dragonbra.javasteam.types.SteamID(friendSteamId).accountID.toInt()
             }
         } else {
-            GameGrubApp.events.emit(
+            eventEmitter.emitAndroidEvent(
                 AndroidEvent.PersonaStateReceived(
-                    SteamID = friendSteamId.convertToUInt64(),
-                    personaName = callback.personaName,
-                    avatarHash = callback.avatarHash,
-                    gamePlayedID = callback.gamePlayedID,
-                    gamePlayedName = callback.gamePlayedName,
-                    personaState = callback.personaState,
-                    friendRelationship = callback.friendRelationship,
+                    SteamID = friendSteamId,
+                    personaName = personaName,
+                    avatarHash = avatarHash,
+                    gamePlayedID = gamePlayedID,
+                    gamePlayedName = gamePlayedName,
+                    personaState = personaState,
+                    friendRelationship = friendRelationship,
                 ),
             )
         }

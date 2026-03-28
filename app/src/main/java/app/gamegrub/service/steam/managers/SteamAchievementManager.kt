@@ -2,6 +2,8 @@ package app.gamegrub.service.steam.managers
 
 import android.content.Context
 import app.gamegrub.PrefManager
+import app.gamegrub.service.steam.di.SteamConnection
+import app.gamegrub.service.steam.di.SteamUserClient
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatsAchievementsGenerator
 import app.gamegrub.utils.container.ContainerUtils
@@ -21,7 +23,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SteamAchievementManager @Inject constructor() {
+class SteamAchievementManager @Inject constructor(
+    private val userClient: SteamUserClient,
+    private val connection: SteamConnection,
+) {
 
     private val _cachedAchievements = MutableStateFlow<List<Achievement>?>(null)
     val cachedAchievements: StateFlow<List<Achievement>?> = _cachedAchievements.asStateFlow()
@@ -35,11 +40,13 @@ class SteamAchievementManager @Inject constructor() {
     }
 
     suspend fun generateAchievements(appId: Int, configDirectory: String) {
-        val service = SteamService.instance ?: return
+        val service = app.gamegrub.service.steam.SteamService.instance ?: return
         val steamUser = service._steamUser ?: return
         val userStats = service._steamUserStats ?: return
 
-        val result = userStats.getUserStats(appId, steamUser.steamID!!).await()
+        val result = withContext(Dispatchers.IO) {
+            userStats.getUserStats(appId, steamUser.steamID!!).await()
+        }
         val schemaArray = result.schema.toByteArray()
         val generator = StatsAchievementsGenerator()
         val genResult = generator.generateStatsAchievements(schemaArray, configDirectory)
@@ -66,15 +73,12 @@ class SteamAchievementManager @Inject constructor() {
         if (accountId != null) {
             dirs.add(File(imageFs.rootDir, "${ImageFs.WINEPREFIX}/drive_c/Program Files (x86)/Steam/userdata/$accountId/$appId"))
         }
-        return dirs
+        return dirs.filter { it.exists() }
     }
 
     suspend fun syncAchievementsFromGoldberg(context: Context, appId: Int) = withContext(Dispatchers.IO) {
         val gseSaveDirs = getGseSaveDirs(context, appId).filter { it.isDirectory }
-        if (gseSaveDirs.isEmpty()) {
-            Timber.d("No GSE save directory for appId=$appId")
-            return@withContext
-        }
+        if (gseSaveDirs.isEmpty()) return@withContext
 
         val unlockedNames = mutableSetOf<String>()
         var gseStatsDir: File? = null
@@ -117,7 +121,7 @@ class SteamAchievementManager @Inject constructor() {
         unlockedNames: Set<String>,
         gseStatsDir: File,
     ): Result<Unit> = runCatching {
-        val service = SteamService.instance ?: throw IllegalStateException("Service not available")
+        val service = app.gamegrub.service.steam.SteamService.instance ?: throw IllegalStateException("Service not available")
         val steamUser = service._steamUser ?: throw IllegalStateException("SteamUser not available")
         val userStats = service._steamUserStats ?: throw IllegalStateException("SteamUserStats not available")
 

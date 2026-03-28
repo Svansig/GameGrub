@@ -3,10 +3,11 @@ package app.gamegrub.service.steam.managers
 import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.data.PostSyncInfo
-import app.gamegrub.data.SteamApp
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.service.steam.SteamAutoCloud
+import app.gamegrub.service.steam.di.SteamCloudClient
+import app.gamegrub.service.steam.di.SteamConnection
 import `in`.dragonbra.javasteam.steam.steamclient.AsyncJobFailedException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -21,7 +22,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SteamCloudSavesManager @Inject constructor() {
+class SteamCloudSavesManager @Inject constructor(
+    private val cloudClient: SteamCloudClient,
+    private val connection: SteamConnection,
+) {
 
     private val syncInProgressApps = ConcurrentHashMap<Int, AtomicBoolean>()
 
@@ -49,7 +53,7 @@ class SteamCloudSavesManager @Inject constructor() {
 
         try {
             var syncResult = PostSyncInfo(SyncResult.UnknownFail)
-            val service = SteamService.instance ?: return@async syncResult
+            val service = app.gamegrub.service.steam.SteamService.instance ?: return@async syncResult
             val clientId = PrefManager.clientId ?: return@async syncResult
             val appInfo = service.appDao?.findApp(appId) ?: return@async syncResult
             val steamCloud = service._steamCloud ?: return@async syncResult
@@ -90,7 +94,7 @@ class SteamCloudSavesManager @Inject constructor() {
         if (!tryAcquireSync(appId)) return@withContext
 
         try {
-            val service = SteamService.instance ?: return@withContext
+            val service = app.gamegrub.service.steam.SteamService.instance ?: return@withContext
             val clientId = PrefManager.clientId ?: return@withContext
             val appInfo = service.appDao?.findApp(appId) ?: return@withContext
             val steamCloud = service._steamCloud ?: return@withContext
@@ -115,7 +119,8 @@ class SteamCloudSavesManager @Inject constructor() {
                         parentScope = this,
                         prefixToPath = prefixToPath,
                     ).await()
-                    steamCloud.signalAppExitSyncDone(
+
+                    cloudClient.signalAppExitSyncDone(
                         appId = appId,
                         clientId = clientId,
                         uploadsCompleted = postSyncInfo?.uploadsCompleted == true,

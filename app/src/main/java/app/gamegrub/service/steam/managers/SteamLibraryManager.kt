@@ -10,12 +10,13 @@ import app.gamegrub.db.dao.DownloadingAppInfoDao
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.db.dao.SteamLicenseDao
 import app.gamegrub.enums.Marker
+import app.gamegrub.service.steam.di.OwnedGame
+import app.gamegrub.service.steam.di.SteamConnection
+import app.gamegrub.service.steam.di.SteamLibraryClient
 import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.storage.MarkerUtils
-import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
-import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
 import `in`.dragonbra.javasteam.types.KeyValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,6 +27,8 @@ import javax.inject.Singleton
 
 @Singleton
 class SteamLibraryManager @Inject constructor(
+    private val libraryClient: SteamLibraryClient,
+    private val connection: SteamConnection,
     private val appDao: SteamAppDao,
     private val licenseDao: SteamLicenseDao,
     private val appInfoDao: AppInfoDao,
@@ -34,21 +37,17 @@ class SteamLibraryManager @Inject constructor(
 ) {
 
     suspend fun refreshOwnedGames(): Int = withContext(Dispatchers.IO) {
-        val service = SteamService.instance ?: return@withContext 0
-        val steamApps = service._steamApps ?: return@withContext 0
-
+        val steamId = connection.steamId ?: return@withContext 0
         try {
-            val result = steamApps.getOwnedGames(service.steamClient?.steamID ?: return@withContext 0).await()
-            val games = result?.games ?: return@withContext 0
-
-            val steamAppsList = games.map { game ->
+            val games = libraryClient.getOwnedGames(steamId)
+            val steamApps = games.map { game ->
                 SteamApp(
-                    appId = game.appID,
-                    name = game.name ?: "Unknown Game",
-                    iconHash = game.imgIconUrl ?: "",
-                    logoHash = game.imgLogoUrl ?: "",
-                    playtime = game.playtimeForever,
-                    hasCloudEnabled = game.hasCommunityVisibleStats,
+                    appId = game.appId,
+                    name = game.name,
+                    iconHash = game.iconUrl,
+                    logoHash = game.logoUrl,
+                    playtime = game.playtimeMinutes,
+                    hasCloudEnabled = true,
                     packageName = null,
                     changeNumber = 0,
                     downloadComplete = false,
@@ -58,10 +57,9 @@ class SteamLibraryManager @Inject constructor(
                     installDirName = null,
                 )
             }
-
-            appDao.insertAll(steamAppsList)
-            Timber.i("Refreshed ${steamAppsList.size} owned games")
-            steamAppsList.size
+            appDao.insertAll(steamApps)
+            Timber.i("Refreshed ${steamApps.size} owned games")
+            steamApps.size
         } catch (e: Exception) {
             Timber.e(e, "Failed to refresh owned games")
             0
@@ -69,20 +67,17 @@ class SteamLibraryManager @Inject constructor(
     }
 
     suspend fun getOwnedGames(friendId: Long): List<OwnedGames> = withContext(Dispatchers.IO) {
-        val service = SteamService.instance ?: return@withContext emptyList()
-        val steamFriends = service._steamFriends ?: return@withContext emptyList()
-
         try {
-            val result = steamFriends.getOwnedGames(friendId).await()
-            result?.games?.map { game ->
+            val steamId = `in`.dragonbra.javasteam.types.SteamID(friendId)
+            libraryClient.getOwnedGames(steamId).map { game ->
                 OwnedGames(
-                    appId = game.appID,
-                    name = game.name ?: "Unknown",
-                    playtime = game.playtimeForever,
-                    iconUrl = game.imgIconUrl ?: "",
-                    logoUrl = game.imgLogoUrl ?: "",
+                    appId = game.appId,
+                    name = game.name,
+                    playtime = game.playtimeMinutes,
+                    iconUrl = game.iconUrl,
+                    logoUrl = game.logoUrl,
                 )
-            } ?: emptyList()
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to get owned games")
             emptyList()
@@ -90,33 +85,19 @@ class SteamLibraryManager @Inject constructor(
     }
 
     suspend fun checkDlcOwnership(dlcAppIds: Set<Int>): Set<Int> = withContext(Dispatchers.IO) {
-        val service = SteamService.instance ?: return@withContext emptySet()
-        val steamApps = service._steamApps ?: return@withContext emptySet()
-        if (dlcAppIds.isEmpty()) return@withContext emptySet()
-
-        try {
-            val requests = dlcAppIds.map { PICSRequest(appId = it) }
-            val result = steamApps.getPICSProductInfo(requests, emptyList()).await()
-            result?.apps?.keys ?: emptySet()
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to check DLC ownership")
-            emptySet()
-        }
+        libraryClient.checkDlcOwnership(dlcAppIds)
     }
 
     suspend fun getLicensesFromDb(): List<License> = withContext(Dispatchers.IO) {
         cachedLicenseDao.getAll().mapNotNull { LicenseSerializer.deserializeLicense(it.licenseJson) }
     }
 
-    fun getPkgInfoOf(appId: Int): SteamLicense? = kotlinx.coroutines.runBlocking(Dispatchers.IO) {
-        val app = appDao.findApp(appId) ?: return@runBlocking null
-        licenseDao.findLicense(app.packageId)
+    fun getPkgInfoOf(appId: Int): SteamLicense? {
+        val app = appDao.findApp(appId) ?: return null
+        return licenseDao.findLicense(app.packageId)
     }
 
-    fun getAppInfo(appId: Int): SteamApp? = kotlinx.coroutines.runBlocking(Dispatchers.IO) {
-        appDao.findApp(appId)
-    }
-
+    fun getAppInfo(appId: Int): SteamApp? = appDao.findApp(appId)
     fun getDownloadingAppInfo(appId: Int) = downloadingAppInfoDao.getDownloadingApp(appId)
     fun getDownloadableDlcApps(appId: Int) = appDao.findDownloadableDLCApps(appId)
     fun getHiddenDlcApps(appId: Int) = appDao.findHiddenDLCApps(appId)
@@ -151,6 +132,5 @@ class SteamLibraryManager @Inject constructor(
     }
 
     fun getDownloadableDepots(appId: Int): Map<Int, DepotInfo> = getMainAppDepots(appId, "english")
-
     fun getAppDlc(appId: Int): Map<Int, DepotInfo> = getMainAppDepots(appId, "english").filter { it.value.dlcAppId != null }
 }

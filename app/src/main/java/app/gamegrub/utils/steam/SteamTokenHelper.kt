@@ -6,11 +6,11 @@ import java.nio.ByteOrder
 class SteamTokenHelper {
     companion object {
         private val obf = intArrayOf(
-            0x1739a3b0.toInt(), 0xb8907fe1.toInt(), 0x8290d3b7.toInt(), 0x72839cd0.toInt(),
-            0x242df096.toInt(), 0x3829750b.toInt(), 0x38de7a77.toInt(), 0x72f0924c.toInt(),
-            0x44783927.toInt(), 0x01925372.toInt(), 0x20902714.toInt(), 0x27585920.toInt(),
-            0x27890632.toInt(), 0x82910476.toInt(), 0x72906721.toInt(), 0x28798904.toInt(),
-            0x78592700.toInt(),
+            0x1739a3b0, 0xb8907fe1.toInt(), 0x8290d3b7.toInt(), 0x72839cd0,
+            0x242df096, 0x3829750b, 0x38de7a77, 0x72f0924c,
+            0x44783927, 0x01925372, 0x20902714, 0x27585920,
+            0x27890632, 0x82910476.toInt(), 0x72906721, 0x28798904,
+            0x78592700,
         )
 
         fun obfuscate(ptext: ByteArray, key: Long): String {

@@ -1,6 +1,5 @@
 package app.gamegrub.utils.steam
 
-import android.annotation.SuppressLint
 import com.auth0.android.jwt.JWT
 import com.winlator.core.FileUtils
 import com.winlator.core.TarCompressorUtils
@@ -71,7 +70,6 @@ class SteamTokenLogin(
         return SteamTokenHelper.deobfuscate(value, mtbf)
     }
 
-    @SuppressLint("BinaryOperationInTimber")
     private fun createConfigVdf(): String {
         // Simple hash-based encryption for cross-platform compatibility
         val hdr = hdr()
@@ -122,7 +120,6 @@ class SteamTokenLogin(
         """.trimIndent()
     }
 
-    @SuppressLint("BinaryOperationInTimber")
     private fun createLocalVdf(): String {
         // Simple hash-based encryption for cross-platform compatibility
         val hdr = hdr()

@@ -74,35 +74,34 @@ object FileUtils {
     }
 
     fun readFileAsString(path: String, errorTag: String = "FileUtils", errorMsg: ((Exception) -> String)? = null): String? {
-        var fileData: String? = null
-        try {
-            val r = BufferedReader(FileReader(path))
-            val total = StringBuilder()
-            var line: String?
+        return try {
+            BufferedReader(FileReader(path)).use { r ->
+                val total = StringBuilder()
+                var line: String?
 
-            while ((r.readLine().also { line = it }) != null) {
-                total.append(line).append('\n')
+                while ((r.readLine().also { line = it }) != null) {
+                    total.append(line).append('\n')
+                }
+
+                total.toString()
             }
-
-            fileData = total.toString()
         } catch (e: Exception) {
             Timber.e("%s encountered an issue in readFileAsString()", errorTag)
             Timber.e(errorMsg?.invoke(e) ?: "Error reading file: $e")
+            null
         }
-
-        return fileData
     }
 
     fun writeStringToFile(data: String, path: String, errorTag: String? = "FileUtils", errorMsg: ((Exception) -> String)? = null) {
         createPathIfNotExist(path)
 
         try {
-            val fOut = FileOutputStream(path)
-            val myOutWriter = OutputStreamWriter(fOut)
-            myOutWriter.append(data)
-            myOutWriter.close()
-            fOut.flush()
-            fOut.close()
+            FileOutputStream(path).use { fOut ->
+                OutputStreamWriter(fOut).use { writer ->
+                    writer.append(data)
+                }
+                fOut.flush()
+            }
         } catch (e: Exception) {
             Timber.e("%s encounted an issue in writeStringToFile()", errorTag)
             Timber.e(errorMsg?.invoke(e) ?: "Error writing to file: $e")

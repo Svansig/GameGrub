@@ -19,18 +19,18 @@ AmazonService (Coordinator)
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `AmazonService.kt` | Main Android foreground service |
-| `AmazonManager.kt` | Game library management |
-| `AmazonAuthManager.kt` | Authentication & credentials |
-| `AmazonDownloadManager.kt` | Download handling |
-| `AmazonApiClient.kt` | HTTP API client |
-| `AmazonAuthClient.kt` | OAuth HTTP client |
-| `AmazonManifest.kt` | Manifest parsing |
-| `AmazonSdkManager.kt` | Amazon SDK integration |
-| `AmazonConstants.kt` | Platform constants |
-| `AmazonPKCEGenerator.kt` | PKCE code generation |
+| File                       | Purpose                         |
+|----------------------------|---------------------------------|
+| `AmazonService.kt`         | Main Android foreground service |
+| `AmazonManager.kt`         | Game library management         |
+| `AmazonAuthManager.kt`     | Authentication & credentials    |
+| `AmazonDownloadManager.kt` | Download handling               |
+| `AmazonApiClient.kt`       | HTTP API client                 |
+| `AmazonAuthClient.kt`      | OAuth HTTP client               |
+| `AmazonManifest.kt`        | Manifest parsing                |
+| `AmazonSdkManager.kt`      | Amazon SDK integration          |
+| `AmazonConstants.kt`       | Platform constants              |
+| `AmazonPKCEGenerator.kt`   | PKCE code generation            |
 
 ## Database
 
@@ -40,11 +40,13 @@ AmazonService (Coordinator)
 ## Key Flows
 
 ### Authentication
+
 1. User initiates OAuth/PKCE flow
 2. `AmazonAuthManager` handles token exchange
 3. Credentials stored securely
 
 ### Library Sync
+
 1. `AmazonService.start()` triggers sync
 2. `AmazonManager` fetches owned games
 3. Results stored in Room

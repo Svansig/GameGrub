@@ -13,7 +13,7 @@ data class LaunchDependencyCallbacks(
 /**
  * A single launch dependency (e.g. imagefs base, Wine/Proton, a file, Steam client).
  * Dependencies are gathered for a container and then satisfied in order.
- * [gameSource] and [gameId] are extracted once by the caller (e.g. PluviaMain) and passed down.
+ * [gameSource] and [gameId] are extracted once by the caller (e.g. GameGrubMain) and passed down.
  */
 interface LaunchDependency {
     /** Whether this dependency applies to the given container. */

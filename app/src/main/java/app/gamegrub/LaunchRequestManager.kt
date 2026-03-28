@@ -17,14 +17,14 @@ object LaunchRequestManager {
     private var pendingLaunchRequest: IntentLaunchManager.LaunchRequest? = null
 
     private var _wasLaunchedViaExternalIntent: Boolean = false
-    
+
     val wasLaunchedViaExternalIntent: Boolean
         get() = _wasLaunchedViaExternalIntent
-    
+
     fun markAsExternalLaunch() {
         _wasLaunchedViaExternalIntent = true
     }
-    
+
     fun clearExternalLaunchFlag() {
         _wasLaunchedViaExternalIntent = false
     }

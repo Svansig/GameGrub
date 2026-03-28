@@ -927,7 +927,7 @@
     <string name="library_wifi_only_enabled">Wi-Fi/LAN 전용 설치 활성화됨</string>
     <string name="library_file_count">%2$d개 중 %1$d번째 파일</string>
 
-    <!-- PluviaMain: Update & App Info -->
+    <!-- GameGrubMain: Update & App Info -->
     <string name="main_update_available_title">업데이트 사용 가능</string>
     <string name="main_update_available_message">새 버전(%1$s)을 사용할 수 있습니다!%2$s</string>
     <string name="main_update_button">업데이트</string>
@@ -937,7 +937,7 @@
     <string name="launch_dependency_failed_title">실행 종속성 다운로드 실패</string>
     <string name="launch_dependency_failed_message">필수 구성 요소를 다운로드하지 못했습니다. 나중에 다시 시도하세요.</string>
 
-    <!-- PluviaMain: Crash & Support -->
+    <!-- GameGrubMain: Crash & Support -->
     <string name="main_recent_crash_title">최근 충돌</string>
     <string name="main_recent_crash_message">죄송합니다!\n최근 발생한 문제에 대해 알려주시면 감사하겠습니다.\n앱 설정에서 가장 최근의 충돌 로그를 보고 내보낼 수 있으며 프로젝트 저장소에 Github 이슈로 첨부할 수 있습니다.\nGithub 저장소 링크도 설정에 있습니다!</string>
     <string name="main_thank_you_title">GameGrub를 사용해 주셔서 감사합니다!</string>
@@ -949,25 +949,25 @@
     <string name="main_discord_support_message">Discord에 참여하여 게임 수정 또는 성능 향상에 대한 지원을 받으세요.</string>
     <string name="main_open_discord">Discord 열기</string>
 
-    <!-- PluviaMain: Game Launch -->
+    <!-- GameGrubMain: Game Launch -->
     <string name="main_downloading_steam">Steam 다운로드 중...</string>
     <string name="main_installing_glibc">glibc 구성 요소 설치 중...</string>
     <string name="main_installing_bionic">Bionic 구성 요소 설치 중...</string>
     <string name="main_loading">로딩 중...</string>
 
-    <!-- PluviaMain: Session Conflicts -->
+    <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">앱 실행 중</string>
     <string name="main_app_running_message">다른 장치에서 이미 %s을(를) 플레이 중입니다. \n이 게임을 플레이할 수 있지만 다른 세션의 Steam 연결이 끊어집니다.</string>
     <string name="main_app_running_other_device">다른 장치(%1$s)에서 이미 %2$s(%3$s)을(를) 플레이 중이며, 해당 저장 파일이 아직 클라우드에 없습니다. \n이 게임을 플레이할 수 있지만 다른 세션의 Steam 연결이 끊어지고 해당 세션의 진행 상황이 동기화될 때 저장 충돌이 발생할 수 있습니다</string>
     <string name="main_play_anyway">어쨌든 플레이</string>
 
-    <!-- PluviaMain: Save Conflicts -->
+    <!-- GameGrubMain: Save Conflicts -->
     <string name="main_save_conflict_title">저장 충돌</string>
     <string name="main_save_conflict_message">새 원격 저장 파일과 새 로컬 저장 파일이 있습니다. 어느 것을 유지하시겠습니까?\n\n로컬 저장 파일:\n\t%1$s\n원격 저장 파일:\n\t%2$s</string>
     <string name="main_keep_local">로컬 유지</string>
     <string name="main_keep_remote">원격 유지</string>
 
-    <!-- PluviaMain: Sync Errors -->
+    <!-- GameGrubMain: Sync Errors -->
     <string name="main_sync_in_progress_retry">동기화 작업이 너무 오래 걸립니다. 잠시 후 게임을 다시 실행해 보세요.</string>
     <string name="main_sync_in_progress">동기화가 현재 진행 중입니다. 잠시 후 다시 시도하세요.</string>
     <string name="main_sync_in_progress_launch_anyway_message">이 게임의 클라우드 저장 동기화가 이미 실행 중입니다. 기다렸다가 다시 시도하거나 동기화 없이 실행할 수 있습니다(저장 충돌이 발생할 수 있음).</string>
@@ -975,7 +975,7 @@
     <string name="main_wait">대기</string>
     <string name="main_sync_failed">저장 파일 동기화 실패: %s.</string>
 
-    <!-- PluviaMain: Pending Operations -->
+    <!-- GameGrubMain: Pending Operations -->
     <string name="main_upload_in_progress_title">업로드 진행 중</string>
     <string name="main_upload_in_progress_message">장치 %2$s(%3$s)에서 %1$s을(를) 플레이했으며 해당 세션의 저장 파일이 아직 업로드 중입니다.\n나중에 다시 시도하세요.</string>
     <string name="main_pending_upload_title">업로드 대기 중</string>

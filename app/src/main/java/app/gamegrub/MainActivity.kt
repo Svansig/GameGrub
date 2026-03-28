@@ -27,7 +27,9 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.GameGrubMain
 import app.gamegrub.ui.ImmersiveModeManager
 import app.gamegrub.ui.OrientationManager
+import app.gamegrub.utils.AnimatedPngDecoder
 import app.gamegrub.utils.ContainerUtils
+import app.gamegrub.utils.IconDecoder
 import app.gamegrub.utils.LocaleHelper
 import coil.ImageLoader
 import coil.disk.DiskCache
@@ -39,13 +41,8 @@ import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import com.winlator.core.AppUtils
 import com.winlator.inputcontrols.ControllerManager
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import okio.Path.Companion.toOkioPath
 import timber.log.Timber
-import java.util.EnumSet
-import app.gamegrub.ui.enums.Orientation as AppOrientation
-import app.gamegrub.utils.IconDecoder
-import app.gamegrub.utils.AnimatedPngDecoder
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

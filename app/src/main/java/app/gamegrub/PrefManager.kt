@@ -40,7 +40,7 @@ import java.util.EnumSet
 object PrefManager {
 
     private val Context.datastore by preferencesDataStore(
-        name = "PluviaPreferences",
+        name = "GameGrubPreferences",
         corruptionHandler = ReplaceFileCorruptionHandler {
             Timber.e("Preferences (somehow got) corrupted, resetting.")
             emptyPreferences()

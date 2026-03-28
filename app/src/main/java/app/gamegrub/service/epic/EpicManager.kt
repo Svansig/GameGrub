@@ -591,7 +591,7 @@ class EpicManager @Inject constructor(
         ).firstOrNull() ?: ""
 
         val isEaManaged = parsedAttributes.thirdPartyManagedApp != null &&
-            parsedAttributes.thirdPartyManagedApp.lowercase() in listOf("origin", "the ea app")
+                parsedAttributes.thirdPartyManagedApp.lowercase() in listOf("origin", "the ea app")
 
         Timber.d("Game $appName - CloudSaveFolder: $saveFolder, CloudIncludeList: ${parsedAttributes.cloudIncludeList}, CanRunOffline: $canRunOffline")
 

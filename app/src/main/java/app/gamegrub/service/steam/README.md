@@ -18,42 +18,46 @@ Shared Services:
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `SteamService.kt` | Main Android foreground service (massive) |
-| `SteamAutoCloud.kt` | Cloud save synchronization |
-| `SteamUnifiedFriends.kt` | Friends list integration |
-| `AchievementWatcher.kt` | Steam achievement monitoring |
-| `DownloadService.kt` | Shared download queue |
-| `NotificationHelper.kt` | Notification management |
+| File                     | Purpose                                   |
+|--------------------------|-------------------------------------------|
+| `SteamService.kt`        | Main Android foreground service (massive) |
+| `SteamAutoCloud.kt`      | Cloud save synchronization                |
+| `SteamUnifiedFriends.kt` | Friends list integration                  |
+| `AchievementWatcher.kt`  | Steam achievement monitoring              |
+| `DownloadService.kt`     | Shared download queue                     |
+| `NotificationHelper.kt`  | Notification management                   |
 
 ## Database
 
-- **Entities**: 
-  - `SteamApp` - Installed games
-  - `SteamLicense` - Game licenses
-  - `AppInfo` - App metadata
-  - `CachedLicense` - Cached license data
+- **Entities**:
+    - `SteamApp` - Installed games
+    - `SteamLicense` - Game licenses
+    - `AppInfo` - App metadata
+    - `CachedLicense` - Cached license data
 - **DAOs**: `SteamAppDao`, `SteamLicenseDao`, `AppInfoDao`, etc.
 
 ## Key Flows
 
 ### Authentication
+
 - Uses JavaSteam library for Steam authentication
 - Supports QR code login
 - Credentials stored securely
 
 ### Library Sync
+
 1. `SteamService.start()` connects to Steam network
 2. Fetches owned games via Steam API
 3. Stores in Room database
 
 ### Game Installation
+
 1. `DepotDownloader` (from JavaSteam) handles downloads
 2. Progress tracked in `DownloadingAppInfo` entity
 3. Manifests parsed for file verification
 
 ### Cloud Saves
+
 - `SteamAutoCloud` monitors for cloud sync opportunities
 - `SteamCloud` handler manages upload/download
 

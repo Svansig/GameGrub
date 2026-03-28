@@ -596,10 +596,12 @@ private fun CredentialsForm(
             ConnectionState.CONNECTED, ConnectionState.CONNECTING -> {
                 showDisconnected = false
             }
+
             ConnectionState.DISCONNECTED -> {
                 delay(3000)
                 showDisconnected = true
             }
+
             else -> {
                 showDisconnected = !isSteamConnected
             }

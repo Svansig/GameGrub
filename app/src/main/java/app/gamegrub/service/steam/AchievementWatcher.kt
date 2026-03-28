@@ -5,7 +5,6 @@ import app.gamegrub.ui.util.AchievementNotificationManager
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
-import kotlin.collections.iterator
 
 class AchievementWatcher(
     private val watchDirs: List<File>,
@@ -31,13 +30,13 @@ class AchievementWatcher(
             observer.startWatching()
             observers.add(observer)
         }
-        Timber.Forest.d("AchievementWatcher started, watching ${watchDirs.size} dirs")
+        Timber.d("AchievementWatcher started, watching ${watchDirs.size} dirs")
     }
 
     fun stop() {
         observers.forEach { it.stopWatching() }
         observers.clear()
-        Timber.Forest.d("AchievementWatcher stopped")
+        Timber.d("AchievementWatcher stopped")
     }
 
     private fun checkForNewUnlocks(achFile: File) {
@@ -55,11 +54,11 @@ class AchievementWatcher(
                     val displayName = displayNameMap[name] ?: name
                     val iconUrl = iconUrlMap[name]
                     AchievementNotificationManager.show(displayName, iconUrl)
-                    Timber.Forest.i("Achievement unlocked: $name ($displayName)")
+                    Timber.i("Achievement unlocked: $name ($displayName)")
                 }
             }
         } catch (e: Exception) {
-            Timber.Forest.w(e, "Failed to parse achievements.json for watcher")
+            Timber.w(e, "Failed to parse achievements.json for watcher")
         }
     }
 }

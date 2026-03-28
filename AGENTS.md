@@ -283,7 +283,7 @@ app/src/
 ### Adding a Database Entity
 1. Create data class with `@Entity` in appropriate package
 2. Create `@Dao` interface
-3. Add to `PluviaDatabase`
+3. Add to `GameGrubDatabase`
 4. Run `./gradlew generateRoomSchema` to generate schema
 
 ## Build Configuration

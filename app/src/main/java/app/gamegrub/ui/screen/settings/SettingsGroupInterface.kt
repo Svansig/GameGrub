@@ -86,8 +86,6 @@ fun SettingsGroupInterface(
 
     var openWebLinks by rememberSaveable { mutableStateOf(PrefManager.openWebLinksExternally) }
 
-    var openStartScreenDialog by rememberSaveable { mutableStateOf(false) }
-
     // Status bar hide/show confirmation dialog
     var showStatusBarRestartDialog by rememberSaveable { mutableStateOf(false) }
     var pendingStatusBarValue by rememberSaveable { mutableStateOf<Boolean?>(null) }

@@ -6,7 +6,15 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -81,6 +89,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
+import app.gamegrub.R
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.GamepadAction
@@ -105,7 +114,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
-import app.gamegrub.R
 
 // https://partner.steamgames.com/doc/store/assets/libraryassets#4
 

@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.hardware.input.InputManager
 import android.util.Log
 import android.view.Display
-import app.gamegrub.R
 import android.view.Gravity
 import android.view.InputDevice
 import android.view.KeyEvent
@@ -22,9 +21,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,8 +81,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.gamegrub.GameGrubApp
 import app.gamegrub.LaunchRequestManager
-import app.gamegrub.MainActivity
 import app.gamegrub.PrefManager
+import app.gamegrub.R
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LaunchInfo
 import app.gamegrub.data.LibraryItem
@@ -76,10 +93,10 @@ import app.gamegrub.externaldisplay.ExternalDisplayInputController
 import app.gamegrub.externaldisplay.ExternalDisplaySwapController
 import app.gamegrub.externaldisplay.SwapInputOverlayView
 import app.gamegrub.gamefixes.GameFixesRegistry
-import app.gamegrub.service.steam.AchievementWatcher
-import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.steam.AchievementWatcher
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.QuickMenu
 import app.gamegrub.ui.component.QuickMenuAction
 import app.gamegrub.ui.data.PerformanceHudConfig
@@ -258,7 +275,7 @@ fun XServerScreen(
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
-    // PluviaApp.events.emit(AndroidEvent.SetAppBarVisibility(false))
+    // GameGrubApp.events.emit(AndroidEvent.SetAppBarVisibility(false))
     GameGrubApp.events.emit(AndroidEvent.SetSystemUIVisibility(false))
 
     // seems to be used to indicate when a custom wine is being installed (intent extra "generate_wineprefix")

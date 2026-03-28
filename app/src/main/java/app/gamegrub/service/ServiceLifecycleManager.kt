@@ -1,7 +1,6 @@
 package app.gamegrub.service
 
 import android.content.Context
-import app.gamegrub.GameGrubApp
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
@@ -19,7 +18,7 @@ object ServiceLifecycleManager {
      * Only stops if not changing configuration (e.g., rotation).
      */
     fun onDestroy(isChangingConfigurations: Boolean) {
-        if (SteamService.isConnected && !SteamService.isLoggedIn && 
+        if (SteamService.isConnected && !SteamService.isLoggedIn &&
             !isChangingConfigurations && !SteamService.keepAlive
         ) {
             Timber.i("Stopping Steam Service")

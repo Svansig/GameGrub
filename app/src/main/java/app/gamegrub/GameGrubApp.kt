@@ -91,9 +91,9 @@ class GameGrubApp : SplitCompatApplication() {
         // Clear any stale temporary config overrides from previous app sessions
         try {
             IntentLaunchManager.clearAllTemporaryOverrides()
-            Timber.d("[PluviaApp]: Cleared temporary config overrides from previous session")
+            Timber.d("[GameGrubApp]: Cleared temporary config overrides from previous session")
         } catch (e: Exception) {
-            Timber.e(e, "[PluviaApp]: Failed to clear temporary config overrides")
+            Timber.e(e, "[GameGrubApp]: Failed to clear temporary config overrides")
         }
 
         // Initialize PostHog Analytics

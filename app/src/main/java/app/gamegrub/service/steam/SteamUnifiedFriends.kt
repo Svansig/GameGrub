@@ -40,7 +40,7 @@ class SteamUnifiedFriends(service: SteamService) : AutoCloseable {
         val result = player?.getOwnedGames(request)?.await()
 
         if (result == null || result.result != EResult.OK) {
-            Timber.Forest.w("Unable to get owned games!")
+            Timber.w("Unable to get owned games!")
             return emptyList()
         }
 
@@ -57,7 +57,7 @@ class SteamUnifiedFriends(service: SteamService) : AutoCloseable {
         }
 
         if (list.size != result.body.gamesCount) {
-            Timber.Forest.w("List was not the same as given")
+            Timber.w("List was not the same as given")
         }
 
         return list

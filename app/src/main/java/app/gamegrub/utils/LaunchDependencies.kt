@@ -13,7 +13,7 @@ const val LOADING_PROGRESS_UNKNOWN: Float = -1f
 /**
  * Ensures all dependencies required to launch a container are downloaded and installed.
  * Reports progress via the given callbacks.
- * [gameSource] and [gameId] are extracted once by the caller (e.g. PluviaMain) and passed down.
+ * [gameSource] and [gameId] are extracted once by the caller (e.g. GameGrubMain) and passed down.
  */
 class LaunchDependencies {
     companion object {

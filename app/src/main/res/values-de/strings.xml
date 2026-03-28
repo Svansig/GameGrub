@@ -868,7 +868,7 @@
     <string name="library_need_internet">Internetverbindung erforderlich</string>
     <string name="library_wifi_only_enabled">Installieren nur über WLAN/LAN aktiviert</string>
     <string name="library_file_count">Datei %1$d von %2$d</string>
-    <!-- PluviaMain: Update & App Info -->
+    <!-- GameGrubMain: Update & App Info -->
     <string name="main_update_available_title">Update verfügbar</string>
     <string name="main_update_available_message">Eine neue Version (%1$s) ist verfügbar!%2$s</string>
     <string name="main_update_button">Update</string>
@@ -877,7 +877,7 @@
     <string name="main_update_failed_message">Update konnte nicht heruntergeladen oder installiert werden. Bitte später erneut versuchen.</string>
     <string name="launch_dependency_failed_title">Download der Startabhängigkeit fehlgeschlagen</string>
     <string name="launch_dependency_failed_message">Eine erforderliche Komponente konnte nicht heruntergeladen werden. Bitte später erneut versuchen.</string>
-    <!-- PluviaMain: Crash & Support -->
+    <!-- GameGrubMain: Crash & Support -->
     <string name="main_recent_crash_title">Kürzlicher Absturz</string>
     <string name="main_recent_crash_message">Tut uns leid!\nTeile uns gern mit, was passiert ist.\nDu kannst das letzte Crash-Log im App-Setup anzeigen/exportieren und bei Github als Issue einreichen.\nDer Link ist auch in den Einstellungen!</string>
     <string name="main_thank_you_title">Danke, dass du GameGrub nutzt!</string>
@@ -888,29 +888,29 @@
     <string name="main_discord_support_title">Hat das Spiel funktioniert?</string>
     <string name="main_discord_support_message">Tritt dem Discord bei, um Hilfe für dein Spiel oder Performance zu erhalten.</string>
     <string name="main_open_discord">Discord öffnen</string>
-    <!-- PluviaMain: Game Launch -->
+    <!-- GameGrubMain: Game Launch -->
     <string name="main_downloading_steam">Steam wird heruntergeladen…</string>
     <string name="main_installing_glibc">GLIBC-Komponenten werden installiert…</string>
     <string name="main_installing_bionic">Bionic-Komponenten werden installiert…</string>
     <string name="main_loading">Lädt…</string>
-    <!-- PluviaMain: Session Conflicts -->
+    <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">App läuft</string>
     <string name="main_app_running_message">Du bist auf einem anderen Gerät bereits mit %s angemeldet. Du kannst trotzdem spielen, aber das beendet die andere Steam-Sitzung.</string>
     <string name="main_app_running_other_device">Du bist auf einem anderen Gerät (%1$s) mit %2$s (%3$s) angemeldet, und dieser Spielstand wurde noch nicht in der Cloud gespeichert. Du kannst trotzdem spielen, doch wird dadurch die andere Sitzung getrennt und es kann zu Speicherstandskonflikten kommen, wenn die andere Sitzung synchronisiert wird.</string>
     <string name="main_play_anyway">Trotzdem starten</string>
-    <!-- PluviaMain: Save Conflicts -->
+    <!-- GameGrubMain: Save Conflicts -->
     <string name="main_save_conflict_title">Speicherstandkonflikt</string>
     <string name="main_save_conflict_message">Es wurden ein neuer lokaler und ein neuer Cloud-Spielstand gefunden. Welchen möchtest du behalten?\n\nLokal:\n\t%1$s\nCloud:\n\t%2$s</string>
     <string name="main_keep_local">Lokal behalten</string>
     <string name="main_keep_remote">Cloud behalten</string>
-    <!-- PluviaMain: Sync Errors -->
+    <!-- GameGrubMain: Sync Errors -->
     <string name="main_sync_in_progress_retry">Die Synchronisierung dauert zu lange. Bitte versuche, das Spiel später erneut zu starten.</string>
     <string name="main_sync_in_progress">Synchronisierung läuft. Bitte versuche es später noch einmal.</string>
     <string name="main_sync_in_progress_launch_anyway_message">Die Cloud-Synchronisierung für dieses Spiel läuft bereits. Du kannst warten und es später erneut versuchen oder trotzdem starten ohne zu synchronisieren (kann Speicherstand-Konflikte verursachen).</string>
     <string name="main_launch_anyway">Trotzdem starten</string>
     <string name="main_wait">Warten</string>
     <string name="main_sync_failed">Speicherstände konnten nicht synchronisiert werden: %s.</string>
-    <!-- PluviaMain: Pending Operations -->
+    <!-- GameGrubMain: Pending Operations -->
     <string name="main_upload_in_progress_title">Upload läuft</string>
     <string name="main_upload_in_progress_message">%1$s wurde auf Gerät %2$s (%3$s) gespielt, aber der Speicherstand wird noch hochgeladen.\nBitte später erneut versuchen.</string>
     <string name="main_pending_upload_title">Ausstehender Upload</string>

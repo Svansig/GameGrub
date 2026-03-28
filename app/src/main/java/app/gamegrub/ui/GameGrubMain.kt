@@ -51,7 +51,6 @@ import app.gamegrub.BuildConfig
 import app.gamegrub.Constants
 import app.gamegrub.GameGrubApp
 import app.gamegrub.LaunchRequestManager
-import app.gamegrub.MainActivity
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.data.GameSource
@@ -61,10 +60,10 @@ import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.AchievementOverlay
 import app.gamegrub.ui.component.ConnectionStatusBanner
 import app.gamegrub.ui.component.dialog.ContainerConfigDialog
@@ -120,7 +119,7 @@ import kotlin.reflect.KFunction2
 
 private fun NavHostController.navigateFromLoginIfNeeded(
     targetRoute: String,
-    logTag: String = "PluviaMain",
+    logTag: String = "GameGrubMain",
 ) {
     val currentRoute = currentDestination?.route
     if (currentRoute == GameGrubScreen.LoginUser.route) {
@@ -296,7 +295,7 @@ fun GameGrubMain(
     // process pending launch request from cold start (event bus has no replay)
     LaunchedEffect(Unit) {
         LaunchRequestManager.consumePendingLaunchRequest()?.let { launchRequest ->
-            Timber.i("[PluviaMain]: Processing pending launch request for app ${launchRequest.appId}")
+            Timber.i("[GameGrubMain]: Processing pending launch request for app ${launchRequest.appId}")
             // Steam games needing login will be handled by OnLogonEnded/SteamDisconnected.
             // consume+requeue is safe: both calls are non-suspending, so no other coroutine
             // can interleave between them on the main dispatcher (cooperative scheduling).
@@ -335,7 +334,7 @@ fun GameGrubMain(
 
                 is GameResolutionResult.NotFound -> {
                     val appName = ContainerUtils.resolveGameName(resolution.originalAppId)
-                    Timber.w("[PluviaMain]: Game not installed: $appName (${launchRequest.appId})")
+                    Timber.w("[GameGrubMain]: Game not installed: $appName (${launchRequest.appId})")
                     msgDialogState = MessageDialogState(
                         visible = true,
                         type = DialogType.SYNC_FAIL,
@@ -356,7 +355,7 @@ fun GameGrubMain(
                 }
 
                 is MainViewModel.MainUiEvent.ExternalGameLaunch -> {
-                    Timber.i("[PluviaMain]: Received ExternalGameLaunch UI event for app ${event.appId}")
+                    Timber.i("[GameGrubMain]: Received ExternalGameLaunch UI event for app ${event.appId}")
 
                     // Steam games need login before launch (cloud sync uses userSteamId)
                     if (needsSteamLogin(context, event.appId)) {
@@ -377,7 +376,7 @@ fun GameGrubMain(
 
                     when (val resolution = resolveGameAppId(context, event.appId)) {
                         is GameResolutionResult.Success -> {
-                            Timber.i("[PluviaMain]: Using appId: ${resolution.finalAppId} (original: ${event.appId}, isSteamInstalled: ${resolution.isSteamInstalled}, isCustomGame: ${resolution.isCustomGame})")
+                            Timber.i("[GameGrubMain]: Using appId: ${resolution.finalAppId} (original: ${event.appId}, isSteamInstalled: ${resolution.isSteamInstalled}, isCustomGame: ${resolution.isCustomGame})")
 
                             LaunchRequestManager.markAsExternalLaunch()
                             trackGameLaunched(resolution.finalAppId)
@@ -397,7 +396,7 @@ fun GameGrubMain(
 
                         is GameResolutionResult.NotFound -> {
                             val appName = ContainerUtils.resolveGameName(resolution.originalAppId)
-                            Timber.w("[PluviaMain]: Game not installed: $appName (${event.appId})")
+                            Timber.w("[GameGrubMain]: Game not installed: $appName (${event.appId})")
                             msgDialogState = MessageDialogState(
                                 visible = true,
                                 type = DialogType.SYNC_FAIL,
@@ -583,7 +582,7 @@ fun GameGrubMain(
         // do the following each time we navigate to a new screen
         if (state.resettedScreen != state.currentScreen) {
             viewModel.setScreen()
-            // Log.d("PluviaMain", "Screen changed to $currentScreen, resetting some values")
+            // Log.d("GameGrubMain", "Screen changed to $currentScreen, resetting some values")
             // TODO: remove this if statement once XServerScreen orientation change bug is fixed
             if (state.currentScreen != GameGrubScreen.XServer) {
                 // Hide or show status bar based on if in game or not
@@ -608,7 +607,7 @@ fun GameGrubMain(
                     !SteamService.keepAlive
 
             if (shouldAttemptReconnect) {
-                Timber.d("[PluviaMain]: Steam not connected - attempting reconnection")
+                Timber.d("[GameGrubMain]: Steam not connected - attempting reconnection")
                 isConnecting = true
                 viewModel.startConnecting()
                 context.startForegroundService(Intent(context, SteamService::class.java))
@@ -618,7 +617,7 @@ fun GameGrubMain(
             if (GOGService.hasStoredCredentials(context) &&
                 !GOGService.isRunning
             ) {
-                Timber.tag("GOG").d("[PluviaMain]: Starting GOGService for logged-in user")
+                Timber.tag("GOG").d("[GameGrubMain]: Starting GOGService for logged-in user")
                 GOGService.start(context)
             } else {
                 Timber.tag("GOG").d("GOG SERVICE Not going to start: ${GOGService.isRunning}")
@@ -628,7 +627,7 @@ fun GameGrubMain(
             if (EpicService.hasStoredCredentials(context) &&
                 !EpicService.isRunning
             ) {
-                Timber.d("[PluviaMain]: Starting EpicService for logged-in user")
+                Timber.d("[GameGrubMain]: Starting EpicService for logged-in user")
                 EpicService.start(context)
             }
 
@@ -636,7 +635,7 @@ fun GameGrubMain(
             if (AmazonService.hasStoredCredentials(context) &&
                 !AmazonService.isRunning
             ) {
-                Timber.d("[PluviaMain]: Starting AmazonService for logged-in user")
+                Timber.d("[GameGrubMain]: Starting AmazonService for logged-in user")
                 AmazonService.start(context)
             }
 
@@ -947,7 +946,7 @@ fun GameGrubMain(
                 pendingSaveAppId?.let { appId ->
                     IntentLaunchManager.getEffectiveContainerConfig(context, appId)?.let { config ->
                         ContainerUtils.applyToContainer(context, appId, config)
-                        Timber.i("[PluviaMain]: Saved container configuration for app $appId")
+                        Timber.i("[GameGrubMain]: Saved container configuration for app $appId")
                     }
                     // Clear the temporary override after saving
                     IntentLaunchManager.clearTemporaryOverride(appId)

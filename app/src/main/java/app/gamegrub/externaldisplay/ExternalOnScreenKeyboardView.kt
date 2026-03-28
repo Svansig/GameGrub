@@ -7,7 +7,6 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.view.Gravity
 import android.view.MotionEvent
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat

@@ -3,14 +3,8 @@ package app.gamegrub.ui.screen
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import app.gamegrub.ui.enums.HomeDestination
 import app.gamegrub.ui.model.HomeViewModel
 import app.gamegrub.ui.screen.library.HomeLibraryScreen
 import app.gamegrub.ui.theme.GameGrubTheme

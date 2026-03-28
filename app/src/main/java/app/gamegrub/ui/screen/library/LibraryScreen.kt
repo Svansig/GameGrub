@@ -65,10 +65,10 @@ import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.GamepadAction
 import app.gamegrub.ui.component.GamepadActionBar
 import app.gamegrub.ui.component.GamepadButton

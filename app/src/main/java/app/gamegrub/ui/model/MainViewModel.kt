@@ -534,7 +534,7 @@ class MainViewModel @Inject constructor(
                 // Prompt user to save temporary container configuration if one was applied
                 if (hadTemporaryOverride) {
                     GameGrubApp.events.emit(AndroidEvent.PromptSaveContainerConfig(appId))
-                    // Dialog handler in PluviaMain manages the save/discard logic
+                    // Dialog handler in GameGrubMain manages the save/discard logic
                 }
 
                 // After app closes, check if we need to show the feedback dialog

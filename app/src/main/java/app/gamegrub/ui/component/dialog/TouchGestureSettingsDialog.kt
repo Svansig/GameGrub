@@ -1,19 +1,38 @@
 package app.gamegrub.ui.component.dialog
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import app.gamegrub.R
 import app.gamegrub.data.TouchGestureConfig
 import app.gamegrub.data.TouchGestureConfig.Companion.ACTION_LEFT_CLICK
 import app.gamegrub.data.TouchGestureConfig.Companion.ACTION_MIDDLE_CLICK
@@ -28,7 +47,6 @@ import app.gamegrub.data.TouchGestureConfig.Companion.ZOOM_PAGE_UP_DOWN
 import app.gamegrub.data.TouchGestureConfig.Companion.ZOOM_PLUS_MINUS
 import app.gamegrub.data.TouchGestureConfig.Companion.ZOOM_SCROLL_WHEEL
 import app.gamegrub.ui.component.settings.SettingsListDropdown
-import app.gamegrub.R
 import app.gamegrub.ui.theme.settingsTileColors
 import app.gamegrub.ui.theme.settingsTileColorsAlt
 import com.alorma.compose.settings.ui.SettingsSwitch
@@ -78,9 +96,11 @@ fun TouchGestureSettingsDialog(
                     .padding(horizontal = 8.dp),
             ) {
                 // ── 1. Tap (fixed: Left Click) ──────────────────────────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_tap)) },
@@ -91,9 +111,11 @@ fun TouchGestureSettingsDialog(
                 }
 
                 // ── 2. Drag (fixed: Drag Left Click) ────────────────────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_drag)) },
@@ -104,9 +126,11 @@ fun TouchGestureSettingsDialog(
                 }
 
                 // ── 3. Long Press (customisable action + delay) ──────────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_long_press)) },
@@ -134,9 +158,11 @@ fun TouchGestureSettingsDialog(
                 }
 
                 // ── 4. Double-Tap (fixed action, customisable delay) ─────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_double_tap)) },
@@ -155,9 +181,11 @@ fun TouchGestureSettingsDialog(
                 }
 
                 // ── 5. Two-Finger Drag (customisable action) ─────────────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_two_finger_drag)) },
@@ -180,9 +208,11 @@ fun TouchGestureSettingsDialog(
                 }
 
                 // ── 6. Pinch In/Out (customisable action) ────────────────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_pinch)) },
@@ -205,9 +235,11 @@ fun TouchGestureSettingsDialog(
                 }
 
                 // ── 7. Two-Finger Tap (customisable action) ──────────────
-                OutlinedCard(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)) {
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                ) {
                     SettingsSwitch(
                         colors = settingsTileColorsAlt(),
                         title = { Text(stringResource(R.string.gesture_two_finger_tap)) },

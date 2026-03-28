@@ -22,10 +22,10 @@ import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.DownloadService
-import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.LibraryState
 import app.gamegrub.ui.enums.AppFilter
 import app.gamegrub.ui.enums.LibraryTab

@@ -21,19 +21,19 @@ EpicService (Coordinator)
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `EpicService.kt` | Main Android foreground service |
-| `EpicManager.kt` | Game library, metadata |
-| `EpicAuthManager.kt` | OAuth flow, token management |
-| `EpicDownloadManager.kt` | Download handling |
-| `EpicCloudSavesManager.kt` | Cloud save synchronization |
-| `EpicAuthClient.kt` | OAuth HTTP client |
-| `EpicGameLauncher.kt` | Game startup logic |
-| `EpicConstants.kt` | Platform constants |
-| `manifest/EpicManifest.kt` | Manifest data models |
-| `manifest/JsonManifestParser.kt` | JSON parsing |
-| `manifest/ManifestUtils.kt` | Manifest utilities |
+| File                             | Purpose                         |
+|----------------------------------|---------------------------------|
+| `EpicService.kt`                 | Main Android foreground service |
+| `EpicManager.kt`                 | Game library, metadata          |
+| `EpicAuthManager.kt`             | OAuth flow, token management    |
+| `EpicDownloadManager.kt`         | Download handling               |
+| `EpicCloudSavesManager.kt`       | Cloud save synchronization      |
+| `EpicAuthClient.kt`              | OAuth HTTP client               |
+| `EpicGameLauncher.kt`            | Game startup logic              |
+| `EpicConstants.kt`               | Platform constants              |
+| `manifest/EpicManifest.kt`       | Manifest data models            |
+| `manifest/JsonManifestParser.kt` | JSON parsing                    |
+| `manifest/ManifestUtils.kt`      | Manifest utilities              |
 
 ## Database
 
@@ -43,16 +43,19 @@ EpicService (Coordinator)
 ## Key Flows
 
 ### Authentication
+
 1. User initiates OAuth via Epic website
 2. `EpicAuthManager` handles token exchange
 3. Tokens stored securely
 
 ### Library Sync
+
 1. `EpicService.start()` triggers sync
 2. `EpicManager` fetches owned games
 3. Results stored in Room
 
 ### Game Installation
+
 1. User selects game to install
 2. `EpicDownloadManager` queues download
 3. Manifest parsed to determine required files

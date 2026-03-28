@@ -60,9 +60,11 @@ fun SingleChoiceDialog(
         },
         title = { Text(text = title) },
         text = {
-            Column(modifier = Modifier
-                .selectableGroup()
-                .verticalScroll(rememberScrollState())) {
+            Column(
+                modifier = Modifier
+                    .selectableGroup()
+                    .verticalScroll(rememberScrollState()),
+            ) {
                 items.forEachIndexed { index, entry ->
                     Row(
                         Modifier

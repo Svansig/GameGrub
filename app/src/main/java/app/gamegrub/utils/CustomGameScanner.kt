@@ -404,10 +404,10 @@ object CustomGameScanner {
      */
     fun requestManageExternalStoragePermission(context: Context): Boolean {
         try {
-                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-                intent.data = Uri.parse("package:${context.packageName}")
-                context.startActivity(intent)
-                return true
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+            intent.data = Uri.parse("package:${context.packageName}")
+            context.startActivity(intent)
+            return true
         } catch (e: Exception) {
             Timber.tag("CustomGameScanner").e(e, "Failed to open settings for MANAGE_EXTERNAL_STORAGE")
             // Fallback: try generic app settings

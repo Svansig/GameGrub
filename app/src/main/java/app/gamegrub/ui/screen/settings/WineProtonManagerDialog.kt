@@ -896,9 +896,11 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             onDismissRequest = { showUntrustedConfirm = false },
             title = { Text(stringResource(R.string.untrusted_files_detected)) },
             text = {
-                Column(modifier = Modifier
-                    .heightIn(max = 360.dp)
-                    .verticalScroll(rememberScrollState())) {
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
                     Text(
                         text = stringResource(R.string.wine_proton_untrusted_files_message),
                         style = MaterialTheme.typography.bodyMedium,

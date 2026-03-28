@@ -341,9 +341,11 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             onDismissRequest = { showUntrustedConfirm = false },
             title = { Text(stringResource(R.string.untrusted_files_detected)) },
             text = {
-                Column(modifier = Modifier
-                    .heightIn(max = 360.dp)
-                    .verticalScroll(rememberScrollState())) {
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
                     Text(
                         text = "This content includes files outside the trusted set. Review and confirm to proceed.",
                         style = MaterialTheme.typography.bodyMedium,

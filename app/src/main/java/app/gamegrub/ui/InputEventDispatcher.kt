@@ -21,11 +21,7 @@ class InputEventDispatcher {
             keyEvent.any { it }
         } == true
 
-        return if (!eventDispatched) {
-            false
-        } else {
-            true
-        }
+        return eventDispatched
     }
 
     /**
@@ -37,10 +33,6 @@ class InputEventDispatcher {
             ev.any { it }
         } == true
 
-        return if (!eventDispatched) {
-            false
-        } else {
-            true
-        }
+        return eventDispatched
     }
 }

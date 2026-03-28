@@ -32,7 +32,6 @@ object UpdateInstaller {
             SteamService.fetchFileWithFallback(
                 fileName = fileName,
                 dest = destFile,
-                context = context,
                 onProgress = onProgress,
             )
 

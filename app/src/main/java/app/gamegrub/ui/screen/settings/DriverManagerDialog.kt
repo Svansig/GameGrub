@@ -188,7 +188,6 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 SteamService.fetchFileWithFallback(
                     fileName = "drivers/$driverFileName",
                     dest = destFile,
-                    context = ctx,
                 ) { progress ->
                     val now = System.currentTimeMillis()
                     if (now - lastUpdate > 300) {

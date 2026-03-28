@@ -361,7 +361,6 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 SteamService.fetchFileWithFallback(
                     fileName = "$wineFileName",
                     dest = destFile,
-                    context = ctx,
                 ) { progress ->
                     val now = System.currentTimeMillis()
                     if (now - lastUpdate > 300) {

@@ -1,11 +1,10 @@
 package app.gamegrub.ui.screen.library.appscreen
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Environment
+import android.os.storage.StorageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
@@ -27,8 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import app.gamegrub.GameGrubApp
+import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
 import app.gamegrub.api.config.BestConfigService
@@ -51,6 +50,7 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.screen.library.GameMigrationDialog
+import app.gamegrub.ui.utils.StoragePermissionGate
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
@@ -1042,31 +1042,60 @@ class SteamAppScreen : BaseAppScreen() {
         // Migration state
         val scope = rememberCoroutineScope()
         var showMoveDialog by remember { mutableStateOf(false) }
+        var showStorageLocationDialog by remember { mutableStateOf(false) }
+        var storageLocationConfirmedForInstall by remember(gameId) { mutableStateOf(false) }
+        var pendingInstallDlcIds by remember(gameId) { mutableStateOf<List<Int>?>(null) }
         var current by remember { mutableStateOf("") }
         var progress by remember { mutableFloatStateOf(0f) }
         var moved by remember { mutableIntStateOf(0) }
         var total by remember { mutableIntStateOf(0) }
+        val sm = context.getSystemService(StorageManager::class.java)
+        val externalStorageDirs = remember {
+            context.getExternalFilesDirs(null)
+                .filterNotNull()
+                .filter { Environment.getExternalStorageState(it) == Environment.MEDIA_MOUNTED }
+                .filter { sm.getStorageVolume(it)?.isPrimary != true }
+        }
         val oldGamesDirectory = remember {
             Paths.get(SteamPaths.defaultAppInstallPath).pathString
         }
-        val initialStoragePermissionGranted = remember {
-            val writePermissionGranted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            ) == PackageManager.PERMISSION_GRANTED
-            val readPermissionGranted = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-            ) == PackageManager.PERMISSION_GRANTED
-            writePermissionGranted && readPermissionGranted
+        var hasStoragePermission by remember {
+            mutableStateOf<Boolean>(StoragePermissionGate.hasStorageAccess(context, SteamPaths.defaultStoragePath))
         }
-        var hasStoragePermission by remember { mutableStateOf(initialStoragePermissionGranted) }
         var installSizeInfo by remember(gameId) { mutableStateOf<InstallSizeInfo?>(null) }
+        fun launchPendingInstall(selectedDlcIds: List<Int>) {
+            val installedApp = SteamService.getInstalledApp(gameId)
+            if (installedApp != null) {
+                // Remove markers if the app is already installed
+                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
+                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
+                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
+            }
+
+            PostHog.capture(
+                event = "game_install_started",
+                properties = mapOf("game_name" to (appInfo?.name ?: "")),
+            )
+            storageLocationConfirmedForInstall = false
+            CoroutineScope(Dispatchers.IO).launch {
+                SteamService.downloadApp(gameId, selectedDlcIds, isUpdateOrVerify = false)
+            }
+        }
+
+        fun showPendingInstallDialog() {
+            showInstallDialog(
+                gameId,
+                MessageDialogState(
+                    visible = true,
+                    type = DialogType.INSTALL_APP_PENDING,
+                ),
+            )
+        }
 
         // Permission launcher for game migration
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestMultiplePermissions(),
-            onResult = { permission ->
+            onResult = { _ ->
                 scope.launch {
                     showMoveDialog = true
                     StorageUtils.moveGamesFromOldPath(
@@ -1086,24 +1115,44 @@ class SteamAppScreen : BaseAppScreen() {
             },
         )
 
-        // Permission launcher for storage permissions
-        val permissionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestMultiplePermissions(),
-        ) { permissions ->
-            val writePermissionGranted = permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: false
-            val readPermissionGranted = permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
-            val granted = writePermissionGranted && readPermissionGranted
+        val requestManageStorageLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) {
+            val granted = StoragePermissionGate.hasStorageAccess(context, SteamPaths.defaultStoragePath)
             hasStoragePermission = granted
             if (!granted) {
-                // Permissions denied
                 SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
                 hideInstallDialog(gameId)
                 hideGameManagerDialog(gameId)
+                pendingInstallDlcIds = null
+            } else {
+                showPendingInstallDialog()
+            }
+        }
+
+        fun continuePendingInstallIfAuthorized() {
+            val selectedDlcIds = pendingInstallDlcIds ?: return
+            val targetPath = SteamPaths.defaultStoragePath
+            val granted = StoragePermissionGate.hasStorageAccess(context, targetPath)
+            hasStoragePermission = granted
+
+            if (granted) {
+                pendingInstallDlcIds = null
+                launchPendingInstall(selectedDlcIds)
+                return
+            }
+
+            val intent = StoragePermissionGate.createManageStoragePermissionIntent(context)
+            if (intent != null) {
+                requestManageStorageLauncher.launch(intent)
+            } else {
+                pendingInstallDlcIds = null
+                SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
             }
         }
 
         LaunchedEffect(gameId, hasStoragePermission) {
-            if (!hasStoragePermission) {
+            if (hasStoragePermission != true) {
                 installSizeInfo = null
                 return@LaunchedEffect
             }
@@ -1135,13 +1184,23 @@ class SteamAppScreen : BaseAppScreen() {
             if (!installDialogState.visible) return@LaunchedEffect
             if (installDialogState.type != DialogType.INSTALL_APP_PENDING) return@LaunchedEffect
 
-            if (!hasStoragePermission) {
-                permissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    ),
-                )
+            val path = SteamPaths.defaultStoragePath
+            val hasAccessNow = StoragePermissionGate.hasStorageAccess(context, path)
+            hasStoragePermission = hasAccessNow
+
+            if (!hasAccessNow) {
+                if (StoragePermissionGate.shouldRequestManageStoragePermission(context, path)) {
+                    val intent = StoragePermissionGate.createManageStoragePermissionIntent(context)
+                    if (intent != null) {
+                        requestManageStorageLauncher.launch(intent)
+                    } else {
+                        SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                        hideInstallDialog(gameId)
+                    }
+                } else {
+                    SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                    hideInstallDialog(gameId)
+                }
             } else {
                 val info = installSizeInfo ?: return@LaunchedEffect
                 val state = if (info.availableBytes < info.installBytes) {
@@ -1155,13 +1214,33 @@ class SteamAppScreen : BaseAppScreen() {
 
         LaunchedEffect(gameManagerDialogState.visible, hasStoragePermission) {
             if (!gameManagerDialogState.visible) return@LaunchedEffect
-            if (!hasStoragePermission) {
-                permissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    ),
-                )
+
+            val isFreshInstall = !SteamService.isAppInstalled(gameId)
+            if (isFreshInstall && !storageLocationConfirmedForInstall && pendingInstallDlcIds == null) {
+                hideGameManagerDialog(gameId)
+                if (externalStorageDirs.isNotEmpty()) {
+                    showStorageLocationDialog = true
+                } else {
+                    PrefManager.useExternalStorage = false
+                    storageLocationConfirmedForInstall = true
+                    showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
+                }
+                return@LaunchedEffect
+            }
+
+            val path = SteamPaths.defaultStoragePath
+            val hasAccessNow = StoragePermissionGate.hasStorageAccess(context, path)
+            hasStoragePermission = hasAccessNow
+
+            if (!hasAccessNow) {
+                if (StoragePermissionGate.shouldRequestManageStoragePermission(context, path)) {
+                    val intent = StoragePermissionGate.createManageStoragePermissionIntent(context)
+                    if (intent != null) {
+                        requestManageStorageLauncher.launch(intent)
+                    } else {
+                        SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                    }
+                }
             }
         }
 
@@ -1188,13 +1267,17 @@ class SteamAppScreen : BaseAppScreen() {
 
                 DialogType.INSTALL_APP -> {
                     {
-                        PostHog.capture(
-                            event = "game_install_started",
-                            properties = mapOf("game_name" to (appInfo?.name ?: "")),
-                        )
                         hideInstallDialog(gameId)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            SteamService.downloadApp(gameId)
+                        if (pendingInstallDlcIds != null) {
+                            continuePendingInstallIfAuthorized()
+                        } else {
+                            PostHog.capture(
+                                event = "game_install_started",
+                                properties = mapOf("game_name" to (appInfo?.name ?: "")),
+                            )
+                            CoroutineScope(Dispatchers.IO).launch {
+                                SteamService.downloadApp(gameId)
+                            }
                         }
                     }
                 }
@@ -1384,6 +1467,60 @@ class SteamAppScreen : BaseAppScreen() {
             )
         }
 
+        if (showStorageLocationDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showStorageLocationDialog = false
+                    storageLocationConfirmedForInstall = false
+                    pendingInstallDlcIds = null
+                },
+                title = { Text(stringResource(R.string.steam_storage_location_title)) },
+                text = { Text(stringResource(R.string.steam_storage_location_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            PrefManager.useExternalStorage = false
+                            storageLocationConfirmedForInstall = true
+                            showStorageLocationDialog = false
+                            if (pendingInstallDlcIds == null) {
+                                showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
+                            } else {
+                                showPendingInstallDialog()
+                            }
+                        },
+                    ) {
+                        Text(stringResource(R.string.steam_storage_location_internal))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            if (externalStorageDirs.isEmpty()) {
+                                SnackbarManager.show(context.getString(R.string.settings_interface_no_external_storage))
+                                return@TextButton
+                            }
+
+                            PrefManager.useExternalStorage = true
+                            val currentPath = PrefManager.externalStoragePath
+                            if (currentPath.isBlank() || externalStorageDirs.none { it.absolutePath == currentPath }) {
+                                PrefManager.externalStoragePath = externalStorageDirs.first().absolutePath
+                            }
+
+                            storageLocationConfirmedForInstall = true
+                            showStorageLocationDialog = false
+                            if (pendingInstallDlcIds == null) {
+                                showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
+                            } else {
+                                showPendingInstallDialog()
+                            }
+                        },
+                    ) {
+                        Text(stringResource(R.string.steam_storage_location_external))
+                    }
+                },
+            )
+        }
+
         if (gameManagerDialogState.visible) {
             GameManagerDialog(
                 visible = true,
@@ -1393,23 +1530,19 @@ class SteamAppScreen : BaseAppScreen() {
                 onInstall = { dlcAppIds ->
                     hideGameManagerDialog(gameId)
 
-                    val installedApp = SteamService.getInstalledApp(gameId)
-                    if (installedApp != null) {
-                        // Remove markers if the app is already installed
-                        MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
-                        MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
-                        MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
-                    }
-
-                    PostHog.capture(
-                        event = "game_install_started",
-                        properties = mapOf("game_name" to (appInfo?.name ?: "")),
-                    )
-                    CoroutineScope(Dispatchers.IO).launch {
-                        SteamService.downloadApp(gameId, dlcAppIds, isUpdateOrVerify = false)
+                    pendingInstallDlcIds = dlcAppIds
+                    if (storageLocationConfirmedForInstall) {
+                        showPendingInstallDialog()
+                    } else if (externalStorageDirs.isNotEmpty()) {
+                        showStorageLocationDialog = true
+                    } else {
+                        PrefManager.useExternalStorage = false
+                        showPendingInstallDialog()
                     }
                 },
                 onDismissRequest = {
+                    storageLocationConfirmedForInstall = false
+                    pendingInstallDlcIds = null
                     hideGameManagerDialog(gameId)
                 },
             )

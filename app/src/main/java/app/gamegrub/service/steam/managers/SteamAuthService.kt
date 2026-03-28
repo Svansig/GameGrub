@@ -1,42 +1,37 @@
 package app.gamegrub.service.steam.managers
 
+import app.gamegrub.GameGrubApp
+import app.gamegrub.PrefManager
 import app.gamegrub.enums.LoginResult
-import app.gamegrub.service.steam.di.AuthResult
-import app.gamegrub.service.steam.di.ConnectionState
-import app.gamegrub.service.steam.di.GameEventEmitter
-import app.gamegrub.service.steam.di.SteamAuthClient
-import app.gamegrub.service.steam.di.SteamConnection
-import app.gamegrub.service.steam.di.SteamPreferences
+import app.gamegrub.events.SteamEvent
+import app.gamegrub.utils.steam.SteamUtils
+import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EResult
+import `in`.dragonbra.javasteam.steam.authentication.AuthPollResult
+import `in`.dragonbra.javasteam.steam.authentication.AuthSessionDetails
+import `in`.dragonbra.javasteam.steam.authentication.AuthenticationException
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
 import `in`.dragonbra.javasteam.steam.authentication.IChallengeUrlChanged
 import `in`.dragonbra.javasteam.steam.authentication.QrAuthSession
+import `in`.dragonbra.javasteam.steam.handlers.steamuser.ChatMode
+import `in`.dragonbra.javasteam.steam.handlers.steamuser.LogOnDetails
+import `in`.dragonbra.javasteam.steam.handlers.steamuser.SteamUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Manages Steam authentication flows.
- *
- * Dependencies are injected via constructor - no service locator pattern.
- * All dependencies are non-nullable for fail-fast behavior.
- */
 @Singleton
-class SteamAuthService @Inject constructor(
-    private val authClient: SteamAuthClient,
-    private val connection: SteamConnection,
-    private val preferences: SteamPreferences,
-    private val eventEmitter: GameEventEmitter,
-) : IChallengeUrlChanged {
+class SteamAuthService @Inject constructor() : IChallengeUrlChanged {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private val _loginResult = MutableStateFlow(LoginResult.Failed)
     val loginResult: StateFlow<LoginResult> = _loginResult.asStateFlow()
@@ -44,74 +39,164 @@ class SteamAuthService @Inject constructor(
     private val _isWaitingForQRAuth = MutableStateFlow(false)
     val isWaitingForQRAuth: StateFlow<Boolean> = _isWaitingForQRAuth.asStateFlow()
 
-    val isLoggedIn: Boolean get() = connection.isLoggedIn
+    val isLoggedIn: Boolean
+        get() = SteamService.instance?.steamClient?.steamID?.isValid == true
 
-    val isLoginInProgress: Boolean get() = _loginResult.value == LoginResult.InProgress
+    val isLoginInProgress: Boolean
+        get() = _loginResult.value == LoginResult.InProgress
 
-    /**
-     * Login with username and password.
-     */
     suspend fun loginWithCredentials(
         username: String,
         password: String,
         rememberSession: Boolean,
         authenticator: IAuthenticator,
     ) {
-        _loginResult.value = LoginResult.InProgress
+        val service = SteamService.instance ?: run {
+            Timber.e("Cannot login - service not running")
+            return
+        }
 
-        val result = authClient.loginWithCredentials(
-            username = username,
-            password = password,
-            rememberSession = rememberSession,
-            authenticator = authenticator,
-        )
+        try {
+            Timber.i("Logging in via credentials.")
+            _loginResult.value = LoginResult.InProgress
 
-        handleAuthResult(result)
+            val steamClient = service.steamClient ?: run {
+                emitLoginFailure(username, "No connection to Steam")
+                return
+            }
+
+            val authDetails = AuthSessionDetails().apply {
+                this.username = username.trim()
+                this.password = password
+                this.persistentSession = rememberSession
+                this.authenticator = authenticator
+                this.deviceFriendlyName = SteamUtils.getMachineName(service)
+                this.clientOSType = EOSType.WinUnknown
+            }
+
+            GameGrubApp.events.emit(SteamEvent.LogonStarted(username))
+
+            val authSession = steamClient.authentication
+                .beginAuthSessionViaCredentials(authDetails)
+                .await()
+
+            val pollResult = authSession.pollingWaitForResult().await()
+
+            if (pollResult.accountName.isEmpty() && pollResult.refreshToken.isEmpty()) {
+                throw Exception("No account name or refresh token received.")
+            }
+
+            performLogin(
+                steamUser = service._steamUser!!,
+                context = service,
+                username = pollResult.accountName,
+                accessToken = pollResult.accessToken,
+                refreshToken = pollResult.refreshToken,
+                clientId = authSession.clientID,
+                rememberSession = rememberSession,
+            )
+
+            _loginResult.value = LoginResult.Success
+        } catch (e: Exception) {
+            Timber.e(e, "Login failed")
+            val message = when (e) {
+                is java.util.concurrent.CancellationException -> "Unknown cancellation"
+                is AuthenticationException -> e.result?.name ?: e.message
+                else -> e.message ?: e.javaClass.name
+            }
+            emitLoginFailure(username, message)
+        }
     }
 
-    /**
-     * Login via QR code.
-     */
     suspend fun loginWithQr() {
-        _isWaitingForQRAuth.value = true
+        val service = SteamService.instance ?: run {
+            Timber.e("Cannot start QR login - service not running")
+            return
+        }
 
-        val result = authClient.loginWithQr(challengeUrlChanged = this)
+        try {
+            Timber.i("Logging in via QR.")
+            val steamClient = service.steamClient ?: run {
+                emitQrFailure("No connection to Steam")
+                return
+            }
 
-        _isWaitingForQRAuth.value = false
-        handleAuthResult(result)
+            _isWaitingForQRAuth.value = true
+
+            val authDetails = AuthSessionDetails().apply {
+                this.deviceFriendlyName = SteamUtils.getMachineName(service)
+                this.clientOSType = EOSType.WinUnknown
+                this.persistentSession = true
+            }
+
+            val authSession = steamClient.authentication
+                .beginAuthSessionViaQR(authDetails)
+                .await()
+
+            authSession.challengeUrlChanged = this
+
+            GameGrubApp.events.emit(SteamEvent.QrChallengeReceived(authSession.challengeUrl))
+
+            var authPollResult: AuthPollResult? = null
+            while (_isWaitingForQRAuth.value && authPollResult == null) {
+                try {
+                    authPollResult = authSession.pollAuthSessionStatus().await()
+                } catch (e: Exception) {
+                    Timber.e(e, "Poll auth session status error")
+                    throw e
+                }
+                delay(authSession.pollingInterval.toLong())
+            }
+
+            _isWaitingForQRAuth.value = false
+            GameGrubApp.events.emit(SteamEvent.QrAuthEnded(authPollResult != null))
+
+            if (authPollResult == null) {
+                throw Exception("Got no auth poll result")
+            }
+
+            performLogin(
+                steamUser = service._steamUser!!,
+                context = service,
+                username = authPollResult.accountName,
+                accessToken = authPollResult.accessToken,
+                refreshToken = authPollResult.refreshToken,
+                clientId = authSession.clientID,
+            )
+
+            _loginResult.value = LoginResult.Success
+        } catch (e: Exception) {
+            Timber.e(e, "QR login failed")
+            _isWaitingForQRAuth.value = false
+            val message = when (e) {
+                is java.util.concurrent.CancellationException -> "QR Session timed out"
+                is AuthenticationException -> e.result?.name ?: e.message
+                else -> e.message ?: e.javaClass.name
+            }
+            emitQrFailure(message)
+        }
     }
 
-    /**
-     * Cancel QR code login.
-     */
     fun cancelQrLogin() {
+        Timber.i("Cancelling QR login")
         _isWaitingForQRAuth.value = false
-        authClient.cancelQrLogin()
     }
 
-    /**
-     * Logout and clean up.
-     */
-    fun logout() {
-        authClient.logOut()
-        _loginResult.value = LoginResult.Failed
+    fun logOut() {
+        scope.launch {
+            _loginResult.value = LoginResult.Failed
+            val service = SteamService.instance ?: return@launch
+            service.performLogOffDuties(clearCloudSyncState = true)
+            service._steamUser?.logOff()
+        }
     }
 
-    /**
-     * Check if user data should be cleared for specific failure results.
-     */
     fun shouldClearUserData(result: EResult): Boolean = when (result) {
-        EResult.InvalidPassword,
-        EResult.IllegalPassword,
-        EResult.PasswordUnset,
-        EResult.AccountLogonDenied,
-        EResult.AccountLogonDeniedNoMail,
-        EResult.AccountLogonDeniedVerifiedEmailRequired,
-        EResult.AccountLoginDeniedNeedTwoFactor,
-        EResult.InvalidLoginAuthCode,
-        EResult.ExpiredLoginAuthCode,
-        EResult.RequirePasswordReEntry,
-        EResult.ParentalControlRestricted,
+        EResult.InvalidPassword, EResult.IllegalPassword, EResult.PasswordUnset,
+        EResult.AccountLogonDenied, EResult.AccountLogonDeniedNoMail,
+        EResult.AccountLogonDeniedVerifiedEmailRequired, EResult.AccountLoginDeniedNeedTwoFactor,
+        EResult.InvalidLoginAuthCode, EResult.ExpiredLoginAuthCode,
+        EResult.RequirePasswordReEntry, EResult.ParentalControlRestricted,
         EResult.CachedCredentialInvalid,
         -> true
         else -> false
@@ -119,20 +204,46 @@ class SteamAuthService @Inject constructor(
 
     override fun onChanged(qrAuthSession: QrAuthSession?) {
         val url = qrAuthSession?.challengeUrl
-        Timber.d("QR challenge URL changed: $url")
+        if (url != null) {
+            GameGrubApp.events.emit(SteamEvent.QrChallengeReceived(url))
+        }
     }
 
-    private fun handleAuthResult(result: AuthResult) {
-        if (result.success) {
-            _loginResult.value = LoginResult.Success
-            preferences.username = result.username
-            preferences.clientId = result.clientId
-            preferences.accessToken = result.accessToken
-            preferences.refreshToken = result.refreshToken
-            Timber.i("Login successful for ${result.username}")
-        } else {
-            _loginResult.value = LoginResult.Failed
-            Timber.e("Login failed: ${result.error}")
+    private fun performLogin(
+        steamUser: SteamUser,
+        context: android.content.Context,
+        username: String,
+        accessToken: String? = null,
+        refreshToken: String? = null,
+        password: String? = null,
+        rememberSession: Boolean = true,
+        clientId: Long? = null,
+    ) {
+        PrefManager.username = username
+        if (refreshToken != null || (password != null && rememberSession)) {
+            if (accessToken != null) PrefManager.accessToken = accessToken
+            if (refreshToken != null) PrefManager.refreshToken = refreshToken
+            if (clientId != null) PrefManager.clientId = clientId
         }
+
+        steamUser.logOn(
+            LogOnDetails(
+                username = SteamUtils.removeSpecialChars(username).trim(),
+                password = password?.let { SteamUtils.removeSpecialChars(it).trim() },
+                shouldRememberPassword = rememberSession,
+                accessToken = refreshToken,
+                loginID = SteamUtils.getUniqueDeviceId(context),
+                machineName = SteamUtils.getMachineName(context),
+                chatMode = ChatMode.NEW_STEAM_CHAT,
+            ),
+        )
+    }
+
+    private fun emitLoginFailure(username: String, message: String?) {
+        GameGrubApp.events.emit(SteamEvent.LogonEnded(username, LoginResult.Failed, message))
+    }
+
+    private fun emitQrFailure(message: String?) {
+        GameGrubApp.events.emit(SteamEvent.QrAuthEnded(success = false, message = message))
     }
 }

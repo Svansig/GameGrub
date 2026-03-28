@@ -2,11 +2,9 @@ package app.gamegrub.service.steam.managers
 
 import app.gamegrub.db.dao.ChangeNumbersDao
 import app.gamegrub.db.dao.FileChangeListsDao
-import app.gamegrub.service.steam.di.PicsChanges
 import app.gamegrub.service.steam.di.SteamPicsClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,26 +14,39 @@ class PicsChangesManager @Inject constructor(
     private val fileChangeListsDao: FileChangeListsDao,
     private val picsClient: SteamPicsClient,
 ) {
-    suspend fun checkForChanges(): PicsChangesResult = withContext(Dispatchers.IO) {
-        val currentChangeNumber = getChangeNumber()
-        val result = picsClient.getChangesSince(currentChangeNumber)
-
-        if (result.success) {
-            setChangeNumber(result.currentChangeNumber)
-        }
-
-        PicsChangesResult(
-            success = result.success,
-            currentChangeNumber = result.currentChangeNumber,
-            appChanges = result.appChanges,
-            packageChanges = result.packageChanges,
-            needsFullUpdate = result.needsFullUpdate,
-        )
+    private companion object {
+        // One shared change number row for global PICS sync progress.
+        const val GLOBAL_PICS_APP_ID = 0
     }
 
-    fun getChangeNumber(): Long = changeNumbersDao.getChangeNumber()
-    fun setChangeNumber(changeNumber: Long) = changeNumbersDao.setChangeNumber(changeNumber)
-    fun deleteAllChanges() {
+    suspend fun checkForChanges(): PicsChangesResult = withContext(Dispatchers.IO) {
+        val currentChangeNumber = getChangeNumber()
+        runCatching {
+            val result = picsClient.getChangesSince(currentChangeNumber)
+
+            setChangeNumber(result.currentChangeNumber)
+
+            PicsChangesResult(
+                success = true,
+                currentChangeNumber = result.currentChangeNumber,
+                appChanges = result.appChanges,
+                packageChanges = result.packageChanges,
+                needsFullUpdate = result.needsFullUpdate,
+            )
+        }.getOrElse {
+            PicsChangesResult(success = false, currentChangeNumber = currentChangeNumber)
+        }
+    }
+
+    suspend fun getChangeNumber(): Long {
+        return changeNumbersDao.getByAppId(GLOBAL_PICS_APP_ID)?.changeNumber ?: 0L
+    }
+
+    suspend fun setChangeNumber(changeNumber: Long) {
+        changeNumbersDao.insert(GLOBAL_PICS_APP_ID, changeNumber)
+    }
+
+    suspend fun deleteAllChanges() {
         changeNumbersDao.deleteAll()
         fileChangeListsDao.deleteAll()
     }

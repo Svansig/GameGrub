@@ -2,6 +2,7 @@ package app.gamegrub.service.steam.managers
 
 import android.content.Context
 import app.gamegrub.PrefManager
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.di.SteamAppInfoClient
 import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamStatsClient
@@ -115,11 +116,16 @@ class SteamAchievementManager @Inject constructor(
     }
 
     private fun findSteamSettingsDir(context: Context, appId: Int): String? {
-        val appDir = File(SteamUtils.getAppDirPath(appId), "steam_settings")
-        if (File(appDir, "achievement_name_to_block.json").exists()) return appDir.absolutePath
+        val appDir: java.io.File = java.io.File(SteamService.getAppDirPath(appId), "steam_settings")
+        val appMapping: java.io.File = java.io.File(appDir, "achievement_name_to_block.json")
+        if (appMapping.isFile) {
+            return appDir.path
+        }
         val container = ContainerUtils.getContainer(context, "STEAM_$appId")
-        val coldClient = File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steam_settings")
-        if (File(coldClient, "achievement_name_to_block.json").exists()) return coldClient.absolutePath
+        val coldClient: java.io.File = java.io.File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steam_settings")
+        if (java.io.File(coldClient, "achievement_name_to_block.json").isFile) {
+            return coldClient.path
+        }
         return null
     }
 

@@ -1,6 +1,6 @@
 package app.gamegrub.service.steam.managers
 
-import app.gamegrub.data.DownloadInfo
+import app.gamegrub.data.AppInfo
 import app.gamegrub.data.DownloadingAppInfo
 import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.ChangeNumbersDao
@@ -16,21 +16,37 @@ class DownloadManager @Inject constructor(
     private val changeNumbersDao: ChangeNumbersDao,
     private val fileChangeListsDao: FileChangeListsDao,
 ) {
-    fun getDownloadingAppInfo(appId: Int): DownloadingAppInfo? = downloadingAppInfoDao.getDownloadingApp(appId)
-    fun getAllDownloadingApps(): List<DownloadingAppInfo> = downloadingAppInfoDao.getAll()
-    fun insertDownloadingApp(info: DownloadingAppInfo) = downloadingAppInfoDao.insert(info)
-    fun deleteDownloadingApp(appId: Int) = downloadingAppInfoDao.deleteApp(appId)
-    fun deleteAllDownloadingApps() = downloadingAppInfoDao.deleteAll()
+    // DownloadingAppInfo operations
+    suspend fun getDownloadingAppInfo(appId: Int): DownloadingAppInfo? = downloadingAppInfoDao.getDownloadingApp(appId)
+    suspend fun getAllDownloadingApps(): List<DownloadingAppInfo> = downloadingAppInfoDao.getAll()
+    suspend fun insertDownloadingApp(info: DownloadingAppInfo) = downloadingAppInfoDao.insert(info)
+    suspend fun deleteDownloadingApp(appId: Int) = downloadingAppInfoDao.deleteApp(appId)
+    suspend fun deleteAllDownloadingApps() = downloadingAppInfoDao.deleteAll()
 
-    fun getInstalledApp(appId: Int) = appInfoDao.getInstalledApp(appId)
-    fun insertAppInfo(info: app.gamegrub.data.AppInfo) = appInfoDao.insert(info)
-    fun updateAppInfo(info: app.gamegrub.data.AppInfo) = appInfoDao.update(info)
-    fun deleteAppInfo(appId: Int) = appInfoDao.deleteApp(appId)
+    // AppInfo operations
+    suspend fun getInstalledApp(appId: Int): AppInfo? = appInfoDao.getInstalledApp(appId)
+    suspend fun insertAppInfo(info: AppInfo) = appInfoDao.insert(info)
+    suspend fun updateAppInfo(info: AppInfo) = appInfoDao.update(info)
+    suspend fun deleteAppInfo(appId: Int) = appInfoDao.deleteApp(appId)
 
-    fun deleteChangeNumbersByApp(appId: Int) = changeNumbersDao.deleteByAppId(appId)
-    fun deleteFileChangeListsByApp(appId: Int) = fileChangeListsDao.deleteByAppId(appId)
+    // Change numbers operations
+    suspend fun deleteChangeNumbersByApp(appId: Int) = changeNumbersDao.deleteByAppId(appId)
+    suspend fun deleteAllChangeNumbers() = changeNumbersDao.deleteAll()
 
-    fun clearAll() {
+    // File change lists operations
+    suspend fun deleteFileChangeListsByApp(appId: Int) = fileChangeListsDao.deleteByAppId(appId)
+    suspend fun deleteAllFileChangeLists() = fileChangeListsDao.deleteAll()
+
+    // Composite: delete all data for an app (used when deleting app)
+    suspend fun deleteAppData(appId: Int) {
+        appInfoDao.deleteApp(appId)
+        changeNumbersDao.deleteByAppId(appId)
+        fileChangeListsDao.deleteByAppId(appId)
+        downloadingAppInfoDao.deleteApp(appId)
+    }
+
+    // Composite: clear all download-related data (used on logout)
+    suspend fun clearAll() {
         appInfoDao.deleteAll()
         changeNumbersDao.deleteAll()
         fileChangeListsDao.deleteAll()

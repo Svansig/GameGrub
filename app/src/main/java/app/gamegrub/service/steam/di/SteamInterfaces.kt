@@ -220,6 +220,12 @@ data class AppGameData(
  * Abstraction for encrypted app ticket operations.
  */
 interface SteamTicketClient {
+    /** Get cached ticket if fresh (within 30 min), null if stale or missing. */
     suspend fun getEncryptedAppTicket(appId: Int): ByteArray?
+
+    /** Fetch ticket from Steam API, cache it, and return it. Returns null on failure. */
+    suspend fun fetchAndCacheEncryptedAppTicket(appId: Int): ByteArray?
+
     suspend fun storeEncryptedAppTicket(appId: Int, ticket: ByteArray)
+    fun clearAllTickets()
 }

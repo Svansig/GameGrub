@@ -2,7 +2,7 @@ package app.gamegrub.service.steam.managers
 
 import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamFriend
-import app.gamegrub.events.AndroidEvent
+import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.di.GameEventEmitter
 import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamPersona
@@ -28,8 +28,8 @@ class SteamFriendsManager @Inject constructor(
 
     suspend fun setPersonaState(state: EPersonaState) = withContext(Dispatchers.IO) {
         try {
-            userClient.setPersonaState(state.code)
-            preferences.personaState = state.code
+            userClient.setPersonaState(state.code())
+            preferences.personaState = state.code()
         } catch (e: Exception) {
             Timber.e(e, "Failed to set persona state")
         }
@@ -77,15 +77,15 @@ class SteamFriendsManager @Inject constructor(
                 PrefManager.steamUserAccountId = `in`.dragonbra.javasteam.types.SteamID(friendSteamId).accountID.toInt()
             }
         } else {
-            eventEmitter.emitAndroidEvent(
-                AndroidEvent.PersonaStateReceived(
-                    SteamID = friendSteamId,
-                    personaName = personaName,
-                    avatarHash = avatarHash,
-                    gamePlayedID = gamePlayedID,
-                    gamePlayedName = gamePlayedName,
-                    personaState = personaState,
-                    friendRelationship = friendRelationship,
+            eventEmitter.emitSteamEvent(
+                SteamEvent.PersonaStateReceived(
+                    persona = SteamFriend(
+                        avatarHash = avatarHash ?: "",
+                        gameAppID = gamePlayedID ?: 0,
+                        gameName = gamePlayedName ?: "",
+                        name = personaName ?: "",
+                        state = EPersonaState.from(personaState ?: EPersonaState.Offline.code()),
+                    ),
                 ),
             )
         }

@@ -49,11 +49,14 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
+import app.gamegrub.service.steam.managers.DownloadManager
+import app.gamegrub.service.steam.managers.PicsChangesManager
 import app.gamegrub.service.steam.managers.SteamAchievementManager
 import app.gamegrub.service.steam.managers.SteamAuthService
 import app.gamegrub.service.steam.managers.SteamCloudSavesManager
 import app.gamegrub.service.steam.managers.SteamFriendsManager
 import app.gamegrub.service.steam.managers.SteamLibraryManager
+import app.gamegrub.service.steam.managers.SteamTicketManager
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatType
 import app.gamegrub.statsgen.StatsAchievementsGenerator
@@ -231,6 +234,18 @@ class SteamService : Service(), IChallengeUrlChanged {
     @Inject
     lateinit var downloadingAppInfoDao: DownloadingAppInfoDao
 
+    @Inject
+    lateinit var libraryManager: SteamLibraryManager
+
+    @Inject
+    lateinit var downloadManager: DownloadManager
+
+    @Inject
+    lateinit var picsChangesManager: PicsChangesManager
+
+    @Inject
+    lateinit var ticketManager: SteamTicketManager
+
     private lateinit var notificationHelper: NotificationHelper
 
     internal var callbackManager: CallbackManager? = null
@@ -296,36 +311,24 @@ class SteamService : Service(), IChallengeUrlChanged {
     )
     val localPersona = _localPersona.asStateFlow()
 
-    internal val authService = SteamAuthService(
-        getService = { this },
-        onLoginSuccess = { username, clientId, accessToken, refreshToken -> },
-        onLoginFailure = { username, result, message -> },
-    )
-    internal val libraryManager = SteamLibraryManager(
-        appDao = appDao,
-        licenseDao = licenseDao,
-        appInfoDao = appInfoDao,
-        cachedLicenseDao = cachedLicenseDao,
-        downloadingAppInfoDao = downloadingAppInfoDao,
-        getService = { this },
-    )
-    internal val cloudSavesManager = SteamCloudSavesManager(
-        getService = { this },
-        getAppInfo = { appId -> appDao.findApp(appId) },
-        getClientId = { PrefManager.clientId },
-    )
-    internal val achievementManager = SteamAchievementManager(
-        getService = { this },
-    )
-    internal val friendsManager = SteamFriendsManager(
-        getService = { this },
-    )
+    @Inject
+    lateinit var authService: SteamAuthService
+
+    @Inject
+    lateinit var cloudSavesManager: SteamCloudSavesManager
+
+    @Inject
+    lateinit var achievementManager: SteamAchievementManager
+
+    @Inject
+    lateinit var friendsManager: SteamFriendsManager
 
     companion object {
         const val MAX_PICS_BUFFER = 256
         const val MAX_RETRY_ATTEMPTS = 20
         const val INVALID_APP_ID: Int = Int.MAX_VALUE
         const val INVALID_PKG_ID: Int = Int.MAX_VALUE
+        private const val STEAM_CONTROLLER_CONFIG_FILENAME = "steam_controller.vdf"
 
         var requestTimeout = 30.seconds
         var responseTimeout = 120.seconds
@@ -540,7 +543,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         suspend fun getOwnedAppDlc(appId: Int): Map<Int, DepotInfo> {
             val client = instance?.steamClient ?: return emptyMap()
             client.steamID?.accountID?.toInt() ?: return emptyMap()
-            val steamId = userSteamId ?: return@withContext
+            val steamId = userSteamId ?: return emptyMap()
             val ownedGameIds = getOwnedGames(steamId.convertToUInt64()).map { it.appId }.toHashSet()
 
             return getAppDlc(appId).filter { (_, depot) ->
@@ -596,26 +599,6 @@ class SteamService : Service(), IChallengeUrlChanged {
          * @return number of newly discovered appIds that were scheduled for PICS.
          */
         suspend fun refreshOwnedGamesFromServer(): Int = requireInstance().libraryManager.refreshOwnedGamesFromServer()
-
-                val localAppIds = service.appDao.getAllAppIds().toSet()
-                val missingAppIds = remoteAppIds - localAppIds
-                if (missingAppIds.isEmpty()) {
-                    return@runCatching 0
-                }
-
-                missingAppIds
-                    .chunked(MAX_PICS_BUFFER)
-                    .forEach { chunk ->
-                        val requests = chunk.map { PICSRequest(id = it) }
-                        service.appPicsChannel.send(requests)
-                    }
-
-                missingAppIds.size
-            }.onFailure { error ->
-                Timber.tag("SteamService")
-                    .e(error, "Failed to refresh owned games from server")
-            }.getOrDefault(0)
-        }
 
         /**
          * Common Filter for downloadable depots
@@ -988,22 +971,16 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun deleteApp(appId: Int): Boolean {
-            // snapshot path before marker removal (removing the marker changes resolution)
             val appDirPath = getAppDirPath(appId)
             MarkerUtils.removeMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-            val svc = instance ?: return@withContext false
+            val svc = instance ?: return false
             svc.scope.launch {
                 svc.db.withTransaction {
-                    appInfoDao.deleteApp(appId)
-                    changeNumbersDao.deleteByAppId(appId)
-                    fileChangeListsDao.deleteByAppId(appId)
-                    downloadingAppInfoDao.deleteApp(appId)
+                    svc.downloadManager.deleteAppData(appId)
 
                     val indirectDlcAppIds = getDownloadableDlcAppsOf(appId).orEmpty().map { it.id }
                     indirectDlcAppIds.forEach { dlcAppId ->
-                        appInfoDao.deleteApp(dlcAppId)
-                        changeNumbersDao.deleteByAppId(dlcAppId)
-                        fileChangeListsDao.deleteByAppId(dlcAppId)
+                        svc.downloadManager.deleteAppData(dlcAppId)
                     }
                 }
             }
@@ -1490,7 +1467,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     Timber.i("Resumed download: initialized with $persistedBytes bytes")
                 }
 
-                val svc = instance ?: return@withContext null
+                val svc = instance ?: return null
                 val downloadJob = svc.scope.launch {
                     try {
                         // Get licenses from database
@@ -2058,7 +2035,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                                                 } else if (ignorePendingOperations &&
                                                     pendingRemoteOperations.any {
                                                         it.operation ==
-                                                            SteammessagesClientObjects.ECloudPendingRemoteOperation.k_ECloudPendingRemoteOperationAppSessionActive
+                                                            SteammessagesClientObjects.ECloudPendingRemoteOperation
+                                                                .k_ECloudPendingRemoteOperationAppSessionActive
                                                     }
                                                 ) {
                                                     steamInstance._steamUser?.kickPlayingSession()
@@ -2256,17 +2234,17 @@ class SteamService : Service(), IChallengeUrlChanged {
             password: String,
             rememberSession: Boolean,
             authenticator: IAuthenticator,
-        ) = requireInstance().authService.startLoginWithCredentials(
+        ) = requireInstance().authService.loginWithCredentials(
             username = username,
             password = password,
             rememberSession = rememberSession,
             authenticator = authenticator,
         )
 
-        suspend fun startLoginWithQr() = requireInstance().authService.startLoginWithQr()
+        suspend fun startLoginWithQr() = requireInstance().authService.loginWithQr()
 
         fun stopLoginWithQr() {
-            requireInstance().authService.stopLoginWithQr()
+            requireInstance().authService.cancelQrLogin()
         }
 
         fun stop() {
@@ -2278,7 +2256,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun logOut() {
-            requireInstance().authService.logOut(clearCloudSyncState = true)
+            requireInstance().authService.logOut()
             isLoggingOut = true
         }
 
@@ -2307,18 +2285,15 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun clearDatabase(clearCloudSyncState: Boolean = false) {
-            with(instance!!) {
-                scope.launch {
-                    db.withTransaction {
-                        appDao.deleteAll()
-                        if (clearCloudSyncState) {
-                            changeNumbersDao.deleteAll()
-                            fileChangeListsDao.deleteAll()
-                        }
-                        licenseDao.deleteAll()
-                        encryptedAppTicketDao.deleteAll()
-                        downloadingAppInfoDao.deleteAll()
+            val svc = instance ?: return
+            svc.scope.launch {
+                svc.db.withTransaction {
+                    svc.libraryManager.clearAllLibraryData()
+                    if (clearCloudSyncState) {
+                        svc.picsChangesManager.deleteAllChanges()
                     }
+                    svc.downloadManager.clearAll()
+                    svc.ticketManager.clearAllTickets()
                 }
             }
         }
@@ -2456,8 +2431,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         suspend fun generateAchievements(appId: Int, configDirectory: String) {
             val mgr = requireInstance().achievementManager
             mgr.generateAchievements(appId, configDirectory)
-            cachedAchievements = mgr.cachedAchievements
-            cachedAchievementsAppId = mgr.cachedAchievementsAppId
+            cachedAchievements = mgr.cachedAchievements.value
+            cachedAchievementsAppId = mgr.cachedAchievementsAppId.value
         }
 
         fun clearCachedAchievements() {
@@ -2487,84 +2462,6 @@ class SteamService : Service(), IChallengeUrlChanged {
                 gseStatsDir = gseStatsDir,
             ) ?: Result.failure(IllegalStateException("Service not available"))
         }
-                    val blockId = (block.achievementId as? Number)?.toInt() ?: continue
-                    var bitmask = 0
-                    val unlockTimes = block.unlockTime ?: emptyList()
-                    for (i in unlockTimes.indices) {
-                        val t = unlockTimes[i]
-                        if ((t as? Number)?.toLong() != 0L) bitmask = bitmask or (1 shl i)
-                    }
-                    allStats[blockId] = bitmask
-                }
-
-                // Merge in newly unlocked achievements
-                for (name in unlockedNames) {
-                    val (blockId, bitIndex) = nameToBlockBit[name] ?: continue
-                    val current = allStats.getOrDefault(blockId, 0)
-                    allStats[blockId] = current or (1 shl bitIndex)
-                }
-            }
-
-            // Merge GSE stat files using schema from getUserStats for name->id mapping
-            if (gseStatsDir.isDirectory) {
-                val statNameToId = mutableMapOf<String, Int>()
-                try {
-                    val parsedSchema = VdfParser().binaryLoads(userStats.schema.toByteArray())
-                    for ((_, appData) in parsedSchema) {
-                        if (appData !is Map<*, *>) continue
-                        val statInfo = (appData as Map<String, Any>)["stats"] as? Map<String, Any> ?: continue
-                        for ((statKey, statData) in statInfo) {
-                            if (statData !is Map<*, *>) continue
-                            val stat = statData as Map<String, Any>
-                            val statType = stat["type"]?.toString() ?: continue
-                            if (statType == StatType.STAT_TYPE_BITS || statType == StatType.ACHIEVEMENTS) continue
-                            val name = stat["name"]?.toString()?.lowercase() ?: continue
-                            val id = statKey.toIntOrNull() ?: continue
-                            statNameToId[name] = id
-                        }
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "Failed to parse schema for stat name mapping, appId=$appId")
-                }
-
-                if (statNameToId.isNotEmpty()) {
-                    for (statFile in gseStatsDir.listFiles() ?: emptyArray()) {
-                        if (!statFile.isFile) continue
-                        val statId = statNameToId[statFile.name.lowercase()] ?: continue
-                        val bytes = statFile.readBytes()
-                        if (bytes.size >= 4) {
-                            val value = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).int
-                            allStats[statId] = value
-                            Timber.d("Read GSE stat: ${statFile.name} -> statId=$statId, value=$value")
-                        }
-                    }
-                }
-            }
-
-            if (allStats.isEmpty()) {
-                Timber.d("No stats or achievements to store for appId=$appId")
-                return@runCatching
-            }
-
-            val statsToStore = allStats.map { (id, value) -> Stats(statId = id, statValue = value) }
-            Timber.d("storeUserStats: appId=$appId, crcStats=${userStats.crcStats}, stats=$statsToStore")
-            val mySteamId = steamUser.steamID!!
-            val callback = instance?._steamUserStats!!.storeUserStats(
-                appId, statsToStore, mySteamId, mySteamId, userStats.crcStats,
-            ).await()
-            if (callback.result != EResult.OK) {
-                throw IllegalStateException("storeUserStats failed: ${callback.result}")
-            }
-            if (callback.statsOutOfDate) {
-                Timber.w("Stats were out of date on server for appId=$appId")
-            }
-            if (callback.statsFailedValidation.isNotEmpty()) {
-                Timber.w("${callback.statsFailedValidation.size} stats failed validation for appId=$appId")
-                callback.statsFailedValidation.forEach { f ->
-                    Timber.w("  statId=${f.statId} reverted to ${f.revertedStatValue}")
-                }
-            }
-        }
     }
 
     override fun onCreate() {
@@ -2586,9 +2483,9 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         // clear stale download records (completed games) but keep interrupted ones (preserves DLC selection)
         scope.launch {
-            for (record in downloadingAppInfoDao.getAll()) {
+            for (record in downloadManager.getAllDownloadingApps()) {
                 if (isAppInstalled(record.appId)) {
-                    downloadingAppInfoDao.deleteApp(record.appId)
+                    downloadManager.deleteDownloadingApp(record.appId)
                 }
             }
         }
@@ -3068,7 +2965,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                             name = playerName,
                             state = state,
                             gameAppID = callback.gamePlayedAppId,
-                            gameName = appDao.findApp(callback.gamePlayedAppId)?.name ?: callback.gameName,
+                            gameName = requireInstance().libraryManager.findApp(callback.gamePlayedAppId)?.name ?: callback.gameName,
                         )
                     }
 
@@ -3093,17 +2990,12 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         scope.launch {
             db.withTransaction {
-                // Note: I assume with every launch we do, in fact, update the licenses for app the apps if we join or get removed
-                //      from family sharing... We really can't test this as there is a 1-year cooldown.
-                //      Then 'findStaleLicences' will find these now invalid items to remove.
-
-                // Store raw licenses for DepotDownloader - each license in its own row
                 licenses = callback.licenseList
-                cachedLicenseDao.deleteAll()
+                libraryManager.deleteAllCachedLicenses()
                 val cachedLicenses = callback.licenseList.map { license ->
                     CachedLicense(licenseJson = LicenseSerializer.serializeLicense(license))
                 }
-                cachedLicenseDao.insertAll(cachedLicenses)
+                libraryManager.insertAllCachedLicenses(cachedLicenses)
 
                 val licensesToAdd = callback.licenseList
                     .groupBy { it.packageID }
@@ -3130,27 +3022,27 @@ class SteamService : Service(), IChallengeUrlChanged {
                             licenseType = preferred.licenseType,
                             territoryCode = preferred.territoryCode,
                             accessToken = preferred.accessToken,
-                            ownerAccountId = licensesEntry.value.map { it.ownerAccountID }, // Read note above
+                            ownerAccountId = licensesEntry.value.map { it.ownerAccountID },
                             masterPackageID = preferred.masterPackageID,
                         )
                     }
 
                 if (licensesToAdd.isNotEmpty()) {
                     Timber.i("Adding ${licensesToAdd.size} licenses")
-                    licenseDao.insertAll(licensesToAdd)
+                    libraryManager.insertAllLicenses(licensesToAdd)
                 }
 
-                val licensesToRemove = licenseDao.findStaleLicences(
+                val licensesToRemove = libraryManager.findStaleLicenses(
                     packageIds = callback.licenseList.map { it.packageID },
                 )
                 if (licensesToRemove.isNotEmpty()) {
                     Timber.i("Removing ${licensesToRemove.size} (stale) licenses")
                     val packageIds = licensesToRemove.map { it.packageId }
-                    licenseDao.deleteStaleLicenses(packageIds)
+                    libraryManager.deleteStaleLicenses(packageIds)
                 }
 
                 // Get PICS information with the current license database.
-                licenseDao.getAllLicenses()
+                libraryManager.getAllLicenses()
                     .map { PICSRequest(it.packageId, it.accessToken) }
                     .chunked(MAX_PICS_BUFFER)
                     .forEach { chunk ->
@@ -3183,11 +3075,11 @@ class SteamService : Service(), IChallengeUrlChanged {
             // Initial delay before each check
             delay(60.seconds)
 
-            PICSChangesCheck()
+            picsChangesCheck()
         }
     }
 
-    private fun PICSChangesCheck() {
+    private fun picsChangesCheck() {
         scope.launch {
             ensureActive()
 
@@ -3222,8 +3114,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 launch {
                     changesSince.appChanges.values
                         .filter { changeData ->
-                            // only queue PICS requests for apps existing in the db that have changed
-                            val app = appDao.findApp(changeData.id) ?: return@filter false
+                            val app = libraryManager.findApp(changeData.id) ?: return@filter false
                             changeData.changeNumber != app.lastChangeNumber
                         }
                         .map { PICSRequest(id = it.id) }
@@ -3235,12 +3126,10 @@ class SteamService : Service(), IChallengeUrlChanged {
                         }
                 }
 
-                // Process any package changes
                 launch {
                     val pkgsWithChanges = changesSince.packageChanges.values
                         .filter { changeData ->
-                            // only queue PICS requests for pkgs existing in the db that have changed
-                            val pkg = licenseDao.findLicense(changeData.id) ?: return@filter false
+                            val pkg = libraryManager.findLicense(changeData.id) ?: return@filter false
                             changeData.changeNumber != pkg.lastChangeNumber
                         }
 
@@ -3299,15 +3188,10 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                         ensureActive()
                         val steamAppsMap = picsCallback.apps.values.mapNotNull { app ->
-                            val appFromDb = appDao.findApp(app.id)
+                            val appFromDb = libraryManager.findApp(app.id)
                             val packageId = appFromDb?.packageId ?: INVALID_PKG_ID
-                            val packageFromDb = if (packageId != INVALID_PKG_ID) licenseDao.findLicense(packageId) else null
+                            val packageFromDb = if (packageId != INVALID_PKG_ID) libraryManager.findLicense(packageId) else null
                             val ownerAccountId = packageFromDb?.ownerAccountId ?: emptyList()
-
-                            // Apps with -1 for the ownerAccountId should be added.
-                            //  This can help with friend game names.
-
-                            // TODO maybe apps with -1 for the ownerAccountId can be stripped with necessities and name.
 
                             if (app.changeNumber != appFromDb?.lastChangeNumber) {
                                 app.keyValues.generateSteamApp().copy(
@@ -3327,7 +3211,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         if (steamAppsMap.isNotEmpty()) {
                             Timber.i("Inserting ${steamAppsMap.size} PICS apps to database")
                             db.withTransaction {
-                                appDao.insertAll(steamAppsMap)
+                                libraryManager.insertAllApps(steamAppsMap)
                             }
                         }
                     }
@@ -3405,68 +3289,9 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
     }
 
-    /**
-     * Get encrypted app ticket for an app, with 30-minute caching.
-     * Returns the serialized protobuf bytes, or null if unavailable.
-     */
-    suspend fun getEncryptedAppTicket(appId: Int): ByteArray? {
-        return try {
-            // Check database for existing ticket less than 30 minutes old
-            val cachedTicket = encryptedAppTicketDao.getByAppId(appId)
-            val now = System.currentTimeMillis()
-            val thirtyMinutes = 30 * 60 * 1000L
+    suspend fun getEncryptedAppTicket(appId: Int): ByteArray? =
+        requireInstance().ticketManager.getEncryptedAppTicket(appId)
 
-            if (cachedTicket != null && (now - cachedTicket.timestamp) < thirtyMinutes) {
-                Timber.d("Using cached encrypted app ticket protobuf for app $appId")
-                return cachedTicket.encryptedTicket
-            }
-
-            // Request new ticket from Steam
-            val steamApps = instance?._steamApps ?: null
-            val response = try {
-                withTimeout(5_000) {
-                    steamApps?.requestEncryptedAppTicket(appId)?.await()
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to request encrypted app ticket for app $appId")
-                return null
-            }
-
-            if (response?.result != EResult.OK || response.encryptedAppTicket == null) {
-                Timber.w("Failed to get encrypted app ticket for app $appId: ${response?.result}")
-                return null
-            }
-
-            // Extract all fields from the protobuf message
-            val ticketProto = response.encryptedAppTicket
-            val ticket = EncryptedAppTicket(
-                appId = appId,
-                result = response.result.code(),
-                ticketVersionNo = ticketProto!!.ticketVersionNo.toInt(),
-                crcEncryptedTicket = ticketProto.crcEncryptedticket.toInt(),
-                cbEncryptedUserData = ticketProto.cbEncrypteduserdata.toInt(),
-                cbEncryptedAppOwnershipTicket = ticketProto.cbEncryptedAppownershipticket.toInt(),
-                encryptedTicket = ticketProto.toByteArray(),
-                timestamp = now,
-            )
-
-            // Store in database
-            encryptedAppTicketDao.insert(ticket)
-            Timber.d("Stored new encrypted app ticket protobuf for app $appId")
-
-            ticket.encryptedTicket
-        } catch (e: Exception) {
-            Timber.e(e, "Error getting encrypted app ticket for app $appId")
-            null
-        }
-    }
-
-    /**
-     * Get encrypted app ticket as base64 encoded string, with 30-minute caching.
-     * Returns the base64 encoded ticket, or null if unavailable.
-     */
-    suspend fun getEncryptedAppTicketBase64(appId: Int): String? {
-        val ticket = getEncryptedAppTicket(appId) ?: return null
-        return Base64.encodeToString(ticket, Base64.NO_WRAP)
-    }
+    suspend fun getEncryptedAppTicketBase64(appId: Int): String? =
+        requireInstance().ticketManager.getEncryptedAppTicketBase64(appId)
 }

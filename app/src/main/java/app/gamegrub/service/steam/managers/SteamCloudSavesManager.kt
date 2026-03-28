@@ -70,7 +70,7 @@ class SteamCloudSavesManager @Inject constructor(
                         syncResult = PostSyncInfo(
                             SyncResult.Success,
                             uploadsCompleted = result.uploadsCompleted,
-                            downloadsCompleted = result.downloadsCompleted,
+                            filesDownloaded = if (result.downloadsCompleted) 1 else 0,
                         )
                     }
                     break

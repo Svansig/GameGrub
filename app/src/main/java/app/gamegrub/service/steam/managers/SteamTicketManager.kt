@@ -11,9 +11,17 @@ import javax.inject.Singleton
 class SteamTicketManager @Inject constructor(
     private val ticketClient: SteamTicketClient,
 ) {
+    /**
+     * Get encrypted app ticket, fetching from Steam if cache is stale.
+     * Returns the ticket bytes, or null if unavailable.
+     */
     suspend fun getEncryptedAppTicket(appId: Int): ByteArray? = withContext(Dispatchers.IO) {
         try {
-            ticketClient.getEncryptedAppTicket(appId)
+            val cached = ticketClient.getEncryptedAppTicket(appId)
+            if (cached != null) {
+                return@withContext cached
+            }
+            ticketClient.fetchAndCacheEncryptedAppTicket(appId)
         } catch (e: Exception) {
             Timber.e(e, "Failed to get encrypted app ticket for $appId")
             null
@@ -31,5 +39,9 @@ class SteamTicketManager @Inject constructor(
         } catch (e: Exception) {
             Timber.e(e, "Failed to store encrypted app ticket for $appId")
         }
+    }
+
+    fun clearAllTickets() {
+        ticketClient.clearAllTickets()
     }
 }

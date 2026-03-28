@@ -39,19 +39,24 @@ object SteamModule {
 
     @Provides
     @Singleton
-    fun provideSteamStatsClient(provider: SteamClientProvider, appInfoClient: SteamAppInfoClient): SteamStatsClient = SteamStatsClientAdapter(provider, appInfoClient)
+    fun provideSteamStatsClient(provider: SteamClientProvider): SteamStatsClient = SteamStatsClientAdapter(provider)
 
     @Provides
     @Singleton
-    fun provideSteamAppInfoClient(appDao: SteamAppDao, appInfoDao: AppInfoDao): SteamAppInfoClient = SteamAppInfoClientAdapter(appDao, appInfoDao)
+    fun provideSteamAppInfoClient(
+        appDao: SteamAppDao,
+        appInfoDao: AppInfoDao,
+    ): SteamAppInfoClient = SteamAppInfoClientAdapter(appDao, appInfoDao)
 
     @Provides
     @Singleton
-    fun provideSteamPicsClient(provider: SteamClientProvider): SteamPicsClient = SteamPicsClientAdapter(provider)
+    fun provideSteamPicsClient(): SteamPicsClient = SteamPicsClientAdapter()
 
     @Provides
     @Singleton
-    fun provideSteamTicketClient(encryptedAppTicketDao: EncryptedAppTicketDao): SteamTicketClient = SteamTicketClientAdapter(encryptedAppTicketDao)
+    fun provideSteamTicketClient(
+        encryptedAppTicketDao: EncryptedAppTicketDao,
+    ): SteamTicketClient = SteamTicketClientAdapter(encryptedAppTicketDao)
 
     @Provides
     @Singleton

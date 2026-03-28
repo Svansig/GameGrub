@@ -127,22 +127,32 @@ ui/util/                       # ✅ UI-specific utilities
 
 ---
 
-## Phase 3: SteamService Decomposition 🔲 PENDING
+## Phase 3: SteamService Decomposition ✅ IN PROGRESS
 
 ### Current State
-- `SteamService.kt` is ~3800 lines
-- Handles: authentication, library sync, cloud saves, achievements, input, friends
+- `SteamService.kt` reduced from ~3800 lines
+- **All DAO access removed** from SteamService - now uses managers
+- Hilt DI infrastructure in place
 
-### Proposed Decomposition
+### Managers Created
 ```
-service/steam/
-├── SteamService.kt              # Core service (reduced)
-├── SteamAuthService.kt          # Authentication & login
-├── SteamLibraryManager.kt       # Game library sync
-├── SteamCloudSavesManager.kt    # Cloud save management
-├── SteamAchievementManager.kt   # Achievement tracking
-├── SteamInputManager.kt         # Controller input
-└── SteamFriendsManager.kt       # Friends & chat
+service/steam/managers/
+├── SteamAuthService.kt          # ✅ Authentication flows
+├── SteamLibraryManager.kt       # ✅ Library, licenses, depot info
+├── SteamCloudSavesManager.kt    # ✅ Cloud save sync
+├── SteamAchievementManager.kt   # ✅ Achievement tracking
+├── SteamFriendsManager.kt       # ✅ Persona state, friends
+├── DownloadManager.kt           # ✅ Download tracking
+├── PicsChangesManager.kt        # ✅ PICS change tracking
+└── SteamTicketManager.kt        # ✅ Encrypted app tickets
+```
+
+### DI Infrastructure
+```
+service/steam/di/
+├── SteamInterfaces.kt           # ✅ All interface contracts
+├── SteamAdapters.kt             # ✅ All adapter implementations
+└── SteamModule.kt               # ✅ Hilt @Provides bindings
 ```
 
 ---
@@ -153,7 +163,7 @@ service/steam/
 |----------|------|--------|
 | ~~High~~ | Fix Steam service inconsistency | ✅ Done |
 | ~~Medium~~ | Reorganize utils/ into subfolders | ✅ Done |
-| Low | Decompose SteamService.kt | 🔲 Pending |
+| ~~High~~ | Decompose SteamService.kt | ✅ In Progress |
 | Low | Add more unit tests | 🔲 Pending |
 
 ---
@@ -169,7 +179,8 @@ service/steam/
 
 ## Next Steps
 
-1. Decompose `SteamService.kt` into focused managers
-2. Add unit tests for moved utilities
-3. Update documentation/README with new structure
-4. Consider adding KDoc comments to public APIs
+1. ~~Decompose `SteamService.kt` into focused managers~~ ✅ Done
+2. Continue extracting remaining logic from SteamService to managers
+3. Add unit tests for moved utilities and managers
+4. Update documentation/README with new structure
+5. Consider adding KDoc comments to public APIs

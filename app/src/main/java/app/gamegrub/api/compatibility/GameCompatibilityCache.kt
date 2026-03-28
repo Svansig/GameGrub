@@ -86,7 +86,8 @@ class GameCompatibilityCache @Inject constructor(
     private fun persistCache() {
         scope.launch {
             try {
-                val cacheJson = Json.Default.encodeToString(cache)
+                val cacheSnapshot: Map<String, CachedEntry> = cache.toMap()
+                val cacheJson = Json.Default.encodeToString(cacheSnapshot)
                 cacheFile.writeText(cacheJson)
                 Timber.Forest.tag("GameCompatibilityCache").d("Persisted ${cache.size} entries")
             } catch (e: Exception) {

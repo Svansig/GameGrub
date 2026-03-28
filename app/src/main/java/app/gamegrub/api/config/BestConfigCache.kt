@@ -85,7 +85,8 @@ class BestConfigCache @Inject constructor(
     private fun persistCache() {
         scope.launch {
             try {
-                val cacheJson = Json.encodeToString(cache)
+                val cacheSnapshot: Map<String, CachedEntry> = cache.toMap()
+                val cacheJson = Json.encodeToString(cacheSnapshot)
                 cacheFile.writeText(cacheJson)
                 Timber.tag("BestConfigCache").d("Persisted ${cache.size} entries")
             } catch (e: Exception) {

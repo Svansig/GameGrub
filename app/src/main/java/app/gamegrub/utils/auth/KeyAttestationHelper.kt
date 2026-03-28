@@ -1,5 +1,8 @@
 package app.gamegrub.utils.auth
 
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -24,6 +27,12 @@ import timber.log.Timber
 object KeyAttestationHelper {
 
     private const val TAG = "KeyAttestationHelper"
+    private const val STRONGBOX_UNKNOWN = -1
+    private const val STRONGBOX_UNSUPPORTED = 0
+    private const val STRONGBOX_SUPPORTED = 1
+
+    @Volatile
+    private var hasLoggedAttestationUnavailable = false
 
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
@@ -44,11 +53,23 @@ object KeyAttestationHelper {
         }
     }
 
-    fun generateAttestedKey(nonce: String): List<String> {
+    fun generateAttestedKey(context: Context, nonce: String): List<String> {
         val alias = "key_attestation_${System.nanoTime()}"
         val challengeBytes = nonce.toByteArray(Charsets.UTF_8)
 
-        generateKeyPair(alias, challengeBytes, useStrongBox = true)
+        val advertisedStrongBox = isStrongBoxAdvertised(context)
+        val cachedStrongBoxState = PrefManager.strongBoxSupportState
+        val shouldUseStrongBox = advertisedStrongBox && cachedStrongBoxState != STRONGBOX_UNSUPPORTED
+
+        if (!advertisedStrongBox) {
+            PrefManager.strongBoxSupportState = STRONGBOX_UNSUPPORTED
+            Timber.tag(TAG).d("StrongBox not advertised by PackageManager; using TEE")
+        }
+
+        val usedStrongBox = generateKeyPair(alias, challengeBytes, useStrongBox = shouldUseStrongBox)
+        if (usedStrongBox) {
+            PrefManager.strongBoxSupportState = STRONGBOX_SUPPORTED
+        }
 
         val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
         val chain = keyStore.getCertificateChain(alias)
@@ -57,7 +78,7 @@ object KeyAttestationHelper {
         return result
     }
 
-    private fun generateKeyPair(alias: String, challenge: ByteArray, useStrongBox: Boolean) {
+    private fun generateKeyPair(alias: String, challenge: ByteArray, useStrongBox: Boolean): Boolean {
         try {
             val specBuilder = KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_SIGN)
                 .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
@@ -74,10 +95,12 @@ object KeyAttestationHelper {
             )
             keyPairGenerator.initialize(specBuilder.build())
             keyPairGenerator.generateKeyPair()
+            return useStrongBox
         } catch (e: ProviderException) {
             if (useStrongBox) {
+                PrefManager.strongBoxSupportState = STRONGBOX_UNSUPPORTED
                 Timber.tag(TAG).w("StrongBox failed, falling back to TEE: ${e.message}")
-                generateKeyPair(alias, challenge, useStrongBox = false)
+                return generateKeyPair(alias, challenge, useStrongBox = false)
             } else {
                 throw e
             }
@@ -89,16 +112,45 @@ object KeyAttestationHelper {
      * in API request bodies. Returns null if attestation is unavailable or fails
      * for any reason, allowing the app to continue without attestation.
      */
-    suspend fun getAttestationFields(baseUrl: String): Pair<String, List<String>>? {
+    suspend fun getAttestationFields(context: Context, baseUrl: String): Pair<String, List<String>>? {
         return try {
             val nonce = fetchNonce(baseUrl)
-            val chain = generateAttestedKey(nonce)
+            val chain = generateAttestedKey(context, nonce)
             PrefManager.keyAttestationAvailable = true
             Pair(nonce, chain)
         } catch (e: Exception) {
-            Timber.tag(TAG).e(e, "Key attestation failed, continuing without it")
+            if (isExpectedAttestationUnavailable(e)) {
+                // Many devices/ROMs cannot produce attestable hardware keys; continue without hard failure.
+                if (!hasLoggedAttestationUnavailable) {
+                    Timber.tag(TAG).w("Key attestation unavailable on this device; continuing without it")
+                    hasLoggedAttestationUnavailable = true
+                } else {
+                    Timber.tag(TAG).d("Key attestation unavailable; continuing without it")
+                }
+            } else {
+                Timber.tag(TAG).e(e, "Key attestation failed, continuing without it")
+            }
             PrefManager.keyAttestationAvailable = false
             null
         }
+    }
+
+    private fun isExpectedAttestationUnavailable(error: Throwable): Boolean {
+        if (error is ProviderException) {
+            return true
+        }
+
+        val message = error.message?.lowercase().orEmpty()
+        return message.contains("attestation") ||
+            message.contains("failed to generate key pair") ||
+            message.contains("strongbox")
+    }
+
+    private fun isStrongBoxAdvertised(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+            return false
+        }
+
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
     }
 }

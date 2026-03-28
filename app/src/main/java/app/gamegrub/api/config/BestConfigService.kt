@@ -11,6 +11,7 @@ import app.gamegrub.utils.manifest.ManifestContentTypes
 import app.gamegrub.utils.manifest.ManifestEntry
 import app.gamegrub.utils.manifest.ManifestRepository
 import app.gamegrub.utils.network.Net
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.winlator.box86_64.Box86_64PresetManager
 import com.winlator.container.Container
 import com.winlator.contents.ContentProfile
@@ -34,6 +35,7 @@ import javax.inject.Singleton
 @Singleton
 class BestConfigService @Inject constructor(
     private val cache: BestConfigCache,
+    @ApplicationContext private val context: Context,
 ) {
     private val httpClient = Net.http
 
@@ -94,8 +96,10 @@ class BestConfigService @Inject constructor(
                 put("gpuName", gpuName)
             }
 
-            val attestation =
-                KeyAttestationHelper.getAttestationFields("https://api.gamenative.app")
+            val attestation = KeyAttestationHelper.getAttestationFields(
+                context = context,
+                baseUrl = "https://api.gamenative.app",
+            )
             if (attestation != null) {
                 requestBody.put("nonce", attestation.first)
                 requestBody.put("attestationChain", JSONArray(attestation.second))

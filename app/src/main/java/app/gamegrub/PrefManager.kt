@@ -1152,6 +1152,11 @@ object PrefManager {
         get() = getPref(KEY_ATTESTATION_AVAILABLE, false)
         set(value) = setPref(KEY_ATTESTATION_AVAILABLE, value)
 
+    private val STRONGBOX_SUPPORT_STATE = intPreferencesKey("strongbox_support_state")
+    var strongBoxSupportState: Int
+        get() = getPref(STRONGBOX_SUPPORT_STATE, -1)
+        set(value) = setPref(STRONGBOX_SUPPORT_STATE, value)
+
     private val PLAY_INTEGRITY_AVAILABLE = booleanPreferencesKey("play_integrity_available")
     var playIntegrityAvailable: Boolean
         get() = getPref(PLAY_INTEGRITY_AVAILABLE, false)

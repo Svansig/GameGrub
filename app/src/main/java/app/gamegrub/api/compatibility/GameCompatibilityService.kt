@@ -7,6 +7,7 @@ import app.gamegrub.api.compatibility.GameCompatibilityCache
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.network.Net
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,7 @@ import timber.log.Timber
 @Singleton
 class GameCompatibilityService @Inject constructor(
     private val cache: GameCompatibilityCache,
+    @ApplicationContext private val context: Context,
 ) {
     private val httpClient = Net.http
 
@@ -116,7 +118,10 @@ class GameCompatibilityService @Inject constructor(
                 put("gpuName", gpuName)
             }
 
-            val attestation = KeyAttestationHelper.getAttestationFields("https://api.gamenative.app")
+            val attestation = KeyAttestationHelper.getAttestationFields(
+                context = context,
+                baseUrl = "https://api.gamenative.app",
+            )
             if (attestation != null) {
                 requestBody.put("nonce", attestation.first)
                 requestBody.put("attestationChain", JSONArray(attestation.second))

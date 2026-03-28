@@ -2,13 +2,13 @@ package app.gamegrub.utils.container
 
 import android.content.Context
 import app.gamegrub.PrefManager
+import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
-import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.general.IntentLaunchManager
 import app.gamegrub.utils.steam.SteamUtils

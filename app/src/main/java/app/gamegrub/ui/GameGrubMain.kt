@@ -53,6 +53,8 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.PrefManager
 import app.gamegrub.R
+import app.gamegrub.api.compatibility.GameFeedbackUtils
+import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult
@@ -87,9 +89,7 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.auth.PlatformAuthUtils
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.LaunchDependencies
-import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.game.CustomGameScanner
-import app.gamegrub.utils.game.GameFeedbackUtils
 import app.gamegrub.utils.general.IntentLaunchManager
 import app.gamegrub.utils.general.UpdateInstaller
 import app.gamegrub.utils.manifest.ManifestInstaller

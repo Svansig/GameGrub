@@ -3,8 +3,8 @@ package app.gamegrub.ui.utils
 import android.content.Context
 import android.net.Uri
 import app.gamegrub.R
+import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.manifest.ManifestInstaller
 import java.io.IOException
 import kotlinx.coroutines.CancellationException

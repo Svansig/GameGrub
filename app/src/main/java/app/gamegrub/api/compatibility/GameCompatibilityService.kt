@@ -1,37 +1,29 @@
-package app.gamegrub.utils.game
+package app.gamegrub.api.compatibility
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.R
+import app.gamegrub.api.compatibility.GameCompatibilityCache
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.network.Net
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
 
-/**
- * Service for fetching game compatibility information from GameNative API.
- */
-object GameCompatibilityService {
-    private const val API_BASE_URL = "https://api.gamenative.app/api/game-runs"
+@Singleton
+class GameCompatibilityService @Inject constructor(
+    private val cache: GameCompatibilityCache,
+) {
     private val httpClient = Net.http
 
-    /**
-     * Data class for API request.
-     */
-    data class GameCompatibilityRequest(
-        val gameNames: List<String>,
-        val gpuName: String,
-    )
-
-    /**
-     * Data class for API response per game.
-     */
     data class GameCompatibilityResponse(
         val gameName: String,
         val totalPlayableCount: Int,
@@ -41,56 +33,93 @@ object GameCompatibilityService {
         val isNotWorking: Boolean,
     )
 
-    /**
-     * Compatibility message with text and color.
-     */
     data class CompatibilityMessage(
         val text: String,
         val color: Color,
     )
 
-    /**
-     * Gets user-friendly compatibility message based on compatibility response.
-     * Uses totalPlayableCount and gpuPlayableCount to determine the message.
-     */
     fun getCompatibilityMessageFromResponse(context: Context, response: GameCompatibilityResponse): CompatibilityMessage {
         return when {
             response.totalPlayableCount > 0 && response.gpuPlayableCount > 0 ->
-                CompatibilityMessage(context.getString(R.string.best_config_exact_gpu_match), Color.Green)
+                CompatibilityMessage(context.getString(R.string.best_config_exact_gpu_match), Color.Companion.Green)
 
             response.gpuPlayableCount == 0 && response.totalPlayableCount > 0 ->
-                CompatibilityMessage(context.getString(R.string.best_config_fallback_match), Color.Yellow)
+                CompatibilityMessage(context.getString(R.string.best_config_fallback_match), Color.Companion.Yellow)
 
             response.isNotWorking ->
-                CompatibilityMessage(context.getString(R.string.library_not_compatible), Color.Red)
+                CompatibilityMessage(context.getString(R.string.library_not_compatible), Color.Companion.Red)
 
             else ->
-                CompatibilityMessage(context.getString(R.string.library_compatibility_unknown), Color.Gray)
+                CompatibilityMessage(context.getString(R.string.library_compatibility_unknown), Color.Companion.Gray)
         }
     }
 
-    /**
-     * Fetches compatibility information for a batch of games.
-     * Returns a map of game name to compatibility response, or null on error.
-     */
-    suspend fun fetchCompatibility(
+    suspend fun getCompatibilityMessageForGame(
+        context: Context,
+        gameName: String,
+        gpuName: String,
+    ): CompatibilityMessage? {
+        if (gameName.isBlank() || gpuName.isBlank() || gpuName == "Unknown GPU") {
+            return null
+        }
+
+        val responses = getCompatibility(listOf(gameName), gpuName)
+        val response = responses[gameName] ?: responses.values.firstOrNull {
+            it.gameName.equals(gameName, ignoreCase = true)
+        }
+
+        return response?.let { getCompatibilityMessageFromResponse(context, it) }
+    }
+
+    suspend fun getCompatibility(
         gameNames: List<String>,
         gpuName: String,
-    ): Map<String, GameCompatibilityResponse>? = withContext(Dispatchers.IO) {
+    ): Map<String, GameCompatibilityResponse> = withContext(Dispatchers.IO) {
         if (gameNames.isEmpty()) {
             return@withContext emptyMap()
         }
 
+        val result = mutableMapOf<String, GameCompatibilityResponse>()
+
+        for (gameName in gameNames) {
+            cache.getCached(gameName)?.let { cached ->
+                result[gameName] = cached
+            }
+        }
+
+        val uncached = gameNames.filter { it !in result }
+        if (uncached.isEmpty()) {
+            Timber.Forest.tag("GameCompatibilityService").d("All ${gameNames.size} games from cache")
+            return@withContext result
+        }
+
+        Timber.Forest.tag("GameCompatibilityService").d("Cache hit: ${result.size}, fetching: ${uncached.size}")
+
+        val fetched = fetchFromApi(uncached, gpuName)
+        if (fetched != null) {
+            cache.cacheAll(fetched)
+            result.putAll(fetched)
+        }
+
+        result
+    }
+
+    fun clearCache() = cache.clear()
+
+    private suspend fun fetchFromApi(
+        gameNames: List<String>,
+        gpuName: String,
+    ): Map<String, GameCompatibilityResponse>? = withContext(Dispatchers.IO) {
         try {
             val requestBody = JSONObject().apply {
-                put("gameNames", org.json.JSONArray(gameNames))
+                put("gameNames", JSONArray(gameNames))
                 put("gpuName", gpuName)
             }
 
             val attestation = KeyAttestationHelper.getAttestationFields("https://api.gamenative.app")
             if (attestation != null) {
                 requestBody.put("nonce", attestation.first)
-                requestBody.put("attestationChain", org.json.JSONArray(attestation.second))
+                requestBody.put("attestationChain", JSONArray(attestation.second))
             }
 
             val mediaType = "application/json".toMediaType()
@@ -110,8 +139,7 @@ object GameCompatibilityService {
 
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    Timber.tag("GameCompatibilityService")
-                        .w("API request failed - HTTP ${response.code}")
+                    Timber.Forest.tag("GameCompatibilityService").w("API request failed - HTTP ${response.code}")
                     return@withContext null
                 }
 
@@ -137,14 +165,16 @@ object GameCompatibilityService {
                     result[gameName] = compatibilityResponse
                 }
 
-                Timber.tag("GameCompatibilityService")
-                    .d("Fetched compatibility for ${result.size} games")
+                Timber.Forest.tag("GameCompatibilityService").d("Fetched compatibility for ${result.size} games")
                 result
             }
         } catch (e: Exception) {
-            Timber.tag("GameCompatibilityService")
-                .e(e, "Error fetching compatibility data: ${e.message}")
+            Timber.Forest.tag("GameCompatibilityService").e(e, "Error fetching compatibility data: ${e.message}")
             null
         }
+    }
+
+    companion object {
+        private const val API_BASE_URL = "https://api.gamenative.app/api/game-runs"
     }
 }

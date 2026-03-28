@@ -30,6 +30,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import app.gamegrub.GameGrubApp
 import app.gamegrub.R
+import app.gamegrub.api.compatibility.GameCompatibilityService
+import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.PathType
@@ -52,9 +54,6 @@ import app.gamegrub.ui.screen.library.GameMigrationDialog
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
-import app.gamegrub.utils.game.BestConfigService
-import app.gamegrub.utils.game.GameCompatibilityCache
-import app.gamegrub.utils.game.GameCompatibilityService
 import app.gamegrub.utils.manifest.ManifestInstaller
 import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.storage.MarkerUtils
@@ -65,6 +64,10 @@ import com.winlator.container.ContainerData
 import com.winlator.container.ContainerManager
 import com.winlator.core.GPUInformation
 import com.winlator.xenvironment.ImageFsInstaller
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.io.File
 import java.nio.file.Paths
 import kotlin.io.path.pathString
@@ -73,6 +76,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface GameCompatibilityServiceEntryPoint {
+    fun gameCompatibilityService(): GameCompatibilityService
+}
 
 private data class InstallSizeInfo(
     val downloadSize: String,
@@ -327,6 +336,11 @@ class SteamAppScreen : BaseAppScreen() {
         libraryItem: LibraryItem,
     ): GameDisplayInfo {
         val gameId = libraryItem.gameId
+        val gameCompatibilityService = remember(context.applicationContext) {
+            EntryPointAccessors
+                .fromApplication(context.applicationContext, GameCompatibilityServiceEntryPoint::class.java)
+                .gameCompatibilityService()
+        }
         val appInfo = remember(libraryItem.appId) {
             SteamService.getAppInfoOf(gameId)
         } ?: return GameDisplayInfo(
@@ -430,14 +444,20 @@ class SteamAppScreen : BaseAppScreen() {
             }
         }
 
-        // Fetch compatibility info from cache
+        // Fetch compatibility via service (cache/network handled internally)
         var compatibilityMessage by remember { mutableStateOf<String?>(null) }
         var compatibilityColor by remember { mutableStateOf<ULong?>(null) }
         LaunchedEffect(isInstalled, gameId, appInfo.name) {
             try {
-                val cachedResponse = GameCompatibilityCache.getCached(appInfo.name)
-                if (cachedResponse != null) {
-                    val message = GameCompatibilityService.getCompatibilityMessageFromResponse(context, cachedResponse)
+                val gpuName = GPUInformation.getRenderer(context)
+
+                val message = gameCompatibilityService.getCompatibilityMessageForGame(
+                    context = context,
+                    gameName = appInfo.name,
+                    gpuName = gpuName,
+                )
+
+                if (message != null) {
                     compatibilityMessage = message.text
                     compatibilityColor = message.color.value
                 } else {
@@ -445,7 +465,7 @@ class SteamAppScreen : BaseAppScreen() {
                     compatibilityColor = null
                 }
             } catch (e: Exception) {
-                Timber.tag("SteamAppScreen").e(e, "Failed to get compatibility from cache")
+                Timber.tag("SteamAppScreen").e(e, "Failed to get compatibility data")
                 compatibilityMessage = null
                 compatibilityColor = null
             }

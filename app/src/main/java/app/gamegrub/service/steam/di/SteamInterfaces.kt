@@ -166,6 +166,38 @@ data class AchievementBlock(
 )
 
 /**
+ * Abstraction for PICS (Product Info) operations.
+ */
+interface SteamPicsClient {
+    suspend fun getChangesSince(changeNumber: Long): PicsChanges
+    suspend fun getProductInfo(appIds: Set<Int>, packageIds: Set<Int>): PicsProductInfo
+}
+
+data class PicsChanges(
+    val currentChangeNumber: Long,
+    val appChanges: Set<Int>,
+    val packageChanges: Set<Int>,
+    val needsFullUpdate: Boolean,
+)
+
+data class PicsProductInfo(
+    val apps: Map<Int, PicsAppInfo>,
+    val packages: Map<Int, PicsPackageInfo>,
+)
+
+data class PicsAppInfo(
+    val changeNumber: Long,
+    val common: Map<String, String>,
+)
+
+data class PicsPackageInfo(
+    val changeNumber: Long,
+    val common: Map<String, String>,
+    val appIds: Set<Int>,
+    val depotIds: Set<Int>,
+)
+
+/**
  * Abstraction for app info access.
  */
 interface SteamAppInfoClient {
@@ -183,3 +215,11 @@ data class AppGameData(
     val name: String,
     val packageName: String?,
 )
+
+/**
+ * Abstraction for encrypted app ticket operations.
+ */
+interface SteamTicketClient {
+    suspend fun getEncryptedAppTicket(appId: Int): ByteArray?
+    suspend fun storeEncryptedAppTicket(appId: Int, ticket: ByteArray)
+}

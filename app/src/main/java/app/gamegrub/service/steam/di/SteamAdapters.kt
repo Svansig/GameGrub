@@ -71,6 +71,7 @@ class SteamConnectionAdapter @Inject constructor(
 class SteamClientProvider @Inject constructor() {
     var client: SteamClient? = null
     var steamUser: SteamUser? = null
+    var steamApps: `in`.dragonbra.javasteam.steam.handlers.steamapps.SteamApps? = null
     var steamCloud: `in`.dragonbra.javasteam.steam.handlers.steamcloud.SteamCloud? = null
     var steamUserStats: `in`.dragonbra.javasteam.steam.handlers.steamuserstats.SteamUserStats? = null
 }
@@ -424,4 +425,85 @@ class SteamPreferencesAdapter @Inject constructor() : SteamPreferences {
     override var steamUserAccountId: Int
         get() = PrefManager.steamUserAccountId
         set(value) { PrefManager.steamUserAccountId = value }
+}
+
+@Singleton
+class SteamPicsClientAdapter @Inject constructor(
+    private val clientProvider: SteamClientProvider,
+) : SteamPicsClient {
+
+    override suspend fun getChangesSince(changeNumber: Long): PicsChanges {
+        val steamApps = clientProvider.steamApps
+            ?: return PicsChanges(0, emptySet(), emptySet(), false)
+        return try {
+            val result = steamApps.picsGetChangesSince(changeNumber, false, false).await()
+            PicsChanges(
+                currentChangeNumber = result.currentChangeNumber,
+                appChanges = result.appChanges?.keys ?: emptySet(),
+                packageChanges = result.packageChanges?.keys ?: emptySet(),
+                needsFullUpdate = result.appChangesToken?.isNotEmpty() == true || result.packageChangesToken?.isNotEmpty() == true,
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get PICS changes")
+            PicsChanges(0, emptySet(), emptySet(), false)
+        }
+    }
+
+    override suspend fun getProductInfo(appIds: Set<Int>, packageIds: Set<Int>): PicsProductInfo {
+        val steamApps = clientProvider.steamApps
+            ?: return PicsProductInfo(emptyMap(), emptyMap())
+        return try {
+            val appRequests = appIds.map { PICSRequest(appId = it) }
+            val pkgRequests = packageIds.map { PICSRequest(packageId = it) }
+            val result = steamApps.getPICSProductInfo(appRequests, pkgRequests).await()
+
+            val apps = result?.apps?.mapValues { (_, info) ->
+                PicsAppInfo(
+                    changeNumber = info.changenumber,
+                    common = info.common?.keyValues?.associate { it.name to it.value } ?: emptyMap(),
+                )
+            } ?: emptyMap()
+
+            val packages = result?.packages?.mapValues { (_, info) ->
+                PicsPackageInfo(
+                    changeNumber = info.changenumber,
+                    common = info.common?.keyValues?.associate { it.name to it.value } ?: emptyMap(),
+                    appIds = info.appIds?.keys ?: emptySet(),
+                    depotIds = info.depotIds?.keys ?: emptySet(),
+                )
+            } ?: emptyMap()
+
+            PicsProductInfo(apps, packages)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get PICS product info")
+            PicsProductInfo(emptyMap(), emptyMap())
+        }
+    }
+}
+
+@Singleton
+class SteamTicketClientAdapter @Inject constructor(
+    private val encryptedAppTicketDao: app.gamegrub.db.dao.EncryptedAppTicketDao,
+) : SteamTicketClient {
+
+    override suspend fun getEncryptedAppTicket(appId: Int): ByteArray? {
+        val cached = encryptedAppTicketDao.getByAppId(appId) ?: return null
+        val ageMs = System.currentTimeMillis() - cached.timestampMs
+        return if (ageMs < 30 * 60 * 1000) { // 30 minutes
+            android.util.Base64.decode(cached.ticketBase64, android.util.Base64.DEFAULT)
+        } else {
+            null
+        }
+    }
+
+    override suspend fun storeEncryptedAppTicket(appId: Int, ticket: ByteArray) {
+        val ticketBase64 = android.util.Base64.encodeToString(ticket, android.util.Base64.DEFAULT)
+        encryptedAppTicketDao.insert(
+            app.gamegrub.data.EncryptedAppTicket(
+                appId = appId,
+                ticketBase64 = ticketBase64,
+                timestampMs = System.currentTimeMillis(),
+            )
+        )
+    }
 }

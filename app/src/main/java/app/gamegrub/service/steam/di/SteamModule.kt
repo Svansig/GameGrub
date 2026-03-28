@@ -1,6 +1,7 @@
 package app.gamegrub.service.steam.di
 
 import app.gamegrub.db.dao.AppInfoDao
+import app.gamegrub.db.dao.EncryptedAppTicketDao
 import app.gamegrub.db.dao.SteamAppDao
 import dagger.Module
 import dagger.Provides
@@ -43,6 +44,14 @@ object SteamModule {
     @Provides
     @Singleton
     fun provideSteamAppInfoClient(appDao: SteamAppDao, appInfoDao: AppInfoDao): SteamAppInfoClient = SteamAppInfoClientAdapter(appDao, appInfoDao)
+
+    @Provides
+    @Singleton
+    fun provideSteamPicsClient(provider: SteamClientProvider): SteamPicsClient = SteamPicsClientAdapter(provider)
+
+    @Provides
+    @Singleton
+    fun provideSteamTicketClient(encryptedAppTicketDao: EncryptedAppTicketDao): SteamTicketClient = SteamTicketClientAdapter(encryptedAppTicketDao)
 
     @Provides
     @Singleton

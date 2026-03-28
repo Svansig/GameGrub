@@ -2687,6 +2687,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             steamClientProvider.client = steamClient
             steamClientProvider.steamUser = _steamUser
+            steamClientProvider.steamApps = _steamApps
             steamClientProvider.steamCloud = _steamCloud
             steamClientProvider.steamUserStats = _steamUserStats
 
@@ -2830,6 +2831,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         steamClientProvider.client = null
         steamClientProvider.steamUser = null
+        steamClientProvider.steamApps = null
         steamClientProvider.steamCloud = null
         steamClientProvider.steamUserStats = null
 

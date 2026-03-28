@@ -502,7 +502,7 @@ class GOGManager @Inject constructor(
         }
     }
 
-    fun isGameInstalled(context: Context, libraryItem: LibraryItem): Boolean {
+    suspend fun isGameInstalled(context: Context, libraryItem: LibraryItem): Boolean {
         try {
             val appDirPath = getAppDirPath(libraryItem.appId)
 
@@ -514,11 +514,11 @@ class GOGManager @Inject constructor(
 
             // Update database if status changed
             val gameId = libraryItem.gameId.toString()
-            val game = runBlocking { getGameFromDbById(gameId) }
+            val game = getGameFromDbById(gameId)
             if (game != null && isInstalled != game.isInstalled) {
                 val installPath = if (isInstalled) getGameInstallPath(gameId, libraryItem.name) else ""
                 val updatedGame = game.copy(isInstalled = isInstalled, installPath = installPath)
-                runBlocking { gogGameDao.update(updatedGame) }
+                gogGameDao.update(updatedGame)
             }
 
             return isInstalled
@@ -528,8 +528,8 @@ class GOGManager @Inject constructor(
         }
     }
 
-    fun verifyInstallation(gameId: String): Pair<Boolean, String?> {
-        val game = runBlocking { getGameFromDbById(gameId) }
+    suspend fun verifyInstallation(gameId: String): Pair<Boolean, String?> {
+        val game = getGameFromDbById(gameId)
         val installPath = game?.installPath
 
         if (game == null || installPath == null || !game.isInstalled) {
@@ -679,7 +679,7 @@ class GOGManager @Inject constructor(
         }
     }
 
-    fun getGogWineStartCommand(
+    suspend fun getGogWineStartCommand(
         libraryItem: LibraryItem,
         container: Container,
         bootToContainer: Boolean,
@@ -695,7 +695,7 @@ class GOGManager @Inject constructor(
             return "\"explorer.exe\""
         }
 
-        val game = runBlocking { getGameFromDbById(gameId.toString()) }
+        val game = getGameFromDbById(gameId.toString())
         if (game == null) {
             Timber.e("Game not found for ID: $gameId")
             return "\"explorer.exe\""
@@ -714,7 +714,7 @@ class GOGManager @Inject constructor(
             Timber.d("Using configured executable path from container: ${container.executablePath}")
             container.executablePath
         } else {
-            val detectedPath = runBlocking { getInstalledExe(libraryItem) }
+            val detectedPath = getInstalledExe(libraryItem)
             Timber.d("Auto-detected executable path: $detectedPath")
             if (detectedPath.isNotEmpty()) {
                 container.executablePath = detectedPath
@@ -799,9 +799,9 @@ class GOGManager @Inject constructor(
      * _gog_manifest.json). Used by LaunchSteps to prepend to the game launch command so it runs
      * in the same Wine session. Returns empty list if not needed or not available.
      */
-    fun getScriptInterpreterPartsForLaunch(appId: String): List<String> {
+    suspend fun getScriptInterpreterPartsForLaunch(appId: String): List<String> {
         val gameId = ContainerUtils.extractGameIdFromContainerId(appId) ?: return emptyList()
-        val game = runBlocking { getGameFromDbById(gameId.toString()) } ?: return emptyList()
+        val game = getGameFromDbById(gameId.toString()) ?: return emptyList()
         val computedPath = getGameInstallPath(gameId.toString(), game.title)
         val gameInstallPath = when {
             game.installPath.isNotEmpty() && File(game.installPath).exists() -> game.installPath
@@ -854,6 +854,10 @@ class GOGManager @Inject constructor(
         }
 
         return parts
+    }
+
+    fun getScriptInterpreterPartsForLaunchSync(appId: String): List<String> = runBlocking {
+        getScriptInterpreterPartsForLaunch(appId)
     }
 
     // ==========================================================================
@@ -1223,9 +1227,9 @@ class GOGManager @Inject constructor(
     // FILE SYSTEM & PATHS
     // ==========================================================================
 
-    fun getAppDirPath(appId: String): String {
+    suspend fun getAppDirPath(appId: String): String {
         val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
-        val game = runBlocking { getGameFromDbById(gameId.toString()) }
+        val game = getGameFromDbById(gameId.toString())
 
         if (game != null) {
             return GOGConstants.getGameInstallPath(game.title)

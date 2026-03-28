@@ -8,10 +8,10 @@ import com.winlator.contents.AdrenotoolsManager
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
 import java.io.File
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
 data class ManifestInstallResult(
@@ -123,63 +123,56 @@ object ManifestInstaller {
         mgr: ContentsManager,
         uri: Uri,
     ): Triple<ContentProfile?, ContentsManager.InstallFailedReason?, Exception?> = withContext(Dispatchers.IO) {
-        var profile: ContentProfile? = null
-        var failReason: ContentsManager.InstallFailedReason? = null
-        var err: Exception? = null
-        val latch = CountDownLatch(1)
+        val deferred = CompletableDeferred<Triple<ContentProfile?, ContentsManager.InstallFailedReason?, Exception?>>()
         try {
             mgr.extraContentFile(
                 uri,
                 object : ContentsManager.OnInstallFinishedCallback {
                     override fun onFailed(reason: ContentsManager.InstallFailedReason, e: Exception) {
-                        failReason = reason
-                        err = e
-                        latch.countDown()
+                        deferred.complete(Triple(null, reason, e))
                     }
 
                     override fun onSucceed(profileArg: ContentProfile) {
-                        profile = profileArg
-                        latch.countDown()
+                        deferred.complete(Triple(profileArg, null, null))
                     }
                 },
             )
         } catch (e: Exception) {
-            err = e
-            latch.countDown()
+            deferred.complete(Triple(null, null, e))
         }
-        if (!latch.await(240, TimeUnit.SECONDS)) {
-            err = Exception("Installation timed out")
-        }
-        Triple(profile, failReason, err)
+        val result = withTimeoutOrNull(240_000L) {
+            deferred.await()
+        } ?: Triple(null, null, Exception("Installation timed out"))
+        result
     }
 
     private suspend fun finishInstall(
         mgr: ContentsManager,
         profile: ContentProfile,
     ): Boolean = withContext(Dispatchers.IO) {
-        var success = false
-        val latch = CountDownLatch(1)
+        val deferred = CompletableDeferred<Boolean>()
         try {
             mgr.finishInstallContent(
                 profile,
                 object : ContentsManager.OnInstallFinishedCallback {
                     override fun onFailed(reason: ContentsManager.InstallFailedReason, e: Exception) {
-                        latch.countDown()
+                        deferred.complete(false)
                     }
 
                     override fun onSucceed(profileArg: ContentProfile) {
-                        success = true
-                        latch.countDown()
+                        deferred.complete(true)
                     }
                 },
             )
         } catch (_: Exception) {
-            latch.countDown()
+            deferred.complete(false)
         }
-        if (!latch.await(240, TimeUnit.SECONDS)) {
+        val result = withTimeoutOrNull(240_000L) {
+            deferred.await()
+        } ?: run {
             Timber.w("ManifestInstaller: finishInstall timed out after 240 seconds")
-            return@withContext false
+            false
         }
-        return@withContext success
+        result
     }
 }

@@ -2,12 +2,34 @@ package app.gamegrub.utils.network
 
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
 import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
 import okhttp3.dnsoverhttps.DnsOverHttps
+import okio.IOException
 import timber.log.Timber
+
+suspend fun Call.await(): Response = suspendCancellableCoroutine { cont ->
+    enqueue(object : okhttp3.Callback {
+        override fun onResponse(call: Call, response: Response) {
+            cont.resume(response)
+        }
+
+        override fun onFailure(call: Call, e: IOException) {
+            cont.resumeWithException(e)
+        }
+    })
+    cont.invokeOnCancellation { cancel() }
+}
+
+suspend fun OkHttpClient.newCallSuspend(request: Request): Response = newCall(request).await()
 
 object Net {
 

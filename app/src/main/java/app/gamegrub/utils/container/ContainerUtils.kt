@@ -711,7 +711,7 @@ object ContainerUtils {
                 // For Amazon games, map the specific game directory to A: drive
                 val appIdInt = runCatching { extractGameIdFromContainerId(appId) }.getOrNull()
                 val installPath = if (appIdInt != null) {
-                    AmazonService.getInstallPathByAppId(appIdInt)
+                    AmazonService.getInstallPathByAppIdSync(appIdInt)
                 } else {
                     null
                 }
@@ -993,7 +993,7 @@ object ContainerUtils {
 
             GameSource.AMAZON -> {
                 val appIdInt = runCatching { extractGameIdFromContainerId(appId) }.getOrNull()
-                if (appIdInt != null) AmazonService.getInstallPathByAppId(appIdInt) else null
+                if (appIdInt != null) AmazonService.getInstallPathByAppIdSync(appIdInt) else null
             }
         }
 
@@ -1173,7 +1173,7 @@ object ContainerUtils {
 
             GameSource.EPIC -> EpicService.getEpicGameOf(gameId)?.title
 
-            GameSource.AMAZON -> AmazonService.getAmazonGameByAppId(gameId)?.title
+            GameSource.AMAZON -> AmazonService.getAmazonGameByAppIdSync(gameId)?.title
 
             GameSource.CUSTOM_GAME -> {
                 val customAppId = "${GameSource.CUSTOM_GAME.name}_$gameId"

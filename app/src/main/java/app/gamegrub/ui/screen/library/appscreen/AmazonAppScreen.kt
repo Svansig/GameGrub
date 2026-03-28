@@ -187,7 +187,7 @@ class AmazonAppScreen : BaseAppScreen() {
     }
 
     override fun isInstalled(context: Context, libraryItem: LibraryItem): Boolean =
-        AmazonService.isGameInstalledByAppId(context, libraryItem.gameId)
+        AmazonService.isGameInstalledByAppIdSync(context, libraryItem.gameId)
 
     override fun isValidToDownload(context: Context, libraryItem: LibraryItem): Boolean =
         !isInstalled(context, libraryItem) &&
@@ -200,7 +200,7 @@ class AmazonAppScreen : BaseAppScreen() {
         AmazonService.getDownloadInfoByAppId(libraryItem.gameId)?.getProgress() ?: 0f
 
     override fun hasPartialDownload(context: Context, libraryItem: LibraryItem): Boolean {
-        return AmazonService.hasPartialDownloadByAppId(context, libraryItem.gameId)
+        return AmazonService.hasPartialDownloadByAppIdSync(context, libraryItem.gameId)
     }
 
     override fun onDownloadInstallClick(
@@ -358,7 +358,7 @@ class AmazonAppScreen : BaseAppScreen() {
     }
 
     override fun getInstallPath(context: Context, libraryItem: LibraryItem): String? {
-        return AmazonService.getInstallPathByAppId(libraryItem.gameId)
+        return AmazonService.getInstallPathByAppIdSync(libraryItem.gameId)
     }
 
     override fun observeGameState(
@@ -428,7 +428,7 @@ class AmazonAppScreen : BaseAppScreen() {
                         currentDownloadInfo = null
                     }
                     // If not installed after download stopped → paused/cancelled: show Resume state
-                    val nowInstalled = AmazonService.isGameInstalledByAppId(context, gameId)
+                    val nowInstalled = AmazonService.isGameInstalledByAppIdSync(context, gameId)
                     onHasPartialDownloadChanged?.invoke(!nowInstalled && hasPartialDownload(context, libraryItem))
                 }
                 onStateChanged()

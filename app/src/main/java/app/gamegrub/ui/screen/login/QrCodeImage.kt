@@ -2,27 +2,24 @@ package app.gamegrub.ui.screen.login
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,16 +30,18 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.WriterException
+import com.google.zxing.common.BitMatrix
 import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
- * Displays a QR code for [content] at the desired [size].
+ * Displays a QR code for [content] at the specified [size].
  *
- * The QR code will render in the background before displaying. If this takes any amount of time, a circular progress
- * indicator will display until the QR code is rendered.
- * Source: https://gist.github.com/ryanholden8/6e921a4dc2a40bd40b3b5a15aaff4705
+ * Generates the QR code asynchronously with a 2-module quiet zone,
+ * error correction level M, and high-contrast black-on-white colors.
+ * Shows a loading indicator while generating.
  */
 @Composable
 fun QrCodeImage(
@@ -50,7 +49,6 @@ fun QrCodeImage(
     content: String,
     size: Dp,
 ) {
-    // QR Code Image
     val qrBitmap = rememberQrBitmap(content = content, size = size)
 
     Crossfade(
@@ -60,14 +58,14 @@ fun QrCodeImage(
         Box(
             modifier = modifier
                 .size(size)
-                .background(Color.Transparent),
+                .background(androidx.compose.ui.graphics.Color.Transparent),
             contentAlignment = Alignment.Center,
         ) {
             if (bitmap != null) {
                 val bitmapPainter = remember(bitmap) { BitmapPainter(bitmap.asImageBitmap()) }
                 Image(
                     painter = bitmapPainter,
-                    contentDescription = null,
+                    contentDescription = "QR code for Steam login",
                     contentScale = ContentScale.FillBounds,
                     modifier = Modifier.size(size),
                 )
@@ -78,65 +76,59 @@ fun QrCodeImage(
     }
 }
 
-/** Taken from: https://gist.github.com/dev-niiaddy/8f936062291e3d328c7d10bb644273d0 */
+/**
+ * Generates and remembers a QR code bitmap for the given [content] and [size].
+ * Regenerates when content or size changes, running on IO dispatcher.
+ */
 @Composable
 private fun rememberQrBitmap(content: String, size: Dp): Bitmap? {
     val density = LocalDensity.current
     val sizePx = with(density) { size.roundToPx() }
 
-    var bitmap by remember(content) {
-        mutableStateOf<Bitmap?>(null)
-    }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-    val ioScope = rememberCoroutineScope { Dispatchers.IO }
-    val bgColor = MaterialTheme.colorScheme.background.toArgb()
-    val onBgColor = MaterialTheme.colorScheme.onBackground.toArgb()
-
-    LaunchedEffect(bitmap) {
-        if (bitmap != null) return@LaunchedEffect
-
-        ioScope.launch {
-            val qrCodeWriter = QRCodeWriter()
-
-            val encodeHints = mutableMapOf<EncodeHintType, Any?>().apply {
-                this[EncodeHintType.MARGIN] = 2
-            }
-
-            val bitmapMatrix = try {
-                qrCodeWriter.encode(
-                    content,
-                    BarcodeFormat.QR_CODE,
-                    sizePx,
-                    sizePx,
-                    encodeHints,
-                )
-            } catch (ex: WriterException) {
-                null
-            }
-
-            val matrixWidth = bitmapMatrix?.width ?: sizePx
-            val matrixHeight = bitmapMatrix?.height ?: sizePx
-
-            val newBitmap = createBitmap(bitmapMatrix?.width ?: sizePx, bitmapMatrix?.height ?: sizePx)
-
-            val pixels = IntArray(matrixWidth * matrixHeight)
-
-            for (x in 0 until matrixWidth) {
-                for (y in 0 until matrixHeight) {
-                    val shouldColorPixel = bitmapMatrix?.get(x, y) ?: false
-                    val pixelColor = if (shouldColorPixel) onBgColor else bgColor
-
-                    pixels[y * matrixWidth + x] = pixelColor
-                }
-            }
-
-            newBitmap.setPixels(pixels, 0, matrixWidth, 0, 0, matrixWidth, matrixHeight)
-
-            bitmap = newBitmap
+    LaunchedEffect(content, sizePx) {
+        bitmap = null
+        bitmap = withContext(Dispatchers.IO) {
+            generateQrBitmap(content, sizePx)
         }
     }
 
     return bitmap
+}
+
+/** Generates a QR code [Bitmap] with error correction level M and 2-module margin. */
+private fun generateQrBitmap(content: String, sizePx: Int): Bitmap? {
+    val hints = mapOf(
+        EncodeHintType.MARGIN to 2,
+        EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
+    )
+
+    val matrix = try {
+        QRCodeWriter().encode(content, BarcodeFormat.QR_CODE, sizePx, sizePx, hints)
+    } catch (e: WriterException) {
+        return null
+    }
+
+    return matrix.toBitmap()
+}
+
+/** Converts a ZXing [BitMatrix] to an Android [Bitmap] with black modules on white background. */
+private fun BitMatrix.toBitmap(): Bitmap {
+    val width = width
+    val height = height
+    val pixels = IntArray(width * height)
+
+    for (y in 0 until height) {
+        val offset = y * width
+        for (x in 0 until width) {
+            pixels[offset + x] = if (get(x, y)) Color.BLACK else Color.WHITE
+        }
+    }
+
+    return createBitmap(width, height).apply {
+        setPixels(pixels, 0, width, 0, 0, width, height)
+    }
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)

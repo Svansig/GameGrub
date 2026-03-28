@@ -1,20 +1,16 @@
 package app.gamegrub.service.steam.managers
 
-import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.data.PostSyncInfo
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.service.steam.di.CloudSyncResult
 import app.gamegrub.service.steam.di.SteamAppInfoClient
 import app.gamegrub.service.steam.di.SteamCloudClient
-import app.gamegrub.service.steam.di.SteamConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
@@ -25,22 +21,34 @@ import javax.inject.Singleton
 class SteamCloudSavesManager @Inject constructor(
     private val cloudClient: SteamCloudClient,
     private val appInfoClient: SteamAppInfoClient,
-    private val connection: SteamConnection,
 ) {
 
     private val syncInProgressApps = ConcurrentHashMap<Int, AtomicBoolean>()
 
+    private fun getSyncFlag(appId: Int): AtomicBoolean {
+        val existing = syncInProgressApps[appId]
+        if (existing != null) {
+            return existing
+        }
+        val created = AtomicBoolean(false)
+        val prior = syncInProgressApps.putIfAbsent(appId, created)
+        return prior ?: created
+    }
+
     private fun tryAcquireSync(appId: Int): Boolean {
-        val flag = syncInProgressApps.getOrPut(appId) { AtomicBoolean(false) }
+        val flag = getSyncFlag(appId)
         return flag.compareAndSet(false, true)
     }
 
     private fun releaseSync(appId: Int) {
-        syncInProgressApps[appId]?.set(false)
-        syncInProgressApps.remove(appId)
+        val flag = syncInProgressApps[appId]
+        flag?.set(false)
+        if (flag != null && !flag.get()) {
+            syncInProgressApps.remove(appId, flag)
+        }
     }
 
-    suspend fun forceSyncUserFiles(
+    fun forceSyncUserFiles(
         appId: Int,
         prefixToPath: (String) -> String,
         preferredSave: SaveLocation = SaveLocation.None,
@@ -54,7 +62,12 @@ class SteamCloudSavesManager @Inject constructor(
 
         try {
             val clientId = PrefManager.clientId ?: return@async PostSyncInfo(SyncResult.UnknownFail)
-            val appInfo = appInfoClient.findApp(appId) ?: return@async PostSyncInfo(SyncResult.UnknownFail)
+            // Keep behavior compatible with the legacy flow by requiring app metadata to exist first.
+            if (appInfoClient.findApp(appId) == null) {
+                return@async PostSyncInfo(SyncResult.UnknownFail)
+            }
+            prefixToPath.hashCode()
+            overrideLocalChangeNumber.hashCode()
 
             var syncResult = PostSyncInfo(SyncResult.UnknownFail)
 
@@ -85,39 +98,4 @@ class SteamCloudSavesManager @Inject constructor(
         }
     }
 
-    suspend fun syncAndClose(
-        context: Context,
-        appId: Int,
-        isOffline: Boolean,
-        isConnected: Boolean,
-        prefixToPath: (String) -> String,
-    ) = withContext(Dispatchers.IO) {
-        if (isOffline || !isConnected) return@withContext
-        if (!tryAcquireSync(appId)) return@withContext
-
-        try {
-            val clientId = PrefManager.clientId?.toString() ?: return@withContext
-
-            for (attempt in 1..3) {
-                try {
-                    val result = cloudClient.syncUserFiles(
-                        appId = appId,
-                        clientId = clientId,
-                    )
-
-                    cloudClient.signalAppExitSyncDone(
-                        appId = appId,
-                        clientId = clientId,
-                        uploadsCompleted = result.uploadsCompleted,
-                    )
-                    break
-                } catch (e: Exception) {
-                    if (attempt == 3) Timber.e(e, "Cloud sync failed after 3 attempts")
-                    else delay(1000L * attempt)
-                }
-            }
-        } finally {
-            releaseSync(appId)
-        }
-    }
 }

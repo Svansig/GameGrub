@@ -2687,6 +2687,8 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             steamClientProvider.client = steamClient
             steamClientProvider.steamUser = _steamUser
+            steamClientProvider.steamCloud = _steamCloud
+            steamClientProvider.steamUserStats = _steamUserStats
 
             _unifiedFriends = SteamUnifiedFriends(this)
             _steamFamilyGroups = steamClient!!.getHandler<SteamUnifiedMessages>()!!.createService<FamilyGroups>()
@@ -2828,6 +2830,8 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         steamClientProvider.client = null
         steamClientProvider.steamUser = null
+        steamClientProvider.steamCloud = null
+        steamClientProvider.steamUserStats = null
 
         callbackSubscriptions.forEach { it.close() }
         callbackSubscriptions.clear()

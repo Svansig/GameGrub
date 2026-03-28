@@ -71,6 +71,8 @@ class SteamConnectionAdapter @Inject constructor(
 class SteamClientProvider @Inject constructor() {
     var client: SteamClient? = null
     var steamUser: SteamUser? = null
+    var steamCloud: `in`.dragonbra.javasteam.steam.handlers.steamcloud.SteamCloud? = null
+    var steamUserStats: `in`.dragonbra.javasteam.steam.handlers.steamuserstats.SteamUserStats? = null
 }
 
 /**
@@ -269,29 +271,117 @@ class SteamLibraryClientAdapter @Inject constructor() : SteamLibraryClient {
     }
 }
 
-/**
- * Adapter for Steam cloud operations.
- */
 @Singleton
-class SteamCloudClientAdapter @Inject constructor() : SteamCloudClient {
+class SteamCloudClientAdapter @Inject constructor(
+    private val clientProvider: SteamClientProvider,
+) : SteamCloudClient {
 
     override suspend fun signalAppExitSyncDone(
         appId: Int,
         clientId: String,
         uploadsCompleted: Boolean,
     ) {
-        val service = app.gamegrub.service.steam.SteamService.instance ?: return
-        service._steamCloud?.signalAppExitSyncDone(
+        clientProvider.steamCloud?.signalAppExitSyncDone(
             appId = appId,
             clientId = clientId,
             uploadsCompleted = uploadsCompleted,
         )
     }
+
+    override suspend fun syncUserFiles(
+        appId: Int,
+        clientId: String,
+        preferredSave: String,
+    ): CloudSyncResult {
+        return try {
+            val service = app.gamegrub.service.steam.SteamService.instance
+                ?: return CloudSyncResult(false, error = "Service not running")
+            val appInfo = service.appDao?.findApp(appId)
+                ?: return CloudSyncResult(false, error = "App not found")
+            val steamCloud = clientProvider.steamCloud
+                ?: return CloudSyncResult(false, error = "Cloud not available")
+
+            val result = app.gamegrub.service.steam.SteamAutoCloud.syncUserFiles(
+                appInfo = appInfo,
+                clientId = clientId,
+                steamInstance = service,
+                steamCloud = steamCloud,
+                preferredSave = app.gamegrub.enums.SaveLocation.valueOf(preferredSave),
+                parentScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO),
+                prefixToPath = { path -> path },
+            ).await()
+
+            CloudSyncResult(
+                success = result != null,
+                uploadsCompleted = result?.uploadsCompleted == true,
+                downloadsCompleted = result?.downloadsCompleted == true,
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Cloud sync failed")
+            CloudSyncResult(false, error = e.message)
+        }
+    }
 }
 
-/**
- * Adapter for game event emission.
- */
+@Singleton
+class SteamStatsClientAdapter @Inject constructor(
+    private val clientProvider: SteamClientProvider,
+    private val appInfoClient: SteamAppInfoClient,
+) : SteamStatsClient {
+
+    override suspend fun getUserStats(appId: Int, steamId: SteamID): UserStatsResult {
+        val stats = clientProvider.steamUserStats
+            ?: return UserStatsResult(false, ByteArray(0))
+        return try {
+            val result = stats.getUserStats(appId, steamId).await()
+            UserStatsResult(
+                success = result.result == `in`.dragonbra.javasteam.enums.EResult.OK,
+                schema = result.schema?.toByteArray() ?: ByteArray(0),
+                achievementBlocks = result.achievementBlocks?.map { block ->
+                    AchievementBlock(
+                        achievementId = (block.achievementId as? Number)?.toInt() ?: 0,
+                        unlockTimes = block.unlockTime ?: emptyList(),
+                    )
+                } ?: emptyList(),
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get user stats")
+            UserStatsResult(false, ByteArray(0))
+        }
+    }
+
+    override suspend fun storeStats(appId: Int, stats: Map<Int, Int>, achievements: Map<Int, Boolean>): Boolean {
+        val statsClient = clientProvider.steamUserStats ?: return false
+        return try {
+            statsClient.storeStats(appId, stats, achievements).await()
+            true
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to store stats")
+            false
+        }
+    }
+
+    override fun getSchema(appId: Int): ByteArray? {
+        return null
+    }
+}
+
+@Singleton
+class SteamAppInfoClientAdapter @Inject constructor(
+    private val appDao: app.gamegrub.db.dao.SteamAppDao,
+    private val appInfoDao: app.gamegrub.db.dao.AppInfoDao,
+) : SteamAppInfoClient {
+
+    override fun getAppInfo(appId: Int): AppInfoData? {
+        val info = appInfoDao.getInstalledApp(appId) ?: return null
+        return AppInfoData(appId = info.appId, installPath = info.installPath)
+    }
+
+    override fun findApp(appId: Int): AppGameData? {
+        val app = appDao.findApp(appId) ?: return null
+        return AppGameData(appId = app.appId, name = app.name, packageName = app.packageName)
+    }
+}
 @Singleton
 class GameEventEmitterAdapter @Inject constructor() : GameEventEmitter {
 

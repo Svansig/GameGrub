@@ -5,10 +5,10 @@ import app.gamegrub.PrefManager
 import app.gamegrub.data.PostSyncInfo
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.service.steam.SteamAutoCloud
+import app.gamegrub.service.steam.di.CloudSyncResult
+import app.gamegrub.service.steam.di.SteamAppInfoClient
 import app.gamegrub.service.steam.di.SteamCloudClient
 import app.gamegrub.service.steam.di.SteamConnection
-import `in`.dragonbra.javasteam.steam.steamclient.AsyncJobFailedException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class SteamCloudSavesManager @Inject constructor(
     private val cloudClient: SteamCloudClient,
+    private val appInfoClient: SteamAppInfoClient,
     private val connection: SteamConnection,
 ) {
 
@@ -52,27 +53,28 @@ class SteamCloudSavesManager @Inject constructor(
         }
 
         try {
+            val clientId = PrefManager.clientId ?: return@async PostSyncInfo(SyncResult.UnknownFail)
+            val appInfo = appInfoClient.findApp(appId) ?: return@async PostSyncInfo(SyncResult.UnknownFail)
+
             var syncResult = PostSyncInfo(SyncResult.UnknownFail)
-            val service = app.gamegrub.service.steam.SteamService.instance ?: return@async syncResult
-            val clientId = PrefManager.clientId ?: return@async syncResult
-            val appInfo = service.appDao?.findApp(appId) ?: return@async syncResult
-            val steamCloud = service._steamCloud ?: return@async syncResult
 
             for (attempt in 1..3) {
                 try {
-                    val postSyncInfo = SteamAutoCloud.syncUserFiles(
-                        appInfo = appInfo,
-                        clientId = clientId,
-                        steamInstance = service,
-                        steamCloud = steamCloud,
-                        preferredSave = preferredSave,
-                        parentScope = parentScope,
-                        prefixToPath = prefixToPath,
-                        overrideLocalChangeNumber = overrideLocalChangeNumber,
-                    ).await()
-                    postSyncInfo?.let { syncResult = it }
+                    val result = cloudClient.syncUserFiles(
+                        appId = appId,
+                        clientId = clientId.toString(),
+                        preferredSave = preferredSave.name,
+                    )
+
+                    if (result.success) {
+                        syncResult = PostSyncInfo(
+                            SyncResult.Success,
+                            uploadsCompleted = result.uploadsCompleted,
+                            downloadsCompleted = result.downloadsCompleted,
+                        )
+                    }
                     break
-                } catch (e: AsyncJobFailedException) {
+                } catch (e: Exception) {
                     if (attempt == 3) Timber.e(e, "Cloud sync failed after 3 attempts")
                     else delay(1000L * attempt)
                 }
@@ -94,36 +96,19 @@ class SteamCloudSavesManager @Inject constructor(
         if (!tryAcquireSync(appId)) return@withContext
 
         try {
-            val service = app.gamegrub.service.steam.SteamService.instance ?: return@withContext
-            val clientId = PrefManager.clientId ?: return@withContext
-            val appInfo = service.appDao?.findApp(appId) ?: return@withContext
-            val steamCloud = service._steamCloud ?: return@withContext
-
-            try {
-                service._steamUserStats?.let { userStats ->
-                    service._steamUser?.steamID?.let { steamId ->
-                        userStats.getUserStats(appId, steamId).await()
-                    }
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Achievement sync failed for $appId")
-            }
+            val clientId = PrefManager.clientId?.toString() ?: return@withContext
 
             for (attempt in 1..3) {
                 try {
-                    val postSyncInfo = SteamAutoCloud.syncUserFiles(
-                        appInfo = appInfo,
+                    val result = cloudClient.syncUserFiles(
+                        appId = appId,
                         clientId = clientId,
-                        steamInstance = service,
-                        steamCloud = steamCloud,
-                        parentScope = this,
-                        prefixToPath = prefixToPath,
-                    ).await()
+                    )
 
                     cloudClient.signalAppExitSyncDone(
                         appId = appId,
                         clientId = clientId,
-                        uploadsCompleted = postSyncInfo?.uploadsCompleted == true,
+                        uploadsCompleted = result.uploadsCompleted,
                     )
                     break
                 } catch (e: Exception) {

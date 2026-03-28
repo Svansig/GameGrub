@@ -2,7 +2,9 @@ package app.gamegrub.service.steam.managers
 
 import android.content.Context
 import app.gamegrub.PrefManager
+import app.gamegrub.service.steam.di.SteamAppInfoClient
 import app.gamegrub.service.steam.di.SteamConnection
+import app.gamegrub.service.steam.di.SteamStatsClient
 import app.gamegrub.service.steam.di.SteamUserClient
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatsAchievementsGenerator
@@ -25,6 +27,8 @@ import javax.inject.Singleton
 @Singleton
 class SteamAchievementManager @Inject constructor(
     private val userClient: SteamUserClient,
+    private val statsClient: SteamStatsClient,
+    private val appInfoClient: SteamAppInfoClient,
     private val connection: SteamConnection,
 ) {
 
@@ -39,29 +43,33 @@ class SteamAchievementManager @Inject constructor(
         _cachedAchievementsAppId.value = null
     }
 
-    suspend fun generateAchievements(appId: Int, configDirectory: String) {
-        val service = app.gamegrub.service.steam.SteamService.instance ?: return
-        val steamUser = service._steamUser ?: return
-        val userStats = service._steamUserStats ?: return
+    suspend fun generateAchievements(appId: Int, configDirectory: String) = withContext(Dispatchers.IO) {
+        val steamId = connection.steamId ?: return@withContext
 
-        val result = withContext(Dispatchers.IO) {
-            userStats.getUserStats(appId, steamUser.steamID!!).await()
-        }
-        val schemaArray = result.schema.toByteArray()
-        val generator = StatsAchievementsGenerator()
-        val genResult = generator.generateStatsAchievements(schemaArray, configDirectory)
-
-        _cachedAchievements.value = genResult.achievements
-        _cachedAchievementsAppId.value = appId
-
-        if (genResult.nameToBlockBit.isNotEmpty()) {
-            val configDir = File(configDirectory)
-            if (!configDir.exists()) configDir.mkdirs()
-            val mappingJson = JSONObject()
-            genResult.nameToBlockBit.forEach { (name, pair) ->
-                mappingJson.put(name, JSONArray(listOf(pair.first, pair.second)))
+        try {
+            val result = statsClient.getUserStats(appId, steamId)
+            if (!result.success) {
+                Timber.e("Failed to get user stats for $appId")
+                return@withContext
             }
-            File(configDir, "achievement_name_to_block.json").writeText(mappingJson.toString(), Charsets.UTF_8)
+
+            val generator = StatsAchievementsGenerator()
+            val genResult = generator.generateStatsAchievements(result.schema, configDirectory)
+
+            _cachedAchievements.value = genResult.achievements
+            _cachedAchievementsAppId.value = appId
+
+            if (genResult.nameToBlockBit.isNotEmpty()) {
+                val configDir = File(configDirectory)
+                if (!configDir.exists()) configDir.mkdirs()
+                val mappingJson = JSONObject()
+                genResult.nameToBlockBit.forEach { (name, pair) ->
+                    mappingJson.put(name, JSONArray(listOf(pair.first, pair.second)))
+                }
+                File(configDir, "achievement_name_to_block.json").writeText(mappingJson.toString(), Charsets.UTF_8)
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to generate achievements for $appId")
         }
     }
 
@@ -121,12 +129,10 @@ class SteamAchievementManager @Inject constructor(
         unlockedNames: Set<String>,
         gseStatsDir: File,
     ): Result<Unit> = runCatching {
-        val service = app.gamegrub.service.steam.SteamService.instance ?: throw IllegalStateException("Service not available")
-        val steamUser = service._steamUser ?: throw IllegalStateException("SteamUser not available")
-        val userStats = service._steamUserStats ?: throw IllegalStateException("SteamUserStats not available")
+        val steamId = connection.steamId ?: throw IllegalStateException("Not logged in")
 
-        val result = userStats.getUserStats(appId, steamUser.steamID!!).await()
-        if (result.result != EResult.OK) throw IllegalStateException("getUserStats failed: ${result.result}")
+        val result = statsClient.getUserStats(appId, steamId)
+        if (!result.success) throw IllegalStateException("Failed to get user stats")
 
         val allStats = mutableMapOf<Int, Int>()
         val mappingFile = File(configDirectory, "achievement_name_to_block.json")
@@ -137,19 +143,18 @@ class SteamAchievementManager @Inject constructor(
                 val arr = mappingJson.optJSONArray(key) ?: continue
                 if (arr.length() >= 2) nameToBlockBit[key] = Pair(arr.getInt(0), arr.getInt(1))
             }
-            for (block in result.achievementBlocks ?: emptyList()) {
-                val blockId = (block.achievementId as? Number)?.toInt() ?: continue
+            for (block in result.achievementBlocks) {
                 var bitmask = 0
-                for (i in (block.unlockTime ?: emptyList()).indices) {
-                    if ((block.unlockTime ?: emptyList())[i] > 0) bitmask = bitmask or (1 shl i)
+                for (i in block.unlockTimes.indices) {
+                    if (block.unlockTimes[i] > 0) bitmask = bitmask or (1 shl i)
                 }
-                allStats[blockId] = bitmask
+                allStats[block.achievementId] = bitmask
             }
             for (name in unlockedNames) {
                 val (blockId, bit) = nameToBlockBit[name] ?: continue
                 allStats[blockId] = (allStats[blockId] ?: 0) or bit
             }
         }
-        userStats.storeStats(appId, allStats, emptyMap()).await()
+        statsClient.storeStats(appId, allStats, emptyMap())
     }
 }

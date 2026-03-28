@@ -108,7 +108,20 @@ interface SteamCloudClient {
         clientId: String,
         uploadsCompleted: Boolean,
     )
+
+    suspend fun syncUserFiles(
+        appId: Int,
+        clientId: String,
+        preferredSave: String = "None",
+    ): CloudSyncResult
 }
+
+data class CloudSyncResult(
+    val success: Boolean,
+    val uploadsCompleted: Boolean = false,
+    val downloadsCompleted: Boolean = false,
+    val error: String? = null,
+)
 
 /**
  * Abstraction for event emission.
@@ -131,3 +144,42 @@ interface SteamPreferences {
     var steamUserAvatarHash: String
     var steamUserAccountId: Int
 }
+
+/**
+ * Abstraction for Steam achievement/stats operations.
+ */
+interface SteamStatsClient {
+    suspend fun getUserStats(appId: Int, steamId: SteamID): UserStatsResult
+    suspend fun storeStats(appId: Int, stats: Map<Int, Int>, achievements: Map<Int, Boolean>): Boolean
+    fun getSchema(appId: Int): ByteArray?
+}
+
+data class UserStatsResult(
+    val success: Boolean,
+    val schema: ByteArray,
+    val achievementBlocks: List<AchievementBlock> = emptyList(),
+)
+
+data class AchievementBlock(
+    val achievementId: Int,
+    val unlockTimes: List<Int>,
+)
+
+/**
+ * Abstraction for app info access.
+ */
+interface SteamAppInfoClient {
+    fun getAppInfo(appId: Int): AppInfoData?
+    fun findApp(appId: Int): AppGameData?
+}
+
+data class AppInfoData(
+    val appId: Int,
+    val installPath: String,
+)
+
+data class AppGameData(
+    val appId: Int,
+    val name: String,
+    val packageName: String?,
+)

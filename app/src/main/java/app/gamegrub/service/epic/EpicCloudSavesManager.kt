@@ -3,8 +3,11 @@ package app.gamegrub.service.epic
 import android.content.Context
 import app.gamegrub.data.EpicGame
 import app.gamegrub.service.epic.manifest.EpicManifest
-import app.gamegrub.utils.network.Net
 import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.network.Net
+import java.io.File
+import java.time.Instant
+import java.util.zip.GZIPInputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -15,9 +18,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
-import java.time.Instant
-import java.util.zip.GZIPInputStream
 
 /**
  * Manages Epic Cloud Saves - downloading and uploading save files

@@ -1,7 +1,6 @@
 package app.gamegrub.utils.storage
 
 import android.content.res.AssetManager
-import timber.log.Timber
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -14,6 +13,7 @@ import java.util.stream.Stream
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.name
+import timber.log.Timber
 
 object FileUtils {
 

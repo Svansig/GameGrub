@@ -4,8 +4,8 @@ import android.content.Context
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.xenvironment.ImageFs
-import timber.log.Timber
 import java.nio.file.Paths
+import timber.log.Timber
 
 enum class PathType {
     GameInstall,
@@ -33,6 +33,7 @@ enum class PathType {
     fun toAbsPath(context: Context, appId: Int, accountId: Long): String {
         val path = when (this) {
             GameInstall -> SteamService.getAppDirPath(appId)
+
             SteamUserData -> Paths.get(
                 ImageFs.find(context).rootDir.absolutePath,
                 ImageFs.WINEPREFIX,
@@ -104,7 +105,7 @@ enum class PathType {
             WinAppDataLocalLow,
             WinAppDataRoaming,
             WinSavedGames,
-                -> true
+            -> true
 
             else -> false
         }
@@ -279,55 +280,55 @@ enum class PathType {
             return when (keyValue?.lowercase()) {
                 "%${GameInstall.name.lowercase()}%",
                 GameInstall.name.lowercase(),
-                    -> GameInstall
+                -> GameInstall
 
                 "%${SteamUserData.name.lowercase()}%",
                 SteamUserData.name.lowercase(),
-                    -> SteamUserData
+                -> SteamUserData
 
                 "%${WinMyDocuments.name.lowercase()}%",
                 WinMyDocuments.name.lowercase(),
-                    -> WinMyDocuments
+                -> WinMyDocuments
 
                 "%${WinAppDataLocal.name.lowercase()}%",
                 WinAppDataLocal.name.lowercase(),
-                    -> WinAppDataLocal
+                -> WinAppDataLocal
 
                 "%${WinAppDataLocalLow.name.lowercase()}%",
                 WinAppDataLocalLow.name.lowercase(),
-                    -> WinAppDataLocalLow
+                -> WinAppDataLocalLow
 
                 "%${WinAppDataRoaming.name.lowercase()}%",
                 WinAppDataRoaming.name.lowercase(),
-                    -> WinAppDataRoaming
+                -> WinAppDataRoaming
 
                 "%${WinSavedGames.name.lowercase()}%",
                 WinSavedGames.name.lowercase(),
-                    -> WinSavedGames
+                -> WinSavedGames
 
                 "%${LinuxHome.name.lowercase()}%",
                 LinuxHome.name.lowercase(),
-                    -> LinuxHome
+                -> LinuxHome
 
                 "%${LinuxXdgDataHome.name.lowercase()}%",
                 LinuxXdgDataHome.name.lowercase(),
-                    -> LinuxXdgDataHome
+                -> LinuxXdgDataHome
 
                 "%${LinuxXdgConfigHome.name.lowercase()}%",
                 LinuxXdgConfigHome.name.lowercase(),
-                    -> LinuxXdgConfigHome
+                -> LinuxXdgConfigHome
 
                 "%${MacHome.name.lowercase()}%",
                 MacHome.name.lowercase(),
-                    -> MacHome
+                -> MacHome
 
                 "%${MacAppSupport.name.lowercase()}%",
                 MacAppSupport.name.lowercase(),
-                    -> MacAppSupport
+                -> MacAppSupport
 
                 "%ROOT_MOD%",
                 "ROOT_MOD",
-                    -> Root
+                -> Root
 
                 else -> {
                     if (keyValue != null) {

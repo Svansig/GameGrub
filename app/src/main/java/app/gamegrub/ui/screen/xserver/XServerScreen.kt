@@ -106,12 +106,13 @@ import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.widget.PerformanceHudView
 import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.container.PreInstallSteps
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.game.ExecutableSelectionUtils
-import app.gamegrub.utils.container.PreInstallSteps
 import app.gamegrub.utils.steam.SteamTokenLogin
 import app.gamegrub.utils.steam.SteamUtils
 import com.posthog.PostHog
+import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.alsaserver.ALSAClient
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
@@ -171,6 +172,16 @@ import com.winlator.xserver.ScreenInfo
 import com.winlator.xserver.Window
 import com.winlator.xserver.WindowManager
 import com.winlator.xserver.XServer
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.util.Arrays
+import java.util.EnumSet
+import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.io.path.name
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -183,17 +194,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption.REPLACE_EXISTING
-import java.util.Arrays
-import java.util.EnumSet
-import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.io.path.name
-import com.winlator.PrefManager as WinlatorPrefManager
 
 // Always re-extract drivers and DXVK on every launch to handle cases of container corruption
 // where games randomly stop working. Set to false once corruption issues are resolved.
@@ -703,8 +703,8 @@ fun XServerScreen(
         hasPhysicalMouse = deviceIds.any { id ->
             val device = InputDevice.getDevice(id) ?: return@any false
             val isMouse = device.supportsSource(InputDevice.SOURCE_MOUSE) ||
-                    device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
-                    device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
+                device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
+                device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
             val isExternal = device.isExternal
             isMouse && !device.isVirtual && isExternal
         }
@@ -777,8 +777,8 @@ fun XServerScreen(
                 }
             }
             val isMouse = device.supportsSource(InputDevice.SOURCE_MOUSE) ||
-                    device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
-                    device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
+                device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
+                device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
             if (isMouse) {
                 hasPhysicalMouse = true
                 if (!hasUpdatedScreenGamepad && tryCapturePointer()) {
@@ -1102,16 +1102,16 @@ fun XServerScreen(
             val isGamepad = ExternalController.isGameController(it.event.device)
             val waitingForManualResume =
                 manualResumeMode &&
-                        GameGrubApp.isOverlayPaused &&
-                        !showQuickMenu &&
-                        !keepPausedForEditor
+                    GameGrubApp.isOverlayPaused &&
+                    !showQuickMenu &&
+                    !keepPausedForEditor
             // logD("onKeyEvent(${it.event.device.sources})\n\tisGamepad: $isGamepad\n\tisKeyboard: $isKeyboard\n\t${it.event}")
 
             if (waitingForManualResume && isGamepad) {
                 when (it.event.keyCode) {
                     KeyEvent.KEYCODE_BUTTON_A,
                     KeyEvent.KEYCODE_BUTTON_START,
-                        -> {
+                    -> {
                         if (it.event.action == KeyEvent.ACTION_DOWN && it.event.repeatCount == 0) {
                             resumeFromManualButton()
                         }
@@ -1234,6 +1234,7 @@ fun XServerScreen(
 
                 when {
                     lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED -> Unit
+
                     lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) -> {
                         Timber.d("Synchronizing XServerView renderer to current resumed lifecycle state")
                         currentXServerView.onResume()
@@ -1250,7 +1251,7 @@ fun XServerScreen(
                 when (event) {
                     Lifecycle.Event.ON_PAUSE,
                     Lifecycle.Event.ON_RESUME,
-                        -> {
+                    -> {
                         Timber.d("Synchronizing XServerView renderer for lifecycle event: $event")
                         syncRendererToCurrentLifecycleState()
                     }
@@ -1294,9 +1295,9 @@ fun XServerScreen(
                                         hud.getLocationOnScreen(hudLocation)
                                         val insideHud =
                                             event.rawX >= hudLocation[0] &&
-                                                    event.rawX <= hudLocation[0] + hud.width &&
-                                                    event.rawY >= hudLocation[1] &&
-                                                    event.rawY <= hudLocation[1] + hud.height
+                                                event.rawX <= hudLocation[0] + hud.width &&
+                                                event.rawY >= hudLocation[1] &&
+                                                event.rawY <= hudLocation[1] + hud.height
                                         if (insideHud) {
                                             performanceHudTouchDownRawX = event.rawX
                                             performanceHudTouchDownRawY = event.rawY
@@ -1328,7 +1329,7 @@ fun XServerScreen(
 
                                 MotionEvent.ACTION_POINTER_DOWN,
                                 MotionEvent.ACTION_POINTER_UP,
-                                    -> {
+                                -> {
                                     if (isTrackingPerformanceHudTouch || isDraggingPerformanceHud) {
                                         isTrackingPerformanceHudTouch = false
                                         isDraggingPerformanceHud = false
@@ -1463,11 +1464,11 @@ fun XServerScreen(
                                 if (property != null) {
                                     if (frameRatingWindowId == -1 &&
                                         (
-                                                property.nameAsString().contains("_UTIL_LAYER") ||
-                                                        property.nameAsString().contains("_MESA_DRV") ||
-                                                        container.containerVariant.equals(Container.GLIBC) &&
-                                                        property.nameAsString().contains("_NET_WM_SURFACE")
-                                                )
+                                            property.nameAsString().contains("_UTIL_LAYER") ||
+                                                property.nameAsString().contains("_MESA_DRV") ||
+                                                container.containerVariant.equals(Container.GLIBC) &&
+                                                property.nameAsString().contains("_NET_WM_SURFACE")
+                                            )
                                     ) {
                                         frameRatingWindowId = window.id
                                         (context as? Activity)?.runOnUiThread {
@@ -1502,11 +1503,11 @@ fun XServerScreen(
                             override fun onMapWindow(window: Window) {
                                 Timber.i(
                                     "onMapWindow:" +
-                                            "\n\twindowName: ${window.name}" +
-                                            "\n\twindowClassName: ${window.className}" +
-                                            "\n\tprocessId: ${window.processId}" +
-                                            "\n\thasParent: ${window.parent != null}" +
-                                            "\n\tchildrenSize: ${window.children.size}",
+                                        "\n\twindowName: ${window.name}" +
+                                        "\n\twindowClassName: ${window.className}" +
+                                        "\n\tprocessId: ${window.processId}" +
+                                        "\n\thasParent: ${window.parent != null}" +
+                                        "\n\tchildrenSize: ${window.children.size}",
                                 )
                                 win32AppWorkarounds?.applyWindowWorkarounds(window)
                                 onWindowMapped?.invoke(context, window)
@@ -1515,11 +1516,11 @@ fun XServerScreen(
                             override fun onUnmapWindow(window: Window) {
                                 Timber.i(
                                     "onUnmapWindow:" +
-                                            "\n\twindowName: ${window.name}" +
-                                            "\n\twindowClassName: ${window.className}" +
-                                            "\n\tprocessId: ${window.processId}" +
-                                            "\n\thasParent: ${window.parent != null}" +
-                                            "\n\tchildrenSize: ${window.children.size}",
+                                        "\n\twindowName: ${window.name}" +
+                                        "\n\twindowClassName: ${window.className}" +
+                                        "\n\tprocessId: ${window.processId}" +
+                                        "\n\thasParent: ${window.parent != null}" +
+                                        "\n\tchildrenSize: ${window.children.size}",
                                 )
                                 changeFrameRatingVisibility(window, null)
                                 startExitWatchForUnmappedGameWindow(window)
@@ -1614,15 +1615,15 @@ fun XServerScreen(
                                         val sharpnessDenoise = container.getExtra("sharpnessDenoise", "100").toDouble()
                                         vkbasaltConfig =
                                             "effects=" + sharpnessEffect.lowercase(Locale.getDefault()) + ";" + "casSharpness=" +
-                                                    sharpnessLevel / 100 +
-                                                    ";" +
-                                                    "dlsSharpness=" +
-                                                    sharpnessLevel / 100 +
-                                                    ";" +
-                                                    "dlsDenoise=" +
-                                                    sharpnessDenoise / 100 +
-                                                    ";" +
-                                                    "enableOnLaunch=True"
+                                            sharpnessLevel / 100 +
+                                            ";" +
+                                            "dlsSharpness=" +
+                                            sharpnessLevel / 100 +
+                                            ";" +
+                                            "dlsDenoise=" +
+                                            sharpnessDenoise / 100 +
+                                            ";" +
+                                            "enableOnLaunch=True"
                                     }
 
                                     Timber.i("Doing things once")
@@ -1821,7 +1822,7 @@ fun XServerScreen(
                                         when (configuredExternalMode) {
                                             ExternalDisplayInputController.Mode.KEYBOARD,
                                             ExternalDisplayInputController.Mode.HYBRID,
-                                                -> {
+                                            -> {
                                                 overlay.visibility = View.VISIBLE
                                                 overlay.setMode(configuredExternalMode)
                                             }
@@ -2678,18 +2679,18 @@ private fun setupXEnvironment(
         guestProgramLauncherComponent.container = container
         guestProgramLauncherComponent.wineInfo = xServerState.value.wineInfo
         gameExecutable = "wine explorer /desktop=shell," + xServer.screenInfo + " " +
-                getWineStartCommand(
-                    context,
-                    appId,
-                    container,
-                    bootToContainer,
-                    testGraphics,
-                    appLaunchInfo,
-                    envVars,
-                    guestProgramLauncherComponent,
-                    gameSource,
-                ) +
-                (if (container.execArgs.isNotEmpty()) " " + container.execArgs else "")
+            getWineStartCommand(
+                context,
+                appId,
+                container,
+                bootToContainer,
+                testGraphics,
+                appLaunchInfo,
+                envVars,
+                guestProgramLauncherComponent,
+                gameSource,
+            ) +
+            (if (container.execArgs.isNotEmpty()) " " + container.execArgs else "")
         preInstallCommands = PreInstallSteps.getPreInstallCommands(
             container,
             appId,
@@ -2953,10 +2954,10 @@ private fun setupXEnvironment(
             val watchDirs = SteamService.getGseSaveDirs(context, gameIdInt)
             val displayNameMap = SteamService.cachedAchievements?.associate { ach ->
                 ach.name to (
-                        ach.displayName?.get(container.language)
-                            ?: ach.displayName?.get("english")
-                            ?: ach.name
-                        )
+                    ach.displayName?.get(container.language)
+                        ?: ach.displayName?.get("english")
+                        ?: ach.name
+                    )
             } ?: emptyMap()
             val iconUrlMap = SteamService.cachedAchievements?.associate { ach ->
                 ach.name to ach.icon?.let {
@@ -3356,7 +3357,7 @@ private fun getWineStartCommand(
         if (container.isLaunchRealSteam) {
             // Launch Steam with the applaunch parameter to start the game
             "\"C:\\\\Program Files (x86)\\\\Steam\\\\steam.exe\" -silent -vgui -tcp " +
-                    "-nobigpicture -nofriendsui -nochatui -nointro -applaunch $gameId"
+                "-nobigpicture -nofriendsui -nochatui -nointro -applaunch $gameId"
         } else {
             var executablePath = ""
             if (container.executablePath.isNotEmpty()) {
@@ -4503,6 +4504,7 @@ private fun extractGraphicsDriverFiles(
             }
 
             "none" -> envVars.put("WRAPPER_EMULATE_BCN", "0")
+
             else -> envVars.put("WRAPPER_EMULATE_BCN", "1")
         }
 
@@ -4526,7 +4528,9 @@ private fun extractSteamFiles(
             ImageFs.find(context).rootDir.absolutePath,
             ImageFs.WINEPREFIX + "/drive_c/Program Files (x86)/Steam/steam.exe",
         ).exists()
-    ) return
+    ) {
+        return
+    }
     val downloaded = File(imageFs.filesDir, "steam.tzst")
     Timber.i("Extracting steam.tzst")
     TarCompressorUtils.extract(

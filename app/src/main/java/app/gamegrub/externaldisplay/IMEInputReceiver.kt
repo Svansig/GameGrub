@@ -53,11 +53,11 @@ class IMEInputReceiver(
         Timber.d("IMEInputReceiver: onCreateInputConnection called!")
         // Disable autocomplete/suggestions so each key commits immediately
         outAttrs.inputType = EditorInfo.TYPE_CLASS_TEXT or
-                EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
-                EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN or
-                EditorInfo.IME_FLAG_NO_EXTRACT_UI or
-                EditorInfo.IME_ACTION_NONE
+            EditorInfo.IME_FLAG_NO_EXTRACT_UI or
+            EditorInfo.IME_ACTION_NONE
 
         return object : BaseInputConnection(this, false) {
             override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {

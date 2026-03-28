@@ -24,17 +24,17 @@ import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
 import app.gamegrub.utils.storage.MarkerUtils
-import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.storage.StorageUtils
 import com.winlator.container.ContainerData
+import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
-import java.util.Locale
 
 /**
  * GOG-specific implementation of BaseAppScreen
@@ -574,8 +574,8 @@ class GOGAppScreen : BaseAppScreen() {
                         CoroutineScope(Dispatchers.IO).launch {
                             val downloadInfo = GOGService.getDownloadInfo(gameId)
                             val wasDownloading = downloadInfo != null &&
-                                    downloadInfo.isActive() &&
-                                    (downloadInfo.getProgress() ?: 0f) < 1f
+                                downloadInfo.isActive() &&
+                                (downloadInfo.getProgress() ?: 0f) < 1f
                             downloadInfo?.cancel()
                             downloadInfo?.awaitCompletion()
                             GOGService.cleanupDownload(gameId)

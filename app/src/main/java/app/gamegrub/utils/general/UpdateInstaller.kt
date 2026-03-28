@@ -5,10 +5,10 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import app.gamegrub.BuildConfig
 import app.gamegrub.service.steam.SteamService
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 
 object UpdateInstaller {
     suspend fun downloadAndInstall(

@@ -16,8 +16,8 @@ object GogScriptInterpreterStep : PreInstallStep {
         gameDirPath: String,
     ): Boolean {
         return gameSource == GameSource.GOG &&
-                container.containerVariant.equals(Container.GLIBC) &&
-                !MarkerUtils.hasMarker(gameDirPath, Marker.GOG_SCRIPT_INSTALLED)
+            container.containerVariant.equals(Container.GLIBC) &&
+            !MarkerUtils.hasMarker(gameDirPath, Marker.GOG_SCRIPT_INSTALLED)
     }
 
     override fun buildCommand(

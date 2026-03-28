@@ -55,11 +55,11 @@ import app.gamegrub.statsgen.StatsAchievementsGenerator
 import app.gamegrub.statsgen.VdfParser
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.steam.LicenseSerializer
-import app.gamegrub.utils.storage.MarkerUtils
 import app.gamegrub.utils.network.Net
+import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.steam.generateSteamApp
+import app.gamegrub.utils.storage.MarkerUtils
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
 import com.winlator.xenvironment.ImageFs
@@ -118,6 +118,24 @@ import `in`.dragonbra.javasteam.types.KeyValue
 import `in`.dragonbra.javasteam.types.SteamID
 import `in`.dragonbra.javasteam.util.log.LogListener
 import `in`.dragonbra.javasteam.util.log.LogManager
+import java.io.Closeable
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.Collections
+import java.util.EnumSet
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import kotlin.io.path.pathString
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -149,24 +167,6 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.Closeable
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.Collections
-import java.util.EnumSet
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import kotlin.io.path.pathString
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Steam foreground service - handles all Steam integration.
@@ -411,7 +411,6 @@ class SteamService : Service(), IChallengeUrlChanged {
         var isWaitingForQRAuth: Boolean = false
             private set
 
-
         val userSteamId: SteamID?
             get() = instance?.steamClient?.steamID
 
@@ -629,9 +628,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
             // 2. Supported OS
             if (!(
-                        depot.osList.contains(OS.windows) ||
-                                (!depot.osList.contains(OS.linux) && !depot.osList.contains(OS.macos))
-                        )
+                    depot.osList.contains(OS.windows) ||
+                        (!depot.osList.contains(OS.linux) && !depot.osList.contains(OS.macos))
+                    )
             ) {
                 return false
             }
@@ -762,11 +761,12 @@ class SteamService : Service(), IChallengeUrlChanged {
             // SteamKit-JVM (most forks) – flags is EnumSet<EDepotFileFlag>
             is EnumSet<*> -> {
                 flags.contains(EDepotFileFlag.Executable) ||
-                        flags.contains(EDepotFileFlag.CustomExecutable)
+                    flags.contains(EDepotFileFlag.CustomExecutable)
             }
 
             // SteamKit-C# protobuf port – flags is UInt / Int / Long
             is Int -> (flags and 0x20) != 0 || (flags and 0x80) != 0
+
             is Long -> ((flags and 0x20L) != 0L) || ((flags and 0x80L) != 0L)
 
             else -> false
@@ -858,7 +858,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             val sb = scoreExe(b, gameName, isExecutable(b.flags))
 
             when {
-                sa != sb -> sa - sb // higher score wins
+                sa != sb -> sa - sb
+
+                // higher score wins
                 else -> (a.totalSize - b.totalSize).toInt() // tie-break on size
             }
         }
@@ -878,10 +880,10 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             val depots = appInfo.depots.values.filter { d ->
                 !d.sharedInstall &&
-                        (
-                                d.osList.isEmpty() ||
-                                        d.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) }
-                                )
+                    (
+                        d.osList.isEmpty() ||
+                            d.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) }
+                        )
             }
             Timber.i("Depots considered: $depots")
 
@@ -902,10 +904,10 @@ class SteamService : Service(), IChallengeUrlChanged {
                 Timber.w("Cannot fetch manifests: steamClient or licenses not available")
                 // Fallback to last resort
                 return (
-                        getAppInfoOf(appId)?.let { appInfo ->
-                            getWindowsLaunchInfos(appId).firstOrNull()
-                        }
-                        )?.executable ?: ""
+                    getAppInfoOf(appId)?.let { appInfo ->
+                        getWindowsLaunchInfos(appId).firstOrNull()
+                    }
+                    )?.executable ?: ""
             }
 
             for (depot in depots) {
@@ -959,10 +961,10 @@ class SteamService : Service(), IChallengeUrlChanged {
             /* 4️⃣ last resort */
             Timber.w("No executable found; falling back to install dir")
             return (
-                    getAppInfoOf(appId)?.let { appInfo ->
-                        getWindowsLaunchInfos(appId).firstOrNull()
-                    }
-                    )?.executable ?: ""
+                getAppInfoOf(appId)?.let { appInfo ->
+                    getWindowsLaunchInfos(appId).firstOrNull()
+                }
+                )?.executable ?: ""
         }
 
         /**
@@ -1058,12 +1060,12 @@ class SteamService : Service(), IChallengeUrlChanged {
             val imageFs = ImageFs.find(context)
             if (variant.equals(Container.BIONIC)) {
                 return File(imageFs.filesDir, "imagefs_bionic.txz").exists() ||
-                        context.assets.list("")
-                            ?.contains("imagefs_bionic.txz") == true
+                    context.assets.list("")
+                        ?.contains("imagefs_bionic.txz") == true
             } else {
                 return File(imageFs.filesDir, "imagefs_gamenative.txz").exists() ||
-                        context.assets.list("")
-                            ?.contains("imagefs_gamenative.txz") == true
+                    context.assets.list("")
+                        ?.contains("imagefs_gamenative.txz") == true
             }
         }
 
@@ -1229,7 +1231,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 for (controllerType in controllerPriority) {
                     val match = details.firstOrNull { detail ->
                         detail.controllerType.equals(controllerType, ignoreCase = true) &&
-                                detail.enabledBranches.any { it.equals(branch, ignoreCase = true) }
+                            detail.enabledBranches.any { it.equals(branch, ignoreCase = true) }
                     }
                     if (match != null) return match
                 }
@@ -1362,6 +1364,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val config = getAppInfoOf(appId)?.config ?: return null
             return when (config.steamControllerTemplateIndex) {
                 1 -> readDownloadedSteamInputTemplate(appId)
+
                 13 -> {
                     val manifestFile = resolveSteamInputManifestFile(appId, getAppDirPath(appId))
                         ?: return null
@@ -1369,8 +1372,11 @@ class SteamService : Service(), IChallengeUrlChanged {
                 }
 
                 2, 12 -> readBuiltInSteamInputTemplate("controller_xboxone_gamepad_fps.vdf")
+
                 6 -> readBuiltInSteamInputTemplate("controller_xboxone_wasd.vdf")
+
                 4, 5 -> readBuiltInSteamInputTemplate("gamepad_joystick.vdf")
+
                 else -> readBuiltInSteamInputTemplate("gamepad+mouse.vdf")
             }
         }
@@ -1403,9 +1409,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             // Depots from DLC App
             val dlcAppDepots = downloadableDepots.filter { (_, depot) ->
                 !mainAppDepots.map { it.key }.contains(depot.depotId) &&
-                        userSelectedDlcAppIds.contains(depot.dlcAppId) &&
-                        indirectDlcAppIds.contains(depot.dlcAppId) &&
-                        depot.manifests.isNotEmpty()
+                    userSelectedDlcAppIds.contains(depot.dlcAppId) &&
+                    indirectDlcAppIds.contains(depot.dlcAppId) &&
+                    depot.manifests.isNotEmpty()
             }
 
             // Remove depots that are already downloaded (not for update/verify)
@@ -1597,7 +1603,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                     val request = Request.Builder()
                                         .url(
                                             "https://api.steampowered.com/" +
-                                                    "ISteamRemoteStorage/GetPublishedFileDetails/v1",
+                                                "ISteamRemoteStorage/GetPublishedFileDetails/v1",
                                         )
                                         .post(requestBody)
                                         .build()
@@ -1606,7 +1612,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         if (!response.isSuccessful) {
                                             Timber.w(
                                                 "Failed to get steam controller config details " +
-                                                        "for $publishedFileId: ${response.code}",
+                                                    "for $publishedFileId: ${response.code}",
                                             )
                                             return@use
                                         }
@@ -1615,7 +1621,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         if (responseBody.isNullOrEmpty()) {
                                             Timber.w(
                                                 "Empty response body for steam controller config " +
-                                                        publishedFileId,
+                                                    publishedFileId,
                                             )
                                             return@use
                                         }
@@ -1626,7 +1632,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         if (responseData == null) {
                                             Timber.w(
                                                 "Steam controller config $publishedFileId " +
-                                                        "missing response data",
+                                                    "missing response data",
                                             )
                                             return@use
                                         }
@@ -1636,7 +1642,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         if (result != 1 || resultCount < 1) {
                                             Timber.w(
                                                 "Steam controller config $publishedFileId " +
-                                                        "returned result=$result resultcount=$resultCount",
+                                                    "returned result=$result resultcount=$resultCount",
                                             )
                                             return@use
                                         }
@@ -1647,7 +1653,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         if (fileDetails == null) {
                                             Timber.w(
                                                 "Steam controller config $publishedFileId " +
-                                                        "missing publishedfiledetails",
+                                                    "missing publishedfiledetails",
                                             )
                                             return@use
                                         }
@@ -1657,7 +1663,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                         if (fileUrl.isEmpty()) {
                                             Timber.w(
                                                 "Steam controller config $publishedFileId " +
-                                                        "missing fileUrl",
+                                                    "missing fileUrl",
                                             )
                                             return@use
                                         }
@@ -1675,7 +1681,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                             if (!downloadResponse.isSuccessful) {
                                                 Timber.w(
                                                     "Failed to download steam controller config " +
-                                                            "$publishedFileId: ${downloadResponse.code}",
+                                                        "$publishedFileId: ${downloadResponse.code}",
                                                 )
                                                 return@use
                                             }
@@ -1684,7 +1690,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                             if (downloadBody == null) {
                                                 Timber.w(
                                                     "Empty body for steam controller config " +
-                                                            publishedFileId,
+                                                        publishedFileId,
                                                 )
                                                 return@use
                                             }
@@ -1697,7 +1703,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                                             Timber.i(
                                                 "Downloaded steam controller config " +
-                                                        "$publishedFileId to ${configFile.path}",
+                                                    "$publishedFileId to ${configFile.path}",
                                             )
                                         }
                                     }
@@ -1705,7 +1711,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                     Timber.w(
                                         error,
                                         "Steam controller config download failed for " +
-                                                publishedFileId,
+                                            publishedFileId,
                                     )
                                 }
                             }
@@ -1974,10 +1980,10 @@ class SteamService : Service(), IChallengeUrlChanged {
                                 |   processId: ${process.processId}
                                 |   processIdParent: ${process.processIdParent}
                                 |   parentIsSteam: ${process.parentIsSteam}
-                                    """.trimMargin()
+                                        """.trimMargin()
                                     }
                                 }
-                            """.trimMargin()
+                                """.trimMargin()
                             },
                         )
 
@@ -2054,7 +2060,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                                                 } else if (ignorePendingOperations &&
                                                     pendingRemoteOperations.any {
                                                         it.operation ==
-                                                                SteammessagesClientObjects.ECloudPendingRemoteOperation.k_ECloudPendingRemoteOperationAppSessionActive
+                                                            SteammessagesClientObjects.ECloudPendingRemoteOperation.k_ECloudPendingRemoteOperationAppSessionActive
                                                     }
                                                 ) {
                                                     steamInstance._steamUser!!.kickPlayingSession()
@@ -2520,7 +2526,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             EResult.RequirePasswordReEntry,
             EResult.ParentalControlRestricted,
             EResult.CachedCredentialInvalid,
-                -> true
+            -> true
 
             else -> false
         }
@@ -2941,7 +2947,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 val activeNet = connectivityManager.activeNetwork ?: return false
                 val caps = connectivityManager.getNetworkCapabilities(activeNet) ?: return false
                 return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
             }
 
             // no transition guard needed — if WiFi already down, downloadJobs is empty (no-op)
@@ -3528,15 +3534,15 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                 Timber.d(
                     "picsGetChangesSince:" +
-                            "\n\tlastChangeNumber: ${changesSince.lastChangeNumber}" +
-                            "\n\tcurrentChangeNumber: ${changesSince.currentChangeNumber}" +
-                            "\n\tisRequiresFullUpdate: ${changesSince.isRequiresFullUpdate}" +
-                            "\n\tisRequiresFullAppUpdate: ${changesSince.isRequiresFullAppUpdate}" +
-                            "\n\tisRequiresFullPackageUpdate: ${changesSince.isRequiresFullPackageUpdate}" +
-                            "\n\tappChangesCount: ${changesSince.appChanges.size}" +
-                            "\n\tpkgChangesCount: ${changesSince.packageChanges.size}",
+                        "\n\tlastChangeNumber: ${changesSince.lastChangeNumber}" +
+                        "\n\tcurrentChangeNumber: ${changesSince.currentChangeNumber}" +
+                        "\n\tisRequiresFullUpdate: ${changesSince.isRequiresFullUpdate}" +
+                        "\n\tisRequiresFullAppUpdate: ${changesSince.isRequiresFullAppUpdate}" +
+                        "\n\tisRequiresFullPackageUpdate: ${changesSince.isRequiresFullPackageUpdate}" +
+                        "\n\tappChangesCount: ${changesSince.appChanges.size}" +
+                        "\n\tpkgChangesCount: ${changesSince.packageChanges.size}",
 
-                    )
+                )
 
                 // Process any app changes
                 launch {
@@ -3613,8 +3619,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                     callback.results.forEachIndexed { index, picsCallback ->
                         Timber.d(
                             "onPicsProduct: ${index + 1} of ${callback.results.size}" +
-                                    "\n\tReceived PICS result of ${picsCallback.apps.size} app(s)." +
-                                    "\n\tReceived PICS result of ${picsCallback.packages.size} package(s).",
+                                "\n\tReceived PICS result of ${picsCallback.apps.size} app(s)." +
+                                "\n\tReceived PICS result of ${picsCallback.packages.size} package(s).",
                         )
 
                         ensureActive()

@@ -6,9 +6,9 @@ import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
 import com.winlator.core.GPUHelper
 import com.winlator.core.StringUtils
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 object ManifestComponentHelper {
     data class InstalledContentLists(
@@ -178,7 +178,7 @@ object ManifestComponentHelper {
             graphicsDrivers.getOrNull(graphicsDriverIndex).orEmpty(),
         )
         val isVortekLike = containerVariant.equals("glibc", ignoreCase = true) &&
-                driverType in listOf("vortek", "adreno", "sd-8-elite")
+            driverType in listOf("vortek", "adreno", "sd-8-elite")
 
         val isVKD3D = StringUtils.parseIdentifier(
             dxWrappers.getOrNull(dxWrapperIndex).orEmpty(),
@@ -187,8 +187,8 @@ object ManifestComponentHelper {
         val constrainedIds = constrainedLabels.map { StringUtils.parseIdentifier(it) }
         val useConstrained =
             !inspectionMode &&
-                    isVortekLike &&
-                    GPUHelper.vkGetApiVersionSafe() < GPUHelper.vkMakeVersion(1, 3, 0)
+                isVortekLike &&
+                GPUHelper.vkGetApiVersionSafe() < GPUHelper.vkMakeVersion(1, 3, 0)
 
         val labels =
             if (useConstrained) {

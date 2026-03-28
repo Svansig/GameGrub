@@ -11,8 +11,8 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.general.IntentLaunchManager
-import app.gamegrub.utils.storage.MarkerUtils
 import app.gamegrub.utils.steam.SteamUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import com.winlator.container.Container
 import com.winlator.container.ContainerData
 import com.winlator.container.ContainerManager
@@ -23,6 +23,7 @@ import com.winlator.core.WineRegistryEditor
 import com.winlator.core.WineThemeManager
 import com.winlator.winhandler.WinHandler
 import com.winlator.xenvironment.ImageFs
+import java.io.File
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -30,7 +31,6 @@ import kotlinx.coroutines.withTimeout
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
 
 object ContainerUtils {
     data class GpuInfo(
@@ -353,10 +353,12 @@ object ContainerUtils {
                     ?: updatedData
 
                 "dxwrapper" -> value?.let { updatedData.copy(dxwrapper = it as? String ?: updatedData.dxwrapper) } ?: updatedData
+
                 "dxwrapperConfig" -> value?.let { updatedData.copy(dxwrapperConfig = it as? String ?: updatedData.dxwrapperConfig) }
                     ?: updatedData
 
                 "execArgs" -> value?.let { updatedData.copy(execArgs = it as? String ?: updatedData.execArgs) } ?: updatedData
+
                 "startupSelection" -> value?.let {
                     updatedData.copy(
                         startupSelection =
@@ -366,12 +368,16 @@ object ContainerUtils {
                     ?: updatedData
 
                 "box64Version" -> value?.let { updatedData.copy(box64Version = it as? String ?: updatedData.box64Version) } ?: updatedData
+
                 "box64Preset" -> value?.let { updatedData.copy(box64Preset = it as? String ?: updatedData.box64Preset) } ?: updatedData
+
                 "containerVariant" -> value?.let { updatedData.copy(containerVariant = it as? String ?: updatedData.containerVariant) }
                     ?: updatedData
 
                 "wineVersion" -> value?.let { updatedData.copy(wineVersion = it as? String ?: updatedData.wineVersion) } ?: updatedData
+
                 "emulator" -> value?.let { updatedData.copy(emulator = it as? String ?: updatedData.emulator) } ?: updatedData
+
                 "fexcoreVersion" -> value?.let { updatedData.copy(fexcoreVersion = it as? String ?: updatedData.fexcoreVersion) }
                     ?: updatedData
 
@@ -388,17 +394,23 @@ object ContainerUtils {
                     ?: updatedData
 
                 "useLegacyDRM" -> value?.let { updatedData.copy(useLegacyDRM = it as? Boolean ?: updatedData.useLegacyDRM) } ?: updatedData
+
                 "steamOfflineMode" -> value?.let { updatedData.copy(steamOfflineMode = it as? Boolean ?: updatedData.steamOfflineMode) }
                     ?: updatedData
 
                 "unpackFiles" -> value?.let { updatedData.copy(unpackFiles = it as? Boolean ?: updatedData.unpackFiles) } ?: updatedData
+
                 "suspendPolicy" -> value?.let { updatedData.copy(suspendPolicy = it as? String ?: updatedData.suspendPolicy) }
                     ?: updatedData
 
                 "envVars" -> value?.let { updatedData.copy(envVars = it as? String ?: updatedData.envVars) } ?: updatedData
+
                 "cpuList" -> value?.let { updatedData.copy(cpuList = it as? String ?: updatedData.cpuList) } ?: updatedData
+
                 "cpuListWoW64" -> value?.let { updatedData.copy(cpuListWoW64 = it as? String ?: updatedData.cpuListWoW64) } ?: updatedData
+
                 "audioDriver" -> value?.let { updatedData.copy(audioDriver = it as? String ?: updatedData.audioDriver) } ?: updatedData
+
                 "wincomponents" -> value?.let { updatedData.copy(wincomponents = it as? String ?: updatedData.wincomponents) }
                     ?: updatedData
 
@@ -416,7 +428,7 @@ object ContainerUtils {
     }
 
     fun applyToContainer(context: Context, container: Container, containerData: ContainerData, saveToDisk: Boolean) {
-        Timber.Forest.d("Applying containerData to container. execArgs: '${containerData.execArgs}', saveToDisk: $saveToDisk")
+        Timber.d("Applying containerData to container. execArgs: '${containerData.execArgs}', saveToDisk: $saveToDisk")
         // Detect language change before mutating container
         val previousLanguage: String = try {
             container.language
@@ -510,24 +522,24 @@ object ContainerUtils {
         // If language changed, remove the STEAM_DLL_REPLACED marker so settings regenerate
         if (previousLanguage.lowercase() != containerData.language.lowercase()) {
             val steamAppId = extractGameIdFromContainerId(container.id)
-            val appDirPath = SteamService.Companion.getAppDirPath(steamAppId)
+            val appDirPath = SteamService.getAppDirPath(steamAppId)
             MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
             MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
-            Timber.Forest.i("Language changed from '$previousLanguage' to '${containerData.language}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
+            Timber.i("Language changed from '$previousLanguage' to '${containerData.language}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
         }
         if (previousForceDlc != containerData.forceDlc) {
             val steamAppId = extractGameIdFromContainerId(container.id)
-            val appDirPath = SteamService.Companion.getAppDirPath(steamAppId)
+            val appDirPath = SteamService.getAppDirPath(steamAppId)
             MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
             MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
-            Timber.Forest.i("forceDlc changed from '$previousForceDlc' to '${containerData.forceDlc}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
+            Timber.i("forceDlc changed from '$previousForceDlc' to '${containerData.forceDlc}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
         }
         if (previousSteamOfflineMode != containerData.steamOfflineMode) {
             val steamAppId = extractGameIdFromContainerId(container.id)
-            val appDirPath = SteamService.Companion.getAppDirPath(steamAppId)
+            val appDirPath = SteamService.getAppDirPath(steamAppId)
             MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
             MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
-            Timber.Forest.i("steamOfflineMode changed from '$previousSteamOfflineMode' to '${containerData.steamOfflineMode}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
+            Timber.i("steamOfflineMode changed from '$previousSteamOfflineMode' to '${containerData.steamOfflineMode}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
         }
 
         // Apply controller settings to container
@@ -540,14 +552,14 @@ object ContainerUtils {
         container.inputType = api.ordinal
         container.dinputMapperType = containerData.dinputMapperType
         container.isUseDRI3 = containerData.useDRI3
-        Timber.Forest.d("Container set: preferredInputApi=%s, dinputMapperType=0x%02x", api, containerData.dinputMapperType)
+        Timber.d("Container set: preferredInputApi=%s, dinputMapperType=0x%02x", api, containerData.dinputMapperType)
 
         if (saveToDisk) {
             // Mark that config has been changed, so we can show feedback dialog after next game run
             container.putExtra("config_changed", "true")
             container.saveData()
         }
-        Timber.Forest.d("Set container.execArgs to '${containerData.execArgs}'")
+        Timber.d("Set container.execArgs to '${containerData.execArgs}'")
     }
 
     private fun mapLanguageToLocale(language: String): String {
@@ -619,7 +631,7 @@ object ContainerUtils {
             GameSource.STEAM -> {
                 // For Steam games, set up the app directory path
                 val gameId = extractGameIdFromContainerId(appId)
-                val appDirPath = SteamService.Companion.getAppDirPath(gameId)
+                val appDirPath = SteamService.getAppDirPath(gameId)
                 val drive: Char = Container.getNextAvailableDriveLetter(defaultDrives)
                 "$defaultDrives$drive:$appDirPath"
             }
@@ -636,7 +648,7 @@ object ContainerUtils {
                     }
                     "$defaultDrives$drive:$gameFolderPath"
                 } else {
-                    Timber.Forest.w("Could not find folder path for Custom Game: $appId")
+                    Timber.w("Could not find folder path for Custom Game: $appId")
                     defaultDrives
                 }
             }
@@ -644,7 +656,7 @@ object ContainerUtils {
             GameSource.GOG -> {
                 // For GOG games, map the specific game directory to A: drive
                 val gameId = extractGameIdFromContainerId(appId)
-                val game = GOGService.Companion.getGOGGameOf(gameId.toString())
+                val game = GOGService.getGOGGameOf(gameId.toString())
                 if (game != null && game.installPath.isNotEmpty()) {
                     val gameInstallPath = game.installPath
                     val drive: Char = if (defaultDrives.contains("A:")) {
@@ -654,7 +666,7 @@ object ContainerUtils {
                     }
                     "$defaultDrives$drive:$gameInstallPath"
                 } else {
-                    Timber.Forest.w("Could not find GOG game info for: $gameId, using default drives")
+                    Timber.w("Could not find GOG game info for: $gameId, using default drives")
                     defaultDrives
                 }
             }
@@ -662,12 +674,12 @@ object ContainerUtils {
             GameSource.EPIC -> {
                 // For Epic games, map the specific game directory to A: drive
                 val gameId = extractGameIdFromContainerId(appId)
-                val game = EpicService.Companion.getEpicGameOf(gameId)
+                val game = EpicService.getEpicGameOf(gameId)
 
                 if (game != null && game.installPath.isNotEmpty()) {
                     val gameInstallPath = game.installPath
-                    Timber.Forest.tag("Epic").d("EPIC GAME FOUND FOR DRIVE: $gameId")
-                    Timber.Forest.tag("Epic").d("EPIC INSTALL PATH FOUND FOR DRIVE: $gameInstallPath")
+                    Timber.tag("Epic").d("EPIC GAME FOUND FOR DRIVE: $gameId")
+                    Timber.tag("Epic").d("EPIC INSTALL PATH FOUND FOR DRIVE: $gameInstallPath")
 
                     val drive: Char = if (defaultDrives.contains("A:")) {
                         Container.getNextAvailableDriveLetter(defaultDrives)
@@ -677,9 +689,9 @@ object ContainerUtils {
                     "$defaultDrives$drive:$gameInstallPath"
                 } else {
                     if (game == null) {
-                        Timber.Forest.tag("Epic").w("Could not find Epic game info for: $gameId, using default drives")
+                        Timber.tag("Epic").w("Could not find Epic game info for: $gameId, using default drives")
                     } else {
-                        Timber.Forest.tag("Epic").w("Epic game $gameId has empty install path, using default drives")
+                        Timber.tag("Epic").w("Epic game $gameId has empty install path, using default drives")
                     }
                     defaultDrives
                 }
@@ -689,7 +701,7 @@ object ContainerUtils {
                 // For Amazon games, map the specific game directory to A: drive
                 val appIdInt = runCatching { extractGameIdFromContainerId(appId) }.getOrNull()
                 val installPath = if (appIdInt != null) {
-                    AmazonService.Companion.getInstallPathByAppId(appIdInt)
+                    AmazonService.getInstallPathByAppId(appIdInt)
                 } else {
                     null
                 }
@@ -702,12 +714,12 @@ object ContainerUtils {
                     }
                     "$defaultDrives$drive:$installPath"
                 } else {
-                    Timber.Forest.w("Could not find Amazon game install path for appId: $appIdInt, using default drives")
+                    Timber.w("Could not find Amazon game install path for appId: $appIdInt, using default drives")
                     defaultDrives
                 }
             }
         }
-        Timber.Forest.d("Prepared container drives: $drives")
+        Timber.d("Prepared container drives: $drives")
 
         // Prepare container data with default DX wrapper to start
         val initialDxWrapper = if (customConfig?.dxwrapper != null) {
@@ -726,26 +738,26 @@ object ContainerUtils {
         // If container creation failed, it might be because directory already exists but is corrupted
         // Try to clean it up and retry once
         if (container == null) {
-            Timber.Forest.w("Container creation failed for $containerId, checking for corrupted directory...")
+            Timber.w("Container creation failed for $containerId, checking for corrupted directory...")
             // Get the container directory path
             val rootDir = ImageFs.find(context).rootDir
             val homeDir = File(rootDir, "home")
             val containerDir = File(homeDir, ImageFs.USER + "-" + containerId)
 
             if (containerDir.exists() && !containerManager.hasContainer(containerId)) {
-                Timber.Forest.w("Found orphaned/corrupted container directory, deleting and retrying: $containerId")
+                Timber.w("Found orphaned/corrupted container directory, deleting and retrying: $containerId")
                 try {
                     FileUtils.delete(containerDir)
                     // Retry container creation after cleanup
                     container = containerManager.createContainerFuture(containerId, data).get()
                 } catch (e: Exception) {
-                    Timber.Forest.e(e, "Failed to clean up corrupted container directory: $containerId")
+                    Timber.e(e, "Failed to clean up corrupted container directory: $containerId")
                 }
             }
 
             // If still null after retry, throw exception
             if (container == null) {
-                Timber.Forest.e("Failed to create container for $containerId after cleanup attempt")
+                Timber.e("Failed to create container for $containerId after cleanup attempt")
                 throw IllegalStateException("Failed to create container: $containerId")
             }
         }
@@ -757,13 +769,13 @@ object ContainerUtils {
                 if (!gameFolderPath.isNullOrEmpty() && container.executablePath.isEmpty()) {
                     val auto = CustomGameScanner.findUniqueExeRelativeToFolder(gameFolderPath)
                     if (auto != null) {
-                        Timber.Forest.i("Auto-selected Custom Game exe during container creation: $auto")
+                        Timber.i("Auto-selected Custom Game exe during container creation: $auto")
                         container.executablePath = auto
                         container.saveData()
                     }
                 }
             } catch (e: Exception) {
-                Timber.Forest.w(e, "Failed to auto-select exe during Custom Game creation for $appId")
+                Timber.w(e, "Failed to auto-select exe during Custom Game creation for $appId")
             }
         }
 
@@ -772,7 +784,7 @@ object ContainerUtils {
         if (gameSource == GameSource.STEAM && customConfig == null && PrefManager.autoApplyKnownConfig) {
             try {
                 val gameId = extractGameIdFromContainerId(appId)
-                val appInfo = SteamService.Companion.getAppInfoOf(gameId)
+                val appInfo = SteamService.getAppInfoOf(gameId)
                 if (appInfo != null) {
                     val gameName = appInfo.name
                     val gpuName = GPUInformation.getRenderer(context)
@@ -783,7 +795,7 @@ object ContainerUtils {
                         try {
                             val bestConfig = BestConfigService.fetchBestConfig(gameName, gpuName)
                             if (bestConfig != null && bestConfig.matchType != "no_match") {
-                                Timber.Forest.i("Applying best config for $gameName (matchType: ${bestConfig.matchType})")
+                                Timber.i("Applying best config for $gameName (matchType: ${bestConfig.matchType})")
                                 val parsedConfig = BestConfigService.parseConfigToContainerData(
                                     context,
                                     bestConfig.bestConfig,
@@ -795,15 +807,15 @@ object ContainerUtils {
                                 }
                             }
                         } catch (e: Exception) {
-                            Timber.Forest.w(
+                            Timber.w(
                                 e,
-                                "Failed to get best config for container creation: ${e.message}"
+                                "Failed to get best config for container creation: ${e.message}",
                             )
                         }
                     }
                 }
             } catch (e: Exception) {
-                Timber.Forest.w(e, "Error checking for best config: ${e.message}")
+                Timber.w(e, "Error checking for best config: ${e.message}")
             }
         }
 
@@ -890,7 +902,7 @@ object ContainerUtils {
         if (gameSource == GameSource.STEAM) {
             runBlocking {
                 try {
-                    Timber.Forest.i("Fetching DirectX version synchronously for app $appId")
+                    Timber.i("Fetching DirectX version synchronously for app $appId")
 
                     val gameId = extractGameIdFromContainerId(appId)
                     // Create CompletableDeferred to wait for result
@@ -905,7 +917,7 @@ object ContainerUtils {
                     val dxVersion = try {
                         withTimeout(10000) { deferred.await() }
                     } catch (e: Exception) {
-                        Timber.Forest.w(e, "Timeout waiting for DirectX version")
+                        Timber.w(e, "Timeout waiting for DirectX version")
                         -1 // Default on timeout
                     }
 
@@ -918,11 +930,11 @@ object ContainerUtils {
 
                     // Update the wrapper if needed
                     if (newDxWrapper != containerData.dxwrapper) {
-                        Timber.Forest.i("Setting DX wrapper for app $appId to $newDxWrapper (DirectX version: $dxVersion)")
+                        Timber.i("Setting DX wrapper for app $appId to $newDxWrapper (DirectX version: $dxVersion)")
                         containerData.dxwrapper = newDxWrapper
                     }
                 } catch (e: Exception) {
-                    Timber.Forest.w(e, "Error determining DirectX version: ${e.message}")
+                    Timber.w(e, "Error determining DirectX version: ${e.message}")
                     // Continue with default wrapper on error
                 }
             }
@@ -949,17 +961,17 @@ object ContainerUtils {
         val gameFolderPath: String? = when (gameSource) {
             GameSource.STEAM -> {
                 val gameId = extractGameIdFromContainerId(appId)
-                SteamService.Companion.getAppDirPath(gameId)
+                SteamService.getAppDirPath(gameId)
             }
 
             GameSource.GOG -> {
                 val gameId = extractGameIdFromContainerId(appId)
-                GOGService.Companion.getInstallPath(gameId.toString())
+                GOGService.getInstallPath(gameId.toString())
             }
 
             GameSource.EPIC -> {
                 val gameId = extractGameIdFromContainerId(appId)
-                EpicService.Companion.getInstallPath(gameId)
+                EpicService.getInstallPath(gameId)
             }
 
             GameSource.CUSTOM_GAME -> {
@@ -968,7 +980,7 @@ object ContainerUtils {
 
             GameSource.AMAZON -> {
                 val appIdInt = runCatching { extractGameIdFromContainerId(appId) }.getOrNull()
-                if (appIdInt != null) AmazonService.Companion.getInstallPathByAppId(appIdInt) else null
+                if (appIdInt != null) AmazonService.getInstallPathByAppId(appIdInt) else null
             }
         }
 
@@ -999,10 +1011,10 @@ object ContainerUtils {
                 val updatedDrives = drivesBuilder.toString()
                 container.drives = updatedDrives
                 container.saveData()
-                Timber.Forest.d("Updated container drives to include A: drive mapping: $updatedDrives")
+                Timber.d("Updated container drives to include A: drive mapping: $updatedDrives")
             }
         } else {
-            Timber.Forest.w("Could not find gameFolderPath for game $appId, skipping drive mapping update")
+            Timber.w("Could not find gameFolderPath for game $appId, skipping drive mapping update")
         }
         return container
     }
@@ -1027,7 +1039,7 @@ object ContainerUtils {
                     val effectiveConfig = IntentLaunchManager.getEffectiveContainerConfig(context, appId)
                     if (effectiveConfig != null) {
                         applyToContainer(context, container, effectiveConfig, saveToDisk = false)
-                        Timber.Forest.i("Applied temporary config override to existing container for app $appId (in-memory only)")
+                        Timber.i("Applied temporary config override to existing container for app $appId (in-memory only)")
                     }
                 }
             }
@@ -1049,23 +1061,23 @@ object ContainerUtils {
      * Deletes the container associated with the given appId, if it exists.
      */
     fun deleteContainer(context: Context, appId: String) {
-        Timber.Forest.i("[ContainerDeletion] Attempting to delete container for appId=$appId")
+        Timber.i("[ContainerDeletion] Attempting to delete container for appId=$appId")
         val manager = ContainerManager(context)
         val hasContainer = manager.hasContainer(appId)
-        Timber.Forest.i("[ContainerDeletion] hasContainer($appId) = $hasContainer")
+        Timber.i("[ContainerDeletion] hasContainer($appId) = $hasContainer")
         if (hasContainer) {
             // Remove the container directory asynchronously
             manager.removeContainerAsync(
                 manager.getContainerById(appId),
             ) {
-                Timber.Forest.i("[ContainerDeletion] Successfully deleted container for appId=$appId")
+                Timber.i("[ContainerDeletion] Successfully deleted container for appId=$appId")
             }
         } else {
-            Timber.Forest.w("[ContainerDeletion] No container found for appId=$appId — deletion aborted.")
+            Timber.w("[ContainerDeletion] No container found for appId=$appId — deletion aborted.")
 
             // Containers successfully parsed by ContainerManager (config file was readable)
             val loadedIds = manager.containers.map { it.id }
-            Timber.Forest.w("[ContainerDeletion] Loaded containers (${loadedIds.size}): $loadedIds")
+            Timber.w("[ContainerDeletion] Loaded containers (${loadedIds.size}): $loadedIds")
 
             // Raw filesystem scan — catches directories whose config file was empty/corrupt and
             // were silently skipped by ContainerManager. These are potential orphans.
@@ -1077,9 +1089,9 @@ object ContainerUtils {
                 ?.map { it.name.removePrefix(prefix) }
                 ?: emptyList()
             val unloadedIds = rawIds - loadedIds.toSet()
-            Timber.Forest.w("[ContainerDeletion] Raw filesystem dirs (${rawIds.size}): $rawIds")
+            Timber.w("[ContainerDeletion] Raw filesystem dirs (${rawIds.size}): $rawIds")
             if (unloadedIds.isNotEmpty()) {
-                Timber.Forest.w("[ContainerDeletion] Dirs present on disk but NOT loaded by ContainerManager (corrupt/empty config): $unloadedIds")
+                Timber.w("[ContainerDeletion] Dirs present on disk but NOT loaded by ContainerManager (corrupt/empty config): $unloadedIds")
             }
         }
     }
@@ -1120,10 +1132,15 @@ object ContainerUtils {
     fun extractGameSourceFromContainerId(containerId: String): GameSource {
         return when {
             containerId.startsWith("STEAM_") -> GameSource.STEAM
+
             containerId.startsWith("CUSTOM_GAME_") -> GameSource.CUSTOM_GAME
+
             containerId.startsWith("GOG_") -> GameSource.GOG
+
             containerId.startsWith("EPIC_") -> GameSource.EPIC
+
             containerId.startsWith("AMAZON_") -> GameSource.AMAZON
+
             // Add other platforms here..
             else -> GameSource.STEAM // default fallback
         }
@@ -1137,10 +1154,14 @@ object ContainerUtils {
         val gameSource = extractGameSourceFromContainerId(containerId)
         val gameId = extractGameIdFromContainerId(containerId)
         return when (gameSource) {
-            GameSource.STEAM -> SteamService.Companion.getAppInfoOf(gameId)?.name
-            GameSource.GOG -> GOGService.Companion.getGOGGameOf(gameId.toString())?.title
-            GameSource.EPIC -> EpicService.Companion.getEpicGameOf(gameId)?.title
-            GameSource.AMAZON -> AmazonService.Companion.getAmazonGameByAppId(gameId)?.title
+            GameSource.STEAM -> SteamService.getAppInfoOf(gameId)?.name
+
+            GameSource.GOG -> GOGService.getGOGGameOf(gameId.toString())?.title
+
+            GameSource.EPIC -> EpicService.getEpicGameOf(gameId)?.title
+
+            GameSource.AMAZON -> AmazonService.getAmazonGameByAppId(gameId)?.title
+
             GameSource.CUSTOM_GAME -> {
                 val customAppId = "${GameSource.CUSTOM_GAME.name}_$gameId"
                 CustomGameScanner.getFolderPathFromAppId(customAppId)
@@ -1172,17 +1193,17 @@ object ContainerUtils {
             // Find the A: drive path from container drives
             val aDrivePath = getADrivePath(drives)
             if (aDrivePath == null) {
-                Timber.Forest.w("No A: drive found in container drives")
+                Timber.w("No A: drive found in container drives")
                 return emptyList()
             }
 
             val aDir = File(aDrivePath)
             if (!aDir.exists() || !aDir.isDirectory) {
-                Timber.Forest.w("A: drive path does not exist or is not a directory: $aDrivePath")
+                Timber.w("A: drive path does not exist or is not a directory: $aDrivePath")
                 return emptyList()
             }
 
-            Timber.Forest.d("Scanning for executables in A: drive: $aDrivePath")
+            Timber.d("Scanning for executables in A: drive: $aDrivePath")
 
             // Recursively scan for .exe files using listFiles with depth limit.
             // Symlinked directories are skipped to avoid cycles (e.g. GOG ISI rootdir -> game root).
@@ -1215,9 +1236,9 @@ object ContainerUtils {
                 }
             }
 
-            Timber.Forest.d("Found ${executables.size} executables in A: drive")
+            Timber.d("Found ${executables.size} executables in A: drive")
         } catch (e: Exception) {
-            Timber.Forest.e(e, "Error scanning A: drive for executables")
+            Timber.e(e, "Error scanning A: drive for executables")
         }
 
         return executables

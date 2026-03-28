@@ -6,11 +6,11 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import app.gamegrub.NetworkMonitor.init
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Process-wide reactive network state.
@@ -34,7 +34,7 @@ object NetworkMonitor {
 
         fun skip(caps: NetworkCapabilities) =
             caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE) ||
-                    caps.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN)
+                caps.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN)
 
         // VPN networks can report stale transports (e.g. WIFI+VPN after wifi drops)
         fun hasVpn(caps: NetworkCapabilities) =
@@ -57,7 +57,7 @@ object NetworkMonitor {
             // fixing this would risk treating always-on VPN without real WiFi as valid.
             _hasWifiOrEthernet.value = nonVpnCaps.any {
                 it.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                        it.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                    it.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
             }
         }
 

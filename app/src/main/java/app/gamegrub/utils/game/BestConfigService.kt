@@ -6,9 +6,9 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
-import app.gamegrub.utils.manifest.ManifestEntry
 import app.gamegrub.utils.manifest.ManifestComponentHelper
 import app.gamegrub.utils.manifest.ManifestContentTypes
+import app.gamegrub.utils.manifest.ManifestEntry
 import app.gamegrub.utils.manifest.ManifestRepository
 import app.gamegrub.utils.network.Net
 import com.winlator.box86_64.Box86_64PresetManager
@@ -16,6 +16,8 @@ import com.winlator.container.Container
 import com.winlator.contents.ContentProfile
 import com.winlator.core.KeyValueSet
 import com.winlator.fexcore.FEXCorePresetManager
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -26,8 +28,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Service for fetching best configurations for games from GameNative API.
@@ -338,7 +338,9 @@ object BestConfigService {
         if (box64Version.isNotEmpty() && containerVariant.isNotEmpty()) {
             val box64VersionsToCheck = when {
                 containerVariant.equals(Container.BIONIC, ignoreCase = true) -> availableBox64Bionic
+
                 containerVariant.equals(Container.GLIBC, ignoreCase = true) -> availableBox64Glibc
+
                 else -> {
                     Timber.tag("BestConfigService").w("Unknown container variant '$containerVariant', defaulting to glibc Box64 versions")
                     availableBox64Glibc
@@ -374,7 +376,9 @@ object BestConfigService {
         if (wineVersion.isNotEmpty() && containerVariant.isNotEmpty()) {
             val wineVersionsToCheck = when {
                 containerVariant.equals(Container.BIONIC, ignoreCase = true) -> availableWineBionic
+
                 containerVariant.equals(Container.GLIBC, ignoreCase = true) -> availableWineGlibc
+
                 else -> {
                     Timber.tag("BestConfigService").w("Unknown container variant '$containerVariant', checking against all wine versions")
                     (availableWineBionic + availableWineGlibc).distinct()

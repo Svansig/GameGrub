@@ -3,6 +3,7 @@ package app.gamegrub.utils.network
 import android.content.Context
 import app.gamegrub.BuildConfig
 import app.gamegrub.Constants
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -10,7 +11,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 @Serializable
 data class UpdateInfo(

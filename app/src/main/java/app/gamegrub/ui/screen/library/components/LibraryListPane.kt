@@ -224,7 +224,9 @@ internal fun LibraryListPane(
             LaunchedEffect(state.isLoading, state.appInfoList.size, state.totalAppsInFilter) {
                 shouldShowSkeletonOverlay = when {
                     state.totalAppsInFilter == 0 -> false
+
                     state.isLoading && state.appInfoList.isEmpty() -> true
+
                     state.appInfoList.isNotEmpty() && !state.isLoading -> {
                         delay(100)
                         false

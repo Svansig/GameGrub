@@ -8,6 +8,6 @@ object DeviceUtils {
 
     fun isViewWide(windowSizeClass: WindowAdaptiveInfo): Boolean {
         return windowSizeClass.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.MEDIUM ||
-                windowSizeClass.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+            windowSizeClass.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     }
 }

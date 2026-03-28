@@ -4,13 +4,13 @@ import android.content.Context
 import app.gamegrub.service.gog.GOGAuthManager
 import app.gamegrub.utils.network.Net
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import org.json.JSONObject
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Native Kotlin API client for GOG Content System
@@ -346,7 +346,7 @@ class GOGApiClient @Inject constructor(
 
                 Timber.tag("GOG").d(
                     "Depot manifest parsed: ${depotManifest.files.size} file(s), " +
-                            "${depotManifest.directories.size} dir(s)",
+                        "${depotManifest.directories.size} dir(s)",
                 )
 
                 Result.success(depotManifest)
@@ -399,7 +399,7 @@ class GOGApiClient @Inject constructor(
 
             Timber.tag("GOG").d(
                 "Dependency depot manifest parsed: ${depotManifest.files.size} file(s), " +
-                        "${depotManifest.directories.size} dir(s)",
+                    "${depotManifest.directories.size} dir(s)",
             )
 
             Result.success(depotManifest)

@@ -407,7 +407,7 @@ fun ScreenEffectsPanel(
                                     when (keyEvent.nativeKeyEvent.keyCode) {
                                         KeyEvent.KEYCODE_BUTTON_B,
                                         KeyEvent.KEYCODE_BACK,
-                                            -> {
+                                        -> {
                                             onDismiss()
                                             true
                                         }

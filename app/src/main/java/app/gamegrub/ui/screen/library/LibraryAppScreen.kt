@@ -109,11 +109,11 @@ import app.gamegrub.ui.screen.library.components.GameOptionsPanel
 import app.gamegrub.ui.theme.GameGrubTheme
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 // https://partner.steamgames.com/doc/store/assets/libraryassets#4
 
@@ -530,9 +530,9 @@ internal fun AppScreenContent(
     // Download progress texts hoisted here so they can be shown inside the button
     val downloadStatusMessageFlow = remember(downloadInfo) { downloadInfo?.getStatusMessageFlow() }
     val downloadStatusMessage by (
-            downloadStatusMessageFlow?.collectAsState(initial = downloadStatusMessageFlow.value)
-                ?: remember { mutableStateOf<String?>(null) }
-            )
+        downloadStatusMessageFlow?.collectAsState(initial = downloadStatusMessageFlow.value)
+            ?: remember { mutableStateOf<String?>(null) }
+        )
     val downloadingLabel = stringResource(R.string.downloading)
     val downloadTimeLeftText = remember(displayInfo.appId, downloadProgress, downloadInfo, isDownloading, downloadStatusMessage) {
         val etaMs = downloadInfo?.getEstimatedTimeRemaining()

@@ -9,24 +9,13 @@ import app.gamegrub.data.UserFilesUploadResult
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.utils.storage.FileUtils
 import app.gamegrub.utils.steam.SteamUtils
+import app.gamegrub.utils.storage.FileUtils
 import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileChangeList
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileInfo
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.SteamCloud
 import `in`.dragonbra.javasteam.util.crypto.CryptoHelper
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.withTimeout
-import okhttp3.Headers
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import timber.log.Timber
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -40,6 +29,17 @@ import java.util.stream.Collectors
 import java.util.zip.ZipInputStream
 import kotlin.io.path.pathString
 import kotlin.time.measureTime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withTimeout
+import okhttp3.Headers
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import timber.log.Timber
 
 /**
  * [Steam Auto Cloud](https://partner.steamgames.com/doc/features/cloud#steam_auto-cloud)
@@ -451,7 +451,7 @@ object SteamAutoCloud {
 
                     Timber.i(
                         "Beginning app upload batch with ${filesToDelete.size} file(s) to delete " +
-                                "and ${filesToUpload.size} file(s) to upload",
+                            "and ${filesToUpload.size} file(s) to upload",
                     )
 
                     val uploadBatchResponse = steamCloud.beginAppUploadBatch(
@@ -513,17 +513,17 @@ object SteamAutoCloud {
                                 Timber.i("Uploading to $httpUrl")
                                 Timber.i(
                                     "Block Request:" +
-                                            "\n\tblockOffset: ${blockRequest.blockOffset}" +
-                                            "\n\tblockLength: ${blockRequest.blockLength}" +
-                                            "\n\trequestHeaders:\n\t\t${
-                                                blockRequest.requestHeaders.joinToString("\n\t\t") { "${it.name}: ${it.value}" }
-                                            }" +
-                                            "\n\texplicitBodyData: [${
-                                                blockRequest.explicitBodyData.joinToString(
-                                                    ", ",
-                                                )
-                                            }]" +
-                                            "\n\tmayParallelize: ${blockRequest.mayParallelize}",
+                                        "\n\tblockOffset: ${blockRequest.blockOffset}" +
+                                        "\n\tblockLength: ${blockRequest.blockLength}" +
+                                        "\n\trequestHeaders:\n\t\t${
+                                            blockRequest.requestHeaders.joinToString("\n\t\t") { "${it.name}: ${it.value}" }
+                                        }" +
+                                        "\n\texplicitBodyData: [${
+                                            blockRequest.explicitBodyData.joinToString(
+                                                ", ",
+                                            )
+                                        }]" +
+                                        "\n\tmayParallelize: ${blockRequest.mayParallelize}",
                                 )
 
                                 val byteArray = ByteArray(blockRequest.blockLength)
@@ -910,22 +910,22 @@ object SteamAutoCloud {
         with(this) {
             Timber.i(
                 "GetAppFileListChange(${appInfo.id}):" +
-                        "\n\tTotal Files: ${files.size}" +
-                        "\n\tCurrent Change Number: $currentChangeNumber" +
-                        "\n\tIs Only Delta: $isOnlyDelta" +
-                        "\n\tApp BuildID Hwm: $appBuildIDHwm" +
-                        "\n\tPath Prefixes: \n\t\t${pathPrefixes.joinToString("\n\t\t")}" +
-                        "\n\tMachine Names: \n\t\t${machineNames.joinToString("\n\t\t")}" +
-                        files.joinToString {
-                            "\n\t${it.filename}:" +
-                                    "\n\t\tshaFile: ${it.shaFile}" +
-                                    "\n\t\ttimestamp: ${it.timestamp}" +
-                                    "\n\t\trawFileSize: ${it.rawFileSize}" +
-                                    "\n\t\tpersistState: ${it.persistState}" +
-                                    "\n\t\tplatformsToSync: ${it.platformsToSync}" +
-                                    "\n\t\tpathPrefixIndex: ${it.pathPrefixIndex}" +
-                                    "\n\t\tmachineNameIndex: ${it.machineNameIndex}"
-                        },
+                    "\n\tTotal Files: ${files.size}" +
+                    "\n\tCurrent Change Number: $currentChangeNumber" +
+                    "\n\tIs Only Delta: $isOnlyDelta" +
+                    "\n\tApp BuildID Hwm: $appBuildIDHwm" +
+                    "\n\tPath Prefixes: \n\t\t${pathPrefixes.joinToString("\n\t\t")}" +
+                    "\n\tMachine Names: \n\t\t${machineNames.joinToString("\n\t\t")}" +
+                    files.joinToString {
+                        "\n\t${it.filename}:" +
+                            "\n\t\tshaFile: ${it.shaFile}" +
+                            "\n\t\ttimestamp: ${it.timestamp}" +
+                            "\n\t\trawFileSize: ${it.rawFileSize}" +
+                            "\n\t\tpersistState: ${it.persistState}" +
+                            "\n\t\tplatformsToSync: ${it.platformsToSync}" +
+                            "\n\t\tpathPrefixIndex: ${it.pathPrefixIndex}" +
+                            "\n\t\tmachineNameIndex: ${it.machineNameIndex}"
+                    },
             )
         }
     }

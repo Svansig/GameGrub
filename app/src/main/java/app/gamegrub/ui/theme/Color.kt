@@ -24,32 +24,32 @@ val gameGrubSeedColor = Color(0x284561FF)
  * These are the base colors used to construct theme palettes.
  */
 // Brand
-val GameGrubPrimary = Color(0xFF39D4C6)      // handheld screen teal
-val GameGrubSeed = Color(0xFF1B2A30)         // deep blue-black / cloak seed
+val GameGrubPrimary = Color(0xFF39D4C6) // handheld screen teal
+val GameGrubSeed = Color(0xFF1B2A30) // deep blue-black / cloak seed
 
 // Backgrounds
-val GameGrubBackground = Color(0xFF0B0F12)   // near-black with blue tint
-val GameGrubSurface = Color(0xFF12181D)      // dark cloak tone
+val GameGrubBackground = Color(0xFF0B0F12) // near-black with blue tint
+val GameGrubSurface = Color(0xFF12181D) // dark cloak tone
 val GameGrubSurfaceElevated = Color(0xFF1A2329)
 val GameGrubCard = Color(0xFF10161B)
 
 // Foregrounds
-val GameGrubForeground = Color(0xFFF2EBDD)   // bone-white
+val GameGrubForeground = Color(0xFFF2EBDD) // bone-white
 val GameGrubForegroundMuted = Color(0xFF9AA3A8)
 
 // Secondary
-val GameGrubSecondary = Color(0xFF263239)    // muted slate / cloak gray
+val GameGrubSecondary = Color(0xFF263239) // muted slate / cloak gray
 
 // Accents
-val GameGrubCyan = Color(0xFF39D4C6)         // primary teal
-val GameGrubPurple = Color(0xFF2E4650)       // repurposed as deep slate-blue
-val GameGrubPink = Color(0xFFB7A98A)         // warm bone/tan accent
+val GameGrubCyan = Color(0xFF39D4C6) // primary teal
+val GameGrubPurple = Color(0xFF2E4650) // repurposed as deep slate-blue
+val GameGrubPink = Color(0xFFB7A98A) // warm bone/tan accent
 
 // Semantic
-val GameGrubSuccess = Color(0xFF6FAF5D)      // moss green
-val GameGrubWarning = Color(0xFFD7A44A)      // lantern amber
-val GameGrubDanger = Color(0xFFD05C5C)       // softened red
-val GameGrubDestructive = Color(0xFF5A1F24)  // dark wine red
+val GameGrubSuccess = Color(0xFF6FAF5D) // moss green
+val GameGrubWarning = Color(0xFFD7A44A) // lantern amber
+val GameGrubDanger = Color(0xFFD05C5C) // softened red
+val GameGrubDestructive = Color(0xFF5A1F24) // dark wine red
 
 // Border
 val GameGrubBorder = Color(0xFF2B3840)

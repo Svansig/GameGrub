@@ -23,6 +23,13 @@ import android.widget.TextView
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.PerformanceHudSize
 import app.gamegrub.utils.general.DateTimeUtils.formatRuntimeHours
+import java.io.File
+import java.util.ArrayDeque
+import java.util.Date
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -31,13 +38,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.util.ArrayDeque
-import java.util.Date
-import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 /**
  * Lightweight floating HUD shown above the in-game surface.
@@ -323,12 +323,13 @@ class PerformanceHudView(
 
         val runtimeText = when {
             status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                    status == BatteryManager.BATTERY_STATUS_FULL -> {
+                status == BatteryManager.BATTERY_STATUS_FULL -> {
                 smoothedBatteryRuntimeHours = null
                 "LEFT CHG"
             }
 
             currentMicroAmps <= 0L || chargeCounterMicroAmpHours <= 0L -> null
+
             else -> {
                 val rawHours = chargeCounterMicroAmpHours.toDouble() / currentMicroAmps.toDouble()
                 if (!rawHours.isFinite() || rawHours <= 0.0 || rawHours > MAX_RUNTIME_HOURS) {
@@ -635,9 +636,9 @@ class PerformanceHudView(
     private fun readGpuTempC(): Int? {
         return readTemperatureC(
             listOf("/sys/class/kgsl/kgsl-3d0/temp") +
-                    discoverThermalZoneTempPaths { type ->
-                        type.contains("gpu") || type.contains("kgsl")
-                    },
+                discoverThermalZoneTempPaths { type ->
+                    type.contains("gpu") || type.contains("kgsl")
+                },
         )
     }
 

@@ -5,9 +5,9 @@ import android.os.Handler
 import android.os.Looper
 import com.winlator.core.FileUtils
 import com.winlator.xenvironment.ImageFs
+import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
 
 /**
  * Handles migration of legacy container formats.
@@ -28,9 +28,9 @@ object ContainerMigrator {
         try {
             versionFile.createNewFile()
             FileUtils.writeString(versionFile, version.toString())
-            Timber.Forest.i("Created container migration version file: $version")
+            Timber.i("Created container migration version file: $version")
         } catch (e: Exception) {
-            Timber.Forest.e(e, "Failed to create container migration version file")
+            Timber.e(e, "Failed to create container migration version file")
         }
     }
 
@@ -44,7 +44,7 @@ object ContainerMigrator {
             try {
                 FileUtils.readLines(versionFile)[0].toInt()
             } catch (e: Exception) {
-                Timber.Forest.e(e, "Failed to read container migration version")
+                Timber.e(e, "Failed to read container migration version")
                 0
             }
         } else {
@@ -73,7 +73,7 @@ object ContainerMigrator {
         try {
             // Check if migration is needed based on version
             if (!isContainerMigrationNeeded(context)) {
-                Timber.Forest.i("Container migration not needed, already at version $LATEST_CONTAINER_MIGRATION_VERSION")
+                Timber.i("Container migration not needed, already at version $LATEST_CONTAINER_MIGRATION_VERSION")
                 postMain {
                     onComplete?.invoke(0)
                 }
@@ -86,19 +86,19 @@ object ContainerMigrator {
             // Find all legacy numeric container directories
             val legacyContainers = homeDir.listFiles()?.filter { file ->
                 file.isDirectory &&
-                        file.name != ImageFs.USER &&
-                        // Skip active symlink
-                        file.name.startsWith("${ImageFs.USER}-") &&
-                        // Must have xuser- prefix
-                        file.name.removePrefix("${ImageFs.USER}-").matches(Regex("\\d+")) &&
-                        // Numeric ID after prefix
-                        File(file, ".container").exists() // Has container config
+                    file.name != ImageFs.USER &&
+                    // Skip active symlink
+                    file.name.startsWith("${ImageFs.USER}-") &&
+                    // Must have xuser- prefix
+                    file.name.removePrefix("${ImageFs.USER}-").matches(Regex("\\d+")) &&
+                    // Numeric ID after prefix
+                    File(file, ".container").exists() // Has container config
             } ?: emptyList()
 
             val totalContainers = legacyContainers.size
             var migratedContainers = 0
 
-            Timber.Forest.i("Found $totalContainers legacy containers to migrate")
+            Timber.i("Found $totalContainers legacy containers to migrate")
 
             for (legacyDir in legacyContainers) {
                 val legacyId = legacyDir.name.removePrefix("${ImageFs.USER}-") // Remove xuser- prefix
@@ -132,16 +132,16 @@ object ContainerMigrator {
                         if (activeSymlink.exists() && activeSymlink.canonicalPath.endsWith(legacyId)) {
                             activeSymlink.delete()
                             FileUtils.symlink("./${ImageFs.USER}-$finalContainerId", activeSymlink.path)
-                            Timber.Forest.i("Updated active symlink to point to $finalContainerId")
+                            Timber.i("Updated active symlink to point to $finalContainerId")
                         }
 
                         migratedContainers++
-                        Timber.Forest.i("Migrated container $legacyId -> $finalContainerId")
+                        Timber.i("Migrated container $legacyId -> $finalContainerId")
                     } else {
-                        Timber.Forest.e("Failed to rename container directory: $legacyId")
+                        Timber.e("Failed to rename container directory: $legacyId")
                     }
                 } catch (e: Exception) {
-                    Timber.Forest.e(e, "Error migrating container $legacyId")
+                    Timber.e(e, "Error migrating container $legacyId")
                 }
             }
 
@@ -152,9 +152,9 @@ object ContainerMigrator {
                 onComplete?.invoke(migratedContainers)
             }
 
-            Timber.Forest.i("Container migration completed: $migratedContainers containers migrated")
+            Timber.i("Container migration completed: $migratedContainers containers migrated")
         } catch (e: Exception) {
-            Timber.Forest.e(e, "Error during container migration")
+            Timber.e(e, "Error during container migration")
             // Still mark as complete to avoid repeated attempts
             createContainerMigrationVersionFile(context, LATEST_CONTAINER_MIGRATION_VERSION)
             postMain {
@@ -170,9 +170,9 @@ object ContainerMigrator {
             val data = JSONObject(configContent)
             data.put("id", newContainerId)
             FileUtils.writeString(configFile, data.toString())
-            Timber.Forest.i("Updated container config ID to $newContainerId")
+            Timber.i("Updated container config ID to $newContainerId")
         } catch (e: Exception) {
-            Timber.Forest.e(e, "Failed to update container config for $newContainerId")
+            Timber.e(e, "Failed to update container config for $newContainerId")
         }
     }
 }

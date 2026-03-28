@@ -50,14 +50,14 @@ import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.screen.library.GameMigrationDialog
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
+import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.game.GameCompatibilityCache
 import app.gamegrub.utils.game.GameCompatibilityService
 import app.gamegrub.utils.manifest.ManifestInstaller
-import app.gamegrub.utils.storage.MarkerUtils
 import app.gamegrub.utils.steam.SteamUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import app.gamegrub.utils.storage.StorageUtils
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.posthog.PostHog
@@ -65,14 +65,14 @@ import com.winlator.container.ContainerData
 import com.winlator.container.ContainerManager
 import com.winlator.core.GPUInformation
 import com.winlator.xenvironment.ImageFsInstaller
+import java.io.File
+import java.nio.file.Paths
+import kotlin.io.path.pathString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
-import java.nio.file.Paths
-import kotlin.io.path.pathString
 
 private data class InstallSizeInfo(
     val downloadSize: String,

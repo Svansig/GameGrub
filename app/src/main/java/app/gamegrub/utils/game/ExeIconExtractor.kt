@@ -1,10 +1,10 @@
 package app.gamegrub.utils.game
 
-import timber.log.Timber
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import timber.log.Timber
 
 /**
  * Minimal PE resource parser to extract icon(s) from a Windows EXE/DLL.
@@ -50,8 +50,12 @@ object ExeIconExtractor {
                 val optionalHeaderStart = coffStart + 20
                 val magic = hb.getShort(optionalHeaderStart).toInt() and 0xFFFF
                 val dataDirectoriesStart = optionalHeaderStart + when (magic) {
-                    0x10B -> 96 // PE32
-                    0x20B -> 112 // PE32+
+                    0x10B -> 96
+
+                    // PE32
+                    0x20B -> 112
+
+                    // PE32+
                     else -> return false
                 }
                 if (dataDirectoriesStart + 24 > headerSize) return false

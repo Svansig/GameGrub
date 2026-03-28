@@ -2,9 +2,9 @@ package app.gamegrub.service.amazon
 
 import android.content.Context
 import app.gamegrub.data.AmazonCredentials
+import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
 
 /** Manages Amazon authentication and credential lifecycle. */
 object AmazonAuthManager {

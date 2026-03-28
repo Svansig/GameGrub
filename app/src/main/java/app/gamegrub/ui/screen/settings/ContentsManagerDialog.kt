@@ -46,10 +46,10 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.utils.SnackbarManager
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
+import java.util.concurrent.CountDownLatch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.CountDownLatch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

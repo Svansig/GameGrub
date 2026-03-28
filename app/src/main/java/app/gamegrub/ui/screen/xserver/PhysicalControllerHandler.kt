@@ -98,8 +98,8 @@ class PhysicalControllerHandler(
     private fun hasMotionRange(device: InputDevice?, axis: Int): Boolean {
         if (device == null) return false
         return device.getMotionRange(axis, InputDevice.SOURCE_JOYSTICK) != null ||
-                device.getMotionRange(axis, InputDevice.SOURCE_GAMEPAD) != null ||
-                device.getMotionRange(axis) != null
+            device.getMotionRange(axis, InputDevice.SOURCE_GAMEPAD) != null ||
+            device.getMotionRange(axis) != null
     }
 
     /**

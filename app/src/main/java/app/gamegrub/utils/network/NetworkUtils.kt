@@ -1,13 +1,13 @@
 package app.gamegrub.utils.network
 
+import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.dnsoverhttps.DnsOverHttps
 import timber.log.Timber
-import java.net.InetAddress
-import java.util.concurrent.TimeUnit
 
 object Net {
 

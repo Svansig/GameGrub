@@ -3,6 +3,8 @@ package app.gamegrub.utils.game
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.R
+import app.gamegrub.utils.auth.KeyAttestationHelper
+import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.network.Net
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,8 +13,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
-import app.gamegrub.utils.auth.KeyAttestationHelper
-import app.gamegrub.utils.auth.PlayIntegrity
 
 /**
  * Service for fetching game compatibility information from GameNative API.

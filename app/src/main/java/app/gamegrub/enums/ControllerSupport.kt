@@ -12,8 +12,11 @@ enum class ControllerSupport(val code: Int) {
         fun from(keyValue: String?): ControllerSupport {
             return when (keyValue?.lowercase()) {
                 none.name -> none
+
                 partial.name -> partial
+
                 full.name -> full
+
                 else -> {
                     if (keyValue != null) {
                         Timber.e("Could not find proper ControllerSupport from $keyValue")

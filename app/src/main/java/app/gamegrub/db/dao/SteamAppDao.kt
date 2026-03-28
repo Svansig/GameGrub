@@ -23,15 +23,15 @@ interface SteamAppDao {
 
     @Query(
         "SELECT * FROM steam_app AS app " +
-                "WHERE app.id != 480 " + // Actively filter out Spacewar
-                "AND app.package_id != :invalidPkgId " +
-                "AND app.type != 0 " +
-                "AND EXISTS (" +
-                "  SELECT 1 FROM steam_license AS license " +
-                "  WHERE license.packageId = app.package_id " +
-                "  AND (license.license_flags & 8 = 0) " + // exclude expired licenses (e.g. free weekends)
-                ") " +
-                "ORDER BY LOWER(app.name)",
+            "WHERE app.id != 480 " + // Actively filter out Spacewar
+            "AND app.package_id != :invalidPkgId " +
+            "AND app.type != 0 " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM steam_license AS license " +
+            "  WHERE license.packageId = app.package_id " +
+            "  AND (license.license_flags & 8 = 0) " + // exclude expired licenses (e.g. free weekends)
+            ") " +
+            "ORDER BY LOWER(app.name)",
     )
     fun getAllOwnedApps(
         invalidPkgId: Int = INVALID_PKG_ID,
@@ -48,21 +48,21 @@ interface SteamAppDao {
 
     @Query(
         "SELECT * FROM steam_app AS app WHERE dlc_for_app_id = :appId AND depots <> '{}' AND " +
-                " EXISTS (" +
-                "   SELECT * FROM steam_license AS license " +
-                "     WHERE license.license_type <> 0 AND " +
-                "       REPLACE(REPLACE(license.app_ids, '[', ','), ']', ',') LIKE ('%,' || app.id || ',%') " +
-                ")",
+            " EXISTS (" +
+            "   SELECT * FROM steam_license AS license " +
+            "     WHERE license.license_type <> 0 AND " +
+            "       REPLACE(REPLACE(license.app_ids, '[', ','), ']', ',') LIKE ('%,' || app.id || ',%') " +
+            ")",
     )
     suspend fun findDownloadableDLCApps(appId: Int): List<SteamApp>?
 
     @Query(
         "SELECT * FROM steam_app AS app WHERE dlc_for_app_id = :appId AND depots = '{}' AND " +
-                " EXISTS (" +
-                "   SELECT * FROM steam_license AS license " +
-                "     WHERE license.license_type <> 0 AND " +
-                "       REPLACE(REPLACE(license.app_ids, '[', ','), ']', ',') LIKE ('%,' || app.id || ',%') " +
-                ")",
+            " EXISTS (" +
+            "   SELECT * FROM steam_license AS license " +
+            "     WHERE license.license_type <> 0 AND " +
+            "       REPLACE(REPLACE(license.app_ids, '[', ','), ']', ',') LIKE ('%,' || app.id || ',%') " +
+            ")",
     )
     suspend fun findHiddenDLCApps(appId: Int): List<SteamApp>?
 

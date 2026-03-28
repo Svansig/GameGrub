@@ -33,6 +33,7 @@ class VdfParser {
 
             when (dataType) {
                 VDF_END -> break
+
                 VDF_SUBSECTION -> {
                     val key = readString(stream)
                     val value = parseVdfData(stream)

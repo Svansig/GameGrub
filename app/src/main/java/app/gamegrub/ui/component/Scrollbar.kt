@@ -40,9 +40,9 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 /** Fallback item height in pixels when no visible items available for measurement */
 private const val FALLBACK_ITEM_HEIGHT_PX = 100f

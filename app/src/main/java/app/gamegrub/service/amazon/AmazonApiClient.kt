@@ -2,6 +2,7 @@ package app.gamegrub.service.amazon
 
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.utils.network.Net
+import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -9,7 +10,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
-import java.security.MessageDigest
 
 /** Low-level client for Amazon Gaming distribution APIs. */
 object AmazonApiClient {

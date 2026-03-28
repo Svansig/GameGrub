@@ -188,15 +188,25 @@ class ExternalOnScreenKeyboardView(
     private fun onKeyDown(spec: KeySpec) {
         when (spec.action) {
             Action.SHIFT -> Unit
+
             Action.BACKSPACE -> pressKey(XKeycode.KEY_BKSP)
+
             Action.ENTER -> pressKey(XKeycode.KEY_ENTER)
+
             Action.SPACE -> pressKey(XKeycode.KEY_SPACE)
+
             Action.TAB -> pressKey(XKeycode.KEY_TAB)
+
             Action.ESC -> pressKey(XKeycode.KEY_ESC)
+
             Action.ARROW_LEFT -> pressKey(XKeycode.KEY_LEFT)
+
             Action.ARROW_DOWN -> pressKey(XKeycode.KEY_DOWN)
+
             Action.ARROW_RIGHT -> pressKey(XKeycode.KEY_RIGHT)
+
             Action.ARROW_UP -> pressKey(XKeycode.KEY_UP)
+
             Action.INPUT -> {
                 val keycode = spec.keycode ?: return
                 val useShift = when (shiftState) {

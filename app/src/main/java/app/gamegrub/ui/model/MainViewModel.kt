@@ -21,12 +21,15 @@ import app.gamegrub.ui.enums.ConnectionState
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.general.IntentLaunchManager
-import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.network.UpdateInfo
+import app.gamegrub.utils.steam.SteamUtils
 import com.materialkolor.PaletteStyle
 import com.winlator.xserver.Window
 import dagger.hilt.android.lifecycle.HiltViewModel
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.AppProcessInfo
+import java.nio.file.Paths
+import javax.inject.Inject
+import kotlin.io.path.name
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,9 +43,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.nio.file.Paths
-import javax.inject.Inject
-import kotlin.io.path.name
 
 @HiltViewModel
 class MainViewModel @Inject constructor(

@@ -61,9 +61,9 @@ import app.gamegrub.ui.utils.ListItemImage
 import app.gamegrub.utils.game.CustomGameScanner
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /**
  * Grid card for Hero/Capsule layout views.
@@ -389,11 +389,11 @@ internal fun getGridImageUrl(
                 val folder = File(path)
                 val imageFile = folder.listFiles()?.firstOrNull { file ->
                     file.name.startsWith("steamgriddb_$imageType") &&
-                            (
-                                    file.name.endsWith(".png", ignoreCase = true) ||
-                                            file.name.endsWith(".jpg", ignoreCase = true) ||
-                                            file.name.endsWith(".webp", ignoreCase = true)
-                                    )
+                        (
+                            file.name.endsWith(".png", ignoreCase = true) ||
+                                file.name.endsWith(".jpg", ignoreCase = true) ||
+                                file.name.endsWith(".webp", ignoreCase = true)
+                            )
                 }
                 return imageFile?.let { android.net.Uri.fromFile(it).toString() }
             }
@@ -416,12 +416,12 @@ internal fun getGridImageUrl(
                         val folder = File(path)
                         val heroFile = folder.listFiles()?.firstOrNull { file ->
                             file.name.startsWith("steamgriddb_hero") &&
-                                    !file.name.contains("grid") &&
-                                    (
-                                            file.name.endsWith(".png", ignoreCase = true) ||
-                                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                                    file.name.endsWith(".webp", ignoreCase = true)
-                                            )
+                                !file.name.contains("grid") &&
+                                (
+                                    file.name.endsWith(".png", ignoreCase = true) ||
+                                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                                        file.name.endsWith(".webp", ignoreCase = true)
+                                    )
                         }
                         heroFile?.let { android.net.Uri.fromFile(it).toString() }
                     }
@@ -434,6 +434,7 @@ internal fun getGridImageUrl(
         GameSource.GOG, GameSource.EPIC, GameSource.AMAZON -> {
             val primary = when (paneType) {
                 PaneType.GRID_CAPSULE -> appInfo.capsuleImageUrl.ifEmpty { appInfo.iconHash }
+
                 else -> appInfo.headerImageUrl.ifEmpty {
                     appInfo.heroImageUrl.ifEmpty { appInfo.iconHash }
                 }

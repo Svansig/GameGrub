@@ -39,6 +39,11 @@ import app.gamegrub.utils.general.unaccent
 import com.winlator.core.GPUInformation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import java.util.EnumSet
+import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,11 +53,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
-import java.util.EnumSet
-import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
@@ -410,7 +410,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { item ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                            currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
                     if (installedOnly) {
                         downloadDirectorySet.contains(SteamService.getAppDirName(item))
                     } else {
@@ -481,7 +481,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                            currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -521,7 +521,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                            currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -561,7 +561,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                            currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -623,31 +623,31 @@ class LibraryViewModel @Inject constructor(
             }
 
             val includeGOG = (
-                    if (currentTab == LibraryTab.ALL) {
-                        currentState.showGOGInLibrary
-                    } else {
-                        currentTab.showGoG
-                    }
-                    ) &&
-                    GOGService.hasStoredCredentials(context)
+                if (currentTab == LibraryTab.ALL) {
+                    currentState.showGOGInLibrary
+                } else {
+                    currentTab.showGoG
+                }
+                ) &&
+                GOGService.hasStoredCredentials(context)
 
             val includeEpic = (
-                    if (currentTab == LibraryTab.ALL) {
-                        currentState.showEpicInLibrary
-                    } else {
-                        currentTab.showEpic
-                    }
-                    ) &&
-                    EpicService.hasStoredCredentials(context)
+                if (currentTab == LibraryTab.ALL) {
+                    currentState.showEpicInLibrary
+                } else {
+                    currentTab.showEpic
+                }
+                ) &&
+                EpicService.hasStoredCredentials(context)
 
             val includeAmazon = (
-                    if (currentTab == LibraryTab.ALL) {
-                        currentState.showAmazonInLibrary
-                    } else {
-                        currentTab.showAmazon
-                    }
-                    ) &&
-                    AmazonService.hasStoredCredentials(context)
+                if (currentTab == LibraryTab.ALL) {
+                    currentState.showAmazonInLibrary
+                } else {
+                    currentTab.showAmazon
+                }
+                ) &&
+                AmazonService.hasStoredCredentials(context)
 
             // Combine both lists and apply sort option
             val sortComparator: Comparator<LibraryEntry> = when (currentState.currentSortOption) {
@@ -711,10 +711,18 @@ class LibraryViewModel @Inject constructor(
                     // Per-source counts for tab badges
                     // Use user prefs + auth state only (not current tab) so badges stay stable across tab switches
                     allCount = (if (currentState.showSteamInLibrary) steamEntries.size else 0) +
-                            (if (currentState.showCustomGamesInLibrary) customEntries.size else 0) +
-                            (if (currentState.showGOGInLibrary && GOGService.hasStoredCredentials(context)) gogEntries.size else 0) +
-                            (if (currentState.showEpicInLibrary && EpicService.hasStoredCredentials(context)) epicEntries.size else 0) +
-                            (if (currentState.showAmazonInLibrary && AmazonService.hasStoredCredentials(context)) amazonEntries.size else 0),
+                        (if (currentState.showCustomGamesInLibrary) customEntries.size else 0) +
+                        (if (currentState.showGOGInLibrary && GOGService.hasStoredCredentials(context)) gogEntries.size else 0) +
+                        (if (currentState.showEpicInLibrary && EpicService.hasStoredCredentials(context)) epicEntries.size else 0) +
+                        (
+                            if (currentState.showAmazonInLibrary &&
+                                AmazonService.hasStoredCredentials(context)
+                            ) {
+                                amazonEntries.size
+                            } else {
+                                0
+                            }
+                            ),
                     steamCount = if (currentState.showSteamInLibrary) steamEntries.size else 0,
                     gogCount = if (currentState.showGOGInLibrary && GOGService.hasStoredCredentials(context)) gogEntries.size else 0,
                     epicCount = if (currentState.showEpicInLibrary && EpicService.hasStoredCredentials(context)) epicEntries.size else 0,

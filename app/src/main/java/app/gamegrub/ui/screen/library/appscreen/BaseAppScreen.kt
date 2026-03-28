@@ -711,9 +711,14 @@ abstract class BaseAppScreen {
         // Get download info based on game source for progress tracking
         val downloadInfo = when (libraryItem.gameSource) {
             GameSource.STEAM -> SteamService.getAppDownloadInfo(displayInfo.gameId)
+
             GameSource.EPIC -> app.gamegrub.service.epic.EpicService.getDownloadInfo(displayInfo.gameId)
+
             GameSource.GOG -> app.gamegrub.service.gog.GOGService.getDownloadInfo(displayInfo.gameId.toString())
-            GameSource.CUSTOM_GAME -> null // Custom games don't support downloads yet
+
+            GameSource.CUSTOM_GAME -> null
+
+            // Custom games don't support downloads yet
             GameSource.AMAZON -> app.gamegrub.service.amazon.AmazonService.getDownloadInfoByAppId(libraryItem.gameId)
         }
 

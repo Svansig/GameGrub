@@ -178,7 +178,9 @@ private fun Preview_TwoFactorAuthScreen(
                     userLoginState = currentState,
                     message = when (state.loginResult) {
                         LoginResult.DeviceAuth -> stringResource(R.string.steam_2fa_device)
+
                         LoginResult.DeviceConfirm -> stringResource(R.string.steam_2fa_confirmation)
+
                         LoginResult.EmailAuth -> stringResource(
                             R.string.steam_2fa_email,
                             "pluvia@email.com",

@@ -1,8 +1,8 @@
 package app.gamegrub.utils.storage
 
 import app.gamegrub.enums.Marker
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 object MarkerUtils {
     fun hasMarker(dirPath: String, type: Marker): Boolean {

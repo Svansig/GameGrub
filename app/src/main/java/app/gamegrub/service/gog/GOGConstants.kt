@@ -3,10 +3,10 @@ package app.gamegrub.service.gog
 import android.content.Context
 import android.net.Uri
 import app.gamegrub.PrefManager
-import timber.log.Timber
 import java.io.File
 import java.nio.file.Paths
 import java.security.SecureRandom
+import timber.log.Timber
 
 /**
  * Constants for GOG integration
@@ -37,10 +37,10 @@ object GOGConstants {
     /** Base URL for OAuth login (append &state=... for CSRF protection). */
     val GOG_AUTH_LOGIN_URL: String
         get() = "https://auth.gog.com/auth?" +
-                "client_id=$GOG_CLIENT_ID" +
-                "&redirect_uri=${Uri.encode(GOG_REDIRECT_URI)}" +
-                "&response_type=code" +
-                "&layout=galaxy"
+            "client_id=$GOG_CLIENT_ID" +
+            "&redirect_uri=${Uri.encode(GOG_REDIRECT_URI)}" +
+            "&response_type=code" +
+            "&layout=galaxy"
 
     /** GOG download language (short code as used in manifest depots, e.g. "en"). */
     const val GOG_FALLBACK_DOWNLOAD_LANGUAGE = "english"

@@ -112,8 +112,8 @@ class EpicOAuthActivity : ComponentActivity() {
             val parsed = Uri.parse(url)
             val expected = Uri.parse(EpicConstants.EPIC_REDIRECT_URI)
             parsed.scheme.equals(expected.scheme, ignoreCase = true) &&
-                    parsed.host.equals(expected.host, ignoreCase = true) &&
-                    parsed.path == expected.path
+                parsed.host.equals(expected.host, ignoreCase = true) &&
+                parsed.path == expected.path
         } catch (e: Exception) {
             Timber.w(e, "Failed to parse redirect URL: %s", redactUrlForLogging(url))
             false

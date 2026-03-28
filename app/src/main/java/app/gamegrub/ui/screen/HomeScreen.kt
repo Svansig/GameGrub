@@ -21,7 +21,6 @@ fun HomeScreen(
     onGoOnline: () -> Unit,
     isOffline: Boolean = false,
 ) {
-
     // Pressing back while logged in, confirm we want to close the app.
     BackHandler {
         onClickExit()

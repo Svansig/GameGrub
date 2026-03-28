@@ -12,9 +12,9 @@ import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.events.EventDispatcher
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.AchievementWatcher
+import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.container.ContainerMigrator
 import app.gamegrub.utils.general.IntentLaunchManager
-import app.gamegrub.utils.auth.PlayIntegrity
 import com.google.android.play.core.splitcompat.SplitCompatApplication
 import com.posthog.PersonProfiles
 import com.posthog.android.PostHogAndroid
@@ -26,12 +26,12 @@ import com.winlator.widget.TouchpadView
 import com.winlator.widget.XServerView
 import com.winlator.xenvironment.XEnvironment
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 
 typealias NavChangedListener = NavController.OnDestinationChangedListener
 
@@ -75,8 +75,6 @@ class GameGrubApp : SplitCompatApplication() {
         app.gamegrub.service.gog.GOGConstants.init(this)
 
         DownloadService.populateDownloadService(this)
-
-
 
         appScope.launch {
             ContainerMigrator.migrateLegacyContainersIfNeeded(

@@ -84,17 +84,17 @@ import app.gamegrub.ui.screen.settings.SettingsScreen
 import app.gamegrub.ui.screen.xserver.XServerScreen
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.game.BestConfigService
+import app.gamegrub.utils.auth.PlatformAuthUtils
 import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.container.LaunchDependencies
+import app.gamegrub.utils.game.BestConfigService
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.game.GameFeedbackUtils
 import app.gamegrub.utils.general.IntentLaunchManager
-import app.gamegrub.utils.container.LaunchDependencies
+import app.gamegrub.utils.general.UpdateInstaller
 import app.gamegrub.utils.manifest.ManifestInstaller
-import app.gamegrub.utils.auth.PlatformAuthUtils
 import app.gamegrub.utils.network.UpdateChecker
 import app.gamegrub.utils.network.UpdateInfo
-import app.gamegrub.utils.general.UpdateInstaller
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.posthog.PostHog
 import com.winlator.container.Container
@@ -104,6 +104,10 @@ import com.winlator.core.TarCompressorUtils
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xenvironment.ImageFsInstaller
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
+import java.io.File
+import java.util.Date
+import java.util.EnumSet
+import kotlin.reflect.KFunction2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -112,10 +116,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
-import java.io.File
-import java.util.Date
-import java.util.EnumSet
-import kotlin.reflect.KFunction2
 
 private fun NavHostController.navigateFromLoginIfNeeded(
     targetRoute: String,
@@ -603,8 +603,8 @@ fun GameGrubMain(
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             // Only attempt reconnection if not already connected/connecting and not in offline mode
             val shouldAttemptReconnect = !state.isSteamConnected &&
-                    !isConnecting &&
-                    !SteamService.keepAlive
+                !isConnecting &&
+                !SteamService.keepAlive
 
             if (shouldAttemptReconnect) {
                 Timber.d("[GameGrubMain]: Steam not connected - attempting reconnection")
@@ -1189,11 +1189,12 @@ fun GameGrubMain(
             val startDestination = rememberSaveable {
                 when {
                     SteamService.isLoggedIn -> GameGrubScreen.Home.route + "?offline=false"
+
                     // skip login screen if any service has stored credentials
                     (PrefManager.username.isNotEmpty() && PrefManager.refreshToken.isNotEmpty()) ||
-                            GOGService.hasStoredCredentials(context) ||
-                            EpicService.hasStoredCredentials(context) ||
-                            AmazonService.hasStoredCredentials(context) ->
+                        GOGService.hasStoredCredentials(context) ||
+                        EpicService.hasStoredCredentials(context) ||
+                        AmazonService.hasStoredCredentials(context) ->
                         GameGrubScreen.Home.route + "?offline=true"
 
                     else -> GameGrubScreen.LoginUser.route
@@ -1721,7 +1722,8 @@ fun preLaunchApp(
                     )
                     return@launch
                 }
-            } catch (_: Exception) { /* ignore persona read errors */
+            } catch (_: Exception) {
+                /* ignore persona read errors */
             }
         }
 
@@ -1876,7 +1878,7 @@ fun preLaunchApp(
             SyncResult.UnknownFail,
             SyncResult.DownloadFail,
             SyncResult.UpdateFail,
-                -> {
+            -> {
                 setMessageDialogState(
                     MessageDialogState(
                         visible = true,
@@ -1893,8 +1895,8 @@ fun preLaunchApp(
                     "Pending remote operations:${
                         postSyncInfo.pendingRemoteOperations.joinToString("\n") { pro ->
                             "\n\tmachineName: ${pro.machineName}" +
-                                    "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
-                                    "\n\toperation: ${pro.operation}"
+                                "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
+                                "\n\toperation: ${pro.operation}"
                         }
                     }",
                 )
@@ -2000,7 +2002,7 @@ fun preLaunchApp(
 
             SyncResult.UpToDate,
             SyncResult.Success,
-                -> onSuccess(context, appId)
+            -> onSuccess(context, appId)
         }
     }
 }

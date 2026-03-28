@@ -58,22 +58,22 @@ import app.gamegrub.ui.component.dialog.SingleChoiceDialog
 import app.gamegrub.ui.component.settings.SettingsListDropdown
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.theme.settingsTileColorsAlt
-import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.IconSwitcher
 import app.gamegrub.ui.utils.LocaleHelper
+import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch
 import com.materialkolor.PaletteStyle
 import com.winlator.core.AppUtils
+import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import kotlin.math.roundToInt
 
 @Composable
 fun SettingsGroupInterface(

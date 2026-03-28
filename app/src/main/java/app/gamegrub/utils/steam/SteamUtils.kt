@@ -13,23 +13,15 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirName
 import app.gamegrub.service.steam.SteamService.Companion.getAppInfoOf
 import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.network.Net
 import app.gamegrub.utils.storage.FileUtils
 import app.gamegrub.utils.storage.MarkerUtils
-import app.gamegrub.utils.network.Net
 import com.winlator.container.Container
 import com.winlator.core.TarCompressorUtils
 import com.winlator.core.WineRegistryEditor
 import com.winlator.xenvironment.ImageFs
 import `in`.dragonbra.javasteam.types.KeyValue
 import `in`.dragonbra.javasteam.util.HardwareUtils
-import kotlinx.coroutines.runBlocking
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.Protocol
-import okhttp3.Request
-import okhttp3.Response
-import org.json.JSONObject
-import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -45,6 +37,14 @@ import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.name
+import kotlinx.coroutines.runBlocking
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Protocol
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
+import timber.log.Timber
 
 object SteamUtils {
 
@@ -88,6 +88,7 @@ object SteamUtils {
     // Steam strips all non-ASCII characters from usernames and passwords
     // source: https://github.com/steevp/UpdogFarmer/blob/8f2d185c7260bc2d2c92d66b81f565188f2c1a0e/app/src/main/java/com/steevsapps/idledaddy/LoginActivity.java#L166C9-L168C104
     // more: https://github.com/winauth/winauth/issues/368#issuecomment-224631002
+
     /**
      * Strips non-ASCII characters from String
      */
@@ -524,8 +525,8 @@ object SteamUtils {
             if (unpackedExe.exists()) {
                 // Check if files are different (compare size and last modified time for efficiency)
                 val areFilesDifferent = !exe.exists() ||
-                        exe.length() != unpackedExe.length() ||
-                        exe.lastModified() != unpackedExe.lastModified()
+                    exe.length() != unpackedExe.length() ||
+                    exe.lastModified() != unpackedExe.lastModified()
 
                 if (areFilesDifferent) {
                     Files.copy(unpackedExe.toPath(), exe.toPath(), StandardCopyOption.REPLACE_EXISTING)
@@ -758,10 +759,10 @@ object SteamUtils {
 
         val steamApi = files.firstOrNull {
             it.toPath().name.startsWith("steam_api", true) &&
-                    (
-                            it.toPath().name.endsWith(".dll", true) ||
-                                    it.toPath().name.endsWith(".dll.orig", true)
-                            )
+                (
+                    it.toPath().name.endsWith(".dll", true) ||
+                        it.toPath().name.endsWith(".dll.orig", true)
+                    )
         }
 
         if (steamApi != null) {
@@ -903,9 +904,9 @@ object SteamUtils {
         val container = ContainerUtils.getOrCreateContainer(context, appId)
         val language = runCatching {
             (
-                    container.getExtra("language", null)
-                        ?: container.javaClass.getMethod("getLanguage").invoke(container) as? String
-                    )
+                container.getExtra("language", null)
+                    ?: container.javaClass.getMethod("getLanguage").invoke(container) as? String
+                )
                 ?: "english"
         }.getOrDefault("english").lowercase()
         val useSteamInput = container.getExtra("useSteamInput", "false").toBoolean()
@@ -1119,6 +1120,7 @@ object SteamUtils {
     // Set LoginID to a non-zero value if you have another client connected using the same account,
     // the same private ip, and same public ip.
     // source: https://github.com/Longi94/JavaSteam/blob/08690d0aab254b44b0072ed8a4db2f86d757109b/javasteam-samples/src/main/java/in/dragonbra/javasteamsamples/_000_authentication/SampleLogonAuthentication.java#L146C13-L147C56
+
     /**
      * This ID is unique to the device and app combination
      */
@@ -1175,12 +1177,12 @@ object SteamUtils {
         val where = URLEncoder.encode("Infobox_game.Steam_AppID HOLDS \"$steamAppId\"", "UTF-8")
         val url =
             "https://pcgamingwiki.com/w/api.php" +
-                    "?action=cargoquery" +
-                    "&tables=Infobox_game,AP" +
-                    "I&join_on=Infobox_game._pageID=API._pageID" +
-                    "&fields=API.Direct3D_versions" +
-                    "&where=$where" +
-                    "&format=json"
+                "?action=cargoquery" +
+                "&tables=Infobox_game,AP" +
+                "I&join_on=Infobox_game._pageID=API._pageID" +
+                "&fields=API.Direct3D_versions" +
+                "&where=$where" +
+                "&format=json"
 
         Timber.i("[DX Fetch] Starting fetchDirect3DMajor for query=%s", url)
 

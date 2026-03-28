@@ -3,9 +3,9 @@ package app.gamegrub.ui
 import android.app.Activity
 import android.view.OrientationEventListener
 import app.gamegrub.ui.enums.Orientation
-import timber.log.Timber
 import java.util.EnumSet
 import kotlin.math.abs
+import timber.log.Timber
 
 /**
  * Manages device orientation changes and applies orientation constraints.
@@ -90,9 +90,9 @@ class OrientationManager(private val activity: Activity) {
         ) {
             Timber.d(
                 "$adjustedOrientation => currentOrientation(" +
-                        "${Orientation.fromActivityInfoValue(activity.requestedOrientation)}) " +
-                        "!= nearestOrientation(${nearest.first}) && " +
-                        "currentDistance($currentOrientationDist) > nearestDistance(${nearest.second})",
+                    "${Orientation.fromActivityInfoValue(activity.requestedOrientation)}) " +
+                    "!= nearestOrientation(${nearest.first}) && " +
+                    "currentDistance($currentOrientationDist) > nearestDistance(${nearest.second})",
             )
 
             activity.requestedOrientation = nearest.first.activityInfoValue

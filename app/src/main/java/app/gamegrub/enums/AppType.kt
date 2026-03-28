@@ -1,7 +1,7 @@
 package app.gamegrub.enums
 
-import timber.log.Timber
 import java.util.EnumSet
+import timber.log.Timber
 
 enum class AppType(val code: Int) {
     invalid(0),
@@ -29,24 +29,43 @@ enum class AppType(val code: Int) {
         fun from(keyValue: String?): AppType {
             return when (keyValue?.lowercase()) {
                 invalid.name -> invalid
+
                 game.name -> game
+
                 application.name -> application
+
                 tool.name -> tool
+
                 demo.name -> demo
+
                 deprected.name -> deprected
+
                 dlc.name -> dlc
+
                 guide.name -> guide
+
                 driver.name -> driver
+
                 config.name -> config
+
                 hardware.name -> hardware
+
                 franchise.name -> franchise
+
                 video.name -> video
+
                 plugin.name -> plugin
+
                 music.name -> music
+
                 series.name -> series
+
                 comic.name -> comic
+
                 beta.name -> beta
+
                 shortcut.name -> shortcut
+
                 else -> {
                     if (keyValue != null) {
                         Timber.e("Could not find proper AppType from $keyValue")

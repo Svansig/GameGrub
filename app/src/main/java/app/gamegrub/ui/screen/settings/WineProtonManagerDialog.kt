@@ -53,6 +53,11 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.network.Net
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
+import java.io.File
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,11 +65,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import okhttp3.Request
 import timber.log.Timber
-import java.io.File
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,12 +245,19 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             if (profile == null) {
                 val msg = when (fail) {
                     ContentsManager.InstallFailedReason.ERROR_BADTAR -> ctx.getString(R.string.wine_proton_error_badtar)
+
                     ContentsManager.InstallFailedReason.ERROR_NOPROFILE -> ctx.getString(R.string.wine_proton_error_noprofile)
+
                     ContentsManager.InstallFailedReason.ERROR_BADPROFILE -> ctx.getString(R.string.wine_proton_error_badprofile)
+
                     ContentsManager.InstallFailedReason.ERROR_EXIST -> ctx.getString(R.string.wine_proton_error_exist)
+
                     ContentsManager.InstallFailedReason.ERROR_MISSINGFILES -> ctx.getString(R.string.wine_proton_error_missingfiles)
+
                     ContentsManager.InstallFailedReason.ERROR_UNTRUSTPROFILE -> ctx.getString(R.string.wine_proton_error_untrustprofile)
+
                     ContentsManager.InstallFailedReason.ERROR_NOSPACE -> ctx.getString(R.string.wine_proton_error_nospace)
+
                     null -> error?.let { "Error: ${it.javaClass.simpleName} - ${it.message}" }
                         ?: ctx.getString(R.string.wine_proton_error_unknown)
 
@@ -433,12 +440,19 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 if (profile == null) {
                     val msg = when (fail) {
                         ContentsManager.InstallFailedReason.ERROR_BADTAR -> ctx.getString(R.string.wine_proton_error_badtar)
+
                         ContentsManager.InstallFailedReason.ERROR_NOPROFILE -> ctx.getString(R.string.wine_proton_error_noprofile)
+
                         ContentsManager.InstallFailedReason.ERROR_BADPROFILE -> ctx.getString(R.string.wine_proton_error_badprofile)
+
                         ContentsManager.InstallFailedReason.ERROR_EXIST -> ctx.getString(R.string.wine_proton_error_exist)
+
                         ContentsManager.InstallFailedReason.ERROR_MISSINGFILES -> ctx.getString(R.string.wine_proton_error_missingfiles)
+
                         ContentsManager.InstallFailedReason.ERROR_UNTRUSTPROFILE -> ctx.getString(R.string.wine_proton_error_untrustprofile)
+
                         ContentsManager.InstallFailedReason.ERROR_NOSPACE -> ctx.getString(R.string.wine_proton_error_nospace)
+
                         null -> error?.let { "Error: ${it.javaClass.simpleName} - ${it.message}" }
                             ?: ctx.getString(R.string.wine_proton_error_unknown)
 
@@ -1020,7 +1034,9 @@ private suspend fun performFinishInstall(
                         Timber.tag("WineProtonManagerDialog").e(e, "   ❌ finishInstallContent FAILED: $reason")
                         message = when (reason) {
                             ContentsManager.InstallFailedReason.ERROR_EXIST -> context.getString(R.string.wine_proton_version_already_exists)
+
                             ContentsManager.InstallFailedReason.ERROR_NOSPACE -> context.getString(R.string.wine_proton_error_nospace)
+
                             else -> context.getString(
                                 R.string.wine_proton_install_failed,
                                 e.message ?: context.getString(R.string.wine_proton_error_unknown),
@@ -1086,7 +1102,7 @@ private suspend fun loadWineProtonManifest(
             val manifest = jsonObject.entries
                 .filter {
                     it.key.startsWith("wine", ignoreCase = true) ||
-                            it.key.startsWith("proton", ignoreCase = true)
+                        it.key.startsWith("proton", ignoreCase = true)
                 }
                 .associate { it.key to it.value.toString().removeSurrounding("\"") }
 
@@ -1118,7 +1134,9 @@ private fun detectBinaryVariant(installDir: File): String {
         val wine = File(installDir, "bin/wine")
         val binaryFile = when {
             wine64.exists() -> wine64
+
             wine.exists() -> wine
+
             else -> {
                 Timber.w("No wine binary found in ${installDir.path}")
                 return "unknown"

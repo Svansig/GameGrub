@@ -81,8 +81,8 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.adaptivePanelWidth
 import app.gamegrub.utils.general.MathUtils.normalizedProgress
 import com.winlator.renderer.GLRenderer
-import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 object QuickMenuAction {
     const val KEYBOARD = 1
@@ -191,18 +191,18 @@ private fun matchesPerformanceHudPreset(
 ): Boolean {
     val presetConfig = applyPerformanceHudPreset(currentConfig, preset)
     return currentConfig.showFrameRate == presetConfig.showFrameRate &&
-            currentConfig.showCpuUsage == presetConfig.showCpuUsage &&
-            currentConfig.showGpuUsage == presetConfig.showGpuUsage &&
-            currentConfig.showRamUsage == presetConfig.showRamUsage &&
-            currentConfig.showBatteryLevel == presetConfig.showBatteryLevel &&
-            currentConfig.showPowerDraw == presetConfig.showPowerDraw &&
-            currentConfig.showBatteryRuntime == presetConfig.showBatteryRuntime &&
-            currentConfig.showClockTime == presetConfig.showClockTime &&
-            currentConfig.showCpuTemperature == presetConfig.showCpuTemperature &&
-            currentConfig.showGpuTemperature == presetConfig.showGpuTemperature &&
-            currentConfig.showFrameRateGraph == presetConfig.showFrameRateGraph &&
-            currentConfig.showCpuUsageGraph == presetConfig.showCpuUsageGraph &&
-            currentConfig.showGpuUsageGraph == presetConfig.showGpuUsageGraph
+        currentConfig.showCpuUsage == presetConfig.showCpuUsage &&
+        currentConfig.showGpuUsage == presetConfig.showGpuUsage &&
+        currentConfig.showRamUsage == presetConfig.showRamUsage &&
+        currentConfig.showBatteryLevel == presetConfig.showBatteryLevel &&
+        currentConfig.showPowerDraw == presetConfig.showPowerDraw &&
+        currentConfig.showBatteryRuntime == presetConfig.showBatteryRuntime &&
+        currentConfig.showClockTime == presetConfig.showClockTime &&
+        currentConfig.showCpuTemperature == presetConfig.showCpuTemperature &&
+        currentConfig.showGpuTemperature == presetConfig.showGpuTemperature &&
+        currentConfig.showFrameRateGraph == presetConfig.showFrameRateGraph &&
+        currentConfig.showCpuUsageGraph == presetConfig.showCpuUsageGraph &&
+        currentConfig.showGpuUsageGraph == presetConfig.showGpuUsageGraph
 }
 
 @Composable

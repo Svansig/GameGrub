@@ -12,8 +12,11 @@ enum class ReleaseState(val code: Int) {
         fun from(keyValue: String?): ReleaseState {
             return when (keyValue?.lowercase()) {
                 disabled.name -> disabled
+
                 released.name -> released
+
                 prerelease.name -> prerelease
+
                 else -> {
                     if (keyValue != null) {
                         Timber.e("Could not find proper ReleaseState from $keyValue")

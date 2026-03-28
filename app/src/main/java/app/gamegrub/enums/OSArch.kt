@@ -12,7 +12,9 @@ enum class OSArch(val keyValName: String) {
         fun from(keyValue: String?): OSArch {
             return when (keyValue) {
                 Arch32.keyValName -> Arch32
+
                 Arch64.keyValName -> Arch64
+
                 else -> {
                     if (keyValue != null) {
                         Timber.w("Could not identify $keyValue as OSArch")

@@ -14,7 +14,9 @@ class StatsAchievementsGenerator {
                 }
 
                 char == '\\' -> sb.append("\\")
+
                 char == '"' -> sb.append("\\\"")
+
                 else -> sb.append(char)
             }
         }

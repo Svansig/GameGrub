@@ -49,6 +49,11 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
+import app.gamegrub.service.steam.managers.SteamAchievementManager
+import app.gamegrub.service.steam.managers.SteamAuthService
+import app.gamegrub.service.steam.managers.SteamCloudSavesManager
+import app.gamegrub.service.steam.managers.SteamFriendsManager
+import app.gamegrub.service.steam.managers.SteamLibraryManager
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatType
 import app.gamegrub.statsgen.StatsAchievementsGenerator
@@ -288,6 +293,31 @@ class SteamService : Service(), IChallengeUrlChanged {
     )
     val localPersona = _localPersona.asStateFlow()
 
+    internal val authService = SteamAuthService(
+        getService = { this },
+        onLoginSuccess = { username, clientId, accessToken, refreshToken -> },
+        onLoginFailure = { username, result, message -> },
+    )
+    internal val libraryManager = SteamLibraryManager(
+        appDao = appDao,
+        licenseDao = licenseDao,
+        appInfoDao = appInfoDao,
+        cachedLicenseDao = cachedLicenseDao,
+        downloadingAppInfoDao = downloadingAppInfoDao,
+        getService = { this },
+    )
+    internal val cloudSavesManager = SteamCloudSavesManager(
+        getService = { this },
+        getAppInfo = { appId -> appDao.findApp(appId) },
+        getClientId = { PrefManager.clientId },
+    )
+    internal val achievementManager = SteamAchievementManager(
+        getService = { this },
+    )
+    internal val friendsManager = SteamFriendsManager(
+        getService = { this },
+    )
+
     companion object {
         const val MAX_PICS_BUFFER = 256
 
@@ -315,11 +345,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             private set
         var cachedAchievementsAppId: Int? = null
             private set
-
-        fun clearCachedAchievements() {
-            cachedAchievements = null
-            cachedAchievementsAppId = null
-        }
 
         val hasWifiOrEthernet: Boolean get() = NetworkMonitor.hasWifiOrEthernet.value
 
@@ -420,20 +445,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         val isLoginInProgress: Boolean
             get() = instance?._loginResult == LoginResult.InProgress
 
-        suspend fun setPersonaState(state: EPersonaState) = withContext(Dispatchers.IO) {
-            PrefManager.personaState = state
-            instance?._steamFriends?.setPersonaState(state)
-        }
+        suspend fun setPersonaState(state: EPersonaState) = instance?.friendsManager?.setPersonaState(state) ?: Unit
 
-        suspend fun requestUserPersona() = withContext(Dispatchers.IO) {
-            // in order to get user avatar url and other info
-            userSteamId?.let { instance?._steamFriends?.requestFriendInfo(it) }
-        }
+        suspend fun requestUserPersona() = instance?.friendsManager?.requestUserPersona() ?: Unit
 
-        suspend fun getSelfCurrentlyPlayingAppId(): Int? = withContext(Dispatchers.IO) {
-            val self = instance?.localPersona?.value ?: return@withContext null
-            if (self.isPlayingGame) self.gameAppID else null
-        }
+        suspend fun getSelfCurrentlyPlayingAppId(): Int? = instance?.friendsManager?.getSelfCurrentlyPlayingAppId()
 
         suspend fun kickPlayingSession(onlyGame: Boolean = true): Boolean =
             withContext(Dispatchers.IO) {
@@ -465,35 +481,27 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun getPkgInfoOf(appId: Int): SteamLicense? {
-            return runBlocking(Dispatchers.IO) {
-                instance?.licenseDao?.findLicense(
-                    instance?.appDao?.findApp(appId)?.packageId ?: INVALID_PKG_ID,
-                )
-            }
+            return instance?.libraryManager?.getPkgInfoOf(appId)
         }
 
         fun getAppInfoOf(appId: Int): SteamApp? {
-            return runBlocking(Dispatchers.IO) { instance?.appDao?.findApp(appId) }
+            return instance?.libraryManager?.getAppInfoOf(appId)
         }
 
         fun getDownloadingAppInfoOf(appId: Int): DownloadingAppInfo? {
-            return runBlocking(Dispatchers.IO) {
-                instance?.downloadingAppInfoDao?.getDownloadingApp(
-                    appId,
-                )
-            }
+            return instance?.libraryManager?.getDownloadingAppInfoOf(appId)
         }
 
         fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? {
-            return runBlocking(Dispatchers.IO) { instance?.appDao?.findDownloadableDLCApps(appId) }
+            return instance?.libraryManager?.getDownloadableDlcAppsOf(appId)
         }
 
         fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? {
-            return runBlocking(Dispatchers.IO) { instance?.appDao?.findHiddenDLCApps(appId) }
+            return instance?.libraryManager?.getHiddenDlcAppsOf(appId)
         }
 
         fun getInstalledApp(appId: Int): AppInfo? {
-            return runBlocking(Dispatchers.IO) { instance?.appInfoDao?.getInstalledApp(appId) }
+            return instance?.libraryManager?.getInstalledApp(appId)
         }
 
         fun getInstalledDepotsOf(appId: Int): List<Int>? {
@@ -575,17 +583,7 @@ class SteamService : Service(), IChallengeUrlChanged {
          *
          * @return number of newly discovered appIds that were scheduled for PICS.
          */
-        suspend fun refreshOwnedGamesFromServer(): Int = withContext(Dispatchers.IO) {
-            val service = instance ?: return@withContext 0
-            val unifiedFriends = service._unifiedFriends ?: return@withContext 0
-            val steamId = userSteamId ?: return@withContext 0
-
-            runCatching {
-                val ownedGames = unifiedFriends.getOwnedGames(steamId.convertToUInt64())
-                val remoteAppIds = ownedGames.map { it.appId }.filter { it > 0 }.toSet()
-                if (remoteAppIds.isEmpty()) {
-                    return@runCatching 0
-                }
+        suspend fun refreshOwnedGamesFromServer(): Int = instance?.libraryManager?.refreshOwnedGamesFromServer() ?: 0
 
                 val localAppIds = service.appDao.getAllAppIds().toSet()
                 val missingAppIds = remoteAppIds - localAppIds
@@ -2095,57 +2093,13 @@ class SteamService : Service(), IChallengeUrlChanged {
             preferredSave: SaveLocation = SaveLocation.None,
             parentScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
             overrideLocalChangeNumber: Long? = null,
-        ): Deferred<PostSyncInfo> = parentScope.async {
-            if (!tryAcquireSync(appId)) {
-                Timber.w("Cannot force sync when sync already in progress for appId=$appId")
-                return@async PostSyncInfo(SyncResult.InProgress)
-            }
-
-            try {
-                var syncResult = PostSyncInfo(SyncResult.UnknownFail)
-
-                val maxAttempts = 3
-                for (attempt in 1..maxAttempts) {
-                    try {
-                        PrefManager.clientId?.let { clientId ->
-                            instance?.let { steamInstance ->
-                                getAppInfoOf(appId)?.let { appInfo ->
-                                    steamInstance._steamCloud?.let { steamCloud ->
-                                        val postSyncInfo = SteamAutoCloud.syncUserFiles(
-                                            appInfo = appInfo,
-                                            clientId = clientId,
-                                            steamInstance = steamInstance,
-                                            steamCloud = steamCloud,
-                                            preferredSave = preferredSave,
-                                            parentScope = parentScope,
-                                            prefixToPath = prefixToPath,
-                                            overrideLocalChangeNumber = overrideLocalChangeNumber,
-                                        ).await()
-
-                                        postSyncInfo?.let { info ->
-                                            syncResult = info
-                                            Timber.i("Force cloud sync completed for app $appId with result: ${info.syncResult}")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break
-                    } catch (e: AsyncJobFailedException) {
-                        if (attempt == maxAttempts) {
-                            Timber.e(e, "Force cloud sync failed after $maxAttempts attempts")
-                        } else {
-                            Timber.w("Force cloud sync attempt $attempt failed (AsyncJobFailedException), retrying...")
-                            delay(1000L * attempt)
-                        }
-                    }
-                }
-
-                return@async syncResult
-            } finally {
-                releaseSync(appId)
-            }
-        }
+        ): Deferred<PostSyncInfo> = instance?.cloudSavesManager?.forceSyncUserFiles(
+            appId = appId,
+            prefixToPath = prefixToPath,
+            preferredSave = preferredSave,
+            parentScope = parentScope,
+            overrideLocalChangeNumber = overrideLocalChangeNumber,
+        ) ?: parentScope.async { PostSyncInfo(SyncResult.UnknownFail) }
 
         suspend fun closeApp(context: Context, appId: Int, isOffline: Boolean, prefixToPath: (String) -> String) =
             withContext(Dispatchers.IO) {
@@ -2325,165 +2279,21 @@ class SteamService : Service(), IChallengeUrlChanged {
             password: String,
             rememberSession: Boolean,
             authenticator: IAuthenticator,
-        ) = withContext(Dispatchers.IO) {
-            try {
-                Timber.i("Logging in via credentials.")
-                instance!!._loginResult = LoginResult.InProgress
-                Timber.i("Set login result to InProgress.")
-                instance!!.steamClient?.let { steamClient ->
-                    val authDetails = AuthSessionDetails().apply {
-                        this.username = username.trim()
-                        this.password =
-                            password // Not trimming as some passwords have leading spaces.
-                        this.persistentSession = rememberSession
-                        this.authenticator = authenticator
-                        this.deviceFriendlyName = SteamUtils.getMachineName(instance!!)
-                        this.clientOSType = EOSType.WinUnknown
-                    }
-
-                    val event = SteamEvent.LogonStarted(username)
-                    GameGrubApp.events.emit(event)
-
-                    val authSession =
-                        steamClient.authentication.beginAuthSessionViaCredentials(authDetails)
-                            .await()
-
-                    val pollResult = authSession.pollingWaitForResult().await()
-
-                    if (pollResult.accountName.isEmpty() && pollResult.refreshToken.isEmpty()) {
-                        throw Exception("No account name or refresh token received.")
-                    }
-
-                    login(
-                        clientId = authSession.clientID,
-                        username = pollResult.accountName,
-                        accessToken = pollResult.accessToken,
-                        refreshToken = pollResult.refreshToken,
-                        rememberSession = rememberSession,
-                    )
-                } ?: run {
-                    Timber.e("Could not logon: Failed to connect to Steam")
-
-                    val event = SteamEvent.LogonEnded(
-                        username,
-                        LoginResult.Failed,
-                        "No connection to Steam",
-                    )
-                    GameGrubApp.events.emit(event)
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Login failed")
-
-                val message = when (e) {
-                    is java.util.concurrent.CancellationException -> "Unknown cancellation"
-                    is AuthenticationException -> e.result?.name ?: e.message
-                    else -> e.message ?: e.javaClass.name
-                }
-
-                val event = SteamEvent.LogonEnded(username, LoginResult.Failed, message)
-                GameGrubApp.events.emit(event)
-            }
+        ) = instance?.authService?.startLoginWithCredentials(
+            username = username,
+            password = password,
+            rememberSession = rememberSession,
+            authenticator = authenticator,
+        ) ?: run {
+            Timber.e("Could not start login: Service not initialized")
         }
 
-        suspend fun startLoginWithQr() = withContext(Dispatchers.IO) {
-            try {
-                Timber.i("Logging in via QR.")
-
-                val service = instance
-                if (service == null) {
-                    Timber.e("Could not start QR logon: Service not initialized")
-                    val event =
-                        SteamEvent.QrAuthEnded(success = false, message = "Service not initialized")
-                    GameGrubApp.events.emit(event)
-                    return@withContext
-                }
-
-                service.steamClient?.let { steamClient ->
-                    isWaitingForQRAuth = true
-
-                    val authDetails = AuthSessionDetails().apply {
-                        this.deviceFriendlyName = SteamUtils.getMachineName(instance!!)
-                        this.clientOSType = EOSType.WinUnknown
-                        this.persistentSession = true
-                    }
-
-                    val authSession =
-                        steamClient.authentication.beginAuthSessionViaQR(authDetails).await()
-
-                    // Steam will periodically refresh the challenge url, this callback allows you to draw a new qr code.
-                    authSession.challengeUrlChanged = service
-
-                    val qrEvent = SteamEvent.QrChallengeReceived(authSession.challengeUrl)
-                    GameGrubApp.events.emit(qrEvent)
-
-                    Timber.d("PollingInterval: ${authSession.pollingInterval.toLong()}")
-
-                    var authPollResult: AuthPollResult? = null
-
-                    while (isWaitingForQRAuth && authPollResult == null) {
-                        try {
-                            authPollResult = authSession.pollAuthSessionStatus().await()
-                        } catch (e: Exception) {
-                            Timber.e(e, "Poll auth session status error")
-                            throw e
-                        }
-
-                        // Sensitive info, only print in DEBUG build.
-//                        if (BuildConfig.DEBUG && authPollResult != null) {
-//                            Timber.d(
-//                                "AccessToken: %s\nAccountName: %s\nRefreshToken: %s\nNewGuardData: %s",
-//                                authPollResult.accessToken,
-//                                authPollResult.accountName,
-//                                authPollResult.refreshToken,
-//                                authPollResult.newGuardData ?: "No new guard data",
-//                            )
-//                        }
-
-                        delay(authSession.pollingInterval.toLong())
-                    }
-
-                    isWaitingForQRAuth = false
-
-                    val event = SteamEvent.QrAuthEnded(authPollResult != null)
-                    GameGrubApp.events.emit(event)
-
-                    // there is a chance qr got cancelled and there is no authPollResult
-                    if (authPollResult == null) {
-                        Timber.e("Got no auth poll result")
-                        throw Exception("Got no auth poll result")
-                    }
-
-                    login(
-                        clientId = authSession.clientID,
-                        username = authPollResult.accountName,
-                        accessToken = authPollResult.accessToken,
-                        refreshToken = authPollResult.refreshToken,
-                    )
-                } ?: run {
-                    Timber.e("Could not start QR logon: Failed to connect to Steam")
-
-                    val event =
-                        SteamEvent.QrAuthEnded(success = false, message = "No connection to Steam")
-                    GameGrubApp.events.emit(event)
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "QR failed")
-
-                val message = when (e) {
-                    is java.util.concurrent.CancellationException -> "QR Session timed out"
-                    is AuthenticationException -> e.result?.name ?: e.message
-                    else -> e.message ?: e.javaClass.name
-                }
-
-                val event = SteamEvent.QrAuthEnded(success = false, message = message)
-                GameGrubApp.events.emit(event)
-            }
+        suspend fun startLoginWithQr() = instance?.authService?.startLoginWithQr() ?: run {
+            Timber.e("Could not start QR login: Service not initialized")
         }
 
         fun stopLoginWithQr() {
-            Timber.i("Stopping QR polling")
-
-            isWaitingForQRAuth = false
+            instance?.authService?.stopLoginWithQr()
         }
 
         fun stop() {
@@ -2495,16 +2305,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun logOut() {
-            CoroutineScope(Dispatchers.Default).launch {
-                // isConnected = false
-
-                isLoggingOut = true
-
-                performLogOffDuties(clearCloudSyncState = true)
-
-                val steamUser = instance!!._steamUser!!
-                steamUser.logOff()
-            }
+            instance?.authService?.logOut(clearCloudSyncState = true)
+            isLoggingOut = true
         }
 
         private fun clearUserData(clearCloudSyncState: Boolean = false) {
@@ -2566,9 +2368,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             cancelLongLivedSteamJobs()
         }
 
-        suspend fun getOwnedGames(friendID: Long): List<OwnedGames> = withContext(Dispatchers.IO) {
-            instance?._unifiedFriends!!.getOwnedGames(friendID)
-        }
+        suspend fun getOwnedGames(friendID: Long): List<OwnedGames> = instance?.libraryManager?.getOwnedGames(friendID) ?: emptyList()
 
         // Add helper to detect if any downloads or cloud sync are in progress
         fun hasActiveOperations(): Boolean {
@@ -2681,25 +2481,15 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         suspend fun generateAchievements(appId: Int, configDirectory: String) {
-            val steamUser = instance!!._steamUser!!
-            val userStats = instance?._steamUserStats!!.getUserStats(appId, steamUser.steamID!!).await()
-            val schemaArray = userStats.schema.toByteArray()
-            val generator = StatsAchievementsGenerator()
-            val result = generator.generateStatsAchievements(schemaArray, configDirectory)
-            cachedAchievements = result.achievements
-            cachedAchievementsAppId = appId
+            instance?.achievementManager?.generateAchievements(appId, configDirectory)
+            cachedAchievements = instance?.achievementManager?.cachedAchievements
+            cachedAchievementsAppId = instance?.achievementManager?.cachedAchievementsAppId
+        }
 
-            val nameToBlockBit = result.nameToBlockBit
-            Timber.d("nameToBlockBit size=${nameToBlockBit.size} for appId=$appId")
-            if (nameToBlockBit.isNotEmpty()) {
-                val configDir = File(configDirectory)
-                if (!configDir.exists()) configDir.mkdirs()
-                val mappingJson = JSONObject()
-                nameToBlockBit.forEach { (name, pair) ->
-                    mappingJson.put(name, JSONArray(listOf(pair.first, pair.second)))
-                }
-                File(configDir, "achievement_name_to_block.json").writeText(mappingJson.toString(), Charsets.UTF_8)
-            }
+        fun clearCachedAchievements() {
+            instance?.achievementManager?.clearCachedAchievements()
+            cachedAchievements = null
+            cachedAchievementsAppId = null
         }
 
         fun getGseSaveDirs(context: Context, appId: Int): List<File> {

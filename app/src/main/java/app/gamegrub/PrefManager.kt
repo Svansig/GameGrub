@@ -1126,6 +1126,12 @@ object PrefManager {
         get() = getPref(APP_LANGUAGE, "")
         set(value) = setPref(APP_LANGUAGE, value)
 
+    // Tracks whether startup notification permission prompt has already been shown.
+    private val NOTIFICATION_PERMISSION_PROMPTED = booleanPreferencesKey("notification_permission_prompted")
+    var notificationPermissionPrompted: Boolean
+        get() = getPref(NOTIFICATION_PERMISSION_PROMPTED, false)
+        set(value) = setPref(NOTIFICATION_PERMISSION_PROMPTED, value)
+
     // auto-apply known config from BestConfigService on first container creation
     private val AUTO_APPLY_KNOWN_CONFIG = booleanPreferencesKey("auto_apply_known_config")
     var autoApplyKnownConfig: Boolean

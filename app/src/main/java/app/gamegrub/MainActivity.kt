@@ -3,7 +3,7 @@ package app.gamegrub
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
+import android.content.pm.PackageManager
 import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
 import android.view.KeyEvent
@@ -16,36 +16,30 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.ServiceLifecycleManager
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.GameGrubMain
 import app.gamegrub.ui.ImmersiveModeManager
 import app.gamegrub.ui.OrientationManager
-import app.gamegrub.ui.utils.AnimatedPngDecoder
-import app.gamegrub.ui.utils.IconDecoder
 import app.gamegrub.ui.utils.LocaleHelper
 import app.gamegrub.utils.container.ContainerUtils
 import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.intercept.Interceptor
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import com.posthog.PostHog
 import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import com.winlator.core.AppUtils
 import com.winlator.inputcontrols.ControllerManager
 import dagger.hilt.android.AndroidEntryPoint
-import okio.Path.Companion.toOkioPath
+import javax.inject.Inject
 import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var imageLoader: ImageLoader
 
     private lateinit var immersiveModeManager: ImmersiveModeManager
     private lateinit var orientationManager: OrientationManager
@@ -98,53 +92,25 @@ class MainActivity : ComponentActivity() {
         GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         setContent {
-            var hasNotificationPermission by remember { mutableStateOf(false) }
+            val shouldRequestNotificationPermission = remember {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) != PackageManager.PERMISSION_GRANTED &&
+                    !PrefManager.notificationPermissionPrompted
+            }
+
             val permissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
-            ) { isGranted ->
-                hasNotificationPermission = isGranted
+            ) {
+                // The prompted flag prevents repeated startup prompts after deny/ignore.
             }
 
-            LaunchedEffect(Unit) {
-                if (!hasNotificationPermission) {
+            LaunchedEffect(shouldRequestNotificationPermission) {
+                if (shouldRequestNotificationPermission) {
+                    PrefManager.notificationPermissionPrompted = true
                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
-            }
-
-            val context = LocalContext.current
-            val imageLoader = remember {
-                val memoryCache = MemoryCache.Builder(context)
-                    .maxSizePercent(0.1)
-                    .strongReferencesEnabled(true)
-                    .build()
-
-                val diskCache = DiskCache.Builder()
-                    .maxSizePercent(0.03)
-                    .directory(context.cacheDir.resolve("image_cache").toOkioPath())
-                    .build()
-
-                ImageLoader.Builder(context)
-                    .memoryCachePolicy(CachePolicy.ENABLED)
-                    .memoryCache(memoryCache)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .diskCache(diskCache)
-                    .components {
-                        add(
-                            Interceptor { chain ->
-                                val request = if (!NetworkMonitor.hasInternet.value) {
-                                    chain.request.newBuilder()
-                                        .networkCachePolicy(CachePolicy.DISABLED)
-                                        .build()
-                                } else {
-                                    chain.request
-                                }
-                                chain.proceed(request)
-                            },
-                        )
-                        add(IconDecoder.Factory())
-                        add(AnimatedPngDecoder.Factory())
-                    }
-                    .build()
             }
 
             CompositionLocalProvider(LocalCoilImageLoader provides imageLoader) {
@@ -159,8 +125,6 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
-
         GameGrubApp.events.emit(AndroidEvent.ActivityDestroyed)
 
         GameGrubApp.events.off<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
@@ -169,6 +133,7 @@ class MainActivity : ComponentActivity() {
         GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         ServiceLifecycleManager.onDestroy(isChangingConfigurations)
+        super.onDestroy()
     }
 
     private fun hasReadyGameLifecycleState(action: String): Boolean {
@@ -269,10 +234,6 @@ class MainActivity : ComponentActivity() {
         } == true
 
         return if (!eventDispatched) super.dispatchGenericMotionEvent(ev) else true
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

@@ -34,6 +34,10 @@
     <string name="steam_cloud_sync_failed">Cloud sync failed: %s</string>
     <string name="steam_not_logged_in">You must be logged into Steam to use this feature</string>
     <string name="steam_storage_permission_required">Storage permission required</string>
+    <string name="steam_storage_location_title" translatable="false">Choose install location</string>
+    <string name="steam_storage_location_message" translatable="false">Where should this game be installed?</string>
+    <string name="steam_storage_location_internal" translatable="false">Internal storage</string>
+    <string name="steam_storage_location_external" translatable="false">External storage</string>
     <string name="steam_container_reset_success">Container reset to defaults</string>
     <string name="steam_imagefs_installed">ImageFS installed. Please try editing container again.</string>
     <string name="steam_imagefs_install_failed">Failed to install ImageFS: %s</string>

@@ -2493,98 +2493,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun getGseSaveDirs(context: Context, appId: Int): List<File> {
-            val imageFs = ImageFs.find(context)
-            val dirs = mutableListOf<File>()
-            dirs.add(
-                File(
-                    imageFs.rootDir,
-                    "${ImageFs.WINEPREFIX}/drive_c/users/xuser/AppData/Roaming/GSE Saves/$appId",
-                ),
-            )
-            val accountId = userSteamId?.accountID?.toInt()
-                ?: PrefManager.steamUserAccountId.takeIf { it != 0 }
-            if (accountId != null) {
-                dirs.add(
-                    File(
-                        imageFs.rootDir,
-                        "${ImageFs.WINEPREFIX}/drive_c/Program Files (x86)/Steam/userdata/$accountId/$appId",
-                    ),
-                )
-            }
-            return dirs
+            return instance?.achievementManager?.getGseSaveDirs(context, appId) ?: emptyList()
         }
 
         suspend fun syncAchievementsFromGoldberg(context: Context, appId: Int) {
-            val gseSaveDirs = getGseSaveDirs(context, appId).filter { it.isDirectory }
-            if (gseSaveDirs.isEmpty()) {
-                Timber.d("No GSE save directory found for appId=$appId")
-                return
-            }
-
-            val unlockedNames = mutableSetOf<String>()
-            var gseStatsDir: File? = null
-
-            for (gseSaveDir in gseSaveDirs) {
-                val goldbergAchFile = File(gseSaveDir, "achievements.json")
-                if (goldbergAchFile.exists()) {
-                    try {
-                        val json = JSONObject(goldbergAchFile.readText(Charsets.UTF_8))
-                        for (name in json.keys()) {
-                            val entry = json.optJSONObject(name) ?: continue
-                            if (entry.optBoolean("earned", false)) {
-                                unlockedNames.add(name)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Timber.e(e, "Failed to parse Goldberg achievements.json in ${gseSaveDir.absolutePath} for appId=$appId")
-                    }
-                }
-
-                val statsDir = File(gseSaveDir, "stats")
-                if (gseStatsDir == null && statsDir.isDirectory && (statsDir.listFiles()?.isNotEmpty() == true)) {
-                    gseStatsDir = statsDir
-                }
-            }
-
-            val hasStats = gseStatsDir != null
-
-            if (unlockedNames.isEmpty() && !hasStats) {
-                Timber.d("No earned achievements or stats found in Goldberg output for appId=$appId")
-                return
-            }
-
-            val configDirectory = findSteamSettingsDir(context, appId)
-            if (configDirectory == null) {
-                Timber.w("Could not find steam_settings directory for appId=$appId")
-                return
-            }
-
-            Timber.i("Found ${unlockedNames.size} earned achievements and ${if (hasStats) "stats" else "no stats"} for appId=$appId, syncing to Steam")
-            val result = storeAchievementUnlocks(appId, configDirectory, unlockedNames, gseStatsDir ?: gseSaveDirs.first().resolve("stats"))
-            result.onSuccess {
-                Timber.i("Successfully synced achievements and stats to Steam for appId=$appId")
-            }.onFailure { e ->
-                Timber.e(e, "Failed to sync achievements and stats to Steam for appId=$appId")
-            }
-        }
-
-        private fun findSteamSettingsDir(context: Context, appId: Int): String? {
-            val appDirPath = getAppDirPath(appId)
-            val appDirSettings = File(appDirPath, "steam_settings")
-            if (File(appDirSettings, "achievement_name_to_block.json").exists()) {
-                return appDirSettings.absolutePath
-            }
-
-            val container = ContainerUtils.getContainer(context, "STEAM_$appId")
-            val coldclientSettings = File(
-                container.rootDir,
-                ".wine/drive_c/Program Files (x86)/Steam/steam_settings",
-            )
-            if (File(coldclientSettings, "achievement_name_to_block.json").exists()) {
-                return coldclientSettings.absolutePath
-            }
-
-            return null
+            instance?.achievementManager?.syncAchievementsFromGoldberg(context, appId)
         }
 
         suspend fun storeAchievementUnlocks(
@@ -2592,29 +2505,14 @@ class SteamService : Service(), IChallengeUrlChanged {
             configDirectory: String,
             unlockedNames: Set<String>,
             gseStatsDir: File,
-        ): Result<Unit> = runCatching {
-            val steamUser = instance!!._steamUser!!
-            val userStats = instance?._steamUserStats!!.getUserStats(appId, steamUser.steamID!!).await()
-            if (userStats.result != EResult.OK) {
-                throw IllegalStateException("getUserStats failed: ${userStats.result}")
-            }
-
-            val allStats = mutableMapOf<Int, Int>()
-
-            // Build achievement name-to-block mapping from on-disk file
-            val mappingFile = File(configDirectory, "achievement_name_to_block.json")
-            if (mappingFile.exists() && unlockedNames.isNotEmpty()) {
-                val mappingJson = JSONObject(mappingFile.readText(Charsets.UTF_8))
-                val nameToBlockBit = mutableMapOf<String, Pair<Int, Int>>()
-                for (key in mappingJson.keys()) {
-                    val arr = mappingJson.optJSONArray(key) ?: continue
-                    if (arr.length() >= 2) {
-                        nameToBlockBit[key] = Pair(arr.getInt(0), arr.getInt(1))
-                    }
-                }
-
-                // Seed with current achievement bitmasks from server
-                for (block in userStats.achievementBlocks ?: emptyList()) {
+        ): Result<Unit> {
+            return instance?.achievementManager?.storeAchievementUnlocks(
+                appId = appId,
+                configDirectory = configDirectory,
+                unlockedNames = unlockedNames,
+                gseStatsDir = gseStatsDir,
+            ) ?: Result.failure(IllegalStateException("Service not available"))
+        }
                     val blockId = (block.achievementId as? Number)?.toInt() ?: continue
                     var bitmask = 0
                     val unlockTimes = block.unlockTime ?: emptyList()

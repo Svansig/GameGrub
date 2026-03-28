@@ -54,9 +54,11 @@ import app.gamegrub.service.steam.managers.SteamAppSessionManager
 import app.gamegrub.service.steam.managers.LaunchIntentResult
 import app.gamegrub.service.steam.managers.SteamAuthService
 import app.gamegrub.service.steam.managers.SteamCloudSavesManager
+import app.gamegrub.service.steam.managers.SteamDeviceIdentityManager
 import app.gamegrub.service.steam.managers.SteamFriendsManager
 import app.gamegrub.service.steam.managers.SteamLibraryManager
 import app.gamegrub.service.steam.managers.SteamTicketManager
+import app.gamegrub.service.steam.managers.SteamUserManager
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
@@ -310,6 +312,12 @@ class SteamService : Service(), IChallengeUrlChanged {
 
     @Inject
     lateinit var friendsManager: SteamFriendsManager
+
+    @Inject
+    lateinit var userManager: SteamUserManager
+
+    @Inject
+    lateinit var deviceIdentityManager: SteamDeviceIdentityManager
 
     companion object {
         const val MAX_PICS_BUFFER = 256
@@ -1937,7 +1945,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         val pendingRemoteOperations = steamCloud.signalAppLaunchIntent(
                             appId = appId,
                             clientId = clientId,
-                            machineName = SteamUtils.getMachineName(steamInstance),
+                            machineName = steamInstance.deviceIdentityManager.getMachineName(steamInstance),
                             ignorePendingOperations = ignorePendingOperations,
                             osType = EOSType.AndroidUnknown,
                         ).await()
@@ -2099,8 +2107,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                     twoFactorCode = twoFactorAuth,
                     authCode = emailAuth,
                     accessToken = refreshToken,
-                    loginID = SteamUtils.getUniqueDeviceId(svc),
-                    machineName = SteamUtils.getMachineName(svc),
+                    loginID = svc.deviceIdentityManager.getUniqueDeviceId(svc),
+                    machineName = svc.deviceIdentityManager.getMachineName(svc),
                     chatMode = ChatMode.NEW_STEAM_CHAT,
                 ),
             )

@@ -5,7 +5,6 @@ import app.gamegrub.data.EncryptedAppTicket
 import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.EncryptedAppTicketDao
 import app.gamegrub.db.dao.SteamAppDao
-import app.gamegrub.utils.steam.SteamUtils
 import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import `in`.dragonbra.javasteam.steam.authentication.AuthPollResult
@@ -83,7 +82,7 @@ class SteamAuthClientAdapter @Inject constructor(
                 this.password = password
                 this.persistentSession = rememberSession
                 this.authenticator = authenticator
-                this.deviceFriendlyName = SteamUtils.getMachineName(service)
+                this.deviceFriendlyName = service.deviceIdentityManager.getMachineName(service)
                 this.clientOSType = EOSType.WinUnknown
             }
 
@@ -114,7 +113,7 @@ class SteamAuthClientAdapter @Inject constructor(
                 ?: return@withContext AuthResult(false, error = "Service not running")
 
             val authDetails = AuthSessionDetails().apply {
-                this.deviceFriendlyName = SteamUtils.getMachineName(service)
+                this.deviceFriendlyName = service.deviceIdentityManager.getMachineName(service)
                 this.clientOSType = EOSType.WinUnknown
                 this.persistentSession = true
             }

@@ -21,7 +21,7 @@ object SteamMetadataFetcher {
         .build()
 
     fun fetchDirect3DMajor(steamAppId: Int, callback: (Int) -> Unit) {
-        Timber.Forest.i("[DX Fetch] Starting fetchDirect3DMajor for appId=%d", steamAppId)
+        Timber.i("[DX Fetch] Starting fetchDirect3DMajor for appId=%d", steamAppId)
         val where = URLEncoder.encode("Infobox_game.Steam_AppID HOLDS \"$steamAppId\"", "UTF-8")
         val url =
             "https://pcgamingwiki.com/w/api.php" +
@@ -32,7 +32,7 @@ object SteamMetadataFetcher {
                 "&where=$where" +
                 "&format=json"
 
-        Timber.Forest.i("[DX Fetch] Starting fetchDirect3DMajor for query=%s", url)
+        Timber.i("[DX Fetch] Starting fetchDirect3DMajor for query=%s", url)
 
         http.newCall(Request.Builder().url(url).build()).enqueue(
             object : Callback {
@@ -46,7 +46,7 @@ object SteamMetadataFetcher {
                                 callback(-1)
                                 return
                             }
-                            Timber.Forest.i("[DX Fetch] Raw body fetchDirect3DMajor for body=%s", body)
+                            Timber.i("[DX Fetch] Raw body fetchDirect3DMajor for body=%s", body)
                             val arr = JSONObject(body)
                                 .optJSONArray("cargoquery") ?: run {
                                 callback(-1)
@@ -58,14 +58,12 @@ object SteamMetadataFetcher {
                                 ?.optString("Direct3D versions")
                                 ?.trim() ?: ""
 
-                            Timber.Forest.i("[DX Fetch] Raw fetchDirect3DMajor for raw=%s", raw)
+                            Timber.i("[DX Fetch] Raw fetchDirect3DMajor for raw=%s", raw)
 
                             val dx = Regex("\\b(9|10|11|12)\\b")
-                                .findAll(raw)
-                                .map { match -> match.value.toInt() }
-                                .maxOrNull() ?: -1
+                                .findAll(raw).maxOfOrNull { match -> match.value.toInt() } ?: -1
 
-                            Timber.Forest.i("[DX Fetch] dx fetchDirect3DMajor is dx=%d", dx)
+                            Timber.i("[DX Fetch] dx fetchDirect3DMajor is dx=%d", dx)
 
                             callback(dx)
                         } catch (_: Exception) {

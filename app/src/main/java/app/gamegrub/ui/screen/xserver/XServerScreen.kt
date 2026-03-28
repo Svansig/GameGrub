@@ -97,6 +97,7 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.ui.component.QuickMenu
 import app.gamegrub.ui.component.QuickMenuAction
 import app.gamegrub.ui.data.PerformanceHudConfig
@@ -2885,12 +2886,15 @@ private fun setupXEnvironment(
         if (container.isLaunchRealSteam) {
             val steamService = SteamService.instance
                 ?: throw IllegalStateException("SteamService must be running before launching real Steam")
-            steamService.sessionFilesManager.setupRealSteamSessionFiles(
+            val session = SteamSessionContext(
                 steamId64 = SteamService.getSteamId64()?.toString() ?: PrefManager.steamUserSteamId64.toString(),
-                login = PrefManager.username,
-                token = PrefManager.refreshToken,
+                account = PrefManager.username,
+                refreshToken = PrefManager.refreshToken,
                 accessToken = PrefManager.accessToken,
                 personaName = steamService.localPersona.value.name.ifBlank { PrefManager.username },
+            )
+            steamService.sessionFilesManager.setupRealSteamSessionFiles(
+                session = session,
                 imageFs = imageFs,
                 guestProgramLauncherComponent = guestProgramLauncherComponent,
             )

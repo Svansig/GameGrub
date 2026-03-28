@@ -21,6 +21,14 @@ import timber.log.Timber
 private const val NULL_CHAR = '\u0000'
 private const val TOKEN_EXPIRE_TIME = 86400L
 
+data class SteamSessionContext(
+    val steamId64: String,
+    val account: String,
+    val refreshToken: String,
+    val accessToken: String? = null,
+    val personaName: String = account,
+)
+
 @Singleton
 class SteamSessionFilesManager @Inject constructor() {
 
@@ -179,18 +187,14 @@ class SteamSessionFilesManager @Inject constructor() {
 
     fun applyAutoLoginUserChanges(
         imageFs: ImageFs,
-        steamId64: String,
-        account: String,
-        refreshToken: String,
-        accessToken: String?,
-        personaName: String,
+        session: SteamSessionContext,
     ) {
         val vdfFileText = buildLoginUsersVdfOauth(
-            steamId64 = steamId64,
-            account = account,
-            refreshToken = refreshToken,
-            accessToken = accessToken,
-            personaName = personaName,
+            steamId64 = session.steamId64,
+            account = session.account,
+            refreshToken = session.refreshToken,
+            accessToken = session.accessToken,
+            personaName = session.personaName,
         )
         val steamConfigDir = File(imageFs.wineprefix, "drive_c/Program Files (x86)/Steam/config")
         try {
@@ -201,7 +205,7 @@ class SteamSessionFilesManager @Inject constructor() {
             val steamExe = "$steamRoot\\steam.exe"
             val hkcu = "Software\\Valve\\Steam"
             WineRegistryEditor(userRegFile).use { reg ->
-                reg.setStringValue("Software\\Valve\\Steam", "AutoLoginUser", account)
+                reg.setStringValue("Software\\Valve\\Steam", "AutoLoginUser", session.account)
                 reg.setStringValue(hkcu, "SteamExe", steamExe)
                 reg.setStringValue(hkcu, "SteamPath", steamRoot)
                 reg.setStringValue(hkcu, "InstallPath", steamRoot)
@@ -212,25 +216,19 @@ class SteamSessionFilesManager @Inject constructor() {
     }
 
     fun runTokenSessionConfigPhases(
-        steamId64: String,
-        login: String,
-        token: String,
+        session: SteamSessionContext,
         imageFs: ImageFs,
         guestProgramLauncherComponent: GuestProgramLauncherComponent,
     ) {
         runPhase1SteamConfig(
-            steamId64 = steamId64,
-            login = login,
-            token = token,
+            session = session,
             imageFs = imageFs,
             guestProgramLauncherComponent = guestProgramLauncherComponent,
         )
     }
 
     fun runPhase1SteamConfig(
-        steamId64: String,
-        login: String,
-        token: String,
+        session: SteamSessionContext,
         imageFs: ImageFs,
         guestProgramLauncherComponent: GuestProgramLauncherComponent,
     ) {
@@ -246,7 +244,7 @@ class SteamSessionFilesManager @Inject constructor() {
             if (vdfContent.contains("ConnectCache")) {
                 val vdfData = KeyValue.loadFromString(vdfContent)!!
                 val mtbf = vdfData["Software"]["Valve"]["Steam"]["MTBF"].value
-                val connectCacheValue = vdfData["Software"]["Valve"]["Steam"]["ConnectCache"][hdr(login)].value
+                val connectCacheValue = vdfData["Software"]["Valve"]["Steam"]["ConnectCache"][hdr(session.account)].value
 
                 if (mtbf != null && connectCacheValue != null) {
                     try {
@@ -277,7 +275,11 @@ class SteamSessionFilesManager @Inject constructor() {
         if (shouldWriteConfig) {
             Files.write(
                 steamConfigDir.resolve("config.vdf"),
-                createConfigVdf(steamId = steamId64, login = login, token = token).toByteArray(),
+                createConfigVdf(
+                    steamId = session.steamId64,
+                    login = session.account,
+                    token = session.refreshToken,
+                ).toByteArray(),
             )
 
             FileUtils.chmod(File(steamConfigDir.absolutePathString(), "loginusers.vdf"), 505)
@@ -290,8 +292,7 @@ class SteamSessionFilesManager @Inject constructor() {
             }
         } else if (shouldProcessPhase2) {
             runPhase2LocalConfig(
-                login = login,
-                token = token,
+                session = session,
                 imageFs = imageFs,
                 guestProgramLauncherComponent = guestProgramLauncherComponent,
             )
@@ -299,8 +300,7 @@ class SteamSessionFilesManager @Inject constructor() {
     }
 
     fun runPhase2LocalConfig(
-        login: String,
-        token: String,
+        session: SteamSessionContext,
         imageFs: ImageFs,
         guestProgramLauncherComponent: GuestProgramLauncherComponent,
     ) {
@@ -315,11 +315,11 @@ class SteamSessionFilesManager @Inject constructor() {
             if (localSteamDir.resolve("local.vdf").exists()) {
                 val vdfContent = FileUtils.readString(localSteamDir.resolve("local.vdf").toFile())
                 val vdfData = KeyValue.loadFromString(vdfContent)!!
-                val connectCacheValue = vdfData["Software"]["Valve"]["Steam"]["ConnectCache"][hdr(login)].value
+                val connectCacheValue = vdfData["Software"]["Valve"]["Steam"]["ConnectCache"][hdr(session.account)].value
                 if (connectCacheValue != null) {
                     try {
                         val dToken = decryptToken(
-                            login = login,
+                            login = session.account,
                             vdfValue = connectCacheValue.trimEnd(NULL_CHAR),
                             imageFs = imageFs,
                             guestProgramLauncherComponent = guestProgramLauncherComponent,
@@ -337,8 +337,8 @@ class SteamSessionFilesManager @Inject constructor() {
             Files.write(
                 localSteamDir.resolve("local.vdf"),
                 createLocalVdf(
-                    login = login,
-                    token = token,
+                    login = session.account,
+                    token = session.refreshToken,
                     imageFs = imageFs,
                     guestProgramLauncherComponent = guestProgramLauncherComponent,
                 ).toByteArray(),
@@ -352,27 +352,17 @@ class SteamSessionFilesManager @Inject constructor() {
     }
 
     fun setupRealSteamSessionFiles(
-        steamId64: String,
-        login: String,
-        token: String,
-        accessToken: String? = null,
-        personaName: String = login,
+        session: SteamSessionContext,
         imageFs: ImageFs,
         guestProgramLauncherComponent: GuestProgramLauncherComponent,
     ) {
         applyAutoLoginUserChanges(
             imageFs = imageFs,
-            steamId64 = steamId64,
-            account = login,
-            refreshToken = token,
-            accessToken = accessToken,
-            personaName = personaName,
+            session = session,
         )
 
         runTokenSessionConfigPhases(
-            steamId64 = steamId64,
-            login = login,
-            token = token,
+            session = session,
             imageFs = imageFs,
             guestProgramLauncherComponent = guestProgramLauncherComponent,
         )

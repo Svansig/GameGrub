@@ -8,6 +8,7 @@ import app.gamegrub.data.SteamApp
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppInfoOf
+import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.storage.FileUtils
 import app.gamegrub.utils.storage.MarkerUtils
@@ -263,13 +264,16 @@ object SteamUtils {
 
     fun autoLoginUserChanges(imageFs: ImageFs) {
         val service = SteamService.instance ?: throw IllegalStateException("SteamService must be running to apply Steam session files")
-        service.sessionFilesManager.applyAutoLoginUserChanges(
-            imageFs = imageFs,
+        val session = SteamSessionContext(
             steamId64 = SteamService.getSteamId64()?.toString() ?: "0",
             account = PrefManager.username,
             refreshToken = PrefManager.refreshToken,
             accessToken = PrefManager.accessToken,
             personaName = service.localPersona.value.name.ifBlank { PrefManager.username },
+        )
+        service.sessionFilesManager.applyAutoLoginUserChanges(
+            imageFs = imageFs,
+            session = session,
         )
     }
 
@@ -835,13 +839,6 @@ object SteamUtils {
         }
     }
 
-    fun getSteamId64(): Long? {
-        return SteamService.getSteamId64()
-    }
-
-    fun getSteam3AccountId(): Long? {
-        return SteamService.getSteam3AccountId()
-    }
 
     /**
      * Ensures save locations for games that require special handling (e.g., symlinks)

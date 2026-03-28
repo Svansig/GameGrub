@@ -1,6 +1,7 @@
 package app.gamegrub.service.steam.managers
 
 import app.gamegrub.enums.LoginResult
+import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.di.AuthResult
 import app.gamegrub.service.steam.di.GameEventEmitter
 import app.gamegrub.service.steam.di.SteamAuthClient
@@ -10,6 +11,8 @@ import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
 import `in`.dragonbra.javasteam.steam.authentication.IChallengeUrlChanged
 import `in`.dragonbra.javasteam.steam.authentication.QrAuthSession
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,8 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamAuthService @Inject constructor(
@@ -90,6 +91,7 @@ class SteamAuthService @Inject constructor(
         EResult.RequirePasswordReEntry, EResult.ParentalControlRestricted,
         EResult.CachedCredentialInvalid,
         -> true
+
         else -> false
     }
 
@@ -102,13 +104,19 @@ class SteamAuthService @Inject constructor(
 
     private fun handleAuthResult(result: AuthResult) {
         if (result.success) {
-            _loginResult.value = LoginResult.Success
+            _loginResult.value = LoginResult.InProgress
             preferences.username = result.username
             preferences.clientId = result.clientId
             preferences.accessToken = result.accessToken
             preferences.refreshToken = result.refreshToken
-            eventEmitter.emitSteamEvent(app.gamegrub.events.SteamEvent.LogonEnded(result.username, LoginResult.Success, null))
-            Timber.i("Login successful: ${result.username}")
+            // Complete the flow with a real Steam logon so callbacks (licenses/PICS/library) can run.
+            SteamService.Companion.completeLoginWithAuthTokens(
+                username = result.username,
+                accessToken = result.accessToken,
+                refreshToken = result.refreshToken,
+                clientId = result.clientId,
+            )
+            Timber.i("Auth session succeeded, waiting for LoggedOn callback: ${result.username}")
         } else {
             _loginResult.value = LoginResult.Failed
             eventEmitter.emitSteamEvent(app.gamegrub.events.SteamEvent.LogonEnded("", LoginResult.Failed, result.error))

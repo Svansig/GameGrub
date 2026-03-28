@@ -1,10 +1,13 @@
 package app.gamegrub.service.steam.di
 
+import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.EncryptedAppTicket
 import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.EncryptedAppTicketDao
 import app.gamegrub.db.dao.SteamAppDao
+import app.gamegrub.events.AndroidEvent
+import app.gamegrub.events.SteamEvent
 import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import `in`.dragonbra.javasteam.steam.authentication.AuthPollResult
@@ -14,6 +17,8 @@ import `in`.dragonbra.javasteam.steam.authentication.IChallengeUrlChanged
 import `in`.dragonbra.javasteam.steam.handlers.steamuser.SteamUser
 import `in`.dragonbra.javasteam.steam.steamclient.SteamClient
 import `in`.dragonbra.javasteam.types.SteamID
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +28,6 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamConnectionAdapter @Inject constructor(
@@ -198,12 +201,37 @@ class SteamUserClientAdapter @Inject constructor(
 @Singleton
 class SteamLibraryClientAdapter @Inject constructor() : SteamLibraryClient {
     override suspend fun getOwnedGames(steamId: SteamID): List<OwnedGame> {
-        steamId.hashCode()
-        return emptyList()
+        val service = app.gamegrub.service.steam.SteamService.instance
+            ?: return emptyList<OwnedGame>().also {
+                Timber.w("SteamService instance unavailable while fetching owned games")
+            }
+
+        val unifiedFriends = app.gamegrub.service.steam.SteamUnifiedFriends(service)
+        return try {
+            unifiedFriends.getOwnedGames(steamId.convertToUInt64()).map { game ->
+                OwnedGame(
+                    appId = game.appId,
+                    name = game.name,
+                    playtimeMinutes = game.playtimeForever,
+                    iconUrl = game.imgIconUrl,
+                    logoUrl = "",
+                )
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to fetch owned games")
+            emptyList()
+        } finally {
+            unifiedFriends.close()
+        }
     }
 
     override suspend fun checkDlcOwnership(appIds: Set<Int>): Set<Int> {
-        return appIds
+        return try {
+            app.gamegrub.service.steam.SteamService.checkDlcOwnershipViaPICSBatch(appIds)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to check DLC ownership")
+            emptySet()
+        }
     }
 }
 
@@ -286,11 +314,19 @@ class SteamAppInfoClientAdapter @Inject constructor(
 @Singleton
 class GameEventEmitterAdapter @Inject constructor() : GameEventEmitter {
     override fun emitSteamEvent(event: Any) {
-        event.hashCode()
+        if (event is SteamEvent<*>) {
+            GameGrubApp.events.emitJava(event)
+        } else {
+            Timber.w("Ignored non-Steam event in emitSteamEvent: ${event::class.java.name}")
+        }
     }
 
     override fun emitAndroidEvent(event: Any) {
-        event.hashCode()
+        if (event is AndroidEvent<*>) {
+            GameGrubApp.events.emitJava(event)
+        } else {
+            Timber.w("Ignored non-Android event in emitAndroidEvent: ${event::class.java.name}")
+        }
     }
 }
 

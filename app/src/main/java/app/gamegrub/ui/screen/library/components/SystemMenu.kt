@@ -268,9 +268,13 @@ fun SystemMenu(
     var showStatusPicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        persona = SteamService.instance?.localPersona?.value
-        SteamService.getSteamId64()?.let {
+        val steamService = SteamService.instance
+        persona = steamService?.localPersona?.value
+
+        if (steamService != null && SteamService.isConnected && SteamService.getSteamId64() != null) {
             SteamService.requestUserPersona()
+        } else {
+            Timber.d("Skipping persona request because SteamService is unavailable or disconnected")
         }
     }
 

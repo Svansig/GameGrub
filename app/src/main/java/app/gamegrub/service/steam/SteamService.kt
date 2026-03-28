@@ -15,7 +15,6 @@ import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.data.AppInfo
-import app.gamegrub.data.CachedLicense
 import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.DownloadingAppInfo
@@ -48,10 +47,10 @@ import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.service.steam.managers.DownloadManager
+import app.gamegrub.service.steam.managers.LaunchIntentResult
 import app.gamegrub.service.steam.managers.PicsChangesManager
 import app.gamegrub.service.steam.managers.SteamAchievementManager
 import app.gamegrub.service.steam.managers.SteamAppSessionManager
-import app.gamegrub.service.steam.managers.LaunchIntentResult
 import app.gamegrub.service.steam.managers.SteamAuthService
 import app.gamegrub.service.steam.managers.SteamCloudSavesManager
 import app.gamegrub.service.steam.managers.SteamDeviceIdentityManager
@@ -122,6 +121,21 @@ import `in`.dragonbra.javasteam.types.KeyValue
 import `in`.dragonbra.javasteam.types.SteamID
 import `in`.dragonbra.javasteam.util.log.LogListener
 import `in`.dragonbra.javasteam.util.log.LogManager
+import java.io.Closeable
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.Collections
+import java.util.EnumSet
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import kotlin.io.path.pathString
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -151,21 +165,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.Closeable
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.Collections
-import java.util.EnumSet
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import kotlin.io.path.pathString
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Steam foreground service - handles all Steam integration.
@@ -378,8 +377,10 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         private val downloadJobs = ConcurrentHashMap<Int, DownloadInfo>()
+
         @Volatile
         private var keepAliveFallback: Boolean = false
+
         @Volatile
         private var autoStopWhenIdleFallback: Boolean = false
 
@@ -399,8 +400,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         /** Returns true if there is an incomplete download on disk (no complete marker). */
-        fun hasPartialDownload(appId: Int): Boolean {
-            return requireInstance().libraryManager.hasPartialDownload(appId)
+        fun hasPartialDownload(appId: Int): Boolean = runBlocking {
+            requireInstance().libraryManager.hasPartialDownload(appId)
         }
 
         // Track whether a game is currently running to prevent premature service stop.
@@ -453,11 +454,32 @@ class SteamService : Service(), IChallengeUrlChanged {
         val isLoginInProgress: Boolean
             get() = instance?._loginResult == LoginResult.InProgress
 
-        suspend fun setPersonaState(state: EPersonaState) = requireInstance().friendsManager.setPersonaState(state)
+        suspend fun setPersonaState(state: EPersonaState) {
+            val svc = instance
+            if (svc == null) {
+                Timber.w("Ignoring setPersonaState because SteamService is not running")
+                return
+            }
+            svc.friendsManager.setPersonaState(state)
+        }
 
-        suspend fun requestUserPersona() = requireInstance().friendsManager.requestUserPersona()
+        suspend fun requestUserPersona() {
+            val svc = instance
+            if (svc == null) {
+                Timber.w("Ignoring requestUserPersona because SteamService is not running")
+                return
+            }
+            svc.friendsManager.requestUserPersona()
+        }
 
-        suspend fun getSelfCurrentlyPlayingAppId(): Int? = requireInstance().friendsManager.getSelfCurrentlyPlayingAppId()
+        suspend fun getSelfCurrentlyPlayingAppId(): Int? {
+            val svc = instance
+            if (svc == null) {
+                Timber.w("Ignoring getSelfCurrentlyPlayingAppId because SteamService is not running")
+                return null
+            }
+            return svc.friendsManager.getSelfCurrentlyPlayingAppId()
+        }
 
         suspend fun kickPlayingSession(onlyGame: Boolean = true): Boolean =
             withContext(Dispatchers.IO) {
@@ -478,28 +500,28 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
         }
 
-        fun getPkgInfoOf(appId: Int): SteamLicense? {
-            return requireInstance().libraryManager.getPkgInfoOf(appId)
+        fun getPkgInfoOf(appId: Int): SteamLicense? = runBlocking {
+            requireInstance().libraryManager.getPkgInfoOf(appId)
         }
 
-        fun getAppInfoOf(appId: Int): SteamApp? {
-            return requireInstance().libraryManager.getAppInfoOf(appId)
+        fun getAppInfoOf(appId: Int): SteamApp? = runBlocking {
+            requireInstance().libraryManager.getAppInfoOf(appId)
         }
 
-        fun getDownloadingAppInfoOf(appId: Int): DownloadingAppInfo? {
-            return requireInstance().libraryManager.getDownloadingAppInfoOf(appId)
+        fun getDownloadingAppInfoOf(appId: Int): DownloadingAppInfo? = runBlocking {
+            requireInstance().libraryManager.getDownloadingAppInfoOf(appId)
         }
 
-        fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? {
-            return requireInstance().libraryManager.getDownloadableDlcAppsOf(appId)
+        fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? = runBlocking {
+            requireInstance().libraryManager.getDownloadableDlcAppsOf(appId)
         }
 
-        fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? {
-            return requireInstance().libraryManager.getHiddenDlcAppsOf(appId)
+        fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? = runBlocking {
+            requireInstance().libraryManager.getHiddenDlcAppsOf(appId)
         }
 
-        fun getInstalledApp(appId: Int): AppInfo? {
-            return requireInstance().libraryManager.getInstalledApp(appId)
+        fun getInstalledApp(appId: Int): AppInfo? = runBlocking {
+            requireInstance().libraryManager.getInstalledApp(appId)
         }
 
         fun getInstalledDepotsOf(appId: Int): List<Int>? {
@@ -1988,7 +2010,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             },
         ) ?: parentScope.async { PostSyncInfo(SyncResult.UnknownFail) }
 
-
         fun forceSyncUserFiles(
             appId: Int,
             prefixToPath: (String) -> String,
@@ -2055,7 +2076,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             val filesCreated: List<UserFileInfo>,
         )
 
-
         private fun login(
             username: String,
             accessToken: String? = null,
@@ -2108,6 +2128,22 @@ class SteamService : Service(), IChallengeUrlChanged {
         )
 
         suspend fun startLoginWithQr() = requireInstance().authService.loginWithQr()
+
+        fun completeLoginWithAuthTokens(
+            username: String,
+            accessToken: String,
+            refreshToken: String,
+            clientId: Long,
+            rememberSession: Boolean = true,
+        ) {
+            login(
+                username = username,
+                accessToken = accessToken,
+                refreshToken = refreshToken,
+                rememberSession = rememberSession,
+                clientId = clientId,
+            )
+        }
 
         fun stopLoginWithQr() {
             requireInstance().authService.cancelQrLogin()
@@ -2864,67 +2900,31 @@ class SteamService : Service(), IChallengeUrlChanged {
         Timber.i("Received License List ${callback.result}, size: ${callback.licenseList.size}")
 
         scope.launch {
+            val packageRequests = mutableListOf<PICSRequest>()
+
             db.withTransaction {
                 licenses = callback.licenseList
-                libraryManager.deleteAllCachedLicenses()
-                val cachedLicenses = callback.licenseList.map { license ->
-                    CachedLicense(licenseJson = LicenseSerializer.serializeLicense(license))
-                }
-                libraryManager.insertAllCachedLicenses(cachedLicenses)
-
-                val licensesToAdd = callback.licenseList
-                    .groupBy { it.packageID }
-                    .map { licensesEntry ->
-                        val preferred = licensesEntry.value.firstOrNull {
-                            it.ownerAccountID == userSteamId?.accountID?.toInt()
-                        } ?: licensesEntry.value.first()
-                        SteamLicense(
-                            packageId = licensesEntry.key,
-                            lastChangeNumber = preferred.lastChangeNumber,
-                            timeCreated = preferred.timeCreated,
-                            timeNextProcess = preferred.timeNextProcess,
-                            minuteLimit = preferred.minuteLimit,
-                            minutesUsed = preferred.minutesUsed,
-                            paymentMethod = preferred.paymentMethod,
-                            licenseFlags = licensesEntry.value
-                                .map { it.licenseFlags }
-                                .reduceOrNull { first, second ->
-                                    val combined = EnumSet.copyOf(first)
-                                    combined.addAll(second)
-                                    combined
-                                } ?: EnumSet.noneOf(ELicenseFlags::class.java),
-                            purchaseCode = preferred.purchaseCode,
-                            licenseType = preferred.licenseType,
-                            territoryCode = preferred.territoryCode,
-                            accessToken = preferred.accessToken,
-                            ownerAccountId = licensesEntry.value.map { it.ownerAccountID },
-                            masterPackageID = preferred.masterPackageID,
-                        )
-                    }
-
-                if (licensesToAdd.isNotEmpty()) {
-                    Timber.i("Adding ${licensesToAdd.size} licenses")
-                    libraryManager.insertAllLicenses(licensesToAdd)
-                }
-
-                val licensesToRemove = libraryManager.findStaleLicenses(
-                    packageIds = callback.licenseList.map { it.packageID },
+                val syncResult = libraryManager.syncLicensesForPics(
+                    callbackLicenses = callback.licenseList,
+                    preferredOwnerAccountId = userSteamId?.accountID?.toInt(),
                 )
-                if (licensesToRemove.isNotEmpty()) {
-                    Timber.i("Removing ${licensesToRemove.size} (stale) licenses")
-                    val packageIds = licensesToRemove.map { it.packageId }
-                    libraryManager.deleteStaleLicenses(packageIds)
+
+                if (syncResult.addedCount > 0) {
+                    Timber.i("Adding ${syncResult.addedCount} licenses")
+                }
+                if (syncResult.removedCount > 0) {
+                    Timber.i("Removing ${syncResult.removedCount} (stale) licenses")
                 }
 
-                // Get PICS information with the current license database.
-                libraryManager.getAllLicenses()
-                    .map { PICSRequest(it.packageId, it.accessToken) }
-                    .chunked(MAX_PICS_BUFFER)
-                    .forEach { chunk ->
-                        Timber.d("onLicenseList: Queueing ${chunk.size} package(s) for PICS")
-                        packagePicsChannel.send(chunk)
-                    }
+                packageRequests.addAll(syncResult.packageRequests)
             }
+
+            packageRequests
+                .chunked(MAX_PICS_BUFFER)
+                .forEach { chunk ->
+                    Timber.d("onLicenseList: Queueing ${chunk.size} package(s) for PICS")
+                    packagePicsChannel.send(chunk)
+                }
         }
     }
 

@@ -1,16 +1,13 @@
 package app.gamegrub.data
 
 import app.gamegrub.enums.PathType
-import app.gamegrub.utils.steam.SteamUtils
+import app.gamegrub.service.steam.SteamService
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.pathString
 import kotlinx.serialization.Serializable
 
-/**
- * @param timestamp the value in milliseconds, since the epoch (1970-01-01T00:00:00Z)
- */
 @Serializable
 data class UserFileInfo(
     val root: PathType,
@@ -19,6 +16,14 @@ data class UserFileInfo(
     val timestamp: Long,
     val sha: ByteArray,
 ) {
+    private fun substituteSteamTokens(value: String): String {
+        val steamId64 = SteamService.getSteamId64()?.toString() ?: "0"
+        val steam3AccountId = SteamService.getSteam3AccountId()?.toString() ?: "0"
+        return value
+            .replace("{64BitSteamID}", steamId64)
+            .replace("{Steam3AccountID}", steam3AccountId)
+    }
+
     // "." and blank path both mean "root of path type" per Steam manifest.
     val prefix: String
         get() {
@@ -26,9 +31,7 @@ data class UserFileInfo(
                 path.isBlank() || path == "." -> ""
                 else -> path
             }
-            return Paths.get("%${root.name}%$pathForPrefix").pathString
-                .replace("{64BitSteamID}", SteamUtils.getSteamId64().toString())
-                .replace("{Steam3AccountID}", SteamUtils.getSteam3AccountId().toString())
+            return substituteSteamTokens(Paths.get("%${root.name}%$pathForPrefix").pathString)
         }
 
     // Bare placeholder (%GameInstall%) expects no slash before filename; path with folder uses Paths.get.
@@ -36,14 +39,10 @@ data class UserFileInfo(
         get() = when {
             path.isBlank() || path == "." -> "$prefix$filename"
             else -> Paths.get(prefix, filename).pathString
-        }.replace("{64BitSteamID}", SteamUtils.getSteamId64().toString())
-            .replace("{Steam3AccountID}", SteamUtils.getSteam3AccountId().toString())
+        }.let { substituteSteamTokens(it) }
 
     val substitutedPath: String
-        get() = path
-            .replace("{64BitSteamID}", SteamUtils.getSteamId64().toString())
-            .replace("{Steam3AccountID}", SteamUtils.getSteam3AccountId().toString())
-            .replace("\\", File.separator)
+        get() = substituteSteamTokens(path).replace("\\", File.separator)
 
     fun getAbsPath(prefixToPath: (String) -> String): Path {
         return Paths.get(prefixToPath(root.toString()), substitutedPath, filename)

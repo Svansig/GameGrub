@@ -1,6 +1,7 @@
 package app.gamegrub.service.steam.managers
 
 import app.gamegrub.data.DepotInfo
+import app.gamegrub.data.CachedLicense
 import app.gamegrub.data.OwnedGames
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamLicense
@@ -15,12 +16,14 @@ import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamLibraryClient
 import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.utils.storage.MarkerUtils
+import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
+import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
+import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,54 +37,114 @@ class SteamLibraryManager @Inject constructor(
     private val cachedLicenseDao: CachedLicenseDao,
     private val downloadingAppInfoDao: DownloadingAppInfoDao,
 ) {
-    private inline fun <T> blockingDb(crossinline block: suspend () -> T): T = runBlocking(Dispatchers.IO) {
-        block()
-    }
+    data class LicenseSyncResult(
+        val addedCount: Int,
+        val removedCount: Int,
+        val packageRequests: List<PICSRequest>,
+    )
 
     // App DAO operations
-    fun findApp(appId: Int): SteamApp? = blockingDb { appDao.findApp(appId) }
-    fun getAllAppIds(): List<Int> = blockingDb { appDao.getAllAppIds() }
-    fun deleteAllApps() = blockingDb { appDao.deleteAll() }
-    fun insertAllApps(apps: List<SteamApp>) = blockingDb { appDao.insertAll(apps) }
-    fun insertApp(app: SteamApp) = blockingDb { appDao.insert(app) }
-    fun updateApp(app: SteamApp) = blockingDb { appDao.update(app) }
+    suspend fun findApp(appId: Int): SteamApp? = appDao.findApp(appId)
+    suspend fun getAllAppIds(): List<Int> = appDao.getAllAppIds()
+    suspend fun deleteAllApps() = appDao.deleteAll()
+    suspend fun insertAllApps(apps: List<SteamApp>) = appDao.insertAll(apps)
+    suspend fun insertApp(app: SteamApp) = appDao.insert(app)
+    suspend fun updateApp(app: SteamApp) = appDao.update(app)
 
-    fun getAppInfoOf(appId: Int): SteamApp? = findApp(appId)
-    fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? = blockingDb { appDao.findDownloadableDLCApps(appId) }
-    fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? = blockingDb { appDao.findHiddenDLCApps(appId) }
+    suspend fun getAppInfoOf(appId: Int): SteamApp? = findApp(appId)
+    suspend fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? = appDao.findDownloadableDLCApps(appId)
+    suspend fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? = appDao.findHiddenDLCApps(appId)
 
     // License DAO operations
-    fun deleteAllLicenses() = blockingDb { licenseDao.deleteAll() }
-    fun insertAllLicenses(licenses: List<SteamLicense>) = blockingDb { licenseDao.insertAll(licenses) }
-    fun findStaleLicenses(packageIds: List<Int>): List<SteamLicense> = blockingDb { licenseDao.findStaleLicences(packageIds) }
-    fun deleteStaleLicenses(packageIds: List<Int>) = blockingDb { licenseDao.deleteStaleLicenses(packageIds) }
-    fun getAllLicenses(): List<SteamLicense> = blockingDb { licenseDao.getAllLicenses() }
-    fun findLicense(packageId: Int): SteamLicense? = blockingDb { licenseDao.findLicense(packageId) }
-    fun updateLicenseApps(packageId: Int, appIds: List<Int>) = blockingDb { licenseDao.updateApps(packageId, appIds) }
-    fun updateLicenseDepots(packageId: Int, depotIds: List<Int>) = blockingDb { licenseDao.updateDepots(packageId, depotIds) }
+    suspend fun deleteAllLicenses() = licenseDao.deleteAll()
+    suspend fun insertAllLicenses(licenses: List<SteamLicense>) = licenseDao.insertAll(licenses)
+    suspend fun findStaleLicenses(packageIds: List<Int>): List<SteamLicense> = licenseDao.findStaleLicences(packageIds)
+    suspend fun deleteStaleLicenses(packageIds: List<Int>) = licenseDao.deleteStaleLicenses(packageIds)
+    suspend fun getAllLicenses(): List<SteamLicense> = licenseDao.getAllLicenses()
+    suspend fun findLicense(packageId: Int): SteamLicense? = licenseDao.findLicense(packageId)
+    suspend fun updateLicenseApps(packageId: Int, appIds: List<Int>) = licenseDao.updateApps(packageId, appIds)
+    suspend fun updateLicenseDepots(packageId: Int, depotIds: List<Int>) = licenseDao.updateDepots(packageId, depotIds)
 
     // Cached license operations
-    fun deleteAllCachedLicenses() = blockingDb { cachedLicenseDao.deleteAll() }
-    fun insertAllCachedLicenses(licenses: List<app.gamegrub.data.CachedLicense>) = blockingDb { cachedLicenseDao.insertAll(licenses) }
+    suspend fun deleteAllCachedLicenses() = cachedLicenseDao.deleteAll()
+    suspend fun insertAllCachedLicenses(licenses: List<CachedLicense>) = cachedLicenseDao.insertAll(licenses)
+
+    suspend fun syncLicensesForPics(
+        callbackLicenses: List<License>,
+        preferredOwnerAccountId: Int?,
+    ): LicenseSyncResult {
+        deleteAllCachedLicenses()
+        insertAllCachedLicenses(
+            callbackLicenses.map { license ->
+                CachedLicense(licenseJson = LicenseSerializer.serializeLicense(license))
+            },
+        )
+
+        val licensesToAdd = callbackLicenses
+            .groupBy { it.packageID }
+            .map { licensesEntry ->
+                val preferred = licensesEntry.value.firstOrNull {
+                    it.ownerAccountID == preferredOwnerAccountId
+                } ?: licensesEntry.value.first()
+
+                SteamLicense(
+                    packageId = licensesEntry.key,
+                    lastChangeNumber = preferred.lastChangeNumber,
+                    timeCreated = preferred.timeCreated,
+                    timeNextProcess = preferred.timeNextProcess,
+                    minuteLimit = preferred.minuteLimit,
+                    minutesUsed = preferred.minutesUsed,
+                    paymentMethod = preferred.paymentMethod,
+                    licenseFlags = licensesEntry.value
+                        .map { it.licenseFlags }
+                        .reduceOrNull { first, second ->
+                            val combined = EnumSet.copyOf(first)
+                            combined.addAll(second)
+                            combined
+                        } ?: EnumSet.noneOf(ELicenseFlags::class.java),
+                    purchaseCode = preferred.purchaseCode,
+                    licenseType = preferred.licenseType,
+                    territoryCode = preferred.territoryCode,
+                    accessToken = preferred.accessToken,
+                    ownerAccountId = licensesEntry.value.map { it.ownerAccountID },
+                    masterPackageID = preferred.masterPackageID,
+                )
+            }
+
+        if (licensesToAdd.isNotEmpty()) {
+            insertAllLicenses(licensesToAdd)
+        }
+
+        val licensesToRemove = findStaleLicenses(callbackLicenses.map { it.packageID })
+        if (licensesToRemove.isNotEmpty()) {
+            deleteStaleLicenses(licensesToRemove.map { it.packageId })
+        }
+
+        return LicenseSyncResult(
+            addedCount = licensesToAdd.size,
+            removedCount = licensesToRemove.size,
+            packageRequests = getAllLicenses().map { license ->
+                PICSRequest(license.packageId, license.accessToken)
+            },
+        )
+    }
 
     // App info operations
-    fun getInstalledApp(appId: Int) = blockingDb { appInfoDao.getInstalledApp(appId) }
-    fun deleteAppInfo(appId: Int) = blockingDb { appInfoDao.deleteApp(appId) }
+    suspend fun getInstalledApp(appId: Int) = appInfoDao.getInstalledApp(appId)
+    suspend fun deleteAppInfo(appId: Int) = appInfoDao.deleteApp(appId)
 
     // Downloading app info operations
-    fun getDownloadingAppInfo(appId: Int) = blockingDb { downloadingAppInfoDao.getDownloadingApp(appId) }
-    fun getDownloadingAppInfoOf(appId: Int) = getDownloadingAppInfo(appId)
-    fun getAllDownloadingApps() = blockingDb { downloadingAppInfoDao.getAll() }
-    fun deleteDownloadingApp(appId: Int) = blockingDb { downloadingAppInfoDao.deleteApp(appId) }
-    fun deleteAllDownloadingApps() = blockingDb { downloadingAppInfoDao.deleteAll() }
+    suspend fun getDownloadingAppInfo(appId: Int) = downloadingAppInfoDao.getDownloadingApp(appId)
+    suspend fun getDownloadingAppInfoOf(appId: Int) = getDownloadingAppInfo(appId)
+    suspend fun getAllDownloadingApps() = downloadingAppInfoDao.getAll()
+    suspend fun deleteDownloadingApp(appId: Int) = downloadingAppInfoDao.deleteApp(appId)
+    suspend fun deleteAllDownloadingApps() = downloadingAppInfoDao.deleteAll()
 
     // Composite operations
-    fun clearAllLibraryData() {
-        blockingDb {
-            appDao.deleteAll()
-            licenseDao.deleteAll()
-            cachedLicenseDao.deleteAll()
-        }
+    suspend fun clearAllLibraryData() {
+        deleteAllApps()
+        deleteAllLicenses()
+        deleteAllCachedLicenses()
     }
 
     // Library client operations
@@ -131,12 +194,12 @@ class SteamLibraryManager @Inject constructor(
         cachedLicenseDao.getAll().mapNotNull { LicenseSerializer.deserializeLicense(it.licenseJson) }
     }
 
-    fun getPkgInfoOf(appId: Int): SteamLicense? {
+    suspend fun getPkgInfoOf(appId: Int): SteamLicense? {
         val app = findApp(appId) ?: return null
         return findLicense(app.packageId)
     }
 
-    fun hasPartialDownload(appId: Int): Boolean {
+    suspend fun hasPartialDownload(appId: Int): Boolean {
         if (getDownloadingAppInfo(appId) != null) {
             return true
         }
@@ -144,13 +207,13 @@ class SteamLibraryManager @Inject constructor(
         return File(dirPath).exists() && !MarkerUtils.hasMarker(dirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
     }
 
-    fun getMainAppDepots(appId: Int, language: String): Map<Int, DepotInfo> {
+    suspend fun getMainAppDepots(appId: Int, language: String): Map<Int, DepotInfo> {
         language.hashCode() // keep signature stable while using DB-backed depots.
         return findApp(appId)?.depots.orEmpty()
     }
 
-    fun getDownloadableDepots(appId: Int): Map<Int, DepotInfo> = getMainAppDepots(appId, "english")
-    fun getAppDlc(appId: Int): Map<Int, DepotInfo> =
+    suspend fun getDownloadableDepots(appId: Int): Map<Int, DepotInfo> = getMainAppDepots(appId, "english")
+    suspend fun getAppDlc(appId: Int): Map<Int, DepotInfo> =
         getMainAppDepots(appId, "english").filterValues { depot ->
             depot.dlcAppId != SteamService.INVALID_APP_ID
         }

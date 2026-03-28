@@ -9,7 +9,6 @@ import app.gamegrub.data.UserFilesUploadResult
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.storage.FileUtils
 import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileChangeList
@@ -456,7 +455,7 @@ object SteamAutoCloud {
 
                     val uploadBatchResponse = steamCloud.beginAppUploadBatch(
                         appId = appInfo.id,
-                        machineName = SteamUtils.getMachineName(steamInstance),
+                        machineName = steamInstance.deviceIdentityManager.getMachineName(steamInstance),
                         clientId = clientId,
                         filesToDelete = filesToDelete,
                         filesToUpload = filesToUpload.map { it.first },

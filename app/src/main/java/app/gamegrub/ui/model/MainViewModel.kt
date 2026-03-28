@@ -522,7 +522,8 @@ class MainViewModel @Inject constructor(
                     // For Steam games, sync cloud saves
                     try {
                         SteamService.closeApp(context, gameId, isOffline.value) { prefix ->
-                            PathType.from(prefix).toAbsPath(context, gameId, SteamService.userSteamId!!.accountID)
+                            val accountId = SteamService.getSteam3AccountId() ?: 0L
+                            PathType.from(prefix).toAbsPath(context, gameId, accountId)
                         }.await()
                     } catch (e: CancellationException) {
                         throw e

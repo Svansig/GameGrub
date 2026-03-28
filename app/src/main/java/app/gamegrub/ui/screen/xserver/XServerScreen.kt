@@ -109,7 +109,6 @@ import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.PreInstallSteps
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.game.ExecutableSelectionUtils
-import app.gamegrub.utils.steam.SteamTokenLogin
 import app.gamegrub.utils.steam.SteamUtils
 import com.posthog.PostHog
 import com.winlator.PrefManager as WinlatorPrefManager
@@ -2884,13 +2883,17 @@ private fun setupXEnvironment(
     // Moved here, as guestProgramLauncherComponent.environment is setup after addComponent()
     if (container != null) {
         if (container.isLaunchRealSteam) {
-            SteamTokenLogin(
-                steamId = PrefManager.steamUserSteamId64.toString(),
+            val steamService = SteamService.instance
+                ?: throw IllegalStateException("SteamService must be running before launching real Steam")
+            steamService.sessionFilesManager.setupRealSteamSessionFiles(
+                steamId64 = SteamService.getSteamId64()?.toString() ?: PrefManager.steamUserSteamId64.toString(),
                 login = PrefManager.username,
                 token = PrefManager.refreshToken,
+                accessToken = PrefManager.accessToken,
+                personaName = steamService.localPersona.value.name.ifBlank { PrefManager.username },
                 imageFs = imageFs,
                 guestProgramLauncherComponent = guestProgramLauncherComponent,
-            ).setupSteamFiles()
+            )
         }
     }
 

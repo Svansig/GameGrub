@@ -1818,7 +1818,8 @@ fun preLaunchApp(
 
         // For Steam games, sync save files and check no pending remote operations are running
         val prefixToPath: (String) -> String = { prefix ->
-            PathType.from(prefix).toAbsPath(context, gameId, SteamService.userSteamId!!.accountID)
+            val accountId = SteamService.getSteam3AccountId() ?: 0L
+            PathType.from(prefix).toAbsPath(context, gameId, accountId)
         }
         setLoadingMessage("Syncing cloud saves")
         setLoadingProgress(-1f)

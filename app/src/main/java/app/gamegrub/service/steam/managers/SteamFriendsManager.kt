@@ -1,6 +1,5 @@
 package app.gamegrub.service.steam.managers
 
-import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.di.GameEventEmitter
@@ -22,6 +21,7 @@ class SteamFriendsManager @Inject constructor(
     private val connection: SteamConnection,
     private val preferences: SteamPreferences,
     private val eventEmitter: GameEventEmitter,
+    private val userManager: SteamUserManager,
 ) {
 
     val personaState: StateFlow<SteamPersona> get() = userClient.personaState
@@ -70,11 +70,9 @@ class SteamFriendsManager @Inject constructor(
         val localSteamId = connection.steamId?.convertToUInt64()
 
         if (friendSteamId == localSteamId) {
-            val name = personaName ?: PrefManager.steamUserName
-            PrefManager.steamUserName = name
-            if (avatarHash != null) PrefManager.steamUserAvatarHash = avatarHash
+            userManager.cachePersona(name = personaName, avatarHash = avatarHash)
             if (gamePlayedID != null && gamePlayedID > 0) {
-                PrefManager.steamUserAccountId = `in`.dragonbra.javasteam.types.SteamID(friendSteamId).accountID.toInt()
+                preferences.steamUserAccountId = `in`.dragonbra.javasteam.types.SteamID(friendSteamId).accountID.toInt()
             }
         } else {
             eventEmitter.emitSteamEvent(

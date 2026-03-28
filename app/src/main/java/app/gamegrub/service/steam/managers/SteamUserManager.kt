@@ -42,6 +42,14 @@ class SteamUserManager @Inject constructor(
 
     fun getAvatarHash(): String = PrefManager.steamUserAvatarHash
 
+    fun substituteSteamIdTokens(value: String): String {
+        val steamId64 = getSteamId64()?.toString() ?: "0"
+        val steam3AccountId = getSteam3AccountId()?.toString() ?: "0"
+        return value
+            .replace("{64BitSteamID}", steamId64)
+            .replace("{Steam3AccountID}", steam3AccountId)
+    }
+
     fun cachePersona(name: String?, avatarHash: String?) {
         if (!name.isNullOrBlank()) {
             PrefManager.steamUserName = name

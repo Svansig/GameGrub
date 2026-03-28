@@ -269,7 +269,7 @@ fun SystemMenu(
 
     LaunchedEffect(Unit) {
         persona = SteamService.instance?.localPersona?.value
-        SteamService.userSteamId?.let {
+        SteamService.getSteamId64()?.let {
             SteamService.requestUserPersona()
         }
     }

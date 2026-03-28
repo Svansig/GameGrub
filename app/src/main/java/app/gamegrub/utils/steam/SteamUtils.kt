@@ -1,6 +1,5 @@
 package app.gamegrub.utils.steam
 
-import android.annotation.SuppressLint
 import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.api.steamMetadata.SteamMetadataFetcher
@@ -48,15 +47,6 @@ object SteamUtils {
      * @return A string representing how many hours were played, ie: 1.5 hrs
      */
     fun formatPlayTime(time: Int): String = SteamFormatUtils.formatPlayTime(time)
-
-    // Steam strips all non-ASCII characters from usernames and passwords
-    // source: https://github.com/steevp/UpdogFarmer/blob/8f2d185c7260bc2d2c92d66b81f565188f2c1a0e/app/src/main/java/com/steevsapps/idledaddy/LoginActivity.java#L166C9-L168C104
-    // more: https://github.com/winauth/winauth/issues/368#issuecomment-224631002
-
-    /**
-     * Strips non-ASCII characters from String
-     */
-    fun removeSpecialChars(s: String): String = SteamIdentityUtils.removeSpecialChars(s)
 
     private fun generateInterfacesFile(dllPath: Path) {
         val outFile = dllPath.parent.resolve("steam_interfaces.txt")
@@ -138,7 +128,7 @@ object SteamUtils {
         val backupPaths = mutableSetOf<String>()
         val imageFs = ImageFs.find(context)
         autoLoginUserChanges(imageFs)
-        setupLightweightSteamConfig(imageFs, SteamService.userSteamId?.toString())
+        setupLightweightSteamConfig(imageFs, SteamService.getSteamId64()?.toString())
 
         val rootPath = Paths.get(appDirPath)
         // Get ticket once for all DLLs
@@ -272,30 +262,15 @@ object SteamUtils {
     }
 
     fun autoLoginUserChanges(imageFs: ImageFs) {
-        val vdfFileText = SteamService.getLoginUsersVdfOauth(
-            steamId64 = SteamService.userSteamId?.convertToUInt64().toString(),
+        val service = SteamService.instance ?: throw IllegalStateException("SteamService must be running to apply Steam session files")
+        service.sessionFilesManager.applyAutoLoginUserChanges(
+            imageFs = imageFs,
+            steamId64 = SteamService.getSteamId64()?.toString() ?: "0",
             account = PrefManager.username,
             refreshToken = PrefManager.refreshToken,
-            accessToken = PrefManager.accessToken, // may be blank
-            personaName = SteamService.instance?.localPersona?.value?.name ?: PrefManager.username,
+            accessToken = PrefManager.accessToken,
+            personaName = service.localPersona.value.name.ifBlank { PrefManager.username },
         )
-        val steamConfigDir = File(imageFs.wineprefix, "drive_c/Program Files (x86)/Steam/config")
-        try {
-            File(steamConfigDir, "loginusers.vdf").writeText(vdfFileText)
-            val rootDir = imageFs.rootDir
-            val userRegFile = File(rootDir, ImageFs.WINEPREFIX + "/user.reg")
-            val steamRoot = "C:\\Program Files (x86)\\Steam"
-            val steamExe = "$steamRoot\\steam.exe"
-            val hkcu = "Software\\Valve\\Steam"
-            WineRegistryEditor(userRegFile).use { reg ->
-                reg.setStringValue("Software\\Valve\\Steam", "AutoLoginUser", PrefManager.username)
-                reg.setStringValue(hkcu, "SteamExe", steamExe)
-                reg.setStringValue(hkcu, "SteamPath", steamRoot)
-                reg.setStringValue(hkcu, "InstallPath", steamRoot)
-            }
-        } catch (e: Exception) {
-            Timber.w("Could not add steam config options: $e")
-        }
     }
 
     /**
@@ -450,7 +425,8 @@ object SteamUtils {
         }
 
         // Update or modify localconfig.vdf
-        updateOrModifyLocalConfig(imageFs, container, steamAppId.toString(), SteamService.userSteamId!!.accountID.toString())
+        val accountId = SteamService.getSteam3AccountId()?.toString() ?: "0"
+        updateOrModifyLocalConfig(imageFs, container, steamAppId.toString(), accountId)
 
         skipFirstTimeSteamSetup(imageFs.rootDir)
         val appDirPath = SteamService.getAppDirPath(steamAppId)
@@ -462,7 +438,7 @@ object SteamUtils {
         Timber.i("Checking directory: $appDirPath")
 
         autoLoginUserChanges(imageFs)
-        setupLightweightSteamConfig(imageFs, SteamService.userSteamId!!.accountID.toString())
+        setupLightweightSteamConfig(imageFs, accountId)
 
         putBackSteamDlls(appDirPath)
 
@@ -537,10 +513,10 @@ object SteamUtils {
 
         val configsIni = settingsDir.resolve("configs.user.ini")
         val accountName = PrefManager.username
-        val accountSteamId = SteamService.userSteamId?.convertToUInt64()?.toString()
+        val accountSteamId = SteamService.getSteamId64()?.toString()
             ?: PrefManager.steamUserSteamId64.takeIf { it != 0L }?.toString()
             ?: "0"
-        val accountId = SteamService.userSteamId?.accountID
+        val accountId = SteamService.getSteam3AccountId()
             ?: PrefManager.steamUserAccountId.takeIf { it != 0 }?.toLong()
             ?: 0L
         val container = ContainerUtils.getOrCreateContainer(context, appId)
@@ -727,25 +703,6 @@ object SteamUtils {
     }
 
 
-    /**
-     * Gets the Android user-editable device name or falls back to [HardwareUtils.getMachineName]
-     */
-    fun getMachineName(context: Context): String {
-        return SteamIdentityUtils.getMachineName(context)
-    }
-
-    // Set LoginID to a non-zero value if you have another client connected using the same account,
-    // the same private ip, and same public ip.
-    // source: https://github.com/Longi94/JavaSteam/blob/08690d0aab254b44b0072ed8a4db2f86d757109b/javasteam-samples/src/main/java/in/dragonbra/javasteamsamples/_000_authentication/SampleLogonAuthentication.java#L146C13-L147C56
-
-    /**
-     * This ID is unique to the device and app combination
-     */
-    @SuppressLint("HardwareIds")
-    fun getUniqueDeviceId(context: Context): Int {
-        return SteamIdentityUtils.getUniqueDeviceId(context)
-    }
-
     private fun skipFirstTimeSteamSetup(rootDir: File?) {
         val systemRegFile = File(rootDir, ImageFs.WINEPREFIX + "/system.reg")
         val redistributables = listOf(
@@ -879,11 +836,11 @@ object SteamUtils {
     }
 
     fun getSteamId64(): Long? {
-        return SteamIdentityUtils.getSteamId64()
+        return SteamService.getSteamId64()
     }
 
     fun getSteam3AccountId(): Long? {
-        return SteamIdentityUtils.getSteam3AccountId()
+        return SteamService.getSteam3AccountId()
     }
 
     /**

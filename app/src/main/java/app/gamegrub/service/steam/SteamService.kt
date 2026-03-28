@@ -57,6 +57,7 @@ import app.gamegrub.service.steam.managers.SteamCloudSavesManager
 import app.gamegrub.service.steam.managers.SteamDeviceIdentityManager
 import app.gamegrub.service.steam.managers.SteamFriendsManager
 import app.gamegrub.service.steam.managers.SteamLibraryManager
+import app.gamegrub.service.steam.managers.SteamSessionFilesManager
 import app.gamegrub.service.steam.managers.SteamTicketManager
 import app.gamegrub.service.steam.managers.SteamUserManager
 import app.gamegrub.statsgen.Achievement
@@ -319,6 +320,9 @@ class SteamService : Service(), IChallengeUrlChanged {
     @Inject
     lateinit var deviceIdentityManager: SteamDeviceIdentityManager
 
+    @Inject
+    lateinit var sessionFilesManager: SteamSessionFilesManager
+
     companion object {
         const val MAX_PICS_BUFFER = 256
         const val MAX_RETRY_ATTEMPTS = 20
@@ -426,6 +430,22 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         val userSteamId: SteamID?
             get() = instance?.steamClient?.steamID
+
+        fun getSteamId64(): Long? {
+            val svc = instance
+            if (svc != null) {
+                return svc.userManager.getSteamId64()
+            }
+            return PrefManager.steamUserSteamId64.takeIf { it > 0L }
+        }
+
+        fun getSteam3AccountId(): Long? {
+            val svc = instance
+            if (svc != null) {
+                return svc.userManager.getSteam3AccountId()
+            }
+            return PrefManager.steamUserAccountId.toLong().takeIf { it > 0L }
+        }
 
         val familyMembers: List<Int>
             get() = instance?.familyGroupMembers ?: emptyList()
@@ -2035,45 +2055,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             val filesCreated: List<UserFileInfo>,
         )
 
-        /**
-         * loginusers.vdf writer for the OAuth-style refresh-token flow introduced in 2024.
-         *
-         * @param steamId64    64-bit SteamID of the logged-in user
-         * @param account      AccountName (same as you passed to logOn / poll result)
-         * @param refreshToken Long-lived token you get from AuthSession / QR / credentials
-         * @param accessToken  Optional – short-lived access token, Steam ignores it if absent
-         * @param personaName  What the client shows in the drop-down; defaults to AccountName
-         */
-        internal fun getLoginUsersVdfOauth(
-            steamId64: String,
-            account: String,
-            @Suppress("UNUSED")
-            refreshToken: String,
-            @Suppress("UNUSED")
-            accessToken: String? = null,
-            personaName: String = account,
-        ): String {
-            val epoch = System.currentTimeMillis() / 1_000
-
-            val vdf = buildString {
-                appendLine("\"users\"")
-                appendLine("{")
-                appendLine("    \"$steamId64\"")
-                appendLine("    {")
-                appendLine("        \"AccountName\"          \"$account\"")
-                appendLine("        \"PersonaName\"          \"$personaName\"")
-                appendLine("        \"RememberPassword\"     \"1\"")
-                appendLine("        \"WantsOfflineMode\"     \"0\"")
-                appendLine("        \"SkipOfflineModeWarning\"     \"0\"")
-                appendLine("        \"AllowAutoLogin\"       \"1\"")
-                appendLine("        \"MostRecent\"           \"1\"")
-                appendLine("        \"Timestamp\"            \"$epoch\"")
-                appendLine("    }")
-                appendLine("}")
-            }
-
-            return vdf
-        }
 
         private fun login(
             username: String,
@@ -2101,8 +2082,8 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             steamUser.logOn(
                 LogOnDetails(
-                    username = SteamUtils.removeSpecialChars(username).trim(),
-                    password = password?.let { SteamUtils.removeSpecialChars(it).trim() },
+                    username = svc.userManager.removeSpecialChars(username).trim(),
+                    password = password?.let { svc.userManager.removeSpecialChars(it).trim() },
                     shouldRememberPassword = rememberSession,
                     twoFactorCode = twoFactorAuth,
                     authCode = emailAuth,
@@ -2864,9 +2845,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                         )
                     }
 
-                    // Cache local persona
-                    PrefManager.steamUserAvatarHash = avatarHash
-                    PrefManager.steamUserName = playerName
+                    // Cache local persona via user manager ownership.
+                    userManager.cachePersona(name = playerName, avatarHash = avatarHash)
 
                     val event = SteamEvent.PersonaStateReceived(localPersona.value)
                     GameGrubApp.events.emit(event)

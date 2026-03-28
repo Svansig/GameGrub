@@ -444,7 +444,7 @@ class SteamAppScreen : BaseAppScreen() {
         // Get playtime text
         var playtimeText by remember { mutableStateOf("0 hrs") }
         LaunchedEffect(gameId) {
-            val steamID = SteamService.userSteamId?.convertToUInt64()
+            val steamID = SteamService.getSteamId64()
             if (steamID != null) {
                 val games = SteamService.getOwnedGames(steamID)
                 val game = games.firstOrNull { it.appId == gameId }
@@ -882,8 +882,8 @@ class SteamAppScreen : BaseAppScreen() {
                         properties = mapOf("game_name" to appInfo.name),
                     )
                     CoroutineScope(Dispatchers.IO).launch {
-                        val steamId = SteamService.userSteamId
-                        if (steamId == null) {
+                        val accountId = SteamService.getSteam3AccountId()
+                        if (accountId == null) {
                             SnackbarManager.show(context.getString(R.string.steam_not_logged_in))
                             return@launch
                         }
@@ -893,7 +893,7 @@ class SteamAppScreen : BaseAppScreen() {
                         containerManager.activateContainer(container)
 
                         val prefixToPath: (String) -> String = { prefix ->
-                            PathType.from(prefix).toAbsPath(context, gameId, steamId.accountID)
+                            PathType.from(prefix).toAbsPath(context, gameId, accountId)
                         }
                         val syncResult = SteamService.forceSyncUserFiles(
                             appId = gameId,
@@ -1238,10 +1238,10 @@ class SteamAppScreen : BaseAppScreen() {
                                 MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
 
                                 if (operation == AppOptionMenuType.VerifyFiles) {
-                                    val steamId = SteamService.userSteamId
-                                    if (steamId != null) {
+                                    val accountId = SteamService.getSteam3AccountId()
+                                    if (accountId != null) {
                                         val prefixToPath: (String) -> String = { prefix ->
-                                            PathType.from(prefix).toAbsPath(context, gameId, steamId.accountID)
+                                            PathType.from(prefix).toAbsPath(context, gameId, accountId)
                                         }
                                         SteamService.forceSyncUserFiles(
                                             appId = gameId,

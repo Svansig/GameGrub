@@ -121,7 +121,7 @@ class LibraryViewModel @Inject constructor(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             steamAppDao.getAllOwnedApps(
-                // ownerIds = SteamService.familyMembers.ifEmpty { listOf(SteamService.userSteamId!!.accountID.toInt()) },
+                // ownerIds = SteamService.familyMembers.ifEmpty { listOf((SteamService.getSteam3AccountId() ?: 0L).toInt()) },
             ).collect { apps ->
                 Timber.tag("LibraryViewModel").d("Collecting ${apps.size} apps")
                 // Check if the list has actually changed before triggering a re-filter
@@ -380,9 +380,8 @@ class LibraryViewModel @Inject constructor(
                 .asSequence()
                 .filter { item ->
                     SteamService.familyMembers.ifEmpty {
-                        // Handle the case where userSteamId might be null
-                        SteamService.userSteamId?.let { steamId ->
-                            listOf(steamId.accountID.toInt())
+                        SteamService.getSteam3AccountId()?.toInt()?.let { accountId ->
+                            listOf(accountId)
                         } ?: emptyList()
                     }.let { owners ->
                         if (owners.isEmpty()) {

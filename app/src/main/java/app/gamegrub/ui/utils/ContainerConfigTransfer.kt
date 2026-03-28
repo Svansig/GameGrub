@@ -6,7 +6,10 @@ import app.gamegrub.R
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.manifest.ManifestInstaller
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +18,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
 
-object ContainerConfigTransfer {
+@Singleton
+class ContainerConfigTransfer @Inject constructor(
+    private val bestConfigService: BestConfigService,
+) {
     suspend fun exportConfig(
         context: Context,
         appId: String,
@@ -87,7 +93,7 @@ object ContainerConfigTransfer {
             val matchType = "exact_gpu_match"
 
             // 1) Parse config into a validated map of fields to apply
-            val bestConfigMap = BestConfigService.parseConfigToContainerData(
+            val bestConfigMap = bestConfigService.parseConfigToContainerData(
                 context = context,
                 configJson = configJson,
                 matchType = matchType,
@@ -102,7 +108,7 @@ object ContainerConfigTransfer {
             }
 
             // 2) Install any missing manifest components (wine/proton, dxvk, drivers, etc.)
-            val missingRequests = BestConfigService.resolveMissingManifestInstallRequests(
+            val missingRequests = bestConfigService.resolveMissingManifestInstallRequests(
                 context = context,
                 configJson = configJson,
                 matchType = matchType,

@@ -56,6 +56,10 @@ import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameFeedbackUtils
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.PathType
@@ -116,6 +120,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface BestConfigServiceEntryPoint {
+    fun bestConfigService(): BestConfigService
+}
 
 private fun NavHostController.navigateFromLoginIfNeeded(
     targetRoute: String,
@@ -1516,9 +1526,12 @@ fun preLaunchApp(
         if (gameSource == GameSource.STEAM) {
             try {
                 val configJson = Json.parseToJsonElement(container.containerJson).jsonObject
-                val missingRequests = BestConfigService.resolveMissingManifestInstallRequests(
-                    context, configJson, "exact_gpu_match",
-                )
+                val missingRequests = EntryPointAccessors
+                    .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
+                    .bestConfigService()
+                    .resolveMissingManifestInstallRequests(
+                        context, configJson, "exact_gpu_match",
+                    )
                 for (request in missingRequests) {
                     setLoadingMessage(context.getString(R.string.main_downloading_entry, request.entry.name))
                     try {

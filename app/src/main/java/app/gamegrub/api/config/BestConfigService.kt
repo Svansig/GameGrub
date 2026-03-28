@@ -17,7 +17,6 @@ import com.winlator.contents.ContentProfile
 import com.winlator.core.KeyValueSet
 import com.winlator.fexcore.FEXCorePresetManager
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -29,18 +28,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
-/**
- * Service for fetching best configurations for games from GameNative API.
- */
-object BestConfigService {
-    private const val API_BASE_URL = "https://api.gamenative.app/api/best-config"
+@Singleton
+class BestConfigService @Inject constructor(
+    private val cache: BestConfigCache,
+) {
     private val httpClient = Net.http
 
-    // In-memory cache keyed by "${gameName}_${gpuName}"
-    private val cache = ConcurrentHashMap<String, BestConfigResponse>()
-
-    // Last missing content description from validation (e.g. "DXVK 1.10.3")
     private var lastMissingContentDescription: String? = null
 
     fun consumeLastMissingContentDescription(): String? {
@@ -73,6 +69,10 @@ object BestConfigService {
         val isDriver: Boolean = false,
     )
 
+    companion object {
+        private const val API_BASE_URL = "https://api.gamenative.app/api/best-config"
+    }
+
     /**
      * Fetches best configuration for a game.
      * Returns cached response if available, otherwise makes API call.
@@ -83,8 +83,7 @@ object BestConfigService {
     ): BestConfigResponse? = withContext(Dispatchers.IO) {
         val cacheKey = "${gameName}_$gpuName"
 
-        // Check cache first
-        cache[cacheKey]?.let {
+        cache.getCached(cacheKey)?.let {
             Timber.Forest.tag("BestConfigService").d("Using cached config for $cacheKey")
             return@withContext it
         }
@@ -138,7 +137,7 @@ object BestConfigService {
                     matchedDeviceId = jsonResponse.getInt("matchedDeviceId"),
                 )
 
-                cache[cacheKey] = bestConfigResponse
+                cache.cache(cacheKey, bestConfigResponse)
 
                 Timber.Forest.tag("BestConfigService")
                     .d("Fetched best config for $gameName on $gpuName (matchType: ${bestConfigResponse.matchType})")

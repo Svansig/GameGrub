@@ -37,10 +37,20 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.createPinnedShortcut
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface ContainerConfigTransferEntryPoint {
+    fun containerConfigTransfer(): ContainerConfigTransfer
+}
 
 /**
  * Abstract base class for AppScreen implementations.
@@ -646,7 +656,11 @@ abstract class BaseAppScreen {
 
                 uiScope.launch {
                     try {
-                        ContainerConfigTransfer.exportConfig(
+                        val transfer = EntryPointAccessors.fromApplication(
+                            context.applicationContext,
+                            ContainerConfigTransferEntryPoint::class.java,
+                        ).containerConfigTransfer()
+                        transfer.exportConfig(
                             context = context,
                             appId = appId,
                             uri = uri,
@@ -687,7 +701,11 @@ abstract class BaseAppScreen {
 
                 uiScope.launch {
                     try {
-                        ContainerConfigTransfer.importConfig(
+                        val transfer = EntryPointAccessors.fromApplication(
+                            context.applicationContext,
+                            ContainerConfigTransferEntryPoint::class.java,
+                        ).containerConfigTransfer()
+                        transfer.importConfig(
                             context = context,
                             appId = appId,
                             uri = uri,

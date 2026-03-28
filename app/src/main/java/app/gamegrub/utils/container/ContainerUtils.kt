@@ -4,6 +4,10 @@ import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
@@ -31,6 +35,12 @@ import kotlinx.coroutines.withTimeout
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface BestConfigServiceEntryPoint {
+    fun bestConfigService(): BestConfigService
+}
 
 object ContainerUtils {
     data class GpuInfo(
@@ -793,10 +803,13 @@ object ContainerUtils {
                     // If not cached, make request on background thread (not UI thread)
                     runBlocking(Dispatchers.IO) {
                         try {
-                            val bestConfig = BestConfigService.fetchBestConfig(gameName, gpuName)
+                            val bestConfigService = EntryPointAccessors
+                            .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
+                            .bestConfigService()
+                            val bestConfig = bestConfigService.fetchBestConfig(gameName, gpuName)
                             if (bestConfig != null && bestConfig.matchType != "no_match") {
                                 Timber.i("Applying best config for $gameName (matchType: ${bestConfig.matchType})")
-                                val parsedConfig = BestConfigService.parseConfigToContainerData(
+                                val parsedConfig = bestConfigService.parseConfigToContainerData(
                                     context,
                                     bestConfig.bestConfig,
                                     bestConfig.matchType,

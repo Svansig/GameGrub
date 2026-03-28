@@ -83,6 +83,12 @@ private interface GameCompatibilityServiceEntryPoint {
     fun gameCompatibilityService(): GameCompatibilityService
 }
 
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface BestConfigServiceEntryPoint {
+    fun bestConfigService(): BestConfigService
+}
+
 private data class InstallSizeInfo(
     val downloadSize: String,
     val installSize: String,
@@ -104,11 +110,14 @@ private suspend fun installMissingComponentsForConfig(
     matchType: String,
     uiScope: CoroutineScope,
 ): Boolean {
-    val missingRequests = BestConfigService.resolveMissingManifestInstallRequests(
-        context,
-        configJson,
-        matchType,
-    )
+    val missingRequests = EntryPointAccessors
+        .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
+        .bestConfigService()
+        .resolveMissingManifestInstallRequests(
+            context,
+            configJson,
+            matchType,
+        )
     if (missingRequests.isEmpty()) return true
 
     uiScope.launch(Dispatchers.Main.immediate) {
@@ -184,13 +193,16 @@ private suspend fun applyConfigForContainer(
 
         val container = ContainerUtils.getOrCreateContainer(context, appId)
         val containerData = ContainerUtils.toContainerData(container)
-        val parsedConfig = BestConfigService.parseConfigToContainerData(
+        val bestConfigService = EntryPointAccessors
+            .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
+            .bestConfigService()
+        val parsedConfig = bestConfigService.parseConfigToContainerData(
             context,
             configJson,
             matchType,
             true,
         )
-        val missingContentDescription = BestConfigService.consumeLastMissingContentDescription()
+        val missingContentDescription = bestConfigService.consumeLastMissingContentDescription()
         if (parsedConfig != null && parsedConfig.isNotEmpty()) {
             val updatedContainerData = ContainerUtils.applyBestConfigMapToContainerData(
                 containerData,
@@ -917,7 +929,10 @@ class SteamAppScreen : BaseAppScreen() {
                             val gameName = appInfo.name
                             val gpuName = GPUInformation.getRenderer(context)
 
-                            val bestConfig = BestConfigService.fetchBestConfig(gameName, gpuName)
+                            val bestConfig = EntryPointAccessors
+                                .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
+                                .bestConfigService()
+                                .fetchBestConfig(gameName, gpuName)
                             if (bestConfig == null) {
                                 SnackbarManager.show(context.getString(R.string.best_config_fetch_failed))
                             } else if (bestConfig.matchType == "no_match") {

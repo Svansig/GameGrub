@@ -1326,8 +1326,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.d("depots is empty? %s", downloadableDepots.isEmpty())
             if (downloadableDepots.isEmpty()) return null
 
-            val indirectDlcAppIds = getDownloadableDlcAppsOf(appId).orEmpty().map { it.id }
-
             // Depots from Main game
             val mainDepots = getMainAppDepots(appId, containerLanguage)
             var mainAppDepots = mainDepots.filter { (_, depot) ->
@@ -1340,7 +1338,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val dlcAppDepots = downloadableDepots.filter { (_, depot) ->
                 !mainAppDepots.map { it.key }.contains(depot.depotId) &&
                     userSelectedDlcAppIds.contains(depot.dlcAppId) &&
-                    indirectDlcAppIds.contains(depot.dlcAppId) &&
+                    getDownloadableDlcAppsOf(appId).orEmpty().any { it.id == depot.dlcAppId } &&
                     depot.manifests.isNotEmpty()
             }
 

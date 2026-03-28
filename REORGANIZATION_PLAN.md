@@ -1,150 +1,175 @@
 # Reorganization Plan
 
-> **Status**: Not yet implemented. Requires LSP tooling for safe refactoring.
+> **Status**: Phases 1 & 2 Complete ✅ | Phase 3 Pending
 
-## Service Layer Reorganization
+---
 
-### Current Structure (Inconsistent)
+## Phase 1: Service Layer Reorganization ✅ COMPLETE
 
-```
-service/
-├── SteamService.kt        # Steam - in root (INCONSISTENT)
-├── SteamAutoCloud.kt
-├── SteamUnifiedFriends.kt
-├── AchievementWatcher.kt
-├── DownloadService.kt
-├── NotificationHelper.kt
-├── gog/                   # GOG - proper subfolder ✓
-├── epic/                  # Epic - proper subfolder ✓
-└── amazon/                # Amazon - proper subfolder ✓
-```
-
-### Proposed Structure
+### Final Structure
 
 ```
 service/
-├── DownloadService.kt     # Shared cross-platform
-├── NotificationHelper.kt  # Shared notifications
-├── steam/                 # NEW - consistent with others
+├── DownloadService.kt         # Shared cross-platform
+├── NotificationHelper.kt      # Shared notifications
+├── ServiceLifecycleManager.kt
+├── steam/                     # ✅ Created
 │   ├── SteamService.kt
 │   ├── SteamAutoCloud.kt
 │   ├── SteamUnifiedFriends.kt
-│   └── AchievementWatcher.kt
+│   ├── AchievementWatcher.kt
+│   └── SteamPaths.kt
 ├── gog/
 ├── epic/
 └── amazon/
 ```
 
-### Changes Required
-
-| Action | Files Affected |
-|--------|---------------|
-| Create `service/steam/` directory | - |
-| Move 4 files to `service/steam/` | Steam files |
-| Update package declarations | 4 files moved |
-| Update imports | 38 files import Steam |
-
-### Risks
-- Without LSP tooling, manual import updates error-prone
-- Test files may break
-- Could cause build failures
+### Changes Made
+| Action | Status |
+|--------|--------|
+| Created `service/steam/` directory | ✅ |
+| Moved 5 Steam files to `service/steam/` | ✅ |
+| Updated package declarations | ✅ |
+| Updated imports across codebase | ✅ |
 
 ---
 
-## Utils Reorganization Plan
+## Phase 2: Utils Reorganization ✅ COMPLETE
 
-### Current State
-57 files in a flat `utils/` folder - difficult to navigate.
-
-### Proposed Structure
+### Final Structure
 
 ```
 utils/
-├── container/           # Wine/Proton container management
-│   ├── ContainerUtils.kt
-│   ├── ContainerMigrator.kt
-│   ├── LaunchDependencies.kt
-│   ├── preInstallSteps/  (already nested)
-│   └── launchdependencies/ (already nested)
-├── steam/               # Steam-specific utilities
-│   ├── SteamUtils.kt
-│   ├── SteamTokenHelper.kt
-│   ├── SteamTokenLogin.kt
-│   └── SteamControllerVdfUtils.kt
-├── auth/                # Authentication utilities
+├── auth/                      # ✅ Authentication utilities
+│   ├── AuthUrlRedaction.kt
+│   ├── KeyAttestationHelper.kt
 │   ├── PlatformAuthUtils.kt
 │   ├── PlatformOAuthHandlers.kt
-│   ├── PlayIntegrity.kt
-│   └── KeyAttestationHelper.kt
-├── game/                # Game data management
-│   ├── GameMetadataManager.kt
-│   ├── GameCompatibilityService.kt
-│   ├── GameCompatibilityCache.kt
-│   ├── GameFeedbackUtils.kt
-│   ├── CustomGameScanner.kt
-│   └── CustomGameCache.kt
-├── storage/             # Storage utilities
-│   ├── FileUtils.kt
-│   ├── StorageUtils.kt
-│   └── KeyValueUtils.kt
-├── manifest/            # Manifest handling
-│   ├── ManifestInstaller.kt
-│   ├── ManifestRepository.kt
-│   ├── ManifestModels.kt
-│   └── ManifestComponentHelper.kt
-├── network/             # Network utilities
-│   ├── NetworkUtils.kt
-│   └── UpdateChecker.kt
-├── device/              # Device utilities
+│   └── PlayIntegrity.kt
+├── container/                 # ✅ Wine/Proton container management
+│   ├── ContainerMigrator.kt
+│   ├── ContainerUtils.kt
+│   ├── LaunchDependencies.kt
+│   ├── PreInstallSteps.kt
+│   ├── launchdependencies/
+│   │   ├── GogScriptInterpreterDependency.kt
+│   │   └── LaunchDependency.kt
+│   └── preInstallSteps/
+│       ├── GogScriptInterpreterStep.kt
+│       ├── OpenALStep.kt
+│       ├── PhysXStep.kt
+│       ├── PreInstallStep.kt
+│       ├── VcRedistStep.kt
+│       └── XnaFrameworkStep.kt
+├── device/                    # ✅ Device utilities
 │   ├── DeviceUtils.kt
 │   └── HardwareUtils.kt
-├── image/               # Image handling
-│   ├── IconSwitcher.kt
+├── game/                      # ✅ Game data management
+│   ├── BestConfigService.kt
+│   ├── CustomGameCache.kt
+│   ├── CustomGameScanner.kt
+│   ├── ExecutableSelectionUtils.kt
 │   ├── ExeIconExtractor.kt
-│   └── CoilDecoders.kt
-└── general/             # General utilities
-    ├── DateTimeUtils.kt
-    ├── StringUtils.kt
-    ├── MathUtils.kt
-    ├── FlowUtils.kt
-    ├── LocaleHelper.kt
-    ├── SupportersUtils.kt
+│   ├── GameCompatibilityCache.kt
+│   ├── GameCompatibilityService.kt
+│   ├── GameFeedbackUtils.kt
+│   └── GameMetadataManager.kt
+├── general/                   # ✅ General utilities
+│   ├── DateTimeUtils.kt
+│   ├── FlowUtils.kt
+│   ├── IntentLaunchManager.kt
+│   ├── MathUtils.kt
+│   ├── NoToast.kt
+│   ├── StringUtils.kt
+│   └── UpdateInstaller.kt
+├── manifest/                  # ✅ Manifest handling
+│   ├── ManifestComponentHelper.kt
+│   ├── ManifestInstaller.kt
+│   ├── ManifestModels.kt
+│   └── ManifestRepository.kt
+├── network/                   # ✅ Network utilities
+│   ├── NetworkUtils.kt
+│   └── UpdateChecker.kt
+├── steam/                     # ✅ Steam-specific utilities
+│   ├── KeyValueUtils.kt
+│   ├── LicenseSerializer.kt
+│   ├── SteamControllerVdfUtils.kt
+│   ├── SteamGridDB.kt
+│   ├── SteamTokenHelper.kt
+│   ├── SteamTokenLogin.kt
+│   └── SteamUtils.kt
+└── storage/                   # ✅ Storage utilities
+    ├── FileUtils.kt
     ├── MarkerUtils.kt
-    ├── PaddingUtils.kt
-    ├── NoToast.kt
-    ├── UpdateInstaller.kt
-    ├── LicenseSerializer.kt
-    ├── SteamGridDB.kt
-    ├── IntentLaunchManager.kt
-    ├── AuthUrlRedaction.kt
-    └── BestConfigService.kt
+    └── StorageUtils.kt
 ```
 
-### Migration Strategy
+### UI/Util (Moved out of utils)
 
-1. **Phase 1**: Create new subdirectories
-2. **Phase 2**: Move files one category at a time
-3. **Phase 3**: Update imports (requires LSP)
-4. **Phase 4**: Verify build passes
+```
+ui/util/                       # ✅ UI-specific utilities
+├── CoilDecoders.kt
+├── IconSwitcher.kt
+├── LocaleHelper.kt
+├── PaddingUtils.kt
+├── ShortcutUtils.kt
+└── SupportersUtils.kt
+```
 
-### Notes
-- `preInstallSteps/` and `launchdependencies/` already nested - can keep or move to `container/`
-- Some files like `ShortcutUtils.kt`, `SteamGridDB.kt` need categorization decisions
+### Changes Made
+| Action | Status |
+|--------|--------|
+| Created 8 new subdirectories | ✅ |
+| Moved 43 files to domain-specific folders | ✅ |
+| Updated package declarations in all moved files | ✅ |
+| Updated imports across 71+ files in codebase | ✅ |
+| Verified no remaining old imports | ✅ |
+
+---
+
+## Phase 3: SteamService Decomposition 🔲 PENDING
+
+### Current State
+- `SteamService.kt` is ~3800 lines
+- Handles: authentication, library sync, cloud saves, achievements, input, friends
+
+### Proposed Decomposition
+```
+service/steam/
+├── SteamService.kt              # Core service (reduced)
+├── SteamAuthService.kt          # Authentication & login
+├── SteamLibraryManager.kt       # Game library sync
+├── SteamCloudSavesManager.kt    # Cloud save management
+├── SteamAchievementManager.kt   # Achievement tracking
+├── SteamInputManager.kt         # Controller input
+└── SteamFriendsManager.kt       # Friends & chat
+```
 
 ---
 
 ## Implementation Priority
 
-1. **High**: Fix Steam service inconsistency (create `steam/` subfolder)
-2. **Medium**: Reorganize utils/ into subfolders
-3. **Low**: Consider breaking up `SteamService.kt` (3800 lines) into smaller services
+| Priority | Task | Status |
+|----------|------|--------|
+| ~~High~~ | Fix Steam service inconsistency | ✅ Done |
+| ~~Medium~~ | Reorganize utils/ into subfolders | ✅ Done |
+| Low | Decompose SteamService.kt | 🔲 Pending |
+| Low | Add more unit tests | 🔲 Pending |
 
 ---
 
-## Tools Needed
+## Benefits Achieved
 
-To safely implement these changes:
-- Kotlin LSP server for automated refactoring
-- Or Android Studio's built-in refactoring tools
-- Always run `./gradlew assembleDebug` after changes
-- Run `./gradlew test` to verify tests pass
+1. **Discoverability**: Developers can find utilities by domain
+2. **Maintainability**: Clear separation of concerns
+3. **Scalability**: Easy to add new domain-specific utilities
+4. **Consistency**: All services follow same pattern
+
+---
+
+## Next Steps
+
+1. Decompose `SteamService.kt` into focused managers
+2. Add unit tests for moved utilities
+3. Update documentation/README with new structure
+4. Consider adding KDoc comments to public APIs

@@ -7,8 +7,8 @@ import android.util.Log;
 import app.gamegrub.R;
 import app.gamegrub.enums.Marker;
 import app.gamegrub.service.steam.SteamService;
-import app.gamegrub.utils.ContainerUtils;
-import app.gamegrub.utils.MarkerUtils;
+import app.gamegrub.utils.container.ContainerUtils;
+import app.gamegrub.utils.storage.MarkerUtils;
 
 // import com.winlator.MainActivity;
 // import com.winlator.R;

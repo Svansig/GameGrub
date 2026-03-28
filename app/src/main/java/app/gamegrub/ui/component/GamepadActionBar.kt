@@ -40,7 +40,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.ui.icons.InputIcons
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.shouldShowGamepadUI
+import app.gamegrub.ui.utils.shouldShowGamepadUI
 
 // Icons from https://kenney.nl/assets/input-prompts (CC0 License)
 enum class GamepadButton(@field:DrawableRes val iconRes: Int) {

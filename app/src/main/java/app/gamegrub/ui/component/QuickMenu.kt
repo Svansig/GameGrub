@@ -78,8 +78,8 @@ import app.gamegrub.R
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.PerformanceHudSize
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.adaptivePanelWidth
-import app.gamegrub.utils.MathUtils.normalizedProgress
+import app.gamegrub.ui.utils.adaptivePanelWidth
+import app.gamegrub.utils.general.MathUtils.normalizedProgress
 import com.winlator.renderer.GLRenderer
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt

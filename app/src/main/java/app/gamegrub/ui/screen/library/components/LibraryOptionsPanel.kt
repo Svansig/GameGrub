@@ -67,7 +67,7 @@ import app.gamegrub.ui.enums.AppFilter
 import app.gamegrub.ui.enums.PaneType
 import app.gamegrub.ui.enums.SortOption
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.adaptivePanelWidth
+import app.gamegrub.ui.utils.adaptivePanelWidth
 import java.util.EnumSet
 
 @Composable

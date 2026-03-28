@@ -50,7 +50,7 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.component.topbar.BackButton
 import app.gamegrub.ui.data.GameDisplayInfo
-import app.gamegrub.utils.StorageUtils
+import app.gamegrub.utils.storage.StorageUtils
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import com.winlator.core.StringUtils

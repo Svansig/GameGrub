@@ -48,8 +48,8 @@ import androidx.compose.ui.unit.dp
 import app.gamegrub.R
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.SteamIconImage
-import app.gamegrub.utils.getAvatarURL
+import app.gamegrub.ui.utils.SteamIconImage
+import app.gamegrub.utils.general.getAvatarURL
 import `in`.dragonbra.javasteam.enums.EPersonaState
 
 @Composable

@@ -57,8 +57,8 @@ import app.gamegrub.data.LibraryItem
 import app.gamegrub.ui.component.CompatibilityBadge
 import app.gamegrub.ui.enums.PaneType
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.ListItemImage
-import app.gamegrub.utils.CustomGameScanner
+import app.gamegrub.ui.utils.ListItemImage
+import app.gamegrub.utils.game.CustomGameScanner
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.Dispatchers

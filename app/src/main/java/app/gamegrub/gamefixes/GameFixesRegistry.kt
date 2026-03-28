@@ -6,7 +6,7 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
-import app.gamegrub.utils.ContainerUtils
+import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking

@@ -1,6 +1,6 @@
 package app.gamegrub.service.epic
 
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.network.Net
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody

@@ -60,8 +60,8 @@ import androidx.compose.ui.unit.dp
 import app.gamegrub.R
 import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.WindowWidthClass
-import app.gamegrub.ui.util.rememberWindowWidthClass
+import app.gamegrub.ui.utils.WindowWidthClass
+import app.gamegrub.ui.utils.rememberWindowWidthClass
 
 /**
  * Tab bar for library navigation with sliding pill indicator.

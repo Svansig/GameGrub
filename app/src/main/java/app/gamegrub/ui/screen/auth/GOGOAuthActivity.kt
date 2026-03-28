@@ -8,7 +8,7 @@ import androidx.activity.compose.setContent
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.ui.component.dialog.AuthWebViewDialog
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.utils.redactUrlForLogging
+import app.gamegrub.utils.auth.redactUrlForLogging
 import timber.log.Timber
 
 /**

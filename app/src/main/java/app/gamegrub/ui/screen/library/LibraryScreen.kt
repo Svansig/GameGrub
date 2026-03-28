@@ -94,11 +94,11 @@ import app.gamegrub.ui.screen.library.components.LibrarySourceNotLoggedInSplash
 import app.gamegrub.ui.screen.library.components.LibraryTabBar
 import app.gamegrub.ui.screen.library.components.SystemMenu
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.PlatformAuthUiHelpers
-import app.gamegrub.ui.util.PlatformLogoutCallbacks
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.CustomGameScanner
-import app.gamegrub.utils.PlatformOAuthHandlers
+import app.gamegrub.ui.utils.PlatformAuthUiHelpers
+import app.gamegrub.ui.utils.PlatformLogoutCallbacks
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)

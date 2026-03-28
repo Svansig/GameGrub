@@ -23,9 +23,11 @@ import app.gamegrub.service.gog.GOGService
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils.getContainer
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils.getContainer
+import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.storage.StorageUtils
 import com.winlator.container.ContainerData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -244,9 +246,9 @@ class GOGAppScreen : BaseAppScreen() {
                 val game = GOGService.getGOGGameOf(gameId)
 
                 // Calculate sizes
-                val downloadSize = app.gamegrub.utils.StorageUtils.formatBinarySize(game?.downloadSize ?: 0L)
-                val availableSpace = app.gamegrub.utils.StorageUtils.formatBinarySize(
-                    app.gamegrub.utils.StorageUtils.getAvailableSpace(GOGConstants.defaultGOGGamesPath),
+                val downloadSize = StorageUtils.formatBinarySize(game?.downloadSize ?: 0L)
+                val availableSpace = StorageUtils.formatBinarySize(
+                    StorageUtils.getAvailableSpace(GOGConstants.defaultGOGGamesPath),
                 )
 
                 val message = context.getString(
@@ -390,8 +392,8 @@ class GOGAppScreen : BaseAppScreen() {
     override fun loadContainerData(context: Context, libraryItem: LibraryItem): ContainerData {
         Timber.tag(TAG).d("loadContainerData: appId=${libraryItem.appId}")
         // Load GOG-specific container data using ContainerUtils
-        val container = app.gamegrub.utils.ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
-        val containerData = app.gamegrub.utils.ContainerUtils.toContainerData(container)
+        val container = ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
+        val containerData = ContainerUtils.toContainerData(container)
         Timber.tag(TAG).d("loadContainerData: loaded container for ${libraryItem.appId}")
         return containerData
     }
@@ -400,7 +402,7 @@ class GOGAppScreen : BaseAppScreen() {
         Timber.tag(TAG).i("saveContainerConfig: appId=${libraryItem.appId}")
         val container = getContainer(context, libraryItem.appId)
         val previousLanguage = container.language
-        app.gamegrub.utils.ContainerUtils.applyToContainer(context, libraryItem.appId, config)
+        ContainerUtils.applyToContainer(context, libraryItem.appId, config)
         Timber.tag(TAG).d("saveContainerConfig: saved container config for ${libraryItem.appId}")
 
         if (previousLanguage != config.language) {

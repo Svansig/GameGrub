@@ -34,8 +34,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamegrub.R
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.AchievementNotification
-import app.gamegrub.ui.util.AchievementNotificationManager
+import app.gamegrub.ui.utils.AchievementNotification
+import app.gamegrub.ui.utils.AchievementNotificationManager
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.delay

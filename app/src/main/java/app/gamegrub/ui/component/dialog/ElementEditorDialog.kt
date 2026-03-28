@@ -59,7 +59,7 @@ import app.gamegrub.ui.component.settings.SettingsListDropdown
 import app.gamegrub.ui.component.settings.SettingsTextField
 import app.gamegrub.ui.theme.settingsTileColors
 import app.gamegrub.ui.theme.settingsTileColorsAlt
-import app.gamegrub.ui.util.SnackbarManager
+import app.gamegrub.ui.utils.SnackbarManager
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch

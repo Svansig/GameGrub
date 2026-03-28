@@ -27,8 +27,9 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
 import com.winlator.core.StringUtils
 import kotlinx.coroutines.CoroutineScope
@@ -502,8 +503,8 @@ class EpicAppScreen : BaseAppScreen() {
     override fun loadContainerData(context: Context, libraryItem: LibraryItem): ContainerData {
         Timber.tag(TAG).d("loadContainerData: appId=${libraryItem.appId}")
         // Load Epic-specific container data using ContainerUtils
-        val container = app.gamegrub.utils.ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
-        val containerData = app.gamegrub.utils.ContainerUtils.toContainerData(container)
+        val container = ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
+        val containerData = ContainerUtils.toContainerData(container)
         Timber.tag(TAG).d("loadContainerData: loaded container for ${libraryItem.appId}")
         return containerData
     }
@@ -511,7 +512,7 @@ class EpicAppScreen : BaseAppScreen() {
     override fun saveContainerConfig(context: Context, libraryItem: LibraryItem, config: ContainerData) {
         Timber.tag(TAG).i("saveContainerConfig: appId=${libraryItem.appId}")
         // Save Epic-specific container configuration using ContainerUtils
-        app.gamegrub.utils.ContainerUtils.applyToContainer(context, libraryItem.appId, config)
+        ContainerUtils.applyToContainer(context, libraryItem.appId, config)
         Timber.tag(TAG).d("saveContainerConfig: saved container config for ${libraryItem.appId}")
     }
 

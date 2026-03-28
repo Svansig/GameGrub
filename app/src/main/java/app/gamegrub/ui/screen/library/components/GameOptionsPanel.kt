@@ -75,7 +75,7 @@ import androidx.compose.ui.unit.dp
 import app.gamegrub.R
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.enums.AppOptionMenuType
-import app.gamegrub.ui.util.adaptivePanelWidth
+import app.gamegrub.ui.utils.adaptivePanelWidth
 
 @Composable
 fun GameOptionsPanel(

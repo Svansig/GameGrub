@@ -3,7 +3,8 @@ package app.gamegrub.service.epic
 import android.content.Context
 import app.gamegrub.data.EpicGame
 import app.gamegrub.service.epic.manifest.EpicManifest
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.network.Net
+import app.gamegrub.utils.container.ContainerUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -1184,7 +1185,7 @@ object EpicCloudSavesManager {
 
         // Get the container's Wine prefix path (similar to GOG)
         val appId = "EPIC_${game.id}"
-        val container = app.gamegrub.utils.ContainerUtils.getOrCreateContainer(context, appId)
+        val container = ContainerUtils.getOrCreateContainer(context, appId)
         val winePrefix = File(container.rootDir, ".wine").absolutePath
         val user = "xuser"
 

@@ -12,9 +12,9 @@ import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.events.EventDispatcher
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.AchievementWatcher
-import app.gamegrub.utils.ContainerMigrator
-import app.gamegrub.utils.IntentLaunchManager
-import app.gamegrub.utils.PlayIntegrity
+import app.gamegrub.utils.container.ContainerMigrator
+import app.gamegrub.utils.general.IntentLaunchManager
+import app.gamegrub.utils.auth.PlayIntegrity
 import com.google.android.play.core.splitcompat.SplitCompatApplication
 import com.posthog.PersonProfiles
 import com.posthog.android.PostHogAndroid

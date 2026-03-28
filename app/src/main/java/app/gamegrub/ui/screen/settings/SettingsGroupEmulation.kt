@@ -20,7 +20,7 @@ import app.gamegrub.ui.component.dialog.OrientationDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.theme.settingsTileColors
 import app.gamegrub.ui.theme.settingsTileColorsAlt
-import app.gamegrub.utils.ContainerUtils
+import app.gamegrub.utils.container.ContainerUtils
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch

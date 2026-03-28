@@ -12,9 +12,9 @@ import app.gamegrub.data.EpicGameToken
 import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

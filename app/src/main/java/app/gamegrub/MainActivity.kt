@@ -27,10 +27,10 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.GameGrubMain
 import app.gamegrub.ui.ImmersiveModeManager
 import app.gamegrub.ui.OrientationManager
-import app.gamegrub.utils.AnimatedPngDecoder
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.IconDecoder
-import app.gamegrub.utils.LocaleHelper
+import app.gamegrub.ui.utils.LocaleHelper
+import app.gamegrub.ui.utils.AnimatedPngDecoder
+import app.gamegrub.ui.utils.IconDecoder
+import app.gamegrub.utils.container.ContainerUtils
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.intercept.Interceptor

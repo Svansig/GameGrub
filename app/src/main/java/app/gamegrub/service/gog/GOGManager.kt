@@ -10,10 +10,10 @@ import app.gamegrub.data.LibraryItem
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.PathType
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.FileUtils
-import app.gamegrub.utils.MarkerUtils
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.storage.FileUtils
+import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.utils.network.Net
 import com.winlator.container.Container
 import com.winlator.core.envvars.EnvVars
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent

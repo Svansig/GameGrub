@@ -55,8 +55,8 @@ import app.gamegrub.ui.component.topbar.BackButton
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.internal.fakeAppInfo
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.utils.SteamUtils
-import app.gamegrub.utils.StorageUtils
+import app.gamegrub.utils.steam.SteamUtils
+import app.gamegrub.utils.storage.StorageUtils
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import java.text.SimpleDateFormat

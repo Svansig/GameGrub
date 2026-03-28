@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Environment
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
-import app.gamegrub.utils.StorageUtils
+import app.gamegrub.utils.storage.StorageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber

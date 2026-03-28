@@ -12,8 +12,8 @@ import app.gamegrub.data.LaunchInfo
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

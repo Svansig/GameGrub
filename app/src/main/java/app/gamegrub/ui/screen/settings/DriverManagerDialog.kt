@@ -50,8 +50,8 @@ import app.gamegrub.R
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.Net
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.network.Net
 import com.winlator.contents.AdrenotoolsManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

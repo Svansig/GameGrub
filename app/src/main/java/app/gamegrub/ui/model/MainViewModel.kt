@@ -19,10 +19,10 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.ConnectionState
 import app.gamegrub.ui.screen.GameGrubScreen
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.IntentLaunchManager
-import app.gamegrub.utils.SteamUtils
-import app.gamegrub.utils.UpdateInfo
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.general.IntentLaunchManager
+import app.gamegrub.utils.steam.SteamUtils
+import app.gamegrub.utils.network.UpdateInfo
 import com.materialkolor.PaletteStyle
 import com.winlator.xserver.Window
 import dagger.hilt.android.lifecycle.HiltViewModel

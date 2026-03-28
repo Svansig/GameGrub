@@ -22,7 +22,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.PerformanceHudSize
-import app.gamegrub.utils.DateTimeUtils.formatRuntimeHours
+import app.gamegrub.utils.general.DateTimeUtils.formatRuntimeHours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

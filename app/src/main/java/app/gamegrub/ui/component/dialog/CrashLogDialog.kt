@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import app.gamegrub.ui.utils.PaddingUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +79,7 @@ fun CrashLogDialog(
                             .verticalScroll(scrollState)
                             .padding(
                                 top =
-                                    app.gamegrub.utils.PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
+                                    PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
                                             paddingValues.calculateTopPadding(),
                                 bottom = 24.dp + paddingValues.calculateBottomPadding(),
                                 start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),

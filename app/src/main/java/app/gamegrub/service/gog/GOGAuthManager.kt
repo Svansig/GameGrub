@@ -2,7 +2,7 @@ package app.gamegrub.service.gog
 
 import android.content.Context
 import app.gamegrub.data.GOGCredentials
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.network.Net
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl

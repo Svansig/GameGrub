@@ -65,7 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.gamegrub.R
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.adaptivePanelWidth
+import app.gamegrub.ui.utils.adaptivePanelWidth
 import com.winlator.renderer.GLRenderer
 import com.winlator.renderer.effects.CRTEffect
 import com.winlator.renderer.effects.ColorEffect

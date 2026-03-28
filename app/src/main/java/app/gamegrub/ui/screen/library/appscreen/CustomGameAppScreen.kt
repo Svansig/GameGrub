@@ -24,12 +24,13 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.CustomGameScanner
-import app.gamegrub.utils.GameMetadataManager
-import app.gamegrub.utils.SteamGridDB
-import app.gamegrub.utils.StorageUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.utils.game.ExeIconExtractor
+import app.gamegrub.utils.game.GameMetadataManager
+import app.gamegrub.utils.steam.SteamGridDB
+import app.gamegrub.utils.storage.StorageUtils
 import com.winlator.container.ContainerData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -300,7 +301,7 @@ class CustomGameAppScreen : BaseAppScreen() {
                             if (exeFile.exists()) {
                                 val outIco = File(exeFile.parentFile, exeFile.nameWithoutExtension + ".extracted.ico")
                                 Timber.tag("CustomGameAppScreen").d("Attempting to extract icon to: ${outIco.absolutePath}")
-                                val extracted = app.gamegrub.utils.ExeIconExtractor.tryExtractMainIcon(exeFile, outIco)
+                                val extracted = ExeIconExtractor.tryExtractMainIcon(exeFile, outIco)
                                 Timber.tag("CustomGameAppScreen").d("Icon extraction result: $extracted")
 
                                 if (extracted) {
@@ -326,7 +327,7 @@ class CustomGameAppScreen : BaseAppScreen() {
                             // Only extract if we haven't already extracted from the selected exe
                             if (!outIco.exists()) {
                                 Timber.tag("CustomGameAppScreen").d("Attempting to extract icon to: ${outIco.absolutePath}")
-                                val extracted = app.gamegrub.utils.ExeIconExtractor.tryExtractMainIcon(exeFile, outIco)
+                                val extracted = ExeIconExtractor.tryExtractMainIcon(exeFile, outIco)
                                 Timber.tag("CustomGameAppScreen").d("Icon extraction result: $extracted")
 
                                 if (extracted) {

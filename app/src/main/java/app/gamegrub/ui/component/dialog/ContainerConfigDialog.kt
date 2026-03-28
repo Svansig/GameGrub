@@ -54,15 +54,16 @@ import app.gamegrub.ui.component.dialog.state.MessageDialogState
 import app.gamegrub.ui.components.rememberCustomGameFolderPicker
 import app.gamegrub.ui.components.requestPermissionsForPath
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.CustomGameScanner
-import app.gamegrub.utils.ManifestComponentHelper
-import app.gamegrub.utils.ManifestComponentHelper.VersionOptionList
-import app.gamegrub.utils.ManifestContentTypes
-import app.gamegrub.utils.ManifestData
-import app.gamegrub.utils.ManifestEntry
-import app.gamegrub.utils.ManifestInstaller
+import app.gamegrub.ui.utils.PaddingUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.utils.manifest.ManifestComponentHelper
+import app.gamegrub.utils.manifest.ManifestComponentHelper.VersionOptionList
+import app.gamegrub.utils.manifest.ManifestContentTypes
+import app.gamegrub.utils.manifest.ManifestData
+import app.gamegrub.utils.manifest.ManifestEntry
+import app.gamegrub.utils.manifest.ManifestInstaller
 import com.winlator.box86_64.Box86_64PresetManager
 import com.winlator.container.Container
 import com.winlator.container.ContainerData
@@ -1069,7 +1070,7 @@ fun ContainerConfigDialog(
                         modifier = Modifier
                             .padding(
                                 top =
-                                    app.gamegrub.utils.PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
+                                    PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
                                             paddingValues.calculateTopPadding(),
                                 bottom = 32.dp + paddingValues.calculateBottomPadding(),
                                 start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),

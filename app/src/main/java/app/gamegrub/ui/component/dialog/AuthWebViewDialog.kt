@@ -32,7 +32,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.utils.redactUrlForLogging
+import app.gamegrub.utils.auth.redactUrlForLogging
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)

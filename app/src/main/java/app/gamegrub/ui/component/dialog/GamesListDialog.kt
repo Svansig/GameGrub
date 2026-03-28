@@ -38,8 +38,9 @@ import app.gamegrub.R
 import app.gamegrub.data.OwnedGames
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.ListItemImage
-import app.gamegrub.utils.SteamUtils
+import app.gamegrub.ui.utils.ListItemImage
+import app.gamegrub.ui.utils.PaddingUtils
+import app.gamegrub.utils.steam.SteamUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +78,7 @@ fun GamesListDialog(
                             .fillMaxSize()
                             .padding(
                                 top =
-                                    app.gamegrub.utils.PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
+                                    PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
                                             paddingValues.calculateTopPadding(),
                                 bottom = 24.dp + paddingValues.calculateBottomPadding(),
                                 start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),

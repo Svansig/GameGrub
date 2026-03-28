@@ -1,8 +1,8 @@
 package app.gamegrub.api
 
 import app.gamegrub.BuildConfig
-import app.gamegrub.utils.Net
-import app.gamegrub.utils.PlayIntegrity
+import app.gamegrub.utils.network.Net
+import app.gamegrub.utils.auth.PlayIntegrity
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request

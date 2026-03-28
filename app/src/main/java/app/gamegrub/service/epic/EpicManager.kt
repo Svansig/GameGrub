@@ -3,7 +3,7 @@ package app.gamegrub.service.epic
 import android.content.Context
 import app.gamegrub.data.EpicGame
 import app.gamegrub.db.dao.EpicGameDao
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.network.Net
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext

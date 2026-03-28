@@ -7,7 +7,7 @@ import app.gamegrub.data.EpicGame
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.service.epic.manifest.ManifestUtils
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

@@ -4,7 +4,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamApp
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.DownloadService
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import timber.log.Timber
 import java.io.File
 import java.nio.file.Files

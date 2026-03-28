@@ -2,6 +2,7 @@ package app.gamegrub.enums
 
 import android.content.Context
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.xenvironment.ImageFs
 import timber.log.Timber
 import java.nio.file.Paths
@@ -160,7 +161,7 @@ enum class PathType {
             val imageFs = ImageFs.find(context)
             // For GOG games, use the container-specific wine prefix if appId is provided
             val (winePrefix, useContainerRoot) = if (appId != null) {
-                val container = app.gamegrub.utils.ContainerUtils.getOrCreateContainer(context, appId)
+                val container = ContainerUtils.getOrCreateContainer(context, appId)
                 val containerRoot = container.rootDir.absolutePath
                 Timber.d("[PathType] Using container-specific root for $appId: $containerRoot")
                 Pair(containerRoot, true)

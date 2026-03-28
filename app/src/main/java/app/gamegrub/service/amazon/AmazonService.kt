@@ -14,10 +14,10 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstallPath
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstance
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.ExecutableSelectionUtils
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.game.ExecutableSelectionUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint

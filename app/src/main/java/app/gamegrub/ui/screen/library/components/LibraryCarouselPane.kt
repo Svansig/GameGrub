@@ -54,8 +54,8 @@ import androidx.compose.ui.zIndex
 import app.gamegrub.R
 import app.gamegrub.ui.data.LibraryState
 import app.gamegrub.ui.enums.PaneType
-import app.gamegrub.ui.util.AdaptivePadding
-import app.gamegrub.ui.util.shouldShowGamepadUI
+import app.gamegrub.ui.utils.AdaptivePadding
+import app.gamegrub.ui.utils.shouldShowGamepadUI
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull

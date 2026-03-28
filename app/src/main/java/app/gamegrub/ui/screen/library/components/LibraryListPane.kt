@@ -54,9 +54,9 @@ import app.gamegrub.ui.enums.AppFilter
 import app.gamegrub.ui.enums.PaneType
 import app.gamegrub.ui.internal.fakeAppInfo
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.AdaptivePadding
-import app.gamegrub.ui.util.WindowWidthClass
-import app.gamegrub.ui.util.rememberWindowWidthClass
+import app.gamegrub.ui.utils.AdaptivePadding
+import app.gamegrub.ui.utils.WindowWidthClass
+import app.gamegrub.ui.utils.rememberWindowWidthClass
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull

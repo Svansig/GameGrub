@@ -101,8 +101,8 @@ import app.gamegrub.ui.screen.auth.AmazonOAuthActivity
 import app.gamegrub.ui.screen.auth.EpicOAuthActivity
 import app.gamegrub.ui.screen.auth.GOGOAuthActivity
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.PlatformOAuthHandlers
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

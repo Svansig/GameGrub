@@ -32,10 +32,10 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
-import app.gamegrub.utils.CustomGameScanner
-import app.gamegrub.utils.GameCompatibilityCache
-import app.gamegrub.utils.GameCompatibilityService
-import app.gamegrub.utils.unaccent
+import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.utils.game.GameCompatibilityCache
+import app.gamegrub.utils.game.GameCompatibilityService
+import app.gamegrub.utils.general.unaccent
 import com.winlator.core.GPUInformation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

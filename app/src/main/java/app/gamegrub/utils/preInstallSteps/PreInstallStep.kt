@@ -1,4 +1,4 @@
-package app.gamegrub.utils
+package app.gamegrub.utils.preInstallSteps
 
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker

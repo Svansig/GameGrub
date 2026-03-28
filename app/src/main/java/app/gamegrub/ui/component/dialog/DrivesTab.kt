@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import app.gamegrub.R
 import app.gamegrub.ui.component.settings.SettingsCenteredLabel
 import app.gamegrub.ui.theme.settingsTileColors
-import app.gamegrub.ui.util.SnackbarManager
+import app.gamegrub.ui.utils.SnackbarManager
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.winlator.container.Container

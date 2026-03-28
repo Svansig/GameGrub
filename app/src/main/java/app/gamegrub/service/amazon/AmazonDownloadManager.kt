@@ -4,7 +4,7 @@ import android.content.Context
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.enums.Marker
-import app.gamegrub.utils.MarkerUtils
+import app.gamegrub.utils.storage.MarkerUtils
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

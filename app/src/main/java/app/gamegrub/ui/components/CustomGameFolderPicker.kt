@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import app.gamegrub.R
-import app.gamegrub.utils.CustomGameScanner
+import app.gamegrub.utils.game.CustomGameScanner
 
 /**
  * Converts a document tree URI to a file path.

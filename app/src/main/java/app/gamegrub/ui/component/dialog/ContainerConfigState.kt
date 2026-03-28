@@ -2,9 +2,9 @@ package app.gamegrub.ui.component.dialog
 
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.ManifestComponentHelper
-import app.gamegrub.utils.ManifestEntry
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.manifest.ManifestComponentHelper
+import app.gamegrub.utils.manifest.ManifestEntry
 import com.winlator.box86_64.Box86_64Preset
 import com.winlator.container.ContainerData
 import com.winlator.contents.ContentProfile

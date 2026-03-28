@@ -46,8 +46,8 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.CompatibilityBadge
-import app.gamegrub.ui.util.ListItemImage
-import app.gamegrub.utils.CustomGameScanner
+import app.gamegrub.ui.utils.ListItemImage
+import app.gamegrub.utils.game.CustomGameScanner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

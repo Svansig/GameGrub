@@ -9,8 +9,8 @@ import app.gamegrub.data.UserFilesUploadResult
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.utils.FileUtils
-import app.gamegrub.utils.SteamUtils
+import app.gamegrub.utils.storage.FileUtils
+import app.gamegrub.utils.steam.SteamUtils
 import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileChangeList
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileInfo

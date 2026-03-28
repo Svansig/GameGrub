@@ -9,8 +9,8 @@ import app.gamegrub.service.gog.api.GOGApiClient
 import app.gamegrub.service.gog.api.GOGManifestMeta
 import app.gamegrub.service.gog.api.GOGManifestParser
 import app.gamegrub.service.gog.api.V1DepotFile
-import app.gamegrub.utils.MarkerUtils
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.utils.network.Net
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

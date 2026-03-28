@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import app.gamegrub.utils.fromHtml
+import app.gamegrub.utils.general.fromHtml
 import java.util.Locale
 
 @Composable

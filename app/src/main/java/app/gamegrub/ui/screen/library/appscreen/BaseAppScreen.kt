@@ -32,10 +32,10 @@ import app.gamegrub.ui.component.dialog.ContainerConfigDialog
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
-import app.gamegrub.ui.util.ContainerConfigTransfer
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.createPinnedShortcut
+import app.gamegrub.ui.utils.ContainerConfigTransfer
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.ui.utils.createPinnedShortcut
+import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

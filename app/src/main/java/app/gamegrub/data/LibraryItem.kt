@@ -1,7 +1,7 @@
 package app.gamegrub.data
 
 import app.gamegrub.Constants
-import app.gamegrub.utils.CustomGameScanner
+import app.gamegrub.utils.game.CustomGameScanner
 
 enum class GameSource {
     STEAM,

@@ -27,7 +27,7 @@ import app.gamegrub.ui.component.dialog.WineDebugChannelsDialog
 import app.gamegrub.ui.theme.settingsTileColors
 import app.gamegrub.ui.theme.settingsTileColorsAlt
 import app.gamegrub.ui.theme.settingsTileColorsDebug
-import app.gamegrub.ui.util.SnackbarManager
+import app.gamegrub.ui.utils.SnackbarManager
 import coil.annotation.ExperimentalCoilApi
 import coil.imageLoader
 import com.alorma.compose.settings.ui.SettingsGroup

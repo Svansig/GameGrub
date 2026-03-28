@@ -31,8 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamegrub.R
-import app.gamegrub.utils.KofiSupporter
-import app.gamegrub.utils.fetchKofiSupporters
+import app.gamegrub.ui.utils.KofiSupporter
+import app.gamegrub.ui.utils.fetchKofiSupporters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

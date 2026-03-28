@@ -2,7 +2,7 @@ package app.gamegrub.service.gog.api
 
 import android.content.Context
 import app.gamegrub.service.gog.GOGAuthManager
-import app.gamegrub.utils.Net
+import app.gamegrub.utils.network.Net
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

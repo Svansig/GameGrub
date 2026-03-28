@@ -58,10 +58,10 @@ import app.gamegrub.ui.component.dialog.SingleChoiceDialog
 import app.gamegrub.ui.component.settings.SettingsListDropdown
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.theme.settingsTileColorsAlt
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.IconSwitcher
-import app.gamegrub.utils.LocaleHelper
-import app.gamegrub.utils.PlatformOAuthHandlers
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.ui.utils.IconSwitcher
+import app.gamegrub.ui.utils.LocaleHelper
+import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch

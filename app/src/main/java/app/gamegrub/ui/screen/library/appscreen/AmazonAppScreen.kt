@@ -30,9 +30,10 @@ import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
-import app.gamegrub.ui.util.SnackbarManager
-import app.gamegrub.utils.ContainerUtils
-import app.gamegrub.utils.DateTimeUtils
+import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.general.DateTimeUtils
+import app.gamegrub.utils.storage.StorageUtils
 import com.winlator.container.ContainerData
 import com.winlator.core.StringUtils
 import kotlinx.coroutines.CoroutineScope
@@ -249,19 +250,19 @@ class AmazonAppScreen : BaseAppScreen() {
                 val installBytes = game?.installSize ?: 0L
 
                 val downloadSize = if (downloadBytes > 0L) {
-                    app.gamegrub.utils.StorageUtils.formatBinarySize(downloadBytes)
+                    StorageUtils.formatBinarySize(downloadBytes)
                 } else {
                     "Unknown"
                 }
                 val installSize = if (installBytes > 0L) {
-                    app.gamegrub.utils.StorageUtils.formatBinarySize(installBytes)
+                    StorageUtils.formatBinarySize(installBytes)
                 } else {
                     "Unknown"
                 }
 
                 AmazonConstants.getGameInstallPath(context, game?.title ?: libraryItem.name)
-                val availableBytes = app.gamegrub.utils.StorageUtils.getAvailableSpace(AmazonConstants.defaultAmazonGamesPath(context))
-                val availableSpace = app.gamegrub.utils.StorageUtils.formatBinarySize(availableBytes)
+                val availableBytes = StorageUtils.getAvailableSpace(AmazonConstants.defaultAmazonGamesPath(context))
+                val availableSpace = StorageUtils.formatBinarySize(availableBytes)
 
                 withContext(Dispatchers.Main) {
                     showAmazonInstallDialog(

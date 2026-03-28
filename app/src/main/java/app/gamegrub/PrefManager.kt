@@ -51,27 +51,44 @@ object PrefManager {
 
     private lateinit var dataStore: DataStore<Preferences>
 
+    @Volatile
+    private var preferencesCache: Map<Preferences.Key<*>, Any> = emptyMap()
+
     fun init(context: Context) {
         dataStore = context.datastore
 
-        // Note: Should remove after a few release versions. we've moved to encrypted values.
+        scope.launch {
+            try {
+                val prefs = dataStore.data.first()
+                @Suppress("UNCHECKED_CAST")
+                preferencesCache = prefs.asMap().mapKeys { it.key as Preferences.Key<Any> }
+                Timber.d("Preferences cache initialized with ${preferencesCache.size} entries")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to initialize preferences cache")
+            }
+        }
+
         val oldPassword = stringPreferencesKey("password")
         removePref(oldPassword)
 
         val oldAccessToken = stringPreferencesKey("access_token")
         val oldRefreshToken = stringPreferencesKey("refresh_token")
-        getPref(oldAccessToken, "").let {
-            if (it.isNotEmpty()) {
-                Timber.i("Converting old access token to encrypted")
-                accessToken = it
-                removePref(oldAccessToken)
+
+        runBlocking(Dispatchers.IO) {
+            val prefs = dataStore.data.first()
+            prefs[oldAccessToken]?.let {
+                if (it.isNotEmpty()) {
+                    Timber.i("Converting old access token to encrypted")
+                    accessToken = it
+                    removePref(oldAccessToken)
+                }
             }
-        }
-        getPref(oldRefreshToken, "").let {
-            if (it.isNotEmpty()) {
-                Timber.i("Converting old refresh token to encrypted")
-                refreshToken = it
-                removePref(oldRefreshToken)
+            prefs[oldRefreshToken]?.let {
+                if (it.isNotEmpty()) {
+                    Timber.i("Converting old refresh token to encrypted")
+                    refreshToken = it
+                    removePref(oldRefreshToken)
+                }
             }
         }
     }
@@ -119,20 +136,27 @@ object PrefManager {
         setPref(floatPreferencesKey(key), value)
 
     @Suppress("SameParameterValue")
-    private fun <T> getPref(key: Preferences.Key<T>, defaultValue: T): T = runBlocking {
-        dataStore.data.first()[key] ?: defaultValue
+    private fun <T> getPref(key: Preferences.Key<T>, defaultValue: T): T {
+        val cache = preferencesCache
+        @Suppress("UNCHECKED_CAST")
+        return cache[key] as? T ?: defaultValue
     }
 
     @Suppress("SameParameterValue")
     private fun <T> setPref(key: Preferences.Key<T>, value: T) {
         scope.launch {
-            dataStore.edit { pref -> pref[key] = value }
+            dataStore.edit { pref ->
+                pref[key] = value
+            }
+            @Suppress("UNCHECKED_CAST")
+            (preferencesCache as MutableMap)[key] = value as Any
         }
     }
 
     private fun <T> removePref(key: Preferences.Key<T>) {
         scope.launch {
             dataStore.edit { pref -> pref.remove(key) }
+            preferencesCache = preferencesCache - key
         }
     }
 
@@ -750,10 +774,26 @@ object PrefManager {
     // Special: Because null value.
     private val CLIENT_ID = longPreferencesKey("client_id")
     var clientId: Long?
-        get() = runBlocking { dataStore.data.first()[CLIENT_ID] }
+        get() {
+            val cache = preferencesCache
+            @Suppress("UNCHECKED_CAST")
+            return cache[CLIENT_ID] as? Long
+        }
         set(value) {
             scope.launch {
-                dataStore.edit { pref -> pref[CLIENT_ID] = value!! }
+                dataStore.edit { pref ->
+                    if (value != null) {
+                        pref[CLIENT_ID] = value
+                    } else {
+                        pref.remove(CLIENT_ID)
+                    }
+                }
+                if (value != null) {
+                    @Suppress("UNCHECKED_CAST")
+                    (preferencesCache as MutableMap)[CLIENT_ID] = value
+                } else {
+                    preferencesCache = preferencesCache - CLIENT_ID
+                }
             }
         }
 

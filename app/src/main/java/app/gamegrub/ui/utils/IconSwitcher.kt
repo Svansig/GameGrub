@@ -11,11 +11,11 @@ object IconSwitcher {
 
         val defaultAlias = ComponentName(
             context,
-            "app.gamenative.MainActivityAliasDefault",
+            "app.gamegrub.MainActivityAliasDefault",
         )
         val altAlias = ComponentName(
             context,
-            "app.gamenative.MainActivityAliasAlt",
+            "app.gamegrub.MainActivityAliasAlt",
         )
 
         val defaultState = if (useAltIcon) {

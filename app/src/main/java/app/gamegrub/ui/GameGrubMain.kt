@@ -56,10 +56,6 @@ import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameFeedbackUtils
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.PathType
@@ -107,6 +103,10 @@ import com.winlator.container.ContainerManager
 import com.winlator.core.TarCompressorUtils
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xenvironment.ImageFsInstaller
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
 import java.io.File
 import java.util.Date
@@ -181,7 +181,7 @@ private fun resolveGameAppId(context: Context, appId: String): GameResolutionRes
         }
 
         GameSource.AMAZON -> {
-            AmazonService.isGameInstalledByAppId(context, gameId)
+            AmazonService.isGameInstalledByAppIdSync(context, gameId)
         }
 
         GameSource.CUSTOM_GAME -> {

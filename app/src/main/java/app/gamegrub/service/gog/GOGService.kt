@@ -47,8 +47,8 @@ import timber.log.Timber
 class GOGService : Service() {
 
     companion object {
-        private const val ACTION_SYNC_LIBRARY = "app.gamenative.GOG_SYNC_LIBRARY"
-        private const val ACTION_MANUAL_SYNC = "app.gamenative.GOG_MANUAL_SYNC"
+        private const val ACTION_SYNC_LIBRARY = "app.gamegrub.GOG_SYNC_LIBRARY"
+        private const val ACTION_MANUAL_SYNC = "app.gamegrub.GOG_MANUAL_SYNC"
         private const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L // 15 minutes
 
         private var instance: GOGService? = null
@@ -258,10 +258,10 @@ class GOGService : Service() {
             }
         }
 
-        fun verifyInstallation(gameId: String): Pair<Boolean, String?> {
-            return getInstance()?.gogManager?.verifyInstallation(gameId)
-                ?: Pair(false, "Service not available")
-        }
+//        fun verifyInstallation(gameId: String): Pair<Boolean, String?> {
+//            return getInstance()?.gogManager?.verifyInstallation(gameId)
+//                ?: Pair(false, "Service not available")
+//        }
 
         suspend fun getInstalledExe(libraryItem: LibraryItem): String {
             return getInstance()?.gogManager?.getInstalledExe(libraryItem)
@@ -276,7 +276,7 @@ class GOGService : Service() {
             return getInstance()?.gogManager?.getLaunchExecutable(appId, container) ?: ""
         }
 
-        fun getGogWineStartCommand(
+        suspend fun getGogWineStartCommand(
             libraryItem: LibraryItem,
             container: com.winlator.container.Container,
             bootToContainer: Boolean,
@@ -288,6 +288,20 @@ class GOGService : Service() {
             return getInstance()?.gogManager?.getGogWineStartCommand(
                 libraryItem, container, bootToContainer, appLaunchInfo, envVars, guestProgramLauncherComponent, gameId,
             ) ?: "\"explorer.exe\""
+        }
+
+        fun getGogWineStartCommandSync(
+            libraryItem: LibraryItem,
+            container: com.winlator.container.Container,
+            bootToContainer: Boolean,
+            appLaunchInfo: LaunchInfo?,
+            envVars: com.winlator.core.envvars.EnvVars,
+            guestProgramLauncherComponent: com.winlator.xenvironment.components.GuestProgramLauncherComponent,
+            gameId: Int,
+        ): String = runBlocking(Dispatchers.IO) {
+            getGogWineStartCommand(
+                libraryItem, container, bootToContainer, appLaunchInfo, envVars, guestProgramLauncherComponent, gameId,
+            )
         }
 
         suspend fun refreshLibrary(context: Context): Result<Int> {

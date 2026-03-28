@@ -66,8 +66,8 @@ class AmazonService : Service() {
     private val activeDownloadPaths = ConcurrentHashMap<String, String>()
 
     companion object {
-        private const val ACTION_SYNC_LIBRARY = "app.gamenative.AMAZON_SYNC_LIBRARY"
-        private const val ACTION_MANUAL_SYNC = "app.gamenative.AMAZON_MANUAL_SYNC"
+        private const val ACTION_SYNC_LIBRARY = "app.gamegrub.AMAZON_SYNC_LIBRARY"
+        private const val ACTION_MANUAL_SYNC = "app.gamegrub.AMAZON_MANUAL_SYNC"
         private const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L // 15 minutes
         private var instance: AmazonService? = null
 
@@ -197,7 +197,7 @@ class AmazonService : Service() {
         }
 
         /** Return whether a game is installed, using marker-based detection with DB reconciliation. */
-        fun isGameInstalled(context: Context, productId: String): Boolean {
+        suspend fun isGameInstalled(context: Context, productId: String): Boolean {
             val game = getAmazonGameOf(productId) ?: return false
 
             if (game.isInstalled && game.installPath.isNotEmpty()) {
@@ -213,23 +213,29 @@ class AmazonService : Service() {
             val isDownloadComplete = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
             val isDownloadInProgress = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
             if (isDownloadComplete && !isDownloadInProgress) {
-                runBlocking(Dispatchers.IO) {
-                    instance?.amazonManager?.markInstalled(productId, installPath, 0L)
-                }
+                instance?.amazonManager?.markInstalled(productId, installPath, 0L)
                 return true
             }
 
             return false
         }
 
+        fun isGameInstalledSync(context: Context, productId: String): Boolean = runBlocking(Dispatchers.IO) {
+            isGameInstalled(context, productId)
+        }
+
         /** Return whether a game is installed, looked up by appId. */
-        fun isGameInstalledByAppId(context: Context, appId: Int): Boolean {
+        suspend fun isGameInstalledByAppId(context: Context, appId: Int): Boolean {
             val game = getAmazonGameByAppId(appId) ?: return false
             return isGameInstalled(context, game.productId)
         }
 
+        fun isGameInstalledByAppIdSync(context: Context, appId: Int): Boolean = runBlocking(Dispatchers.IO) {
+            isGameInstalledByAppId(context, appId)
+        }
+
         /** Return expected install path for [appId], even when partially downloaded. */
-        fun getExpectedInstallPathByAppId(context: Context, appId: Int): String? {
+        suspend fun getExpectedInstallPathByAppId(context: Context, appId: Int): String? {
             val game = getAmazonGameByAppId(appId) ?: return null
 
             instance?.activeDownloadPaths?.get(game.productId)?.let { return it }
@@ -238,8 +244,12 @@ class AmazonService : Service() {
             return AmazonConstants.getGameInstallPath(context, title)
         }
 
+        fun getExpectedInstallPathByAppIdSync(context: Context, appId: Int): String? = runBlocking(Dispatchers.IO) {
+            getExpectedInstallPathByAppId(context, appId)
+        }
+
         /** Steam-style partial detection: directory exists and completion marker is absent. */
-        fun hasPartialDownloadByAppId(context: Context, appId: Int): Boolean {
+        suspend fun hasPartialDownloadByAppId(context: Context, appId: Int): Boolean {
             if (getDownloadInfoByAppId(appId) != null) {
                 Timber.tag("Amazon").d("[PARTIAL] appId=$appId partial=true reason=active_download")
                 return true
@@ -291,35 +301,55 @@ class AmazonService : Service() {
             return hasPartialPayload
         }
 
+        fun hasPartialDownloadByAppIdSync(context: Context, appId: Int): Boolean = runBlocking(Dispatchers.IO) {
+            hasPartialDownloadByAppId(context, appId)
+        }
+
         /** Return [AmazonGame] for a product ID, or null if unavailable. */
-        fun getAmazonGameOf(productId: String): AmazonGame? {
-            return runBlocking(Dispatchers.IO) {
-                instance?.amazonManager?.getGameById(productId)
-            }
+        suspend fun getAmazonGameOf(productId: String): AmazonGame? {
+            return instance?.amazonManager?.getGameById(productId)
+        }
+
+        /** Non-suspend version for backward compatibility. */
+        fun getAmazonGameOfSync(productId: String): AmazonGame? = runBlocking(Dispatchers.IO) {
+            getAmazonGameOf(productId)
         }
 
         /** Return [AmazonGame] for an appId, or null if unavailable. */
-        fun getAmazonGameByAppId(appId: Int): AmazonGame? {
-            return runBlocking(Dispatchers.IO) {
-                instance?.amazonManager?.getGameByAppId(appId)
-            }
+        suspend fun getAmazonGameByAppId(appId: Int): AmazonGame? {
+            return instance?.amazonManager?.getGameByAppId(appId)
+        }
+
+        /** Non-suspend version for backward compatibility. */
+        fun getAmazonGameByAppIdSync(appId: Int): AmazonGame? = runBlocking(Dispatchers.IO) {
+            getAmazonGameByAppId(appId)
         }
 
         /** Return install path for [productId], or null if not installed. */
-        fun getInstallPath(productId: String): String? {
+        suspend fun getInstallPath(productId: String): String? {
             val game = getAmazonGameOf(productId) ?: return null
             return if (game.isInstalled && game.installPath.isNotEmpty()) game.installPath else null
         }
 
+        /** Non-suspend version for backward compatibility. */
+        fun getInstallPathSync(productId: String): String? = runBlocking(Dispatchers.IO) {
+            getInstallPath(productId)
+        }
+
         /** Return install path for [appId], or null if not installed. */
-        fun getInstallPathByAppId(appId: Int): String? {
+        suspend fun getInstallPathByAppId(appId: Int): String? {
             val game = getAmazonGameByAppId(appId) ?: return null
             return if (game.isInstalled && game.installPath.isNotEmpty()) game.installPath else null
         }
 
+        /** Non-suspend version for backward compatibility. */
+        fun getInstallPathByAppIdSync(appId: Int): String? = runBlocking(Dispatchers.IO) {
+            getInstallPathByAppId(appId)
+        }
+
         /** Convert appId to productId via DB lookup. */
         fun getProductIdByAppId(appId: Int): String? {
-            return getAmazonGameByAppId(appId)?.productId
+            return getAmazonGameByAppIdSync(appId)?.productId
         }
 
         /**
@@ -330,7 +360,7 @@ class AmazonService : Service() {
             val appId = runCatching { ContainerUtils.extractGameIdFromContainerId(containerId) }.getOrElse { return "" }
             if (appId <= 0) return ""
 
-            val installPath = getInstallPathByAppId(appId) ?: return ""
+            val installPath = getInstallPathByAppIdSync(appId) ?: return ""
             val installDir = File(installPath)
             if (!installDir.isDirectory) return ""
 
@@ -343,7 +373,7 @@ class AmazonService : Service() {
         }
 
         /** Deprecated name kept for call-site compatibility — delegates to [getInstallPath]. */
-        fun getInstalledGamePath(gameId: String): String? = getInstallPath(gameId)
+        fun getInstalledGamePath(gameId: String): String? = getInstallPathSync(gameId)
 
         /** Check whether an installed game has a newer live version. */
         suspend fun isUpdatePending(productId: String): Boolean {
@@ -852,7 +882,7 @@ class AmazonService : Service() {
     // ── Instance helpers (for callers that hold a direct reference) ───────────
 
     /** Instance-method accessor for callers using [getInstance]?. */
-    fun getInstalledGamePath(gameId: String): String? = getInstallPath(gameId)
+    suspend fun getInstalledGamePath(gameId: String): String? = getInstallPath(gameId)
 
     private suspend fun syncLibrary() {
         setSyncInProgress(true)

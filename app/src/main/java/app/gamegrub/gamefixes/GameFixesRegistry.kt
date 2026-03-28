@@ -9,8 +9,6 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import java.io.File
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 object GameFixesRegistry {
@@ -40,9 +38,8 @@ object GameFixesRegistry {
 
     fun applyFor(context: Context, appId: String, container: Container) {
         val source = ContainerUtils.extractGameSourceFromContainerId(appId)
-        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)?.toString() ?: return
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId).toString()
         val catalogId = when (source) {
-            // EPIC auto-generates the id. so we need the catalog id instead.
             GameSource.EPIC -> {
                 val game = EpicService.getEpicGameOf(gameId.toInt()) ?: return
                 game.catalogId
@@ -59,7 +56,7 @@ object GameFixesRegistry {
     private fun resolvePaths(context: Context, source: GameSource, gameId: String): Pair<String, String>? {
         return when (source) {
             GameSource.GOG -> {
-                val game = runBlocking(Dispatchers.IO) { GOGService.getGOGGameOf(gameId) } ?: return null
+                val game = GOGService.getGOGGameOf(gameId) ?: return null
                 if (!game.isInstalled) return null
                 val path = game.installPath.ifEmpty { GOGConstants.getGameInstallPath(game.title) }
                 if (path.isEmpty() || !File(path).exists()) return null

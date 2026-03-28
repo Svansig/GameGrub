@@ -384,7 +384,7 @@ internal fun getGridImageUrl(
 ): GridImageUrls {
     fun findSteamGridDBImage(imageType: String): String? {
         if (appInfo.gameSource == GameSource.CUSTOM_GAME) {
-            val gameFolderPath = CustomGameScanner.getFolderPathFromAppId(appInfo.appId)
+            val gameFolderPath = CustomGameScanner.get().getFolderPathFromAppId(appInfo.appId)
             gameFolderPath?.let { path ->
                 val folder = File(path)
                 val imageFile = folder.listFiles()?.firstOrNull { file ->
@@ -411,7 +411,7 @@ internal fun getGridImageUrl(
                     findSteamGridDBImage("grid_hero") ?: appInfo.headerImageUrl
 
                 else -> {
-                    val gameFolderPath = CustomGameScanner.getFolderPathFromAppId(appInfo.appId)
+                    val gameFolderPath = CustomGameScanner.get().getFolderPathFromAppId(appInfo.appId)
                     val heroUrl = gameFolderPath?.let { path ->
                         val folder = File(path)
                         val heroFile = folder.listFiles()?.firstOrNull { file ->

@@ -185,7 +185,7 @@ private fun resolveGameAppId(context: Context, appId: String): GameResolutionRes
         }
 
         GameSource.CUSTOM_GAME -> {
-            CustomGameScanner.isGameInstalled(gameId)
+            CustomGameScanner.get().isGameInstalled(gameId)
         }
     }
 
@@ -1502,7 +1502,7 @@ fun preLaunchApp(
                 GameSource.STEAM -> SteamService.getLaunchExecutable(appId, container)
                 GameSource.GOG -> GOGService.getLaunchExecutable(appId, container)
                 GameSource.EPIC -> EpicService.getLaunchExecutable(appId)
-                GameSource.CUSTOM_GAME -> CustomGameScanner.getLaunchExecutable(container)
+                GameSource.CUSTOM_GAME -> CustomGameScanner.get().getLaunchExecutable(container)
                 GameSource.AMAZON -> AmazonService.getLaunchExecutable(appId)
             }
             if (effectiveExe.isBlank()) {

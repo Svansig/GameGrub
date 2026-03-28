@@ -90,7 +90,7 @@ fun requestPermissionsForPath(
         return
     }
 
-    CustomGameScanner.requestManageExternalStoragePermission(context)
+    CustomGameScanner.get().requestManageExternalStoragePermission(context)
 }
 
 data class CustomGameFolderPicker(

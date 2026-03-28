@@ -1,6 +1,9 @@
 package app.gamegrub.utils.game
 
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.abs
 import timber.log.Timber
 
@@ -8,8 +11,8 @@ import timber.log.Timber
  * Manages caching of Custom Game app IDs and their folder paths.
  * Provides fast lookups and automatic invalidation when manual folders change.
  */
-internal object CustomGameCache {
-    // Cache: appId (Int) -> folder path (String)
+@Singleton
+class CustomGameCache @Inject constructor() {
     private var appIdCache: Map<Int, String>? = null
     private var cacheManualFolders: Set<String>? = null
 

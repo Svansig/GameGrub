@@ -3324,7 +3324,7 @@ private fun getWineStartCommand(
                 Timber.tag("XServerScreen").e("Could not find A: drive for Custom Game: $appId")
                 return "winhandler.exe \"wfm.exe\""
             }
-            val auto = CustomGameScanner.findUniqueExeRelativeToFolder(gameFolderPath!!)
+            val auto = CustomGameScanner.get().findUniqueExeRelativeToFolder(gameFolderPath!!)
             if (auto != null) {
                 Timber.tag("XServerScreen").i("Auto-selected Custom Game exe: $auto")
                 executablePath = auto

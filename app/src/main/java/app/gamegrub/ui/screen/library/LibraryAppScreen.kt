@@ -90,6 +90,7 @@ import androidx.compose.ui.unit.dp
 import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.R
+import app.gamegrub.api.steamGridDB.SteamGridDB
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.GamepadAction
@@ -114,6 +115,16 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface SteamGridDBEntryPoint {
+    fun steamGridDB(): SteamGridDB
+}
 
 // https://partner.steamgames.com/doc/store/assets/libraryassets#4
 
@@ -427,11 +438,18 @@ fun AppScreen(
     onTestGraphics: () -> Unit,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val steamGridDB = remember(context.applicationContext) {
+        EntryPointAccessors
+            .fromApplication(context.applicationContext, SteamGridDBEntryPoint::class.java)
+            .steamGridDB()
+    }
+
     // Get the appropriate screen model based on game source
-    val screenModel = remember(libraryItem.gameSource) {
+    val screenModel = remember(libraryItem.gameSource, steamGridDB) {
         when (libraryItem.gameSource) {
             app.gamegrub.data.GameSource.STEAM -> SteamAppScreen()
-            app.gamegrub.data.GameSource.CUSTOM_GAME -> CustomGameAppScreen()
+            app.gamegrub.data.GameSource.CUSTOM_GAME -> CustomGameAppScreen(steamGridDB)
             app.gamegrub.data.GameSource.GOG -> GOGAppScreen()
             app.gamegrub.data.GameSource.EPIC -> EpicAppScreen()
             app.gamegrub.data.GameSource.AMAZON -> AmazonAppScreen()

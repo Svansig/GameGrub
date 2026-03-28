@@ -390,7 +390,7 @@ private fun LibraryScreenContent(
 
             // Only request permissions if we can't access the folder AND it's outside the sandbox
             // (folders selected via OpenDocumentTree should already be accessible)
-            if (!canAccess && !CustomGameScanner.hasStoragePermission(context, path)) {
+            if (!canAccess && !CustomGameScanner.get().hasStoragePermission(context, path)) {
                 requestPermissionsForPath(context, path, storagePermissionLauncher)
             }
             onAddCustomGameFolder(path)

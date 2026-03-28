@@ -262,7 +262,7 @@ private fun InstallStatusBadge(
  */
 private fun getListIconUrl(context: Context, appInfo: LibraryItem): String {
     return if (appInfo.gameSource == GameSource.CUSTOM_GAME) {
-        val path = CustomGameScanner.findIconFileForCustomGame(context, appInfo.appId)
+        val path = CustomGameScanner.get().findIconFileForCustomGame(context, appInfo.appId)
         if (!path.isNullOrEmpty()) {
             if (path.startsWith("file://")) path else "file://$path"
         } else {

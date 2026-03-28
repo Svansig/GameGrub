@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
+import app.gamegrub.api.steamGridDB.SteamGridDB
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.ui.data.AppMenuOption
@@ -29,7 +30,6 @@ import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.game.ExeIconExtractor
 import app.gamegrub.utils.game.GameMetadataManager
-import app.gamegrub.utils.steam.SteamGridDB
 import app.gamegrub.utils.storage.StorageUtils
 import com.winlator.container.ContainerData
 import java.io.File
@@ -43,7 +43,9 @@ import timber.log.Timber
 /**
  * Custom Game-specific implementation of BaseAppScreen
  */
-class CustomGameAppScreen : BaseAppScreen() {
+class CustomGameAppScreen(
+    private val steamGridDB: SteamGridDB,
+) : BaseAppScreen() {
     companion object {
         // Shared state for delete dialog - list of appIds that should show the dialog
         private val deleteDialogAppIds = mutableStateListOf<String>()
@@ -69,7 +71,7 @@ class CustomGameAppScreen : BaseAppScreen() {
         libraryItem: LibraryItem,
     ): GameDisplayInfo {
         val gameFolderPath = remember(libraryItem.appId) {
-            CustomGameScanner.getFolderPathFromAppId(libraryItem.appId)
+            CustomGameScanner.get().getFolderPathFromAppId(libraryItem.appId)
         }
 
         // Helper function to find SteamGridDB images in the game folder
@@ -222,7 +224,7 @@ class CustomGameAppScreen : BaseAppScreen() {
 
     override fun getInstallPath(context: Context, libraryItem: LibraryItem): String? {
         // Custom Games are always "installed" (they're external folders)
-        return CustomGameScanner.getFolderPathFromAppId(libraryItem.appId)
+        return CustomGameScanner.get().getFolderPathFromAppId(libraryItem.appId)
     }
 
     override fun getGameFolderPathForImageFetch(context: Context, libraryItem: LibraryItem): String? {
@@ -254,7 +256,7 @@ class CustomGameAppScreen : BaseAppScreen() {
             Timber.tag("CustomGameAppScreen").i("Extracting icon from executable after fetching images")
             try {
                 // Check if icon already exists by using the same method the UI uses
-                val existingIconPath = CustomGameScanner.findIconFileForCustomGame(context, libraryItem.appId)
+                val existingIconPath = CustomGameScanner.get().findIconFileForCustomGame(context, libraryItem.appId)
                 val hasExtractedIcon = existingIconPath != null && existingIconPath.endsWith(".extracted.ico", ignoreCase = true)
 
                 Timber.tag("CustomGameAppScreen")
@@ -314,7 +316,7 @@ class CustomGameAppScreen : BaseAppScreen() {
                     }
 
                     // If that didn't work, try finding a unique executable
-                    val uniqueExeRel = CustomGameScanner.findUniqueExeRelativeToFolder(gameFolder)
+                    val uniqueExeRel = CustomGameScanner.get().findUniqueExeRelativeToFolder(gameFolder)
                     Timber.tag("CustomGameAppScreen").d("Unique executable found: ${uniqueExeRel ?: "null"}")
 
                     if (!uniqueExeRel.isNullOrEmpty()) {
@@ -419,7 +421,7 @@ class CustomGameAppScreen : BaseAppScreen() {
                                 steamgriddbFetched = false,
                             )
 
-                            SteamGridDB.fetchGameImages(gameName, gameFolderPath)
+                            steamGridDB.fetchGameImages(gameName, gameFolderPath)
                             GameGrubApp.events.emit(AndroidEvent.CustomGameImagesFetched(libraryItem.appId))
                             onAfterFetchImages(context, libraryItem, gameFolderPath)
 
@@ -493,13 +495,13 @@ class CustomGameAppScreen : BaseAppScreen() {
 
                                     // Remove from manual folders list and invalidate cache
                                     withContext(Dispatchers.IO) {
-                                        val folderPath = CustomGameScanner.getFolderPathFromAppId(libraryItem.appId)
+                                        val folderPath = CustomGameScanner.get().getFolderPathFromAppId(libraryItem.appId)
                                         if (folderPath != null) {
                                             val manualFolders = PrefManager.customGameManualFolders.toMutableSet()
                                             manualFolders.remove(folderPath)
                                             PrefManager.customGameManualFolders = manualFolders
                                         }
-                                        CustomGameScanner.invalidateCache()
+                                        CustomGameScanner.get().invalidateCache()
                                     }
 
                                     // Navigate back and show notification

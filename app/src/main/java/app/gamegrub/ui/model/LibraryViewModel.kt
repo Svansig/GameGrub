@@ -33,6 +33,7 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
+import app.gamegrub.utils.game.CustomGameCache
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.general.unaccent
 import com.winlator.core.GPUInformation
@@ -60,6 +61,7 @@ class LibraryViewModel @Inject constructor(
     private val epicGameDao: EpicGameDao,
     private val amazonGameDao: AmazonGameDao,
     private val gameCompatibilityService: GameCompatibilityService,
+    private val customGameScanner: CustomGameScanner,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -337,7 +339,7 @@ class LibraryViewModel @Inject constructor(
     fun addCustomGameFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val normalizedPath = File(path).absolutePath
-            val libraryItem = CustomGameScanner.createLibraryItemFromFolder(normalizedPath)
+            val libraryItem = customGameScanner.createLibraryItemFromFolder(normalizedPath)
             if (libraryItem == null) {
                 Timber.tag("LibraryViewModel").w("Selected folder is not a valid custom game: $normalizedPath")
                 return@launch
@@ -349,7 +351,7 @@ class LibraryViewModel @Inject constructor(
                 PrefManager.customGameManualFolders = manualFolders
             }
 
-            CustomGameScanner.invalidateCache()
+            customGameScanner.invalidateCache()
             onFilterApps(paginationCurrentPage)
         }
     }
@@ -458,7 +460,7 @@ class LibraryViewModel @Inject constructor(
             // Scan Custom Games roots and create UI items (filtered by search query inside scanner)
             // Only include custom games if GAME filter is selected
             val customGameItems = if (currentState.appInfoSortType.contains(AppFilter.GAME)) {
-                CustomGameScanner.scanAsLibraryItems(
+                customGameScanner.scanAsLibraryItems(
                     query = currentState.searchQuery,
                 )
             } else {

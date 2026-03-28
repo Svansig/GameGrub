@@ -4,10 +4,6 @@ import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
@@ -27,6 +23,10 @@ import com.winlator.core.WineRegistryEditor
 import com.winlator.core.WineThemeManager
 import com.winlator.winhandler.WinHandler
 import com.winlator.xenvironment.ImageFs
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -648,7 +648,7 @@ object ContainerUtils {
 
             GameSource.CUSTOM_GAME -> {
                 // For Custom Games, find the game folder and map it to A: drive
-                val gameFolderPath = CustomGameScanner.getFolderPathFromAppId(appId)
+                val gameFolderPath = CustomGameScanner.get().getFolderPathFromAppId(appId)
                 if (gameFolderPath != null) {
                     // Check if A: is already in defaultDrives, if not use it, otherwise use next available
                     val drive: Char = if (defaultDrives.contains("A:")) {
@@ -775,9 +775,9 @@ object ContainerUtils {
         // For Custom Games, pre-populate executablePath if there's exactly one valid .exe
         if (gameSource == GameSource.CUSTOM_GAME) {
             try {
-                val gameFolderPath = CustomGameScanner.getFolderPathFromAppId(appId)
+                val gameFolderPath = CustomGameScanner.get().getFolderPathFromAppId(appId)
                 if (!gameFolderPath.isNullOrEmpty() && container.executablePath.isEmpty()) {
-                    val auto = CustomGameScanner.findUniqueExeRelativeToFolder(gameFolderPath)
+                    val auto = CustomGameScanner.get().findUniqueExeRelativeToFolder(gameFolderPath)
                     if (auto != null) {
                         Timber.i("Auto-selected Custom Game exe during container creation: $auto")
                         container.executablePath = auto
@@ -804,8 +804,8 @@ object ContainerUtils {
                     runBlocking(Dispatchers.IO) {
                         try {
                             val bestConfigService = EntryPointAccessors
-                            .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
-                            .bestConfigService()
+                                .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
+                                .bestConfigService()
                             val bestConfig = bestConfigService.fetchBestConfig(gameName, gpuName)
                             if (bestConfig != null && bestConfig.matchType != "no_match") {
                                 Timber.i("Applying best config for $gameName (matchType: ${bestConfig.matchType})")
@@ -988,7 +988,7 @@ object ContainerUtils {
             }
 
             GameSource.CUSTOM_GAME -> {
-                CustomGameScanner.getFolderPathFromAppId(appId)
+                CustomGameScanner.get().getFolderPathFromAppId(appId)
             }
 
             GameSource.AMAZON -> {
@@ -1177,7 +1177,7 @@ object ContainerUtils {
 
             GameSource.CUSTOM_GAME -> {
                 val customAppId = "${GameSource.CUSTOM_GAME.name}_$gameId"
-                CustomGameScanner.getFolderPathFromAppId(customAppId)
+                CustomGameScanner.get().getFolderPathFromAppId(customAppId)
                     ?.let { File(it).name }
             }
         } ?: "Unknown"

@@ -12,12 +12,30 @@ import app.gamegrub.service.DownloadService
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-object CustomGameScanner {
+@Singleton
+class CustomGameScanner @Inject constructor(
+    private val customGameCache: CustomGameCache,
+) {
+    init {
+        instance = this
+    }
+
+    companion object {
+        @JvmStatic
+        lateinit var instance: CustomGameScanner
+            private set
+
+        @JvmStatic
+        fun get() = instance
+    }
 
     // Default root path for Custom Games. Always use the app's external storage sandbox
     // (Android/data/<package>/CustomGames) when available; fall back to internal only if external is unavailable.
@@ -458,7 +476,7 @@ object CustomGameScanner {
     }
 
     private fun handleCustomGameDetection(folder: File, appId: String, idPart: Int) {
-        CustomGameCache.addEntry(idPart, folder.absolutePath)
+        customGameCache.addEntry(idPart, folder.absolutePath)
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
             try {
@@ -538,7 +556,7 @@ object CustomGameScanner {
      * Call this when Custom Game paths change, after deletion, or after manual refresh.
      */
     fun invalidateCache() {
-        CustomGameCache.invalidate()
+        customGameCache.invalidate()
     }
 
     /**
@@ -546,7 +564,7 @@ object CustomGameScanner {
      * Cache is invalidated when Custom Game manual folders change.
      */
     private fun getOrRebuildCache(): Map<Int, String> {
-        return CustomGameCache.getOrRebuildCache(
+        return customGameCache.getOrRebuildCache(
             getManualFolders = { PrefManager.customGameManualFolders },
             readGameIdFromFile = { folder -> readGameIdFromFile(folder) },
         )

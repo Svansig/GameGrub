@@ -44,7 +44,7 @@ data class LibraryItem(
 
             GameSource.CUSTOM_GAME -> {
                 // Attempt to resolve a local icon from the selected/unique exe folder
-                val localPath = CustomGameScanner.findIconFileForCustomGame(appId)
+                val localPath = CustomGameScanner.get().findIconFileForCustomGame(appId)
                 if (!localPath.isNullOrEmpty()) {
                     if (localPath.startsWith("file://")) localPath else "file://$localPath"
                 } else {

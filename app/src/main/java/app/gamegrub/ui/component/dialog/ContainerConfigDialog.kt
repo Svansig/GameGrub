@@ -820,7 +820,7 @@ fun ContainerConfigDialog(
                 } catch (_: Exception) {
                     false
                 }
-                if (!canAccess && !CustomGameScanner.hasStoragePermission(context, path)) {
+                if (!canAccess && !CustomGameScanner.get().hasStoragePermission(context, path)) {
                     requestPermissionsForPath(context, path, storagePermissionLauncher)
                 }
 

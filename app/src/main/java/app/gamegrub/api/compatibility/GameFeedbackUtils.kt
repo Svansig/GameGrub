@@ -39,9 +39,9 @@ object GameFeedbackUtils {
             // Get the game name from container or use a fallback
             val gameName = when (gameSource) {
                 GameSource.CUSTOM_GAME -> {
-                    val folderPath = CustomGameScanner.findCustomGameById(gameId) ?: ""
+                    val folderPath = CustomGameScanner.get().findCustomGameById(gameId) ?: ""
                     if (folderPath.isNotEmpty()) {
-                        val game = CustomGameScanner.createLibraryItemFromFolder(folderPath)
+                        val game = CustomGameScanner.get().createLibraryItemFromFolder(folderPath)
                         game?.name ?: ""
                     } else {
                         ""

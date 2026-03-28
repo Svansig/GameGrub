@@ -3,7 +3,6 @@ package app.gamegrub
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
 import android.view.KeyEvent
@@ -17,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.core.content.ContextCompat
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.ServiceLifecycleManager
 import app.gamegrub.service.steam.SteamService
@@ -82,7 +80,7 @@ class MainActivity : ComponentActivity() {
         ControllerManager.getInstance().init(applicationContext)
         ContainerUtils.setContainerDefaults(applicationContext)
 
-        LaunchRequestManager.handleLaunchIntent(this, intent)
+        handleLaunchIntent(intent)
 
         AppUtils.keepScreenOn(this)
 
@@ -92,12 +90,8 @@ class MainActivity : ComponentActivity() {
         GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         setContent {
-            val shouldRequestNotificationPermission = remember {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ) != PackageManager.PERMISSION_GRANTED &&
-                    !PrefManager.notificationPermissionPrompted
+            val shouldRequestNotificationPermission: Boolean = remember {
+                app.gamegrub.ui.utils.NotificationPermissionGate.shouldRequestNotificationPermission(this)
             }
 
             val permissionLauncher = rememberLauncherForActivityResult(
@@ -108,7 +102,7 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(shouldRequestNotificationPermission) {
                 if (shouldRequestNotificationPermission) {
-                    PrefManager.notificationPermissionPrompted = true
+                    app.gamegrub.ui.utils.NotificationPermissionGate.markPrompted()
                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
@@ -121,7 +115,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        LaunchRequestManager.handleLaunchIntent(this, intent, isNewIntent = true)
+        setIntent(intent)
+        handleLaunchIntent(intent, isNewIntent = true)
+    }
+
+    private fun handleLaunchIntent(intent: Intent, isNewIntent: Boolean = false) {
+        LaunchRequestManager.handleLaunchIntent(this, intent, isNewIntent)
     }
 
     override fun onDestroy() {

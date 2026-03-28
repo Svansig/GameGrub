@@ -3042,7 +3042,7 @@ private fun getWineStartCommand(
             gameSource = GameSource.GOG,
         )
 
-        val gogCommand = GOGService.getGogWineStartCommand(
+        val gogCommand = GOGService.getGogWineStartCommandSync(
             libraryItem = libraryItem,
             container = container,
             bootToContainer = bootToContainer,
@@ -3148,7 +3148,7 @@ private fun getWineStartCommand(
         Timber.tag("XServerScreen").i("Launching Amazon game: appId=$appIdInt, productId=$productId")
 
         val installPath = if (appIdInt != null) {
-            app.gamegrub.service.amazon.AmazonService.getInstallPathByAppId(appIdInt)
+            app.gamegrub.service.amazon.AmazonService.getInstallPathByAppIdSync(appIdInt)
         } else {
             null
         }

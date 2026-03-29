@@ -13,7 +13,7 @@ import java.util.Locale
 /**
  * A local running crash handler.
  * Any uncaught exceptions will be saved located locally in a text file, aka: Crash Report.
- * File location: /<user storage>/Android/data/app.GameGrub/files/crash_logs/
+ * File location: /<user storage>/Android/data/app.gamegrub/files/crash_logs/
  */
 class CrashHandler(
     private val context: Context,

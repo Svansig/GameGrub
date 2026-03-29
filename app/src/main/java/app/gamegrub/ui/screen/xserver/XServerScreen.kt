@@ -1098,10 +1098,8 @@ fun XServerScreen(
             )
         }
         val onKeyEvent: (AndroidEvent.KeyEvent) -> Boolean = {
-            Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent keyCode=${it.event.keyCode} action=${it.event.action}")
             val isKeyboard = Keyboard.isKeyboardDevice(it.event.device)
             val isGamepad = ExternalController.isGameController(it.event.device)
-            Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent isGamepad=$isGamepad isKeyboard=$isKeyboard")
             val waitingForManualResume =
                 manualResumeMode &&
                     GameGrubApp.isOverlayPaused &&
@@ -1122,12 +1120,10 @@ fun XServerScreen(
                     else -> false
                 }
             } else if ((showElementEditor || keepPausedForEditor || showQuickMenu || isEditMode) && (isGamepad || isKeyboard)) {
-                Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent menuVisible=true, deferring to Compose")
                 false
             } else {
                 var handled = false
                 if (isGamepad) {
-                    Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent trying handler pch=$physicalControllerHandler icv=${GameGrubApp.inputControlsView}")
                     val rawFirstKey = when (it.event.keyCode) {
                         KeyEvent.KEYCODE_DPAD_UP,
                         KeyEvent.KEYCODE_DPAD_DOWN,
@@ -1150,50 +1146,38 @@ fun XServerScreen(
 
                     if (rawFirstKey) {
                         handled = xServerView!!.getxServer().winHandler.onKeyEvent(it.event)
-                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent wh(raw-first) result=$handled")
                     }
 
                     if (!handled) {
                         handled = physicalControllerHandler?.onKeyEvent(it.event) == true
-                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent pch result=$handled")
                     }
                     if (!handled) {
                         handled = GameGrubApp.inputControlsView?.onKeyEvent(it.event) == true
-                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent icv result=$handled")
                     }
                     if (!handled && !rawFirstKey) {
                         handled = xServerView!!.getxServer().winHandler.onKeyEvent(it.event)
-                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent wh(fallback) result=$handled")
                     }
                 }
                 if (!handled && isKeyboard) {
                     handled = keyboard?.onKeyEvent(it.event) == true
                 }
-                Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent final handled=$handled")
                 handled
             }
         }
         val onMotionEvent: (AndroidEvent.MotionEvent) -> Boolean = {
-            Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent action=${it.event?.actionMasked}")
             val isGamepad = ExternalController.isGameController(it.event?.device)
-            Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent isGamepad=$isGamepad")
 
             if ((showElementEditor || keepPausedForEditor || showQuickMenu || isEditMode) && isGamepad) {
-                Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent menuVisible=true, deferring to Compose")
                 false
             } else {
                 var handled = false
                 if (isGamepad && it.event != null) {
-                    Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent trying handler pch=$physicalControllerHandler icv=${GameGrubApp.inputControlsView}")
                     handled = xServerView!!.getxServer().winHandler.onGenericMotionEvent(it.event)
-                    Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent wh(raw-first) result=$handled")
                     if (!handled) {
                         handled = physicalControllerHandler?.onGenericMotionEvent(it.event!!) == true
-                        Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent pch result=$handled")
                     }
                     if (!handled) {
                         handled = GameGrubApp.inputControlsView?.onGenericMotionEvent(it.event) == true
-                        Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent icv result=$handled")
                     }
                 }
                 if (GameGrubApp.touchpadView?.hasPointerCapture() != true && !GameGrubApp.isOverlayPaused) {
@@ -1218,7 +1202,6 @@ fun XServerScreen(
                         tryCapturePointer()
                     }
                 }
-                Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent final handled=$handled")
                 handled
             }
         }
@@ -1252,13 +1235,11 @@ fun XServerScreen(
             Timber.i(outputLine ?: "")
         }
 
-        Timber.d("=== CONTROLLER: Registering event listeners pch=$physicalControllerHandler")
         GameGrubApp.events.on<AndroidEvent.ActivityDestroyed, Unit>(onActivityDestroyed)
         GameGrubApp.events.on<AndroidEvent.KeyEvent, Boolean>(onKeyEvent)
         GameGrubApp.events.on<AndroidEvent.MotionEvent, Boolean>(onMotionEvent)
         GameGrubApp.events.on<AndroidEvent.GuestProgramTerminated, Unit>(onGuestProgramTerminated)
         GameGrubApp.events.on<SteamEvent.ForceCloseApp, Unit>(onForceCloseApp)
-        Timber.d("=== CONTROLLER: Event listeners registered")
         ProcessHelper.addDebugCallback(debugCallback)
 
         onDispose {
@@ -1763,7 +1744,6 @@ fun XServerScreen(
                     // Create InputControlsView and add to FrameLayout
                     val manager = GameGrubApp.inputControlsManager
                     val profiles = manager?.getProfiles(false) ?: listOf()
-                    Timber.d("=== CONTROLLER: Profile loading - manager=$manager profiles.size=${profiles.size}")
 
                     var loadedControllerProfile: ControlsProfile? = null
 
@@ -1808,11 +1788,7 @@ fun XServerScreen(
                     }
 
                     if (loadedControllerProfile != null) {
-                        Timber.d("=== CONTROLLER: Creating PhysicalControllerHandler with profile=${loadedControllerProfile?.name}")
                         physicalControllerHandler = PhysicalControllerHandler(loadedControllerProfile!!, xServerView.getxServer(), gameBack)
-                        Timber.d("=== CONTROLLER: PhysicalControllerHandler created successfully pch=$physicalControllerHandler")
-                    } else {
-                        Timber.w("=== CONTROLLER: NOT creating PhysicalControllerHandler - loadedControllerProfile is null!")
                     }
 
                     GameGrubApp.inputControlsView = icView

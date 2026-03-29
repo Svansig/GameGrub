@@ -55,19 +55,15 @@ class PhysicalControllerHandler(
      * Extracted from InputControlsView.onKeyEvent()
      */
     fun onKeyEvent(event: KeyEvent): Boolean {
-        Timber.d("=== CONTROLLER: PCH.onKeyEvent keyCode=${event.keyCode} action=${event.action} profile=$profile")
         if (profile != null && event.repeatCount == 0) {
             val controller = profile?.getController(event.deviceId)
-            Timber.d("=== CONTROLLER: PCH.onKeyEvent controller=$controller deviceId=${event.deviceId}")
             if (controller != null) {
                 val controllerBinding = controller.getControllerBinding(event.keyCode)
-                Timber.d("=== CONTROLLER: PCH.onKeyEvent binding=$controllerBinding")
                 if (controllerBinding != null) {
                     if ((event.keyCode == KeyEvent.KEYCODE_BUTTON_L2 || event.keyCode == KeyEvent.KEYCODE_BUTTON_R2) &&
                         (controllerBinding.binding == Binding.GAMEPAD_BUTTON_L2 || controllerBinding.binding == Binding.GAMEPAD_BUTTON_R2) &&
                         deviceHasTriggerAxis(event.device, event.keyCode)
                     ) {
-                        Timber.d("=== CONTROLLER: PCH.onKeyEvent skipping L2/R2 due to trigger axis")
                         return true
                     }
                     val offset = if (event.action == KeyEvent.ACTION_DOWN &&
@@ -78,12 +74,10 @@ class PhysicalControllerHandler(
                         0f
                     }
                     handleInputEvent(controllerBinding.binding, event.action == KeyEvent.ACTION_DOWN, offset)
-                    Timber.d("=== CONTROLLER: PCH.onKeyEvent handled=true")
                     return true
                 }
             }
         }
-        Timber.d("=== CONTROLLER: PCH.onKeyEvent handled=false")
         return false
     }
 
@@ -111,10 +105,8 @@ class PhysicalControllerHandler(
      * Extracted from InputControlsView.onGenericMotionEvent()
      */
     fun onGenericMotionEvent(event: MotionEvent): Boolean {
-        Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent action=${event.actionMasked} profile=$profile")
         if (profile != null) {
             val controller = profile?.getController(event.deviceId)
-            Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent controller=$controller deviceId=${event.deviceId}")
             if (controller != null && controller.updateStateFromMotionEvent(event)) {
                 var hasAppliedBinding = false
 
@@ -142,11 +134,9 @@ class PhysicalControllerHandler(
                     hasAppliedBinding = true
                 }
 
-                Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent handled=$hasAppliedBinding")
                 return hasAppliedBinding
             }
         }
-        Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent handled=false")
         return false
     }
 

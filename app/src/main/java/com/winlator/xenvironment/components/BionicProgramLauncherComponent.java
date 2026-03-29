@@ -2,15 +2,8 @@ package com.winlator.xenvironment.components;
 
 import android.app.Service;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.media.Image;
 import android.net.ConnectivityManager;
-import android.net.InetAddresses;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Process;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -20,7 +13,6 @@ import com.winlator.PrefManager;
 import com.winlator.box86_64.Box86_64Preset;
 import com.winlator.box86_64.Box86_64PresetManager;
 import com.winlator.container.Container;
-import com.winlator.container.Shortcut;
 import com.winlator.contents.ContentProfile;
 import com.winlator.contents.ContentsManager;
 import com.winlator.core.Callback;
@@ -33,11 +25,7 @@ import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
 import com.winlator.fexcore.FEXCorePreset;
 import com.winlator.fexcore.FEXCorePresetManager;
-import com.winlator.sysvshm.SysVSHMConnectionHandler;
-import com.winlator.sysvshm.SysVSHMRequestHandler;
-import com.winlator.sysvshm.SysVSharedMemory;
 import com.winlator.xconnector.UnixSocketConfig;
-import com.winlator.xconnector.XConnectorEpoll;
 import com.winlator.xenvironment.ImageFs;
 
 import java.io.BufferedReader;
@@ -49,9 +37,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import app.gamenative.PluviaApp;
-import app.gamenative.events.AndroidEvent;
-import app.gamenative.service.SteamService;
+import app.gamegrub.service.steam.SteamService;
 
 public class BionicProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;
@@ -186,10 +172,10 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             String memPath;
             if (i == 0) {
                 // Player 1 uses the original, non-numbered path that is known to work.
-                memPath = "/data/data/app.gamenative/files/imagefs/tmp/gamepad.mem";
+                memPath = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad.mem";
             } else {
                 // Players 2, 3, 4 use a 1-based index.
-                memPath = "/data/data/app.gamenative/files/imagefs/tmp/gamepad" + i + ".mem";
+                memPath = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad" + i + ".mem";
             }
 
             File memFile = new File(memPath);

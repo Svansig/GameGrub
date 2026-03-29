@@ -1,25 +1,13 @@
 package com.winlator.core;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import app.gamenative.MainActivity;
-import app.gamenative.R;
-import com.winlator.contentdialog.ContentDialog;
-import com.winlator.core.TarCompressorUtils;
+
+import app.gamegrub.R;
+
 import com.winlator.xenvironment.ImageFs;
 import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;

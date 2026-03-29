@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameNative</string>
+    <string name="app_name">GameGrub</string>
     <string name="login_user">Login do Usuário</string>
     <string name="login_2fa">Dois Fatores</string>
     <string name="home">Home</string>
@@ -737,7 +737,7 @@
     <string name="library_wifi_only_enabled">Instalação apenas por Wi-Fi/LAN habilitada</string>
     <string name="library_file_count">Arquivo %1$d de %2$d</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Atualização e informações do app -->
+    <!-- TODO: Revisão manual - GameGrubMain: Atualização e informações do app -->
     <string name="main_update_available_title">Atualização disponível</string>
     <string name="main_update_available_message">Uma nova versão (%1$s) está disponível!%2$s</string>
     <string name="main_update_button">Atualizar</string>
@@ -747,7 +747,7 @@
     <string name="launch_dependency_failed_title">Falha ao baixar dependência de lançamento</string>
     <string name="launch_dependency_failed_message">Falha ao baixar um componente necessário. Por favor, tente novamente mais tarde.</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Falha e suporte -->
+    <!-- TODO: Revisão manual - GameGrubMain: Falha e suporte -->
     <string name="main_recent_crash_title">Falha recente</string>
     <string name="main_recent_crash_message">Desculpe por isso!\nSeria bom saber sobre o problema recente que você teve.\nVocê pode visualizar e exportar o log de falha mais recente nas configurações do aplicativo e anexá-lo como um problema do Github no repositório do projeto.\nO link para o repositório do Github também está nas configurações!</string>
     <string name="main_thank_you_title">Obrigado por usar o GameNative!</string>
@@ -759,25 +759,25 @@
     <string name="main_discord_support_message">Junte-se ao Discord para obter suporte para corrigir seu jogo ou melhorar o desempenho.</string>
     <string name="main_open_discord">Abrir Discord</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Inicialização do jogo -->
+    <!-- TODO: Revisão manual - GameGrubMain: Inicialização do jogo -->
     <string name="main_downloading_steam">Baixando Steam...</string>
     <string name="main_installing_glibc">Instalando componentes glibc...</string>
     <string name="main_installing_bionic">Instalando componentes Bionic...</string>
     <string name="main_loading">Carregando...</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Conflitos de sessão -->
+    <!-- TODO: Revisão manual - GameGrubMain: Conflitos de sessão -->
     <string name="main_app_running_title">App em execução</string>
     <string name="main_app_running_message">Você já está logado em outro dispositivo jogando %s. \nVocê ainda pode jogar este jogo, mas isso desconectará a outra sessão do Steam.</string>
     <string name="main_app_running_other_device">Você já está logado em outro dispositivo (%1$s) jogando %2$s (%3$s), e esse save ainda não está na nuvem. \nVocê ainda pode jogar este jogo, mas isso desconectará a outra sessão do Steam e pode criar um conflito de save quando o progresso da sessão for sincronizado</string>
     <string name="main_play_anyway">Jogar mesmo assim</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Conflitos de save -->
+    <!-- TODO: Revisão manual - GameGrubMain: Conflitos de save -->
     <string name="main_save_conflict_title">Conflito de save</string>
     <string name="main_save_conflict_message">Há um novo save remoto e um novo save local, qual você gostaria de manter?\n\nSave local:\n\t%1$s\nSave remoto:\n\t%2$s</string>
     <string name="main_keep_local">Manter local</string>
     <string name="main_keep_remote">Manter remoto</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Erros de sincronização -->
+    <!-- TODO: Revisão manual - GameGrubMain: Erros de sincronização -->
     <string name="main_sync_in_progress_retry">A operação de sincronização está demorando muito. Por favor, tente iniciar o jogo novamente em um momento.</string>
     <string name="main_sync_in_progress">A sincronização está em andamento. Por favor, tente novamente em um momento.</string>
     <string name="main_sync_in_progress_launch_anyway_message">A sincronização na nuvem deste jogo já está em andamento. Você pode esperar e tentar novamente ou iniciar mesmo assim sem sincronizar (pode causar conflitos de salvamento).</string>
@@ -785,7 +785,7 @@
     <string name="main_wait">Esperar</string>
     <string name="main_sync_failed">Falha ao sincronizar arquivos de save: %s.</string>
 
-    <!-- TODO: Revisão manual - PluviaMain: Operações pendentes -->
+    <!-- TODO: Revisão manual - GameGrubMain: Operações pendentes -->
     <string name="main_upload_in_progress_title">Upload em andamento</string>
     <string name="main_upload_in_progress_message">Você jogou %1$s no dispositivo %2$s (%3$s) e o save dessa sessão ainda está sendo enviado.\nTente novamente mais tarde.</string>
     <string name="main_pending_upload_title">Upload pendente</string>

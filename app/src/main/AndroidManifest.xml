@@ -22,7 +22,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
-        android:name=".PluviaApp"
+        android:name=".GameGrubApp"
         android:usesCleartextTraffic="true"
         android:allowBackup="false"
         android:extractNativeLibs="true"
@@ -31,7 +31,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:largeHeap="true"
-        android:theme="@style/Theme.Pluvia"
+        android:theme="@style/Theme.GameGrub"
         android:allowAudioPlaybackCapture="true"
         android:appCategory="game"
         tools:targetApi="29">
@@ -45,7 +45,7 @@
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|keyboard|keyboardHidden|navigation"
-            android:theme="@style/Theme.Pluvia">
+            android:theme="@style/Theme.GameGrub">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -53,11 +53,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="pluvia"
+                    android:host="gamegrub"
                     android:scheme="home" />
             </intent-filter>
             <intent-filter>
-                <action android:name="app.gamenative.LAUNCH_GAME" />
+                <action android:name="app.gamegrub.LAUNCH_GAME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
@@ -72,19 +72,19 @@
         <activity
             android:name=".ui.screen.auth.GOGOAuthActivity"
             android:exported="false"
-            android:theme="@style/Theme.Pluvia" />
+            android:theme="@style/Theme.GameGrub" />
 
         <!-- Epic OAuth (in-app WebView; intercepts redirect for automatic code capture) -->
         <activity
             android:name=".ui.screen.auth.EpicOAuthActivity"
             android:exported="false"
-            android:theme="@style/Theme.Pluvia" />
+            android:theme="@style/Theme.GameGrub" />
 
         <!-- Amazon OAuth (in-app WebView; PKCE flow for Amazon Games auth) -->
         <activity
             android:name=".ui.screen.auth.AmazonOAuthActivity"
             android:exported="false"
-            android:theme="@style/Theme.Pluvia" />
+            android:theme="@style/Theme.GameGrub" />
 
         <!-- Launcher icon aliases to allow switching app icon at runtime -->
         <activity-alias
@@ -112,7 +112,7 @@
             </intent-filter>
         </activity-alias>
         <service
-            android:name=".service.SteamService"
+            android:name=".service.steam.SteamService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="dataSync" />

@@ -1,6 +1,6 @@
-package app.gamenative
+package app.gamegrub
 
-import app.gamenative.enums.OS
+import app.gamegrub.enums.OS
 import java.util.EnumSet
 import junit.framework.TestCase.assertEquals
 import org.junit.Test

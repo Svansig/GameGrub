@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameNative</string>
+    <string name="app_name">GameGrub</string>
     <string name="login_user">User Login</string>
     <string name="login_2fa">Two Factor</string>
     <string name="home">Home</string>
@@ -34,6 +34,10 @@
     <string name="steam_cloud_sync_failed">Cloud sync failed: %s</string>
     <string name="steam_not_logged_in">You must be logged into Steam to use this feature</string>
     <string name="steam_storage_permission_required">Storage permission required</string>
+    <string name="steam_storage_location_title" translatable="false">Choose install location</string>
+    <string name="steam_storage_location_message" translatable="false">Where should this game be installed?</string>
+    <string name="steam_storage_location_internal" translatable="false">Internal storage</string>
+    <string name="steam_storage_location_external" translatable="false">External storage</string>
     <string name="steam_container_reset_success">Container reset to defaults</string>
     <string name="steam_imagefs_installed">ImageFS installed. Please try editing container again.</string>
     <string name="steam_imagefs_install_failed">Failed to install ImageFS: %s</string>
@@ -840,9 +844,9 @@
     <string name="settings_info_source_title">Source code</string>
     <string name="settings_info_source_subtitle">View the source code of this project</string>
     <string name="settings_info_libraries_title">Libraries Used</string>
-    <string name="settings_info_libraries_subtitle">See what technologies make GameNative possible</string>
+    <string name="settings_info_libraries_subtitle">See what technologies make GameGrub possible</string>
     <string name="settings_info_privacy_title">Privacy Policy</string>
-    <string name="settings_info_privacy_subtitle">Opens a link to GameNative\'s privacy policy</string>
+    <string name="settings_info_privacy_subtitle">Opens a link to GameGrub\'s privacy policy</string>
 
     <!-- Settings: Interface Group -->
     <string name="settings_interface_title">Interface</string>
@@ -864,7 +868,7 @@
     <string name="settings_downloads_title">Downloads</string>
 
     <!-- Login Screen -->
-    <string name="login_app_name">GameNative</string>
+    <string name="login_app_name">GameGrub</string>
     <string name="login_privacy_policy">Privacy Policy</string>
     <string name="login_welcome_back">Welcome Back</string>
     <string name="login_subtitle">Sign in to access your Steam library</string>
@@ -880,7 +884,7 @@
     <string name="login_sign_in">Sign in with Steam</string>
     <string name="login_qr_failed">QR Code Failed</string>
     <string name="login_retry_qr">Retry QR Code</string>
-    <string name="login_qr_instructions">Open the Steam mobile app and scan this QR code to sign in instantly</string>
+    <string name="login_qr_instructions">Scan with Steam Guard (Steam Mobile App)</string>
     <string name="login_skip_steam">Skip Steam login</string>
     <string name="login_or_sign_in_with">Or sign in with:</string>
     <string name="login_skip_login">Skip login</string>
@@ -931,7 +935,7 @@
     <string name="download_no_wifi">Not connected to Wi-Fi/LAN</string>
     <string name="download_paused_wifi">Download paused – waiting for Wi-Fi/LAN</string>
 
-    <!-- PluviaMain: Update & App Info -->
+    <!-- GameGrubMain: Update & App Info -->
     <string name="main_update_available_title">Update Available</string>
     <string name="main_update_available_message">A new version (%1$s) is available!%2$s</string>
     <string name="main_update_button">Update</string>
@@ -941,19 +945,19 @@
     <string name="launch_dependency_failed_title">Downloading launch dependency failed</string>
     <string name="launch_dependency_failed_message">Failed to download a required component. Please try again later.</string>
 
-    <!-- PluviaMain: Crash & Support -->
+    <!-- GameGrubMain: Crash & Support -->
     <string name="main_recent_crash_title">Recent Crash</string>
     <string name="main_recent_crash_message">Sorry about that!\nIt would be nice to know about the recent issue you\'ve had.\nYou can view and export the most recent crash log in the app\'s settings and attach it as a Github issue in the project\'s repository.\nLink to the Github repo is also in settings!</string>
-    <string name="main_thank_you_title">Thank you for using GameNative!</string>
+    <string name="main_thank_you_title">Thank you for using GameGrub!</string>
     <string name="main_thank_you_message">Support open-source PC gaming on Android by sharing the app with your friends or becoming a member on Ko-fi.</string>
     <string name="main_join_kofi">Join on Ko-fi</string>
     <string name="main_share">Share</string>
-    <string name="main_share_text">Check out GameNative - play your PC Steam games on Android, with full support for cloud saves!\nhttps://gamenative.app\nJoin the community: https://discord.gg/2hKv4VfZfE</string>
+    <string name="main_share_text">Check out GameGrub - play your PC Steam games on Android, with full support for cloud saves!\nhttps://GameGrub.app\nJoin the community: https://discord.gg/2hKv4VfZfE</string>
     <string name="main_discord_support_title">Did the game work?</string>
     <string name="main_discord_support_message">Join the Discord to get support to fix your game or improve performance.</string>
     <string name="main_open_discord">Open Discord</string>
 
-    <!-- PluviaMain: Game Launch -->
+    <!-- GameGrubMain: Game Launch -->
     <string name="main_downloading_entry">Downloading %s</string>
     <string name="main_downloading_steam">Downloading Steam...</string>
 
@@ -965,19 +969,19 @@
     <string name="install_failed_title">Installation Failed</string>
     <string name="install_failed_message">System files could not be installed. Please try again. If the problem persists, try a different network or use a VPN.</string>
 
-    <!-- PluviaMain: Session Conflicts -->
+    <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">App Running</string>
     <string name="main_app_running_message">You are logged in on another device already playing %s. \nYou can still play this game, but that will disconnect the other session from Steam.</string>
     <string name="main_app_running_other_device">You are logged in on another device (%1$s) already playing %2$s (%3$s), and that save is not yet in the cloud. \nYou can still play this game, but that will disconnect the other session from Steam and may create a save conflict when that session progress is synced</string>
     <string name="main_play_anyway">Play anyway</string>
 
-    <!-- PluviaMain: Save Conflicts -->
+    <!-- GameGrubMain: Save Conflicts -->
     <string name="main_save_conflict_title">Save Conflict</string>
     <string name="main_save_conflict_message">There is a new remote save and a new local save, which would you like to keep?\n\nLocal save:\n\t%1$s\nRemote save:\n\t%2$s</string>
     <string name="main_keep_local">Keep local</string>
     <string name="main_keep_remote">Keep remote</string>
 
-    <!-- PluviaMain: Sync Errors -->
+    <!-- GameGrubMain: Sync Errors -->
     <string name="main_sync_in_progress_retry">Sync operation is taking too long. Please try launching the game again in a moment.</string>
     <string name="main_sync_in_progress">Sync is currently in progress. Please try again in a moment.</string>
     <string name="main_sync_in_progress_launch_anyway_message">Cloud save sync for this game is already running. You can wait and try again, or launch anyway without syncing (may cause save conflicts).</string>
@@ -985,7 +989,7 @@
     <string name="main_wait">Wait</string>
     <string name="main_sync_failed">Failed to sync save files: %s.</string>
 
-    <!-- PluviaMain: Pending Operations -->
+    <!-- GameGrubMain: Pending Operations -->
     <string name="main_upload_in_progress_title">Upload in Progress</string>
     <string name="main_upload_in_progress_message">You played %1$s on the device %2$s (%3$s) and the save of that session is still uploading.\nTry again later.</string>
     <string name="main_pending_upload_title">Pending Upload</string>
@@ -1013,7 +1017,7 @@
 
     <!-- Libraries Dialog -->
     <string name="libraries_title">Libraries Used</string>
-    <string name="libraries_message">Pluvia - github.com/oxters168/Pluvia\nJavaSteam - github.com/Longi94/JavaSteam\nWinlator &amp; Vortek - github.com/brunodev85/winlator\nWinlator Cmod - github.com/coffincolors/winlator\nWrapper - https://github.com/leegao/bionic-vulkan-wrapper &amp; https://github.com/pipetto-crypto/\nUbuntu RootFs - releases.ubuntu.com/focal</string>
+    <string name="libraries_message">GameGrub - github.com/oxters168/Pluvia\nJavaSteam - github.com/Longi94/JavaSteam\nWinlator &amp; Vortek - github.com/brunodev85/winlator\nWinlator Cmod - github.com/coffincolors/winlator\nWrapper - https://github.com/leegao/bionic-vulkan-wrapper &amp; https://github.com/pipetto-crypto/\nUbuntu RootFs - releases.ubuntu.com/focal</string>
 
     <!-- Supporters Dialog -->
     <string name="supporters_art_credits">Art Credits</string>

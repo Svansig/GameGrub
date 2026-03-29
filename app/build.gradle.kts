@@ -29,14 +29,14 @@ room {
 }
 
 android {
-    namespace = "app.gamenative"
+    namespace = "app.gamegrub"
     compileSdk = 35
 
     // https://developer.android.com/ndk/downloads
     ndkVersion = "22.1.7171670"
 
     signingConfigs {
-        create("pluvia") {
+        create("gamegrub") {
             if (keystoreProperties != null) {
                 storeFile = file(keystoreProperties["storeFile"].toString())
                 storePassword = keystoreProperties["storePassword"].toString()
@@ -47,12 +47,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.gamenative"
+        applicationId = "app.gamegrub"
 
-        minSdk = 26
-        targetSdk = 28
+        minSdk = 33
+        targetSdk = 35
 
-        versionCode = 13
+        versionCode = 1
         versionName = "0.8.1"
 
         buildConfigField("boolean", "GOLD", "false")
@@ -122,12 +122,12 @@ android {
         create("release-signed") {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("pluvia")
+            signingConfig = signingConfigs.getByName("gamegrub")
         }
         create("release-gold") {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("pluvia")
+            signingConfig = signingConfigs.getByName("gamegrub")
             applicationIdSuffix = ".gold"
             buildConfigField("boolean", "GOLD", "true")
             val iconValue = "@mipmap/ic_launcher_gold"

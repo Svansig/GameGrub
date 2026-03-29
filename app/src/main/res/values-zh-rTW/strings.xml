@@ -910,7 +910,7 @@
     <string name="library_wifi_only_enabled">已啟用僅透過 Wi-Fi/區域網路安裝</string>
     <string name="library_file_count">檔案 %1$d / %2$d 個</string>
 
-    <!-- PluviaMain: Update & App Info -->
+    <!-- GameGrubMain: Update & App Info -->
     <string name="main_update_available_title">可用更新</string>
     <string name="main_update_available_message">新版本 (%1$s) 已推出! %2$s</string>
     <string name="main_update_button">更新</string>
@@ -920,7 +920,7 @@
     <string name="launch_dependency_failed_title">下載啟動依賴失敗</string>
     <string name="launch_dependency_failed_message">無法下載所需元件，請稍後再試。</string>
 
-    <!-- PluviaMain: Crash & Support -->
+    <!-- GameGrubMain: Crash & Support -->
     <string name="main_recent_crash_title">最近應用程式當機</string>
     <string name="main_recent_crash_message">若能了解您最近遇到的問題, 將有助於我們改善應用程式.\n您可在應用程式設定中檢視並匯出最近的崩潰日誌, 將其附加至專案原始碼儲存庫的 Github Issue中\nGithub 原始碼儲存庫的連結亦位於設定頁面內</string>
     <string name="main_thank_you_title">感謝您使用GameNative!</string>
@@ -932,25 +932,25 @@
     <string name="main_discord_support_message">加入 Discord 社群, 獲取遊戲修復與效能優化的支援</string>
     <string name="main_open_discord">開啟 Discord</string>
 
-    <!-- PluviaMain: Game Launch -->
+    <!-- GameGrubMain: Game Launch -->
     <string name="main_downloading_steam">正在下載 Steam...</string>
     <string name="main_installing_glibc">安裝 glibc 組件...</string>
     <string name="main_installing_bionic">安裝Bionic元件中...</string>
     <string name="main_loading">載入中...</string>
 
-    <!-- PluviaMain: Session Conflicts -->
+    <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">應用程式運行中</string>
     <string name="main_app_running_message">您已在另一台裝置登入並正在遊玩 %s。\n您仍可繼續遊玩此遊戲，但此操作將導致 Steam 斷開另一裝置的連線。</string>
     <string name="main_app_running_other_device">您已在另一台裝置 (%1$s) 上登入並正在遊玩 %2$s (%3$s)，該存檔尚未同步至雲端。\n您仍可繼續遊玩此遊戲，但此操作將使另一裝置的 Steam 連線中斷，且當該裝置的進度同步時可能產生存檔衝突。</string>
     <string name="main_play_anyway">仍要繼續</string>
 
-    <!-- PluviaMain: Save Conflicts -->
+    <!-- GameGrubMain: Save Conflicts -->
     <string name="main_save_conflict_title">存檔衝突</string>
     <string name="main_save_conflict_message">遠端存檔與本地存檔發生衝突，請選擇要保留哪個？\n\n本地存檔：\n\t%1$s\n遠端存檔：\n\t%2$s</string>
     <string name="main_keep_local">保留本地存檔</string>
     <string name="main_keep_remote">保留遠端存檔</string>
 
-    <!-- PluviaMain: Sync Errors -->
+    <!-- GameGrubMain: Sync Errors -->
     <string name="main_sync_in_progress_retry">同步操作耗時過久, 請稍後重新啟動遊戲</string>
     <string name="main_sync_in_progress">同步目前正在進行中, 請稍後再試</string>
     <string name="main_sync_in_progress_launch_anyway_message">此遊戲的雲端存檔同步正在進行。你可以稍後再試，或繼續啟動但不進行同步（可能造成存檔衝突）。</string>
@@ -958,7 +958,7 @@
     <string name="main_wait">等待</string>
     <string name="main_sync_failed">同步存檔案失敗：%s</string>
 
-    <!-- PluviaMain: Pending Operations -->
+    <!-- GameGrubMain: Pending Operations -->
     <string name="main_upload_in_progress_title">上傳中</string>
     <string name="main_upload_in_progress_message">您在裝置 %2$s (%3$s) 上遊玩了 %1$s, 該次遊玩進度的儲存檔案仍在上傳中, 請稍後再試</string>
     <string name="main_pending_upload_title">待上傳</string>
@@ -986,7 +986,7 @@
 
     <!-- Libraries Dialog -->
     <string name="libraries_title">使用的函式庫</string>
-    <string name="libraries_message">Pluvia - github.com/oxters168/Pluvia\nJavaSteam - github.com/Longi94/JavaSteam\nWinlator &amp; Vortek - github.com/brunodev85/winlator\nWinlator Cmod - github.com/coffincolors/winlator\nWrapper - https://github.com/leegao/bionic-vulkan-wrapper &amp; https://github.com/pipetto-crypto/\nUbuntu RootFs - releases.ubuntu.com/focal</string>
+    <string name="libraries_message">GameGrub - github.com/oxters168/Pluvia\nJavaSteam - github.com/Longi94/JavaSteam\nWinlator &amp; Vortek - github.com/brunodev85/winlator\nWinlator Cmod - github.com/coffincolors/winlator\nWrapper - https://github.com/leegao/bionic-vulkan-wrapper &amp; https://github.com/pipetto-crypto/\nUbuntu RootFs - releases.ubuntu.com/focal</string>
 
     <!-- Supporters Dialog -->
     <string name="supporters_art_credits">Art Credits</string>

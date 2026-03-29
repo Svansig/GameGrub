@@ -1,4 +1,4 @@
-package app.gamenative.ui.component.dialog
+package app.gamegrub.ui.component.dialog
 
 import com.winlator.box86_64.Box86_64Preset
 import com.winlator.container.Container
@@ -276,4 +276,3 @@ private val BIONIC_ASSERTIONS = COMMON_ASSERTIONS + listOf(
 private val GLIBC_ASSERTIONS = COMMON_ASSERTIONS + listOf(
     FieldAssertion("graphicsDriverVersion") { it.graphicsDriverVersion },
 )
-

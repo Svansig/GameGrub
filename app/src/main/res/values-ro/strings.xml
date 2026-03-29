@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GameNative</string>
+    <string name="app_name">GameGrub</string>
     <string name="login_user">Autentificare utilizator</string>
     <string name="login_2fa">Autentificare în doi pași</string>
     <string name="home">Acasă</string>
@@ -831,9 +831,9 @@
 	<string name="settings_info_source_title">Cod sursă</string>
 	<string name="settings_info_source_subtitle">Vezi codul sursă al acestui proiect</string>
 	<string name="settings_info_libraries_title">Biblioteci utilizate</string>
-	<string name="settings_info_libraries_subtitle">Vezi tehnologiile care fac GameNative posibil</string>
+	<string name="settings_info_libraries_subtitle">Vezi tehnologiile care fac GameGrub posibil</string>
 	<string name="settings_info_privacy_title">Politica de confidențialitate</string>
-	<string name="settings_info_privacy_subtitle">Deschide linkul către politica de confidențialitate GameNative</string>
+	<string name="settings_info_privacy_subtitle">Deschide linkul către politica de confidențialitate GameGrub</string>
 
 	<!-- Settings: Interface Group -->
 	<string name="settings_interface_title">Interfață</string>
@@ -855,7 +855,7 @@
 	<string name="settings_downloads_title">Descărcări</string>
 
 	<!-- Login Screen -->
-	<string name="login_app_name">GameNative</string>
+	<string name="login_app_name">GameGrub</string>
 	<string name="login_privacy_policy">Politica de confidențialitate</string>
 	<string name="login_welcome_back">Bine ai revenit</string>
 	<string name="login_subtitle">Autentifică-te pentru a accesa biblioteca ta Steam</string>
@@ -930,11 +930,11 @@
 	<!-- PluviaMain: Crash & Support -->
 	<string name="main_recent_crash_title">Crash recent</string>
 	<string name="main_recent_crash_message">Ne pare rău!\nAr fi util să știm ce problemă ai întâmpinat.\nPoți vizualiza și exporta cel mai recent crash log din setările aplicației și îl poți atașa ca issue pe Github în repository-ul proiectului.\nLinkul către repo este tot în setări!</string>
-	<string name="main_thank_you_title">Mulțumim că folosești GameNative!</string>
+	<string name="main_thank_you_title">Mulțumim că folosești GameGrub!</string>
 	<string name="main_thank_you_message">Susține gaming-ul open‑source pe Android distribuind aplicația prietenilor sau devenind membru pe Ko‑fi.</string>
 	<string name="main_join_kofi">Alătură-te pe Ko‑fi</string>
 	<string name="main_share">Distribuie</string>
-	<string name="main_share_text">Descoperă GameNative - joacă jocurile tale Steam pe PC pe Android, cu suport complet pentru salvări în cloud!\nhttps://gamenative.app\nAlătură-te comunității: https://discord.gg/2hKv4VfZfE</string>
+	<string name="main_share_text">Descoperă GameGrub - joacă jocurile tale Steam pe PC pe Android, cu suport complet pentru salvări în cloud!\nhttps://gamenative.app\nAlătură-te comunității: https://discord.gg/2hKv4VfZfE</string>
 	<string name="main_discord_support_title">A funcționat jocul?</string>
 	<string name="main_discord_support_message">Alătură-te serverului de Discord pentru suport și optimizare.</string>
 	<string name="main_open_discord">Deschide Discord</string>

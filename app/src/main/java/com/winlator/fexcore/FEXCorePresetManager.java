@@ -10,9 +10,8 @@ import com.winlator.core.envvars.EnvVars;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Locale;
 
-import app.gamenative.R;
+import app.gamegrub.R;
 import timber.log.Timber;
 
 public abstract class FEXCorePresetManager {

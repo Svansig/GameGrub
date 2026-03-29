@@ -383,13 +383,23 @@ public class WinHandler {
             case RequestCodes.GET_GAMEPAD:
                 boolean isXInput = this.receiveData.get() == 1;
                 boolean notify = this.receiveData.get() == 1;
-                final ControlsProfile profile = inputControlsView.getProfile();
-                final boolean useVirtualGamepad = inputControlsView != null && profile != null && profile.isVirtualGamepad();
+                final ControlsProfile profile = inputControlsView != null ? inputControlsView.getProfile() : null;
+                final boolean useVirtualGamepad = profile != null && profile.isVirtualGamepad();
                 int processId = this.receiveData.getInt();
                 if (!useVirtualGamepad && ((externalController = this.currentController) == null || !externalController.isConnected())) {
                     this.currentController = ExternalController.getController(0);
                 }
                 boolean enabled2 = this.currentController != null || useVirtualGamepad;
+
+                // Maintain subscription state independently from temporary controller availability.
+                if (notify) {
+                    if (!this.gamepadClients.contains(Integer.valueOf(port))) {
+                        this.gamepadClients.add(Integer.valueOf(port));
+                    }
+                } else {
+                    this.gamepadClients.remove(Integer.valueOf(port));
+                }
+
                 if (enabled2) {
                     switch (this.preferredInputApi) {
                         case DINPUT:
@@ -405,24 +415,14 @@ public class WinHandler {
                             }
                             break;
                         case XINPUT:
-                            if (isXInput) {
-                                enabled = false;
-                                break;
-                            }
-                            break;
-                        case BOTH:
                             if (!isXInput) {
                                 enabled = false;
                                 break;
                             }
                             break;
-                    }
-                    if (notify) {
-                        if (!this.gamepadClients.contains(Integer.valueOf(port))) {
-                            this.gamepadClients.add(Integer.valueOf(port));
-                        }
-                    } else {
-                        this.gamepadClients.remove(Integer.valueOf(port));
+                        case BOTH:
+                            // Accept both XInput and DirectInput callers.
+                            break;
                     }
                     final boolean finalEnabled = enabled;
                     addAction(() -> {
@@ -454,9 +454,6 @@ public class WinHandler {
                     return;
                 }
                 enabled = enabled2;
-                if (!enabled) {
-                }
-                this.gamepadClients.remove(Integer.valueOf(port));
                 final boolean finalEnabled2 = enabled;
                 addAction(() -> {
                     this.sendData.rewind();
@@ -520,7 +517,7 @@ public class WinHandler {
         try {
             this.localhost = InetAddress.getLocalHost();
             // Player 1 (currentController) gets the original non-numbered file
-            String p1_mem_path = "/data/data/app.gamenative/files/imagefs/tmp/gamepad.mem";
+            String p1_mem_path = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad.mem";
             File p1_memFile = new File(p1_mem_path);
             p1_memFile.getParentFile().mkdirs();
             try (RandomAccessFile raf = new RandomAccessFile(p1_memFile, "rw")) {
@@ -530,7 +527,7 @@ public class WinHandler {
                 Log.i(TAG, "Successfully created and mapped gamepad file for Player 1");
             }
             for (int i = 0; i < extraGamepadBuffers.length; i++) {
-                String extra_mem_path = "/data/data/app.gamenative/files/imagefs/tmp/gamepad" + (i + 1) + ".mem";
+                String extra_mem_path = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad" + (i + 1) + ".mem";
                 File extra_memFile = new File(extra_mem_path);
                 try (RandomAccessFile raf = new RandomAccessFile(extra_memFile, "rw")) {
                     raf.setLength(64);
@@ -695,29 +692,46 @@ public class WinHandler {
         }
     }
 
+    private ExternalController resolveControllerForDevice(int deviceId) {
+        ExternalController fromProfile = null;
+        if (inputControlsView != null) {
+            ControlsProfile profile = inputControlsView.getProfile();
+            if (profile != null) {
+                fromProfile = profile.getController(deviceId);
+            }
+        }
+
+        // Wildcard profiles do not map to a concrete Android descriptor/deviceId.
+        if (fromProfile != null && !"*".equals(fromProfile.getId()) && fromProfile.getDeviceId() == deviceId) {
+            return fromProfile;
+        }
+
+        ExternalController detected = ExternalController.getController(deviceId);
+        return detected != null ? detected : fromProfile;
+    }
+
     public boolean onGenericMotionEvent(MotionEvent event) {
         boolean handled = false;
         ExternalController externalController = this.currentController;
         // Adopt newly connected controller if deviceId mismatches
         if ((externalController == null || externalController.getDeviceId() != event.getDeviceId()) && ExternalController.isJoystickDevice(event)) {
-            ExternalController adopted = null;
-            // Try to get controller from profile first (has saved bindings)
-            if (inputControlsView != null) {
-                ControlsProfile profile = inputControlsView.getProfile();
-                if (profile != null) {
-                    adopted = profile.getController(event.getDeviceId());
-                }
-            }
-            // Fallback to creating new controller if profile doesn't have one
-            if (adopted == null) {
-                adopted = ExternalController.getController(event.getDeviceId());
-            }
-            if (adopted != null && "*".equals(adopted.getId())) {
+            ExternalController adopted = resolveControllerForDevice(event.getDeviceId());
+            if (adopted != null) {
                 this.currentController = adopted;
                 externalController = adopted;
                 Timber.d("WinHandler.onGenericMotionEvent: adopted controller %s(#%d)", adopted.getName(), adopted.getDeviceId());
             }
         }
+
+        // Recovery path: if the current controller is stale/mismatched, bind directly from event device.
+        if (externalController == null || externalController.getDeviceId() != event.getDeviceId()) {
+            ExternalController detected = ExternalController.getController(event.getDeviceId());
+            if (detected != null) {
+                this.currentController = detected;
+                externalController = detected;
+            }
+        }
+
         if (externalController != null && externalController.getDeviceId() == event.getDeviceId() && (handled = this.currentController.updateStateFromMotionEvent(event))) {
             if (handled) {
                 sendGamepadState();
@@ -737,22 +751,19 @@ public class WinHandler {
         if ((externalController == null || externalController.getDeviceId() != event.getDeviceId())
                 && device != null && ExternalController.isGameController(device)
                 && event.getRepeatCount() == 0) {
-            ExternalController adopted = null;
-            // Try to get controller from profile first (has saved bindings)
-            if (inputControlsView != null) {
-                ControlsProfile profile = inputControlsView.getProfile();
-                if (profile != null) {
-                    adopted = profile.getController(event.getDeviceId());
-                }
-            }
-            // Fallback to creating new controller if profile doesn't have one
-            if (adopted == null) {
-                adopted = ExternalController.getController(event.getDeviceId());
-            }
-            if (adopted != null && "*".equals(adopted.getId())) {
+            ExternalController adopted = resolveControllerForDevice(event.getDeviceId());
+            if (adopted != null) {
                 this.currentController = adopted;
                 externalController = adopted;
                 Timber.d("WinHandler.onKeyEvent: adopted controller %s(#%d)", adopted.getName(), adopted.getDeviceId());
+            }
+        }
+
+        if (externalController == null || externalController.getDeviceId() != event.getDeviceId()) {
+            ExternalController detected = ExternalController.getController(event.getDeviceId());
+            if (detected != null) {
+                this.currentController = detected;
+                externalController = detected;
             }
         }
 

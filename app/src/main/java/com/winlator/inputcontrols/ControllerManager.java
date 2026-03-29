@@ -8,8 +8,6 @@ import android.preference.PreferenceManager;
 import android.util.SparseArray;
 import android.view.InputDevice;
 
-import app.gamenative.PrefManager;
-
 import java.util.ArrayList;
 import java.util.List;
 

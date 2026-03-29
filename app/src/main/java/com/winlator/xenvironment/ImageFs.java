@@ -172,6 +172,17 @@ public class ImageFs {
         return new File(rootDir, "/storage");
     }
 
+    public File getGamepadMemDir() {
+        return new File(rootDir, "tmp");
+    }
+
+    public File getGamepadMemFile(int playerIndex) {
+        if (playerIndex <= 0) {
+            return new File(getGamepadMemDir(), "gamepad.mem");
+        }
+        return new File(getGamepadMemDir(), "gamepad" + playerIndex + ".mem");
+    }
+
     public File getFilesDir() {
         return rootDir.getParentFile();
     }

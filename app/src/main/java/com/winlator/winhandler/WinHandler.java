@@ -20,6 +20,7 @@ import com.winlator.inputcontrols.TouchMouse;
 import com.winlator.math.XForm;
 import com.winlator.widget.InputControlsView;
 import com.winlator.widget.XServerView;
+import com.winlator.xenvironment.ImageFs;
 import com.winlator.xserver.Pointer;
 import com.winlator.xserver.XKeycode;
 import com.winlator.xserver.XServer;
@@ -516,9 +517,9 @@ public class WinHandler {
     public void start() {
         try {
             this.localhost = InetAddress.getLocalHost();
+            ImageFs imageFs = ImageFs.find(activity);
             // Player 1 (currentController) gets the original non-numbered file
-            String p1_mem_path = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad.mem";
-            File p1_memFile = new File(p1_mem_path);
+            File p1_memFile = imageFs.getGamepadMemFile(0);
             p1_memFile.getParentFile().mkdirs();
             try (RandomAccessFile raf = new RandomAccessFile(p1_memFile, "rw")) {
                 raf.setLength(64);
@@ -527,8 +528,7 @@ public class WinHandler {
                 Log.i(TAG, "Successfully created and mapped gamepad file for Player 1");
             }
             for (int i = 0; i < extraGamepadBuffers.length; i++) {
-                String extra_mem_path = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad" + (i + 1) + ".mem";
-                File extra_memFile = new File(extra_mem_path);
+                File extra_memFile = imageFs.getGamepadMemFile(i + 1);
                 try (RandomAccessFile raf = new RandomAccessFile(extra_memFile, "rw")) {
                     raf.setLength(64);
                     extraGamepadBuffers[i] = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 64);

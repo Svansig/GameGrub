@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -165,20 +166,14 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     private int execGuestProgram() {
 
         final int MAX_PLAYERS = 1; // old static method
+        Context context = environment.getContext();
+        ImageFs imageFs = ImageFs.find(context);
+        ensureEvshimGamepadPathCompatibility(imageFs);
 
         // Get the number of enabled players directly from ControllerManager.
         final int enabledPlayerCount = MAX_PLAYERS;
         for (int i = 0; i < enabledPlayerCount; i++) {
-            String memPath;
-            if (i == 0) {
-                // Player 1 uses the original, non-numbered path that is known to work.
-                memPath = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad.mem";
-            } else {
-                // Players 2, 3, 4 use a 1-based index.
-                memPath = "/data/data/app.gamegrub/files/imagefs/tmp/gamepad" + i + ".mem";
-            }
-
-            File memFile = new File(memPath);
+            File memFile = imageFs.getGamepadMemFile(i);
             memFile.getParentFile().mkdirs();
             try (RandomAccessFile raf = new RandomAccessFile(memFile, "rw")) {
                 raf.setLength(64);
@@ -186,8 +181,6 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
                 Log.e("EVSHIM_HOST", "Failed to create mem file for player index "+i, e);
             }
         }
-        Context context = environment.getContext();
-        ImageFs imageFs = ImageFs.find(context);
         File rootDir = imageFs.getRootDir();
 
         PrefManager.init(context);
@@ -332,6 +325,59 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
                     terminationCallback.call(status);
             }
         });
+    }
+
+    private void ensureEvshimGamepadPathCompatibility(ImageFs imageFs) {
+        File evshimFile = new File(imageFs.getLibDir(), "libevshim.so");
+        if (!evshimFile.isFile()) {
+            return;
+        }
+
+        final String legacyPath = "/data/data/com.winlator.cmod/files/imagefs/tmp/gamepad.mem";
+        final String currentPath = imageFs.getGamepadMemFile(0).getAbsolutePath();
+        if (legacyPath.equals(currentPath)) {
+            return;
+        }
+
+        byte[] legacyBytes = legacyPath.getBytes(StandardCharsets.UTF_8);
+        byte[] currentBytes = currentPath.getBytes(StandardCharsets.UTF_8);
+        if (currentBytes.length > legacyBytes.length) {
+            Log.w("EVSHIM_HOST", "Skipping evshim path patch because new path is longer: " + currentPath);
+            return;
+        }
+
+        try (RandomAccessFile raf = new RandomAccessFile(evshimFile, "rw")) {
+            byte[] data = new byte[(int) raf.length()];
+            raf.readFully(data);
+
+            boolean patched = false;
+            for (int i = 0; i <= data.length - legacyBytes.length; i++) {
+                boolean match = true;
+                for (int j = 0; j < legacyBytes.length; j++) {
+                    if (data[i + j] != legacyBytes[j]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (!match) {
+                    continue;
+                }
+
+                System.arraycopy(currentBytes, 0, data, i, currentBytes.length);
+                for (int j = currentBytes.length; j < legacyBytes.length; j++) {
+                    data[i + j] = 0;
+                }
+                patched = true;
+            }
+
+            if (patched) {
+                raf.seek(0);
+                raf.write(data);
+                Log.i("EVSHIM_HOST", "Patched libevshim.so gamepad path to " + currentPath);
+            }
+        } catch (IOException e) {
+            Log.e("EVSHIM_HOST", "Failed to patch libevshim.so gamepad path", e);
+        }
     }
 
     @NonNull

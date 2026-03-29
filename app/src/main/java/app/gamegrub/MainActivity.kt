@@ -211,9 +211,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        Timber.d("=== CONTROLLER: MainActivity.dispatchKeyEvent keyCode=${event.keyCode} action=${event.action}")
         var eventDispatched = GameGrubApp.events.emit(AndroidEvent.KeyEvent(event)) { keyEvent ->
             keyEvent.any { it }
         } == true
+        Timber.d("=== CONTROLLER: MainActivity.dispatchKeyEvent result=$eventDispatched")
 
         if (!eventDispatched) {
             if (event.keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
@@ -228,9 +230,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun dispatchGenericMotionEvent(ev: MotionEvent?): Boolean {
+        Timber.d("=== CONTROLLER: MainActivity.dispatchGenericMotionEvent action=${ev?.actionMasked}")
         val eventDispatched = GameGrubApp.events.emit(AndroidEvent.MotionEvent(ev)) { event ->
             event.any { it }
         } == true
+        Timber.d("=== CONTROLLER: MainActivity.dispatchGenericMotionEvent result=$eventDispatched")
 
         return if (!eventDispatched) super.dispatchGenericMotionEvent(ev) else true
     }

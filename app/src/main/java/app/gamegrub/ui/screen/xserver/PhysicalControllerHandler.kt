@@ -14,6 +14,7 @@ import com.winlator.math.Mathf
 import com.winlator.xserver.XServer
 import java.util.Timer
 import java.util.TimerTask
+import timber.log.Timber
 
 /**
  * Standalone handler for physical controller input that works independently of view visibility.
@@ -54,18 +55,19 @@ class PhysicalControllerHandler(
      * Extracted from InputControlsView.onKeyEvent()
      */
     fun onKeyEvent(event: KeyEvent): Boolean {
+        Timber.d("=== CONTROLLER: PCH.onKeyEvent keyCode=${event.keyCode} action=${event.action} profile=$profile")
         if (profile != null && event.repeatCount == 0) {
             val controller = profile?.getController(event.deviceId)
+            Timber.d("=== CONTROLLER: PCH.onKeyEvent controller=$controller deviceId=${event.deviceId}")
             if (controller != null) {
                 val controllerBinding = controller.getControllerBinding(event.keyCode)
+                Timber.d("=== CONTROLLER: PCH.onKeyEvent binding=$controllerBinding")
                 if (controllerBinding != null) {
-                    // Some controllers emit BOTH a digital KeyEvent for L2/R2 and an analog axis value in MotionEvent.
-                    // If this physical key is mapped to a virtual trigger AND the device exposes trigger axes,
-                    // ignore the KeyEvent to avoid an initial "full press" spike. MotionEvent will provide the analog value.
                     if ((event.keyCode == KeyEvent.KEYCODE_BUTTON_L2 || event.keyCode == KeyEvent.KEYCODE_BUTTON_R2) &&
                         (controllerBinding.binding == Binding.GAMEPAD_BUTTON_L2 || controllerBinding.binding == Binding.GAMEPAD_BUTTON_R2) &&
                         deviceHasTriggerAxis(event.device, event.keyCode)
                     ) {
+                        Timber.d("=== CONTROLLER: PCH.onKeyEvent skipping L2/R2 due to trigger axis")
                         return true
                     }
                     val offset = if (event.action == KeyEvent.ACTION_DOWN &&
@@ -76,10 +78,12 @@ class PhysicalControllerHandler(
                         0f
                     }
                     handleInputEvent(controllerBinding.binding, event.action == KeyEvent.ACTION_DOWN, offset)
+                    Timber.d("=== CONTROLLER: PCH.onKeyEvent handled=true")
                     return true
                 }
             }
         }
+        Timber.d("=== CONTROLLER: PCH.onKeyEvent handled=false")
         return false
     }
 
@@ -107,12 +111,16 @@ class PhysicalControllerHandler(
      * Extracted from InputControlsView.onGenericMotionEvent()
      */
     fun onGenericMotionEvent(event: MotionEvent): Boolean {
+        Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent action=${event.actionMasked} profile=$profile")
         if (profile != null) {
             val controller = profile?.getController(event.deviceId)
+            Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent controller=$controller deviceId=${event.deviceId}")
             if (controller != null && controller.updateStateFromMotionEvent(event)) {
-                // Process trigger buttons (L2/R2)
+                var hasAppliedBinding = false
+
                 var controllerBinding = controller.getControllerBinding(KeyEvent.KEYCODE_BUTTON_L2)
                 if (controllerBinding != null) {
+                    hasAppliedBinding = true
                     handleInputEvent(
                         controllerBinding.binding,
                         controller.state.triggerL > 0f,
@@ -122,6 +130,7 @@ class PhysicalControllerHandler(
 
                 controllerBinding = controller.getControllerBinding(KeyEvent.KEYCODE_BUTTON_R2)
                 if (controllerBinding != null) {
+                    hasAppliedBinding = true
                     handleInputEvent(
                         controllerBinding.binding,
                         controller.state.triggerR > 0f,
@@ -129,11 +138,15 @@ class PhysicalControllerHandler(
                     )
                 }
 
-                // Process analog stick input
-                processJoystickInput(controller)
-                return true
+                if (processJoystickInput(controller)) {
+                    hasAppliedBinding = true
+                }
+
+                Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent handled=$hasAppliedBinding")
+                return hasAppliedBinding
             }
         }
+        Timber.d("=== CONTROLLER: PCH.onGenericMotionEvent handled=false")
         return false
     }
 
@@ -168,7 +181,9 @@ class PhysicalControllerHandler(
      * Process analog stick input and apply bindings.
      * Extracted from InputControlsView.processJoystickInput()
      */
-    private fun processJoystickInput(controller: ExternalController) {
+    private fun processJoystickInput(controller: ExternalController): Boolean {
+        var hasAppliedBinding = false
+
         // Reset mouse movement offset at the start - contributions will be added during processing
         mouseMoveOffset.set(0f, 0f)
 
@@ -195,6 +210,7 @@ class PhysicalControllerHandler(
                 val keyCode = ExternalControllerBinding.getKeyCodeForAxis(axes[i], Mathf.sign(values[i]))
                 controllerBinding = controller.getControllerBinding(keyCode)
                 if (controllerBinding != null) {
+                    hasAppliedBinding = true
                     handleInputEvent(controllerBinding.binding, true, values[i])
                 }
             } else {
@@ -202,16 +218,20 @@ class PhysicalControllerHandler(
                     ExternalControllerBinding.getKeyCodeForAxis(axes[i], 1.toByte()),
                 )
                 if (controllerBinding != null) {
+                    hasAppliedBinding = true
                     handleInputEvent(controllerBinding.binding, false, values[i])
                 }
                 controllerBinding = controller.getControllerBinding(
                     ExternalControllerBinding.getKeyCodeForAxis(axes[i], (-1).toByte()),
                 )
                 if (controllerBinding != null) {
+                    hasAppliedBinding = true
                     handleInputEvent(controllerBinding.binding, false, values[i])
                 }
             }
         }
+
+        return hasAppliedBinding
     }
 
     /**

@@ -1098,14 +1098,15 @@ fun XServerScreen(
             )
         }
         val onKeyEvent: (AndroidEvent.KeyEvent) -> Boolean = {
+            Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent keyCode=${it.event.keyCode} action=${it.event.action}")
             val isKeyboard = Keyboard.isKeyboardDevice(it.event.device)
             val isGamepad = ExternalController.isGameController(it.event.device)
+            Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent isGamepad=$isGamepad isKeyboard=$isKeyboard")
             val waitingForManualResume =
                 manualResumeMode &&
                     GameGrubApp.isOverlayPaused &&
                     !showQuickMenu &&
                     !keepPausedForEditor
-            // logD("onKeyEvent(${it.event.device.sources})\n\tisGamepad: $isGamepad\n\tisKeyboard: $isKeyboard\n\t${it.event}")
 
             if (waitingForManualResume && isGamepad) {
                 when (it.event.keyCode) {
@@ -1121,35 +1122,79 @@ fun XServerScreen(
                     else -> false
                 }
             } else if ((showElementEditor || keepPausedForEditor || showQuickMenu || isEditMode) && (isGamepad || isKeyboard)) {
-                // Let Compose focus system handle keyboard and gamepad navigation/selection while menu is visible.
+                Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent menuVisible=true, deferring to Compose")
                 false
             } else {
                 var handled = false
                 if (isGamepad) {
-                    handled = physicalControllerHandler?.onKeyEvent(it.event) == true
-                    if (!handled) handled = GameGrubApp.inputControlsView?.onKeyEvent(it.event) == true
-                    // Final fallback to WinHandler passthrough
-                    if (!handled) handled = xServerView!!.getxServer().winHandler.onKeyEvent(it.event)
+                    Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent trying handler pch=$physicalControllerHandler icv=${GameGrubApp.inputControlsView}")
+                    val rawFirstKey = when (it.event.keyCode) {
+                        KeyEvent.KEYCODE_DPAD_UP,
+                        KeyEvent.KEYCODE_DPAD_DOWN,
+                        KeyEvent.KEYCODE_DPAD_LEFT,
+                        KeyEvent.KEYCODE_DPAD_RIGHT,
+                        KeyEvent.KEYCODE_BUTTON_A,
+                        KeyEvent.KEYCODE_BUTTON_B,
+                        KeyEvent.KEYCODE_BUTTON_X,
+                        KeyEvent.KEYCODE_BUTTON_Y,
+                        KeyEvent.KEYCODE_BUTTON_L1,
+                        KeyEvent.KEYCODE_BUTTON_R1,
+                        KeyEvent.KEYCODE_BUTTON_L2,
+                        KeyEvent.KEYCODE_BUTTON_R2,
+                        KeyEvent.KEYCODE_BUTTON_SELECT,
+                        KeyEvent.KEYCODE_BUTTON_START,
+                        -> true
+
+                        else -> false
+                    }
+
+                    if (rawFirstKey) {
+                        handled = xServerView!!.getxServer().winHandler.onKeyEvent(it.event)
+                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent wh(raw-first) result=$handled")
+                    }
+
+                    if (!handled) {
+                        handled = physicalControllerHandler?.onKeyEvent(it.event) == true
+                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent pch result=$handled")
+                    }
+                    if (!handled) {
+                        handled = GameGrubApp.inputControlsView?.onKeyEvent(it.event) == true
+                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent icv result=$handled")
+                    }
+                    if (!handled && !rawFirstKey) {
+                        handled = xServerView!!.getxServer().winHandler.onKeyEvent(it.event)
+                        Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent wh(fallback) result=$handled")
+                    }
                 }
                 if (!handled && isKeyboard) {
                     handled = keyboard?.onKeyEvent(it.event) == true
                 }
+                Timber.d("=== CONTROLLER: XServerScreen.onKeyEvent final handled=$handled")
                 handled
             }
         }
         val onMotionEvent: (AndroidEvent.MotionEvent) -> Boolean = {
+            Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent action=${it.event?.actionMasked}")
             val isGamepad = ExternalController.isGameController(it.event?.device)
+            Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent isGamepad=$isGamepad")
 
             if ((showElementEditor || keepPausedForEditor || showQuickMenu || isEditMode) && isGamepad) {
-                // Let Compose consume any gamepad motion while menu is visible.
+                Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent menuVisible=true, deferring to Compose")
                 false
             } else {
                 var handled = false
                 if (isGamepad && it.event != null) {
-                    handled = physicalControllerHandler?.onGenericMotionEvent(it.event!!) == true
-                    if (!handled) handled = GameGrubApp.inputControlsView?.onGenericMotionEvent(it.event) == true
-                    // Final fallback to WinHandler passthrough
-                    if (!handled) handled = xServerView!!.getxServer().winHandler.onGenericMotionEvent(it.event)
+                    Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent trying handler pch=$physicalControllerHandler icv=${GameGrubApp.inputControlsView}")
+                    handled = xServerView!!.getxServer().winHandler.onGenericMotionEvent(it.event)
+                    Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent wh(raw-first) result=$handled")
+                    if (!handled) {
+                        handled = physicalControllerHandler?.onGenericMotionEvent(it.event!!) == true
+                        Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent pch result=$handled")
+                    }
+                    if (!handled) {
+                        handled = GameGrubApp.inputControlsView?.onGenericMotionEvent(it.event) == true
+                        Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent icv result=$handled")
+                    }
                 }
                 if (GameGrubApp.touchpadView?.hasPointerCapture() != true && !GameGrubApp.isOverlayPaused) {
                     if (it.event != null) {
@@ -1158,7 +1203,6 @@ fun XServerScreen(
                         if (device.supportsSource(InputDevice.SOURCE_TOUCHPAD) &&
                             !isExternal
                         ) {
-                            // Samsung DeX Touchpad app
                             hasInternalTouchpad = true
                             if (!showElementEditor &&
                                 !keepPausedForEditor &&
@@ -1174,6 +1218,7 @@ fun XServerScreen(
                         tryCapturePointer()
                     }
                 }
+                Timber.d("=== CONTROLLER: XServerScreen.onMotionEvent final handled=$handled")
                 handled
             }
         }
@@ -1207,11 +1252,13 @@ fun XServerScreen(
             Timber.i(outputLine ?: "")
         }
 
+        Timber.d("=== CONTROLLER: Registering event listeners pch=$physicalControllerHandler")
         GameGrubApp.events.on<AndroidEvent.ActivityDestroyed, Unit>(onActivityDestroyed)
         GameGrubApp.events.on<AndroidEvent.KeyEvent, Boolean>(onKeyEvent)
         GameGrubApp.events.on<AndroidEvent.MotionEvent, Boolean>(onMotionEvent)
         GameGrubApp.events.on<AndroidEvent.GuestProgramTerminated, Unit>(onGuestProgramTerminated)
         GameGrubApp.events.on<SteamEvent.ForceCloseApp, Unit>(onForceCloseApp)
+        Timber.d("=== CONTROLLER: Event listeners registered")
         ProcessHelper.addDebugCallback(debugCallback)
 
         onDispose {
@@ -1714,18 +1761,18 @@ fun XServerScreen(
                     var loadedProfile: ControlsProfile? = null
 
                     // Create InputControlsView and add to FrameLayout
+                    val manager = GameGrubApp.inputControlsManager
+                    val profiles = manager?.getProfiles(false) ?: listOf()
+                    Timber.d("=== CONTROLLER: Profile loading - manager=$manager profiles.size=${profiles.size}")
+
+                    var loadedControllerProfile: ControlsProfile? = null
+
                     val icView = InputControlsView(context).apply {
-                        // Configure InputControlsView
                         setXServer(xServerView.getxServer())
                         touchpadView = GameGrubApp.touchpadView
-
-                        // Load profile for this container
-                        val manager = GameGrubApp.inputControlsManager
-                        val profiles = manager?.getProfiles(false) ?: listOf()
                         PrefManager.init(context)
 
                         if (profiles.isNotEmpty()) {
-                            // Check if container has a custom profile associated
                             val profileIdStr = container.getExtra("profileId", "0")
                             val profileId = profileIdStr.toIntOrNull() ?: 0
                             Timber.d("=== Profile Loading Start ===")
@@ -1734,18 +1781,15 @@ fun XServerScreen(
                             val customProfile = if (profileId != 0) manager?.getProfile(profileId) else null
 
                             val targetProfile = if (customProfile != null) {
-                                // Use the custom profile associated with this container
                                 Timber.d("Using CUSTOM profile: ${customProfile.name} (ID: ${customProfile.id})")
                                 customProfile
                             } else {
-                                // Use Profile 0 (Physical Controller Default) as fallback
                                 val fallback = manager?.getProfile(0) ?: profiles.getOrNull(2) ?: profiles.first()
                                 Timber.d("Using DEFAULT profile: ${fallback.name} (ID: ${fallback.id})")
                                 fallback
                             }
                             Timber.d("Profile loaded successfully: ${targetProfile.name}")
 
-                            // Load controllers for this profile
                             val controllers = targetProfile.loadControllers()
                             Timber.d("Controllers loaded: ${controllers.size} controller(s)")
                             controllers.forEachIndexed { index, controller ->
@@ -1754,20 +1798,23 @@ fun XServerScreen(
 
                             Timber.d("=== Profile Loading Complete ===")
                             profile = targetProfile
-
-                            physicalControllerHandler = PhysicalControllerHandler(targetProfile, xServerView.getxServer(), gameBack)
-
-                            // Store profile for auto-show logic
+                            loadedControllerProfile = targetProfile
                             loadedProfile = targetProfile
                         }
 
-                        // Set overlay opacity from preferences if needed
                         val opacity = PrefManager.getFloat("controls_opacity", InputControlsView.DEFAULT_OVERLAY_OPACITY)
                         setOverlayOpacity(opacity)
-
-                        // Set container-level shooter mode
                         setContainerShooterMode(container.isShooterMode)
                     }
+
+                    if (loadedControllerProfile != null) {
+                        Timber.d("=== CONTROLLER: Creating PhysicalControllerHandler with profile=${loadedControllerProfile?.name}")
+                        physicalControllerHandler = PhysicalControllerHandler(loadedControllerProfile!!, xServerView.getxServer(), gameBack)
+                        Timber.d("=== CONTROLLER: PhysicalControllerHandler created successfully pch=$physicalControllerHandler")
+                    } else {
+                        Timber.w("=== CONTROLLER: NOT creating PhysicalControllerHandler - loadedControllerProfile is null!")
+                    }
+
                     GameGrubApp.inputControlsView = icView
 
                     xServerView.getxServer().winHandler.setInputControlsView(GameGrubApp.inputControlsView)
@@ -3775,7 +3822,7 @@ private fun extractArm64ecInputDLLs(context: Context, container: Container) {
 }
 
 private fun extractx86_64InputDlls(context: Context, container: Container) {
-    "x86_64_input_dlls.tzst"
+    // "x86_64_input_dlls.tzst"
     val imageFs = ImageFs.find(context)
     val wineVersion: String? = container.wineVersion
     Log.d("XServerDisplayActivity", "x86_64 Input DLL Extraction Verification: Container Wine version: " + wineVersion)
@@ -4349,7 +4396,7 @@ private fun extractGraphicsDriverFiles(
                 destinationDir.mkdirs()
                 FileUtils.extractZipFromAssets(context, assetZip, destinationDir)
 
-                "vulkan.adreno.so"
+                // "vulkan.adreno.so"
 
                 // Update cache and only the adrenotoolsDriver key within graphics driver config
                 container.putExtra("graphicsDriverAdreno", adrenoCacheId)

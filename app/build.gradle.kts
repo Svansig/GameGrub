@@ -1,5 +1,5 @@
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -18,7 +18,9 @@ val keystoreProperties: Properties? = if (keystorePropertiesFile.exists()) {
     Properties().apply {
         load(FileInputStream(keystorePropertiesFile))
     }
-} else null
+} else {
+    null
+}
 
 // Add PostHog API key and host as build-time variables
 val posthogApiKey: String = project.findProperty("POSTHOG_API_KEY") as String? ?: System.getenv("POSTHOG_API_KEY") ?: ""
@@ -33,7 +35,8 @@ android {
     compileSdk = 35
 
     // https://developer.android.com/ndk/downloads
-    ndkVersion = "22.1.7171670"
+//    ndkVersion = "22.1.7171670"
+    ndkVersion = "27.1.11397112"
 
     signingConfigs {
         create("gamegrub") {
@@ -60,7 +63,7 @@ android {
             project.findProperty(name) as String? ?: System.getenv(name) ?: ""
 
         buildConfigField("String", "POSTHOG_API_KEY", "\"${secret("POSTHOG_API_KEY")}\"")
-        buildConfigField("String", "POSTHOG_HOST",  "\"${secret("POSTHOG_HOST")}\"")
+        buildConfigField("String", "POSTHOG_HOST", "\"${secret("POSTHOG_HOST")}\"")
         buildConfigField("String", "STEAMGRIDDB_API_KEY", "\"${secret("STEAMGRIDDB_API_KEY")}\"")
         buildConfigField("String", "CLOUD_PROJECT_NUMBER", "\"${secret("CLOUD_PROJECT_NUMBER")}\"")
         val iconValue = "@mipmap/ic_launcher"
@@ -73,25 +76,26 @@ android {
         )
 
         ndk {
-            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+//            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+            abiFilters.addAll(listOf("arm64-v8a"))
         }
 
         // Localization support - specify which languages to include
         resourceConfigurations += listOf(
-            "en",      // English (default)
-            "es",      // Spanish
-            "da",      // Danish
-            "pt-rBR",  // Portuguese (Brazilian)
-            "zh-rTW",  // Traditional Chinese
-            "zh-rCN",  // Simplified Chinese
-            "fr",      // French
-            "de",      // German
-            "uk",      // Ukrainian
-            "it",      // Italian
-            "ro",      // Română
-            "pl",      // Polish
-            "ru",      // Russian
-            "ko",      // Korean
+            "en", // English (default)
+            "es", // Spanish
+            "da", // Danish
+            "pt-rBR", // Portuguese (Brazilian)
+            "zh-rTW", // Traditional Chinese
+            "zh-rCN", // Simplified Chinese
+            "fr", // French
+            "de", // German
+            "uk", // Ukrainian
+            "it", // Italian
+            "ro", // Română
+            "pl", // Polish
+            "ru", // Russian
+            "ko", // Korean
             // TODO: Add more languages here using the ISO 639-1 locale code with regional qualifiers (e.g., "pt-rPT" for European Portuguese)
         )
 
@@ -101,8 +105,8 @@ android {
         }
 
         proguardFiles(
-            // getDefaultProguardFile("proguard-android-optimize.txt"),
-            getDefaultProguardFile("proguard-android.txt"),
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            // getDefaultProguardFile("proguard-android.txt"),
             "proguard-rules.pro",
         )
     }
@@ -176,7 +180,7 @@ android {
     dynamicFeatures += setOf(":ubuntufs")
 
     kotlinter {
-        ignoreFormatFailures  = false
+        ignoreFormatFailures = false
     }
 
     // build extras needed in libwinlator_bionic.so

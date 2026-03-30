@@ -38,8 +38,6 @@ import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.db.dao.SteamLicenseDao
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.Marker
-import app.gamegrub.enums.OS
-import app.gamegrub.enums.OSArch
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
@@ -75,7 +73,6 @@ import `in`.dragonbra.javasteam.depotdownloader.DepotDownloader
 import `in`.dragonbra.javasteam.depotdownloader.IDownloadListener
 import `in`.dragonbra.javasteam.depotdownloader.data.AppItem
 import `in`.dragonbra.javasteam.depotdownloader.data.DownloadItem
-import `in`.dragonbra.javasteam.enums.EDepotFileFlag
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EPersonaState
@@ -117,7 +114,6 @@ import `in`.dragonbra.javasteam.steam.steamclient.callbacks.DisconnectedCallback
 import `in`.dragonbra.javasteam.steam.steamclient.configuration.SteamConfiguration
 import `in`.dragonbra.javasteam.types.DepotManifest
 import `in`.dragonbra.javasteam.types.FileData
-import `in`.dragonbra.javasteam.types.KeyValue
 import `in`.dragonbra.javasteam.types.SteamID
 import `in`.dragonbra.javasteam.util.log.LogListener
 import `in`.dragonbra.javasteam.util.log.LogManager
@@ -163,7 +159,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
 import timber.log.Timber
 
 /**
@@ -328,6 +323,9 @@ class SteamService : Service(), IChallengeUrlChanged {
         const val INVALID_APP_ID: Int = Int.MAX_VALUE
         const val INVALID_PKG_ID: Int = Int.MAX_VALUE
         private const val STEAM_CONTROLLER_CONFIG_FILENAME = "steam_controller.vdf"
+        private val catalogManager = app.gamegrub.service.steam.managers.SteamCatalogManager
+        private val installManager = app.gamegrub.service.steam.managers.SteamInstallManager
+        private val inputManager = app.gamegrub.service.steam.managers.SteamInputManager
 
         var requestTimeout = 30.seconds
         var responseTimeout = 120.seconds
@@ -552,50 +550,21 @@ class SteamService : Service(), IChallengeUrlChanged {
             val steamId = userSteamId ?: return emptyMap()
             val ownedGameIds = getOwnedGames(steamId.convertToUInt64()).map { it.appId }.toHashSet()
 
-            return getAppDlc(appId).filter { (_, depot) ->
-                when {
-                    /* Base-game depots always download */
-                    depot.dlcAppId == INVALID_APP_ID -> true
-
-                    /* ① licence cache */
-                    instance?.licenseDao?.findLicense(depot.dlcAppId) != null -> true
-
-                    /* ② PICS row */
-                    instance?.appDao?.findApp(depot.dlcAppId) != null -> true
-
-                    /* ③ owned-games list */
-                    depot.dlcAppId in ownedGameIds -> true
-
-                    /* ④ final online / cached call */
-                    else -> false
-                }
-            }.toMap()
+            return catalogManager.filterOwnedAppDlc(
+                appDlcDepots = getAppDlc(appId),
+                invalidAppId = INVALID_APP_ID,
+                ownedGameIds = ownedGameIds,
+                hasLicense = { dlcAppId -> instance?.licenseDao?.findLicense(dlcAppId) != null },
+                hasPicsApp = { dlcAppId -> instance?.appDao?.findApp(dlcAppId) != null },
+            )
         }
 
         fun getMainAppDlcIdsWithoutProperDepotDlcIds(appId: Int): MutableList<Int> {
-            val mainAppDlcIds = mutableListOf<Int>()
             val hiddenDlcAppIds = getHiddenDlcAppsOf(appId).orEmpty().map { it.id }
-
-            val appInfo = getAppInfoOf(appId)
-            if (appInfo != null) {
-                // for each of the dlcAppId found in main depots, filter the count = 1, add that dlcAppId to dlcAppIds
-                val checkingAppDlcIds = appInfo.depots.filter { it.value.dlcAppId != INVALID_APP_ID }.map { it.value.dlcAppId }.distinct()
-                checkingAppDlcIds.forEach { checkingDlcId ->
-                    val checkMap = appInfo.depots.filter { it.value.dlcAppId == checkingDlcId }
-                    if (checkMap.size == 1) {
-                        val depotInfo = checkMap[checkMap.keys.first()]!!
-                        if (depotInfo.osList.contains(OS.none) &&
-                            depotInfo.manifests.isEmpty() &&
-                            hiddenDlcAppIds.isNotEmpty() &&
-                            hiddenDlcAppIds.contains(checkingDlcId)
-                        ) {
-                            mainAppDlcIds.add(checkingDlcId)
-                        }
-                    }
-                }
-            }
-
-            return mainAppDlcIds
+            return catalogManager.resolveMainAppDlcIdsWithoutProperDepotDlcIds(
+                appInfo = getAppInfoOf(appId),
+                hiddenDlcAppIds = hiddenDlcAppIds,
+            )
         }
 
         /**
@@ -614,57 +583,22 @@ class SteamService : Service(), IChallengeUrlChanged {
             has64Bit: Boolean,
             preferredLanguage: String,
             ownedDlc: Map<Int, DepotInfo>?,
-        ): Boolean {
-            if (depot.manifests.isEmpty() && depot.encryptedManifests.isNotEmpty()) {
-                return false
-            }
-            // 1. Has something to download (0-byte manifests = stale PICS data from interrupted fetch)
-            if (depot.manifests.isEmpty() && !depot.sharedInstall) {
-                return false
-            }
-            if (depot.manifests.isNotEmpty() && depot.manifests.values.all { it.size == 0L && it.download == 0L }) {
-                return false
-            }
-            // 2. Supported OS
-            if (!(
-                    depot.osList.contains(OS.windows) ||
-                        (!depot.osList.contains(OS.linux) && !depot.osList.contains(OS.macos))
-                    )
-            ) {
-                return false
-            }
-            // 3. 64-bit or indeterminate
-            // Arch selection: allow 64-bit and Unknown always.
-            // Allow 32-bit only when no 64-bit depot exists.
-            val archOk = when (depot.osArch) {
-                OSArch.Arch64, OSArch.Unknown -> true
-                OSArch.Arch32 -> !has64Bit
-            }
-            if (!archOk) return false
-            // 4. DLC you actually own
-            if (depot.dlcAppId != INVALID_APP_ID && ownedDlc != null && !ownedDlc.containsKey(depot.depotId)) {
-                return false
-            }
-            // 5. Language filter - if depot has language, it must match preferred language
-            if (depot.language.isNotEmpty() && depot.language != preferredLanguage) {
-                return false
-            }
-
-            return true
-        }
+        ): Boolean = catalogManager.filterForDownloadableDepots(
+            depot = depot,
+            has64Bit = has64Bit,
+            preferredLanguage = preferredLanguage,
+            ownedDlc = ownedDlc,
+        )
 
         fun getMainAppDepots(appId: Int, containerLanguage: String): Map<Int, DepotInfo> {
             val appInfo = getAppInfoOf(appId) ?: return emptyMap()
             val ownedDlc = runBlocking { getOwnedAppDlc(appId) }
 
-            // If the game ships any 64-bit depot, prefer those and ignore x86 ones
-            val has64Bit = appInfo.depots.values.any { it.osArch == OSArch.Arch64 }
-
-            return appInfo.depots.asSequence()
-                .filter { (_, depot) ->
-                    return@filter filterForDownloadableDepots(depot, has64Bit, containerLanguage, ownedDlc)
-                }
-                .associate { it.toPair() }
+            return catalogManager.getMainAppDepots(
+                appInfo = appInfo,
+                containerLanguage = containerLanguage,
+                ownedDlc = ownedDlc,
+            )
         }
 
         /**
@@ -684,43 +618,12 @@ class SteamService : Service(), IChallengeUrlChanged {
             val appInfo = getAppInfoOf(appId) ?: return emptyMap()
             val ownedDlc = runBlocking { getOwnedAppDlc(appId) }
 
-            // If the game ships any 64-bit depot, prefer those and ignore x86 ones
-            val has64Bit = appInfo.depots.values.any { it.osArch == OSArch.Arch64 }
-
-            val map = appInfo.depots
-                .asSequence()
-                .filter { (_, depot) ->
-                    return@filter filterForDownloadableDepots(depot, has64Bit, preferredLanguage, ownedDlc)
-                }
-                .associate { it.toPair() }
-                .toMutableMap()
-
-            val indirectDlcApps = getDownloadableDlcAppsOf(appId).orEmpty()
-            indirectDlcApps.forEach { dlcApp ->
-                dlcApp.depots
-                    .asSequence()
-                    .filter { (_, depot) ->
-                        return@filter filterForDownloadableDepots(depot, has64Bit, preferredLanguage, null)
-                    }
-                    .associate { it.toPair() }
-                    .forEach { (depotId, depot) ->
-                        // Add DLC Depots with custom object
-                        map[depotId] = DepotInfo(
-                            depotId = depot.depotId,
-                            dlcAppId = dlcApp.id, // Set to DLC App ID
-                            optionalDlcId = depot.optionalDlcId,
-                            depotFromApp = depot.depotFromApp,
-                            sharedInstall = depot.sharedInstall,
-                            osList = depot.osList,
-                            osArch = depot.osArch,
-                            language = depot.language,
-                            manifests = depot.manifests,
-                            encryptedManifests = depot.encryptedManifests,
-                        )
-                    }
-            }
-
-            return map
+            return catalogManager.getDownloadableDepots(
+                appInfo = appInfo,
+                preferredLanguage = preferredLanguage,
+                ownedDlc = ownedDlc,
+                indirectDlcApps = getDownloadableDlcAppsOf(appId).orEmpty(),
+            )
         }
 
         fun getAppDirName(app: SteamApp?): String {
@@ -755,113 +658,11 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun getAppDirPath(gameId: Int): String = SteamPaths.getAppDirPath(gameId)
 
-        private fun isExecutable(flags: Any): Boolean = when (flags) {
-            // SteamKit-JVM (most forks) – flags is EnumSet<EDepotFileFlag>
-            is EnumSet<*> -> {
-                flags.contains(EDepotFileFlag.Executable) ||
-                    flags.contains(EDepotFileFlag.CustomExecutable)
-            }
-
-            // SteamKit-C# protobuf port – flags is UInt / Int / Long
-            is Int -> (flags and 0x20) != 0 || (flags and 0x80) != 0
-
-            is Long -> ((flags and 0x20L) != 0L) || ((flags and 0x80L) != 0L)
-
-            else -> false
-        }
-
-        /* -------------------------------------------------------------------------- */
-        /* 1. Extra patterns & word lists                                             */
-        /* -------------------------------------------------------------------------- */
-
-        // Unreal Engine "Shipping" binaries (e.g. Stray-Win64-Shipping.exe)
-        private val UE_SHIPPING = Regex(
-            """.*-win(32|64)(-shipping)?\.exe$""",
-            RegexOption.IGNORE_CASE,
-        )
-
-        // UE folder hint …/Binaries/Win32|64/…
-        private val UE_BINARIES = Regex(
-            """.*/binaries/win(32|64)/.*\.exe$""",
-            RegexOption.IGNORE_CASE,
-        )
-
-        // Tools / crash-dumpers to push down
-        private val NEGATIVE_KEYWORDS = listOf(
-            "crash", "handler", "viewer", "compiler", "tool",
-            "setup", "unins", "eac", "launcher", "steam",
-        )
-
-        /* add near-name helper */
-        private fun fuzzyMatch(a: String, b: String): Boolean {
-            /* strip digits & punctuation, compare first 5 letters */
-            val cleanA = a.replace(Regex("[^a-z]"), "")
-            val cleanB = b.replace(Regex("[^a-z]"), "")
-            return cleanA.take(5) == cleanB.take(5)
-        }
-
-        /* add generic short-name detector: one letter + digits, ≤4 chars  */
-        private val GENERIC_NAME = Regex("^[a-z]\\d{1,3}\\.exe$", RegexOption.IGNORE_CASE)
-
-        /* -------------------------------------------------------------------------- */
-        /* 2. Heuristic score (same signature!)                                       */
-        /* -------------------------------------------------------------------------- */
-
-        private fun scoreExe(
-            file: FileData,
-            gameName: String,
-            hasExeFlag: Boolean,
-        ): Int {
-            var s = 0
-            val path = file.fileName.lowercase()
-
-            // 1️⃣ UE shipping or binaries folder bonus
-            if (UE_SHIPPING.matches(path)) s += 300
-            if (UE_BINARIES.containsMatchIn(path)) s += 250
-
-            // 2️⃣ root-folder exe bonus
-            if (!path.contains('/')) s += 200
-
-            // 3️⃣ filename contains the game / installDir
-            if (path.contains(gameName) || fuzzyMatch(path, gameName)) s += 100
-
-            // 4️⃣ obvious tool / crash-dumper penalty
-            if (NEGATIVE_KEYWORDS.any { it in path }) s -= 150
-            if (GENERIC_NAME.matches(file.fileName)) s -= 200 // ← new
-
-            // 5️⃣ Executable | CustomExecutable flag
-            if (hasExeFlag) s += 50
-
-            Timber.i("Score for $path: $s")
-
-            return s
-        }
-
-        fun FileData.isStub(): Boolean {
-            /* stub detector (same short rules) */
-            val generic = Regex("^[a-z]\\d{1,3}\\.exe$", RegexOption.IGNORE_CASE)
-            val bad = listOf("launcher", "steam", "crash", "handler", "setup", "unins", "eac")
-            val n = fileName.lowercase()
-            val stub = generic.matches(n) || bad.any { it in n } || totalSize < 1_000_000
-            if (stub) Timber.d("Stub filtered: $fileName  size=$totalSize")
-            return stub
-        }
-
         /** select the primary binary */
         fun choosePrimaryExe(
             files: List<FileData>?,
             gameName: String,
-        ): FileData? = files?.maxWithOrNull { a, b ->
-            val sa = scoreExe(a, gameName, isExecutable(a.flags)) // <- fixed
-            val sb = scoreExe(b, gameName, isExecutable(b.flags))
-
-            when {
-                sa != sb -> sa - sb
-
-                // higher score wins
-                else -> (a.totalSize - b.totalSize).toInt() // tie-break on size
-            }
-        }
+        ): FileData? = installManager.choosePrimaryExe(files, gameName)
 
         /**
          * Picks the real shipped EXE for a Steam app.
@@ -873,97 +674,40 @@ class SteamService : Service(), IChallengeUrlChanged {
          */
         fun getInstalledExe(appId: Int): String {
             val appInfo = getAppInfoOf(appId) ?: return ""
-
-            val installDir = appInfo.config.installDir.ifEmpty { appInfo.name }
-
-            val depots = appInfo.depots.values.filter { d ->
-                !d.sharedInstall &&
-                    (
-                        d.osList.isEmpty() ||
-                            d.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) }
-                        )
-            }
-            Timber.i("Depots considered: $depots")
-
-            /* launch targets (lower-case) */
-            val launchTargets = appInfo.config.launch
-                .map { it.executable.lowercase() }
-                .toSet()
-
-            Timber.i("Launch targets from appinfo: $launchTargets")
-
-            /* ---------------------------------------------------------- */
-            val flagged = mutableListOf<Pair<FileData, Long>>() // (file, depotSize)
-            var largestDepotSize = 0L
-
-            // Use DepotDownloader to fetch manifests
             val steamClient = instance?.steamClient
             val licenses = runBlocking { getLicensesFromDb() }
-            if (steamClient == null || licenses.isEmpty()) {
-                Timber.w("Cannot fetch manifests: steamClient or licenses not available")
-                // Fallback to last resort
-                return (
-                    getAppInfoOf(appId)?.let {
-                        getWindowsLaunchInfos(appId).firstOrNull()
+
+            return installManager.resolveInstalledExe(
+                appInfo = appInfo,
+                canQueryManifests = steamClient != null && licenses.isNotEmpty(),
+                fallbackExecutable = {
+                    getWindowsLaunchInfos(appId).firstOrNull()?.executable.orEmpty()
+                },
+                loadManifestCandidates = { depotId, manifestInfo ->
+                    val manifest = DepotManifest.loadFromFile(
+                        "${getAppDirPath(appId)}/.DepotDownloader/${depotId}_${manifestInfo.gid}.manifest",
+                    )
+                    Timber.d("Using manifest for depot $depotId  size=${manifestInfo.size}")
+                    manifest?.files?.map { file ->
+                        app.gamegrub.service.steam.managers.SteamInstalledExeManager.ExecutableCandidate(
+                            source = file,
+                            path = file.fileName,
+                            totalSize = file.totalSize,
+                            hasExecutableFlag = installManager.hasExecutableFlag(file.flags),
+                            isStub = installManager.isStub(file),
+                        )
                     }
-                    )?.executable ?: ""
-            }
-
-            for (depot in depots) {
-                val mi = depot.manifests["public"] ?: continue
-                if (mi.size > largestDepotSize) largestDepotSize = mi.size
-
-                // Check cache first
-                val man =
-                    DepotManifest.loadFromFile("${getAppDirPath(appId)}/.DepotDownloader/${depot.depotId}_${mi.gid}.manifest")
-
-                Timber.d("Using manifest for depot ${depot.depotId}  size=${mi.size}")
-
-                /* 1️⃣ exact launch entry that isn't a stub */
-                man?.files?.firstOrNull { f ->
-                    f.fileName.lowercase() in launchTargets && !f.isStub()
-                }?.let {
-                    Timber.i("Picked via launch entry: ${it.fileName}")
-                    return it.fileName.replace('\\', '/')
-                }
-
-                /* collect for later */
-                man?.files?.filter { isExecutable(it.flags) || it.fileName.endsWith(".exe", true) }
-                    ?.forEach { flagged += it to mi.size }
-            }
-
-            Timber.i("Flagged executable candidates: ${flagged.map { it.first.fileName }}")
-
-            /* 2️⃣ scorer (unchanged) */
-            choosePrimaryExe(
-                flagged
-                    .map { it.first }
-                    .let { pool ->
-                        val noStubs = pool.filterNot { it.isStub() }
-                        if (noStubs.isNotEmpty()) noStubs else pool
-                    },
-                installDir.lowercase(),
-            )?.let {
-                Timber.i("Picked via scorer: ${it.fileName}")
-                return it.fileName.replace('\\', '/')
-            }
-
-            /* 3️⃣ fallback: biggest exe from the biggest depot */
-            flagged
-                .filter { it.second == largestDepotSize }
-                .maxByOrNull { it.first.totalSize }
-                ?.let {
-                    Timber.i("Picked via largest-depot fallback: ${it.first.fileName}")
-                    return it.first.fileName.replace('\\', '/')
-                }
-
-            /* 4️⃣ last resort */
-            Timber.w("No executable found; falling back to install dir")
-            return (
-                getAppInfoOf(appId)?.let {
-                    getWindowsLaunchInfos(appId).firstOrNull()
-                }
-                )?.executable ?: ""
+                },
+                choosePrimary = { candidates, gameName ->
+                    val files = candidates.map { it.source }
+                    val chosen = installManager.choosePrimaryExe(files, gameName)
+                    if (chosen == null) {
+                        null
+                    } else {
+                        candidates.firstOrNull { it.source == chosen }
+                    }
+                },
+            )
         }
 
         /**
@@ -1197,28 +941,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         private fun selectSteamControllerConfig(
             details: List<SteamControllerConfigDetail>,
-        ): SteamControllerConfigDetail? {
-            if (details.isEmpty()) return null
-
-            val branchPriority = listOf("default", "public")
-            val controllerPriority = listOf(
-                "controller_xbox360",
-                "controller_xboxone",
-                "controller_steamcontroller_gordon",
-            )
-
-            for (branch in branchPriority) {
-                for (controllerType in controllerPriority) {
-                    val match = details.firstOrNull { detail ->
-                        detail.controllerType.equals(controllerType, ignoreCase = true) &&
-                            detail.enabledBranches.any { it.equals(branch, ignoreCase = true) }
-                    }
-                    if (match != null) return match
-                }
-            }
-
-            return null
-        }
+        ): SteamControllerConfigDetail? = inputManager.selectSteamControllerConfig(details)
 
         private fun resolveSteamInputManifestFile(
             appId: Int,
@@ -1229,101 +952,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                 ?.steamInputManifestPath
                 ?.trim()
                 .orEmpty()
-            if (manifestPath.isEmpty()) return null
-
-            return resolvePathCaseInsensitive(appDirPath, manifestPath)
+            return inputManager.resolveSteamInputManifestFile(appDirPath, manifestPath)
         }
 
         private fun loadConfigFromManifest(
             manifestFile: File,
-        ): String? {
-            if (!manifestFile.exists()) return null
-            val manifestDirPath = manifestFile.parentFile?.path ?: return null
-
-            val manifestText = manifestFile.readText(Charsets.UTF_8)
-            val configText = try {
-                parseManifestForConfig(manifestDirPath, manifestText)
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to parse Steam Input manifest config at ${manifestFile.path}")
-                return null
-            }
-            return configText ?: manifestText
-        }
-
-        private fun parseManifestForConfig(
-            manifestDirPath: String,
-            manifestText: String,
-        ): String? {
-            return try {
-                val kv = KeyValue.loadFromString(manifestText) ?: return null
-                val actionManifest = if (kv.name?.equals("Action Manifest", ignoreCase = true) == true) {
-                    kv
-                } else {
-                    kv["Action Manifest"]
-                }
-                if (actionManifest === KeyValue.INVALID) return null
-
-                val configs = actionManifest["configurations"]
-                if (configs === KeyValue.INVALID || configs.children.isEmpty()) {
-                    throw IllegalStateException("No configurations found in Action Manifest")
-                }
-
-                val preferredControllers = listOf(
-                    "controller_xboxone",
-                    "controller_steamcontroller_gordon",
-                    "controller_generic",
-                    "controller_xbox360",
-                )
-
-                for (controllerType in preferredControllers) {
-                    val controllerBlock = configs[controllerType]
-                    if (controllerBlock === KeyValue.INVALID) continue
-
-                    for (entry in controllerBlock.children) {
-                        val pathNode = entry["path"]
-                        val configPath = pathNode.asString().orEmpty()
-                        if (pathNode === KeyValue.INVALID || configPath.isEmpty()) continue
-
-                        val configFile = resolvePathCaseInsensitive(manifestDirPath, configPath)
-                            ?: continue
-                        return configFile.readText(Charsets.UTF_8)
-                    }
-                }
-
-                throw IllegalStateException("No valid controller configuration found in Action Manifest")
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to parse Steam Input manifest config")
-                null
-            }
-        }
-
-        private fun resolvePathCaseInsensitive(
-            baseDirPath: String,
-            relativePath: String,
-        ): File? {
-            val directFile = File(baseDirPath, relativePath)
-            if (directFile.exists()) return directFile
-
-            var currentDir = File(baseDirPath)
-            if (!currentDir.exists() || !currentDir.isDirectory) return null
-
-            val segments = relativePath.split('/', '\\').filter { it.isNotEmpty() }
-            for ((index, segment) in segments.withIndex()) {
-                val entries = currentDir.listFiles() ?: return null
-                val matched = entries.firstOrNull {
-                    it.name.equals(segment, ignoreCase = true)
-                } ?: return null
-
-                if (index == segments.lastIndex) {
-                    return matched
-                }
-
-                if (!matched.isDirectory) return null
-                currentDir = matched
-            }
-
-            return null
-        }
+        ): String? = inputManager.loadConfigFromManifest(manifestFile)
 
         private fun readBuiltInSteamInputTemplate(fileName: String): String? {
             val assets = instance?.assets ?: return null
@@ -1342,22 +976,22 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun resolveSteamControllerVdfText(appId: Int): String? {
             val config = getAppInfoOf(appId)?.config ?: return null
-            return when (config.steamControllerTemplateIndex) {
-                1 -> readDownloadedSteamInputTemplate(appId)
+            val route = inputManager.routeFor(config.steamControllerTemplateIndex)
+            return when (route.source) {
+                app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.Downloaded -> {
+                    readDownloadedSteamInputTemplate(appId)
+                }
 
-                13 -> {
+                app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.Manifest -> {
                     val manifestFile = resolveSteamInputManifestFile(appId, getAppDirPath(appId))
                         ?: return null
                     loadConfigFromManifest(manifestFile)
                 }
 
-                2, 12 -> readBuiltInSteamInputTemplate("controller_xboxone_gamepad_fps.vdf")
-
-                6 -> readBuiltInSteamInputTemplate("controller_xboxone_wasd.vdf")
-
-                4, 5 -> readBuiltInSteamInputTemplate("gamepad_joystick.vdf")
-
-                else -> readBuiltInSteamInputTemplate("gamepad+mouse.vdf")
+                app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.BuiltIn -> {
+                    val template = route.builtInTemplateName ?: return null
+                    readBuiltInSteamInputTemplate(template)
+                }
             }
         }
 
@@ -1376,59 +1010,24 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.d("depots is empty? %s", downloadableDepots.isEmpty())
             if (downloadableDepots.isEmpty()) return null
 
-            // Depots from Main game
-            val mainDepots = getMainAppDepots(appId, containerLanguage)
-            var mainAppDepots = mainDepots.filter { (_, depot) ->
-                depot.dlcAppId == INVALID_APP_ID
-            } + mainDepots.filter { (_, depot) ->
-                userSelectedDlcAppIds.contains(depot.dlcAppId) && depot.manifests.isNotEmpty()
-            }
+            val plan = installManager.buildDownloadPlan(
+                appId = appId,
+                downloadableDepots = downloadableDepots,
+                userSelectedDlcAppIds = userSelectedDlcAppIds,
+                mainDepots = getMainAppDepots(appId, containerLanguage),
+                downloadableDlcApps = getDownloadableDlcAppsOf(appId).orEmpty(),
+                installedDownloadedDepots = getInstalledApp(appId)?.downloadedDepots,
+                isUpdateOrVerify = isUpdateOrVerify,
+                invalidAppId = INVALID_APP_ID,
+                initialMainAppDlcIds = getMainAppDlcIdsWithoutProperDepotDlcIds(appId),
+            )
 
-            // Depots from DLC App
-            val dlcAppDepots = downloadableDepots.filter { (_, depot) ->
-                !mainAppDepots.map { it.key }.contains(depot.depotId) &&
-                    userSelectedDlcAppIds.contains(depot.dlcAppId) &&
-                    getDownloadableDlcAppsOf(appId).orEmpty().any { it.id == depot.dlcAppId } &&
-                    depot.manifests.isNotEmpty()
-            }
-
-            // Remove depots that are already downloaded (not for update/verify)
-            val appInfo = getInstalledApp(appId)
-            if (appInfo != null && !isUpdateOrVerify) {
-                mainAppDepots = mainAppDepots.filter { it.key !in appInfo.downloadedDepots }
-            }
-
-            // Combine main app and DLC depots
-            val selectedDepots = mainAppDepots + dlcAppDepots
-
-            val downloadingAppIds = CopyOnWriteArrayList<Int>()
-            val calculatedDlcAppIds = CopyOnWriteArrayList<Int>()
-
-            userSelectedDlcAppIds.forEach { dlcAppId ->
-                if (dlcAppDepots.filter { (_, depot) -> depot.dlcAppId == dlcAppId }.isNotEmpty()) {
-                    downloadingAppIds.add(dlcAppId)
-                    calculatedDlcAppIds.add(dlcAppId)
-                }
-            }
-
-            // Add main app ID if there are main app depots
-            if (mainAppDepots.isNotEmpty()) {
-                downloadingAppIds.add(appId)
-            }
-
-            // There are some apps, the dlc depots does not have dlcAppId in the data, need to set it back
-            val mainAppDlcIds = getMainAppDlcIdsWithoutProperDepotDlcIds(appId)
-
-            // If there are no DLC depots, download the main app only
-            if (dlcAppDepots.isEmpty()) {
-                // Because all dlcIDs are coming from main depots, need to add the dlcID to main app in order to save it to db after finish download
-                mainAppDlcIds.addAll(mainAppDepots.filter { it.value.dlcAppId != INVALID_APP_ID }.map { it.value.dlcAppId }.distinct())
-
-                // Refresh id List, so only main app is downloaded
-                calculatedDlcAppIds.clear()
-                downloadingAppIds.clear()
-                downloadingAppIds.add(appId)
-            }
+            val mainAppDepots = plan.mainAppDepots
+            val dlcAppDepots = plan.dlcAppDepots
+            val selectedDepots = plan.selectedDepots
+            val downloadingAppIds = CopyOnWriteArrayList(plan.downloadingAppIds)
+            val calculatedDlcAppIds = CopyOnWriteArrayList(plan.calculatedDlcAppIds)
+            val mainAppDlcIds = plan.mainAppDlcIds
 
             Timber.i("selectedDepots is empty? %s", selectedDepots.isEmpty())
 
@@ -1564,16 +1163,13 @@ class SteamService : Service(), IChallengeUrlChanged {
                         }
 
                         val appConfig = getAppInfoOf(appId)?.config
-                        if (appConfig?.steamControllerTemplateIndex == 1) {
-                            val controllerConfig = appConfig.steamControllerConfigDetails
-                                .let { selectSteamControllerConfig(it) }
-
-                            if (controllerConfig != null) {
-                                val appDirPath = getAppDirPath(appId)
-                                val publishedFileId = controllerConfig.publishedFileId
-
-                                runCatching {
-                                    // Build POST request to Steam GetPublishedFileDetails API
+                        if (appConfig != null) {
+                            inputManager.tryDownloadWorkshopControllerConfig(
+                                templateIndex = appConfig.steamControllerTemplateIndex,
+                                configDetails = appConfig.steamControllerConfigDetails,
+                                appDirPath = getAppDirPath(appId),
+                                configFileName = STEAM_CONTROLLER_CONFIG_FILENAME,
+                                fetchPublishedFileDetailsJson = { publishedFileId ->
                                     val requestBody = FormBody.Builder()
                                         .add("itemcount", "1")
                                         .add("publishedfileids[0]", publishedFileId.toString())
@@ -1590,94 +1186,32 @@ class SteamService : Service(), IChallengeUrlChanged {
                                     Net.http.newCall(request).execute().use { response ->
                                         if (!response.isSuccessful) {
                                             Timber.w(
-                                                "Failed to get steam controller config details " +
-                                                    "for $publishedFileId: ${response.code}",
+                                                "Failed to get steam controller config details for $publishedFileId: ${response.code}",
                                             )
-                                            return@use
+                                            return@use null
                                         }
-
-                                        val responseBody = response.body.string()
-                                        if (responseBody.isEmpty()) {
-                                            Timber.w("Empty response body for steam controller config %d", publishedFileId)
-                                            return@use
-                                        }
-
-                                        // Parse JSON object response
-                                        val responseJson = JSONObject(responseBody)
-                                        val responseData = responseJson.optJSONObject("response")
-                                        if (responseData == null) {
-                                            Timber.w(
-                                                "Steam controller config $publishedFileId " +
-                                                    "missing response data",
-                                            )
-                                            return@use
-                                        }
-
-                                        val result = responseData.optInt("result", 0)
-                                        val resultCount = responseData.optInt("resultcount", 0)
-                                        if (result != 1 || resultCount < 1) {
-                                            Timber.w(
-                                                "Steam controller config $publishedFileId " +
-                                                    "returned result=$result resultcount=$resultCount",
-                                            )
-                                            return@use
-                                        }
-
-                                        val fileDetails = responseData
-                                            .optJSONArray("publishedfiledetails")
-                                            ?.optJSONObject(0)
-                                        if (fileDetails == null) {
-                                            Timber.w(
-                                                "Steam controller config $publishedFileId " +
-                                                    "missing publishedfiledetails",
-                                            )
-                                            return@use
-                                        }
-
-                                        val fileUrl = fileDetails.optString("file_url", "").trim()
-
-                                        if (fileUrl.isEmpty()) {
-                                            Timber.w(
-                                                "Steam controller config $publishedFileId " +
-                                                    "missing fileUrl",
-                                            )
-                                            return@use
-                                        }
-
-                                        val configFile =
-                                            File(appDirPath, STEAM_CONTROLLER_CONFIG_FILENAME)
-
-                                        // Download the file
-                                        val downloadRequest = Request.Builder()
-                                            .url(fileUrl)
-                                            .get()
-                                            .build()
-
-                                        Net.http.newCall(downloadRequest).execute().use { downloadResponse ->
-                                            if (!downloadResponse.isSuccessful) {
-                                                Timber.w(
-                                                    "Failed to download steam controller config %d: %d",
-                                                    publishedFileId,
-                                                    downloadResponse.code,
-                                                )
-                                                return@use
-                                            }
-
-                                            val downloadBody = downloadResponse.body
-
-                                            configFile.outputStream().use { output ->
-                                                downloadBody.byteStream().use { input ->
-                                                    input.copyTo(output)
-                                                }
-                                            }
-
-                                            Timber.i("Downloaded steam controller config %d to %s", publishedFileId, configFile.path)
-                                        }
+                                        response.body.string()
                                     }
-                                }.onFailure { error ->
-                                    Timber.w(error, "Steam controller config download failed for %d", publishedFileId)
-                                }
-                            }
+                                },
+                                downloadFileBytes = { fileUrl ->
+                                    val downloadRequest = Request.Builder()
+                                        .url(fileUrl)
+                                        .get()
+                                        .build()
+
+                                    Net.http.newCall(downloadRequest).execute().use { downloadResponse ->
+                                        if (!downloadResponse.isSuccessful) {
+                                            Timber.w(
+                                                "Failed to download steam controller config from %s: %d",
+                                                fileUrl,
+                                                downloadResponse.code,
+                                            )
+                                            return@use null
+                                        }
+                                        downloadResponse.body.bytes()
+                                    }
+                                },
+                            )
                         }
 
                         // Signal that no more items will be added
@@ -1697,12 +1231,19 @@ class SteamService : Service(), IChallengeUrlChanged {
                         // Complete app download
                         if (mainAppDepots.isNotEmpty()) {
                             val mainAppDepotIds = mainAppDepots.keys.sorted()
-                            completeAppDownload(di, appId, mainAppDepotIds, mainAppDlcIds, appDirPath)
+                            completeAppDownload(
+                                di,
+                                appId,
+                                mainAppDepotIds,
+                                mainAppDlcIds,
+                                appDirPath,
+                            )
                         }
 
                         // Complete dlc app download
                         calculatedDlcAppIds.forEach { dlcAppId ->
-                            val dlcDepots = selectedDepots.filter { it.value.dlcAppId == dlcAppId }
+                            val dlcDepots = selectedDepots
+                                .filter { it.value.dlcAppId == dlcAppId }
                             val dlcDepotIds = dlcDepots.keys.sorted()
                             completeAppDownload(di, dlcAppId, dlcDepotIds, emptyList(), appDirPath)
                         }
@@ -2271,68 +1812,37 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         @Suppress("UNUSED")
         suspend fun checkDlcOwnershipViaPICSBatch(dlcAppIds: Set<Int>): Set<Int> {
-            if (dlcAppIds.isEmpty()) return emptySet()
-
             val steamApps = instance?._steamApps ?: return emptySet()
 
-            try {
-                // Step 1: Get access tokens for all DLC appIds at once
-                val tokens = steamApps.picsGetAccessTokens(
-                    appIds = dlcAppIds.toList(),
-                    packageIds = emptyList(),
-                ).await()
+            return catalogManager.checkDlcOwnershipViaPICSBatch(
+                dlcAppIds = dlcAppIds,
+                loadAccessTokens = { appIds ->
+                    val tokens = steamApps.picsGetAccessTokens(
+                        appIds = appIds,
+                        packageIds = emptyList(),
+                    ).await()
 
-                Timber.d("Access tokens response:")
-                Timber.d("  - Granted tokens: ${tokens.appTokens.keys}")
-                Timber.d("  - Denied tokens: ${tokens.appTokensDenied}")
-
-                // Step 2: Filter to only appIds that have tokens (we own them)
-                val ownedAppIds = tokens.appTokens.keys.filter { it in dlcAppIds }.toSet()
-
-                Timber.d("Owned appIds (from tokens): $ownedAppIds")
-
-                if (ownedAppIds.isEmpty()) {
-                    Timber.w("No owned DLCs found via access tokens")
-                    return emptySet()
-                }
-
-                // Step 3: Create PICSRequests for all owned appIds
-                val picsRequests = ownedAppIds.map { appId ->
-                    val token = tokens.appTokens[appId] ?: return@map null
-                    PICSRequest(id = appId, accessToken = token)
-                }.filterNotNull()
-
-                Timber.d("Created ${picsRequests.size} PICS requests")
-
-                if (picsRequests.isEmpty()) return emptySet()
-
-                // Step 4: Query PICS for all apps at once (batch them)
-                // Note: Steam has limits, so you might need to chunk if > 100 apps
-                val chunkSize = 100
-                val allOwnedAppIds = mutableSetOf<Int>()
-
-                picsRequests.chunked(chunkSize).forEach { chunk ->
-                    Timber.d("Querying PICS chunk with ${chunk.size} apps")
+                    Timber.d("Access tokens response:")
+                    Timber.d("  - Granted tokens: ${tokens.appTokens.keys}")
+                    Timber.d("  - Denied tokens: ${tokens.appTokensDenied}")
+                    tokens.appTokens
+                },
+                loadPicsProductInfo = { requests ->
+                    Timber.d("Querying PICS chunk with ${requests.size} apps")
                     val callback = steamApps.picsGetProductInfo(
-                        apps = chunk,
+                        apps = requests,
                         packages = emptyList(),
                     ).await()
 
-                    // Collect all appIds that returned results
-                    callback.results.forEach { picsCallback ->
-                        val returnedAppIds = picsCallback.apps.keys
-                        Timber.d("  PICS result: ${returnedAppIds.size} apps returned")
-                        allOwnedAppIds.addAll(picsCallback.apps.keys)
-                    }
-                }
-
-                Timber.i("Final owned DLC appIds: $allOwnedAppIds")
-                Timber.i("Total owned: ${allOwnedAppIds.size} out of ${dlcAppIds.size} checked")
-
-                return allOwnedAppIds
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to check DLC ownership via PICS batch for ${dlcAppIds.size} appIds")
-                return emptySet()
+                    val returnedAppIds = callback.results.flatMap { picsCallback ->
+                        Timber.d("  PICS result: ${picsCallback.apps.keys.size} apps returned")
+                        picsCallback.apps.keys
+                    }.toSet()
+                    returnedAppIds
+                },
+            ).also { ownedIds ->
+                Timber.i("Final owned DLC appIds: $ownedIds")
+                Timber.i("Total owned: ${ownedIds.size} out of ${dlcAppIds.size} checked")
             }
         }
 
@@ -2974,7 +2484,9 @@ class SteamService : Service(), IChallengeUrlChanged {
                 PrefManager.lastPICSChangeNumber = changesSince.currentChangeNumber
 
                 Timber.d(
-                    "picsGetChangesSince:\n\tlastChangeNumber: %s\n\tcurrentChangeNumber: %s\n\tisRequiresFullUpdate: %s\n\tisRequiresFullAppUpdate: %s\n\tisRequiresFullPackageUpdate: %s\n\tappChangesCount: %s\n\tpkgChangesCount: %s",
+                    "picsGetChangesSince:\n\tlastChangeNumber: %s\n\tcurrentChangeNumber: %s\n" +
+                        "\tisRequiresFullUpdate: %s\n\tisRequiresFullAppUpdate: %s\n" +
+                        "\tisRequiresFullPackageUpdate: %s\n\tappChangesCount: %s\n\tpkgChangesCount: %s",
                     changesSince.lastChangeNumber,
                     changesSince.currentChangeNumber,
                     changesSince.isRequiresFullUpdate,

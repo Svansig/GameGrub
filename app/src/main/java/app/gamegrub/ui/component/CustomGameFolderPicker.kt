@@ -1,4 +1,4 @@
-package app.gamegrub.ui.components
+package app.gamegrub.ui.component
 
 import android.content.Context
 import android.net.Uri
@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import app.gamegrub.R
 import app.gamegrub.utils.game.CustomGameScanner
+import java.io.File
 
 /**
  * Converts a document tree URI to a file path.
@@ -43,7 +44,7 @@ fun getPathFromTreeUri(uri: Uri?): String? {
                 } else {
                     "/storage/$volumeId/$path"
                 }
-                val file = java.io.File(possiblePath)
+                val file = File(possiblePath)
                 if (file.exists() || file.parentFile?.exists() == true) {
                     return possiblePath
                 }

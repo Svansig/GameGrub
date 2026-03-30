@@ -67,6 +67,7 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.AchievementOverlay
+import app.gamegrub.ui.component.BootingSplash
 import app.gamegrub.ui.component.ConnectionStatusBanner
 import app.gamegrub.ui.component.dialog.ContainerConfigDialog
 import app.gamegrub.ui.component.dialog.GameFeedbackDialog
@@ -74,7 +75,6 @@ import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
 import app.gamegrub.ui.component.dialog.state.GameFeedbackDialogState
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
-import app.gamegrub.ui.components.BootingSplash
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.enums.Orientation

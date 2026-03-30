@@ -73,8 +73,8 @@ import app.gamegrub.ui.component.GamepadAction
 import app.gamegrub.ui.component.GamepadActionBar
 import app.gamegrub.ui.component.GamepadButton
 import app.gamegrub.ui.component.LibraryActions
-import app.gamegrub.ui.components.rememberCustomGameFolderPicker
-import app.gamegrub.ui.components.requestPermissionsForPath
+import app.gamegrub.ui.component.rememberCustomGameFolderPicker
+import app.gamegrub.ui.component.requestPermissionsForPath
 import app.gamegrub.ui.data.LibraryState
 import app.gamegrub.ui.enums.AppFilter
 import app.gamegrub.ui.enums.LibraryTab
@@ -100,6 +100,7 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import app.gamegrub.utils.game.CustomGameScanner
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -381,7 +382,7 @@ private fun LibraryScreenContent(
             // When a folder is selected via OpenDocumentTree, the user has already granted
             // URI permissions for that specific folder. We should verify we can access it
             // rather than checking for broad storage permissions.
-            val folder = java.io.File(path)
+            val folder = File(path)
             val canAccess = try {
                 folder.exists() && (folder.isDirectory && folder.canRead())
             } catch (e: Exception) {

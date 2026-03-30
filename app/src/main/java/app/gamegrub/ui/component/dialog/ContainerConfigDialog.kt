@@ -51,8 +51,8 @@ import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
-import app.gamegrub.ui.components.rememberCustomGameFolderPicker
-import app.gamegrub.ui.components.requestPermissionsForPath
+import app.gamegrub.ui.component.rememberCustomGameFolderPicker
+import app.gamegrub.ui.component.requestPermissionsForPath
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.PaddingUtils
 import app.gamegrub.ui.utils.SnackbarManager

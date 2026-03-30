@@ -1,4 +1,4 @@
-package app.gamegrub.ui.components
+package app.gamegrub.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade

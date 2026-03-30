@@ -61,4 +61,3 @@ internal object CustomGameLaunchCommandBuilder : StoreLaunchCommandBuilder {
         return "winhandler.exe $args"
     }
 }
-

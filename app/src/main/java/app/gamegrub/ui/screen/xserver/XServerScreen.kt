@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.hardware.input.InputManager
 import android.view.Gravity
 import android.view.InputDevice
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -1599,7 +1598,6 @@ fun XServerScreen(
     // }
 }
 
-
 private fun setupXEnvironment(
     context: Context,
     appId: String,
@@ -1634,4 +1632,3 @@ private fun setupXEnvironment(
         navigateBack = navigateBack,
     )
 }
-

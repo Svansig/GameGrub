@@ -31,4 +31,3 @@ object NotificationPermissionGate {
         PrefManager.notificationPermissionPrompted = true
     }
 }
-

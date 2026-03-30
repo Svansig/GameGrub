@@ -220,4 +220,3 @@ internal object AmazonLaunchCommandBuilder : StoreLaunchCommandBuilder {
         val args: List<String> = emptyList(),
     )
 }
-

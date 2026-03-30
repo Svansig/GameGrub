@@ -37,4 +37,3 @@ internal object XServerLifecycleEventBindings {
         }
     }
 }
-

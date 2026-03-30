@@ -17,15 +17,17 @@ import okio.IOException
 import timber.log.Timber
 
 suspend fun Call.await(): Response = suspendCancellableCoroutine { cont ->
-    enqueue(object : okhttp3.Callback {
-        override fun onResponse(call: Call, response: Response) {
-            cont.resume(response)
-        }
+    enqueue(
+        object : okhttp3.Callback {
+            override fun onResponse(call: Call, response: Response) {
+                cont.resume(response)
+            }
 
-        override fun onFailure(call: Call, e: IOException) {
-            cont.resumeWithException(e)
-        }
-    })
+            override fun onFailure(call: Call, e: IOException) {
+                cont.resumeWithException(e)
+            }
+        },
+    )
     cont.invokeOnCancellation { cancel() }
 }
 

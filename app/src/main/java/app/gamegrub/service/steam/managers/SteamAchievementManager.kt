@@ -10,9 +10,10 @@ import app.gamegrub.service.steam.di.SteamUserClient
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatsAchievementsGenerator
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.steam.SteamUtils
 import com.winlator.xenvironment.ImageFs
-import `in`.dragonbra.javasteam.enums.EResult
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,9 +22,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamAchievementManager @Inject constructor(
@@ -116,14 +114,14 @@ class SteamAchievementManager @Inject constructor(
     }
 
     private fun findSteamSettingsDir(context: Context, appId: Int): String? {
-        val appDir: java.io.File = java.io.File(SteamService.getAppDirPath(appId), "steam_settings")
-        val appMapping: java.io.File = java.io.File(appDir, "achievement_name_to_block.json")
+        val appDir: File = File(SteamService.getAppDirPath(appId), "steam_settings")
+        val appMapping: File = File(appDir, "achievement_name_to_block.json")
         if (appMapping.isFile) {
             return appDir.path
         }
         val container = ContainerUtils.getContainer(context, "STEAM_$appId")
-        val coldClient: java.io.File = java.io.File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steam_settings")
-        if (java.io.File(coldClient, "achievement_name_to_block.json").isFile) {
+        val coldClient: File = File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steam_settings")
+        if (File(coldClient, "achievement_name_to_block.json").isFile) {
             return coldClient.path
         }
         return null

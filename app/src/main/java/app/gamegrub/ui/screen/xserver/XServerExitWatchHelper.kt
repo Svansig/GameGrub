@@ -118,4 +118,3 @@ internal object XServerExitWatchHelper {
         }
     }
 }
-

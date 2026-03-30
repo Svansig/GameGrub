@@ -99,8 +99,8 @@ import app.gamegrub.ui.utils.PlatformLogoutCallbacks
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import app.gamegrub.utils.game.CustomGameScanner
-import kotlinx.coroutines.launch
 import java.io.File
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

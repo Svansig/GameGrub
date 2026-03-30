@@ -1,7 +1,7 @@
 package app.gamegrub.service.steam.managers
 
-import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.CachedLicense
+import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.OwnedGames
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamLicense
@@ -19,13 +19,13 @@ import app.gamegrub.utils.storage.MarkerUtils
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 @Singleton
 class SteamLibraryManager @Inject constructor(

@@ -34,4 +34,3 @@ internal object XServerExitTriggerEventCoordinator {
         )
     }
 }
-

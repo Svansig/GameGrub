@@ -201,4 +201,3 @@ object SteamClientFilesManager {
         Timber.i("Finished restoreOriginalExecutable for appId: $steamAppId. Restored $restoredCount executable(s)")
     }
 }
-

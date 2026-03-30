@@ -25,12 +25,12 @@ object SteamSaveLocationManager {
 
             val sourceRelativePath = service?.userManager?.substituteSteamIdTokens(mapping.sourceRelativePath)
                 ?: mapping.sourceRelativePath
-                .replace("{64BitSteamID}", steamId64)
-                .replace("{Steam3AccountID}", steam3AccountId)
+                    .replace("{64BitSteamID}", steamId64)
+                    .replace("{Steam3AccountID}", steam3AccountId)
             val targetRelativePath = service?.userManager?.substituteSteamIdTokens(mapping.targetRelativePath)
                 ?: mapping.targetRelativePath
-                .replace("{64BitSteamID}", steamId64)
-                .replace("{Steam3AccountID}", steam3AccountId)
+                    .replace("{64BitSteamID}", steamId64)
+                    .replace("{Steam3AccountID}", steam3AccountId)
 
             val sourcePath = File(basePath, sourceRelativePath)
             val targetPath = File(basePath, targetRelativePath)
@@ -58,4 +58,3 @@ object SteamSaveLocationManager {
         }
     }
 }
-

@@ -78,4 +78,3 @@ internal object XServerInputControlsOverlayHelper {
         GameGrubApp.inputControlsView?.invalidate()
     }
 }
-

@@ -2,12 +2,6 @@ package app.gamegrub.service.steam.di
 
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
 import `in`.dragonbra.javasteam.steam.authentication.IChallengeUrlChanged
-import `in`.dragonbra.javasteam.steam.handlers.steamapps.SteamApps
-import `in`.dragonbra.javasteam.steam.handlers.steamcloud.SteamCloud
-import `in`.dragonbra.javasteam.steam.handlers.steamfriends.SteamFriends
-import `in`.dragonbra.javasteam.steam.handlers.steamuser.SteamUser
-import `in`.dragonbra.javasteam.steam.handlers.steamuserstats.SteamUserStats
-import `in`.dragonbra.javasteam.steam.steamclient.SteamClient
 import `in`.dragonbra.javasteam.types.SteamID
 import kotlinx.coroutines.flow.StateFlow
 
@@ -31,7 +25,7 @@ enum class ConnectionState {
     Connected,
     LoggingIn,
     LoggedIn,
-    Error
+    Error,
 }
 
 /**

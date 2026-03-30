@@ -16,11 +16,9 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Singleton
@@ -110,7 +108,7 @@ class SteamAuthService @Inject constructor(
             preferences.accessToken = result.accessToken
             preferences.refreshToken = result.refreshToken
             // Complete the flow with a real Steam logon so callbacks (licenses/PICS/library) can run.
-            SteamService.Companion.completeLoginWithAuthTokens(
+            SteamService.completeLoginWithAuthTokens(
                 username = result.username,
                 accessToken = result.accessToken,
                 refreshToken = result.refreshToken,

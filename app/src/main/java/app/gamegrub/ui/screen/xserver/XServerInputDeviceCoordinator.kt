@@ -61,4 +61,3 @@ internal object XServerInputDeviceCoordinator {
             !uiGuardState.hasUpdatedScreenGamepad
     }
 }
-

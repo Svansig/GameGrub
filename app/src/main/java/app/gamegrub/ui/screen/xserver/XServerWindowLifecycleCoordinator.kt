@@ -165,4 +165,3 @@ internal class XServerWindowLifecycleCoordinator(
         )
     }
 }
-

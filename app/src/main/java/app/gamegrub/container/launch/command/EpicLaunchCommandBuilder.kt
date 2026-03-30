@@ -85,4 +85,3 @@ internal object EpicLaunchCommandBuilder : StoreLaunchCommandBuilder {
         return launchCommand
     }
 }
-

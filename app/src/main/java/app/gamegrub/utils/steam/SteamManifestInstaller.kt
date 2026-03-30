@@ -149,4 +149,3 @@ object SteamManifestInstaller {
         return size
     }
 }
-

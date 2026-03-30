@@ -48,5 +48,3 @@ object StoragePermissionGate {
         return path.contains("/Android/data/${context.packageName}") || path.startsWith(context.dataDir.path)
     }
 }
-
-

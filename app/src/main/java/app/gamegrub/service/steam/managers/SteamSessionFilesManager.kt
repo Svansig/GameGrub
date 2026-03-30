@@ -250,11 +250,7 @@ class SteamSessionFilesManager @Inject constructor() {
                     try {
                         val dToken = SteamTokenHelper.deobfuscate(connectCacheValue.trimEnd(NULL_CHAR), mtbf.toLong())
                             .trimEnd(NULL_CHAR)
-                        if (JWT(dToken).isExpired(TOKEN_EXPIRE_TIME)) {
-                            shouldWriteConfig = true
-                        } else {
-                            shouldWriteConfig = false
-                        }
+                        shouldWriteConfig = JWT(dToken).isExpired(TOKEN_EXPIRE_TIME)
                     } catch (_: Exception) {
                         shouldWriteConfig = true
                     }
@@ -368,5 +364,3 @@ class SteamSessionFilesManager @Inject constructor() {
         )
     }
 }
-
-

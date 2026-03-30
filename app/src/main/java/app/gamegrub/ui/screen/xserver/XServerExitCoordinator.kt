@@ -78,5 +78,3 @@ internal object XServerExitCoordinator {
         }
     }
 }
-
-

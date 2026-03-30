@@ -33,7 +33,6 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
-import app.gamegrub.utils.game.CustomGameCache
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.general.unaccent
 import com.winlator.core.GPUInformation

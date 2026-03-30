@@ -48,10 +48,12 @@ internal object XServerInputEventDispatchCoordinator {
             }
         }
 
-        if ((uiGuardState.showElementEditor ||
-                uiGuardState.keepPausedForEditor ||
-                uiGuardState.showQuickMenu ||
-                uiGuardState.isEditMode) && (isGamepad || isKeyboard)
+        if ((
+                uiGuardState.showElementEditor ||
+                    uiGuardState.keepPausedForEditor ||
+                    uiGuardState.showQuickMenu ||
+                    uiGuardState.isEditMode
+                ) && (isGamepad || isKeyboard)
         ) {
             return false
         }
@@ -93,10 +95,12 @@ internal object XServerInputEventDispatchCoordinator {
         onHideInputControlsRequested: () -> Unit,
         onTryCapturePointer: () -> Unit,
     ): Boolean {
-        if ((uiGuardState.showElementEditor ||
-                uiGuardState.keepPausedForEditor ||
-                uiGuardState.showQuickMenu ||
-                uiGuardState.isEditMode) && isGamepad
+        if ((
+                uiGuardState.showElementEditor ||
+                    uiGuardState.keepPausedForEditor ||
+                    uiGuardState.showQuickMenu ||
+                    uiGuardState.isEditMode
+                ) && isGamepad
         ) {
             return false
         }
@@ -149,4 +153,3 @@ internal object XServerInputEventDispatchCoordinator {
         }
     }
 }
-

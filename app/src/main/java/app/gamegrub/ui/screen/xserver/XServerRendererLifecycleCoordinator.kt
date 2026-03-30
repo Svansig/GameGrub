@@ -24,6 +24,7 @@ internal object XServerRendererLifecycleCoordinator {
         fun syncRendererToCurrentLifecycleState() {
             when (resolveRendererSyncAction(xServerView.isAttachedToWindow, lifecycleOwner.lifecycle.currentState)) {
                 RendererSyncAction.NONE -> Unit
+
                 RendererSyncAction.RESUME -> {
                     Timber.d("Synchronizing XServerView renderer to current resumed lifecycle state")
                     xServerView.onResume()
@@ -81,4 +82,3 @@ internal object XServerRendererLifecycleCoordinator {
         }
     }
 }
-

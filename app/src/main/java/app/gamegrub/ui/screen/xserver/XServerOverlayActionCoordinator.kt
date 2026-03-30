@@ -272,4 +272,3 @@ internal object XServerOverlayActionCoordinator {
         onAreControlsVisibleChanged(!areControlsVisible)
     }
 }
-

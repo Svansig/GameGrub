@@ -81,4 +81,3 @@ internal object SteamLaunchCommandBuilder : StoreLaunchCommandBuilder {
         return "winhandler.exe $args"
     }
 }
-

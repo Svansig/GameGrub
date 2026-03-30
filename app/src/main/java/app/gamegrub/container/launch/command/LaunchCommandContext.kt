@@ -25,4 +25,3 @@ internal data class LaunchCommandContext(
     val guestProgramLauncherComponent: GuestProgramLauncherComponent,
     val gameSource: GameSource,
 )
-

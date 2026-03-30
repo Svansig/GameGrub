@@ -706,7 +706,6 @@ object SteamUtils {
         }
     }
 
-
     private fun skipFirstTimeSteamSetup(rootDir: File?) {
         val systemRegFile = File(rootDir, ImageFs.WINEPREFIX + "/system.reg")
         val redistributables = listOf(
@@ -838,7 +837,6 @@ object SteamUtils {
             Timber.e(e, "Failed to update or modify local config")
         }
     }
-
 
     /**
      * Ensures save locations for games that require special handling (e.g., symlinks)

@@ -51,4 +51,3 @@ internal object XServerProcessMatcher {
         return (essentialServices + coreWineProcesses).toSet()
     }
 }
-

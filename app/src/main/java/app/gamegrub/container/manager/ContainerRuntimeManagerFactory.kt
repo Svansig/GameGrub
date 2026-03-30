@@ -11,4 +11,3 @@ internal object ContainerRuntimeManagerFactory {
         return WinlatorContainerRuntimeManager(ContainerManager(context))
     }
 }
-

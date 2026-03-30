@@ -36,4 +36,3 @@ internal object GogLaunchCommandBuilder : StoreLaunchCommandBuilder {
         return "winhandler.exe $gogCommand"
     }
 }
-

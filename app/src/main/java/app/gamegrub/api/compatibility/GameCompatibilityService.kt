@@ -3,7 +3,6 @@ package app.gamegrub.api.compatibility
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.R
-import app.gamegrub.api.compatibility.GameCompatibilityCache
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.network.Net
@@ -43,16 +42,16 @@ class GameCompatibilityService @Inject constructor(
     fun getCompatibilityMessageFromResponse(context: Context, response: GameCompatibilityResponse): CompatibilityMessage {
         return when {
             response.totalPlayableCount > 0 && response.gpuPlayableCount > 0 ->
-                CompatibilityMessage(context.getString(R.string.best_config_exact_gpu_match), Color.Companion.Green)
+                CompatibilityMessage(context.getString(R.string.best_config_exact_gpu_match), Color.Green)
 
             response.gpuPlayableCount == 0 && response.totalPlayableCount > 0 ->
-                CompatibilityMessage(context.getString(R.string.best_config_fallback_match), Color.Companion.Yellow)
+                CompatibilityMessage(context.getString(R.string.best_config_fallback_match), Color.Yellow)
 
             response.isNotWorking ->
-                CompatibilityMessage(context.getString(R.string.library_not_compatible), Color.Companion.Red)
+                CompatibilityMessage(context.getString(R.string.library_not_compatible), Color.Red)
 
             else ->
-                CompatibilityMessage(context.getString(R.string.library_compatibility_unknown), Color.Companion.Gray)
+                CompatibilityMessage(context.getString(R.string.library_compatibility_unknown), Color.Gray)
         }
     }
 
@@ -91,11 +90,11 @@ class GameCompatibilityService @Inject constructor(
 
         val uncached = gameNames.filter { it !in result }
         if (uncached.isEmpty()) {
-            Timber.Forest.tag("GameCompatibilityService").d("All ${gameNames.size} games from cache")
+            Timber.tag("GameCompatibilityService").d("All ${gameNames.size} games from cache")
             return@withContext result
         }
 
-        Timber.Forest.tag("GameCompatibilityService").d("Cache hit: ${result.size}, fetching: ${uncached.size}")
+        Timber.tag("GameCompatibilityService").d("Cache hit: ${result.size}, fetching: ${uncached.size}")
 
         val fetched = fetchFromApi(uncached, gpuName)
         if (fetched != null) {
@@ -144,7 +143,7 @@ class GameCompatibilityService @Inject constructor(
 
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    Timber.Forest.tag("GameCompatibilityService").w("API request failed - HTTP ${response.code}")
+                    Timber.tag("GameCompatibilityService").w("API request failed - HTTP ${response.code}")
                     return@withContext null
                 }
 
@@ -170,11 +169,11 @@ class GameCompatibilityService @Inject constructor(
                     result[gameName] = compatibilityResponse
                 }
 
-                Timber.Forest.tag("GameCompatibilityService").d("Fetched compatibility for ${result.size} games")
+                Timber.tag("GameCompatibilityService").d("Fetched compatibility for ${result.size} games")
                 result
             }
         } catch (e: Exception) {
-            Timber.Forest.tag("GameCompatibilityService").e(e, "Error fetching compatibility data: ${e.message}")
+            Timber.tag("GameCompatibilityService").e(e, "Error fetching compatibility data: ${e.message}")
             null
         }
     }

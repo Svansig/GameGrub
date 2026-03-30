@@ -8,15 +8,15 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 import timber.log.Timber
-import javax.inject.Singleton
 
 /**
  * Utility class for fetching game images from SteamGridDB API.
@@ -56,13 +56,13 @@ class SteamGridDB @Inject constructor() {
      */
     suspend fun searchGame(gameName: String): GameSearchResult? = withContext(Dispatchers.IO) {
         if (!PrefManager.fetchSteamGridDBImages) {
-            Timber.Forest.tag("SteamGridDB").d("Image fetching is disabled in settings")
+            Timber.tag("SteamGridDB").d("Image fetching is disabled in settings")
             return@withContext null
         }
 
         val apiKey = getApiKey()
         if (apiKey == null) {
-            Timber.Forest.tag("SteamGridDB")
+            Timber.tag("SteamGridDB")
                 .i("Skipping image fetch for '$gameName' - API key not configured")
             return@withContext null
         }
@@ -79,7 +79,7 @@ class SteamGridDB @Inject constructor() {
             val response = httpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Search failed for '$gameName' - HTTP ${response.code}")
                 return@withContext null
             }
@@ -88,14 +88,14 @@ class SteamGridDB @Inject constructor() {
             val json = JSONObject(body)
 
             if (!json.optBoolean("success", false)) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Search API returned success=false for '$gameName'")
                 return@withContext null
             }
 
             val dataArray = json.optJSONArray("data")
             if (dataArray == null || dataArray.length() == 0) {
-                Timber.Forest.tag("SteamGridDB").d("No results found for '$gameName'")
+                Timber.tag("SteamGridDB").d("No results found for '$gameName'")
                 return@withContext null
             }
 
@@ -106,15 +106,15 @@ class SteamGridDB @Inject constructor() {
             val releaseDate = firstMatch.optLong("release_date", 0L)
 
             if (gameId == 0) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Invalid game ID in search results for '$gameName'")
                 return@withContext null
             }
 
-            Timber.Forest.tag("SteamGridDB").i("Found game '$name' (ID: $gameId) for '$gameName'")
+            Timber.tag("SteamGridDB").i("Found game '$name' (ID: $gameId) for '$gameName'")
             return@withContext GameSearchResult(gameId, name, releaseDate)
         } catch (e: Exception) {
-            Timber.Forest.tag("SteamGridDB").e(e, "Error searching for game '$gameName'")
+            Timber.tag("SteamGridDB").e(e, "Error searching for game '$gameName'")
             return@withContext null
         }
     }
@@ -139,7 +139,7 @@ class SteamGridDB @Inject constructor() {
                 }
                 return@withContext null
             } catch (e: Exception) {
-                Timber.Forest.tag("SteamGridDB").w(e, "Failed to determine image orientation")
+                Timber.tag("SteamGridDB").w(e, "Failed to determine image orientation")
                 return@withContext null
             }
         }
@@ -162,7 +162,7 @@ class SteamGridDB @Inject constructor() {
             val imageResponse = httpClient.newCall(imageRequest).execute()
 
             if (!imageResponse.isSuccessful) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Failed to download image from $imageUrl - HTTP ${imageResponse.code}")
                 return@withContext null
             }
@@ -186,11 +186,11 @@ class SteamGridDB @Inject constructor() {
             // Save to file
             FileOutputStream(outputFile).use { it.write(imageBytes) }
 
-            Timber.Forest.tag("SteamGridDB")
+            Timber.tag("SteamGridDB")
                 .i("Saved image to ${outputFile.absolutePath} (horizontal: $isHorizontal)")
             return@withContext Pair(outputFile.absolutePath, isHorizontal)
         } catch (e: Exception) {
-            Timber.Forest.tag("SteamGridDB").e(e, "Error downloading image from $imageUrl")
+            Timber.tag("SteamGridDB").e(e, "Error downloading image from $imageUrl")
             return@withContext null
         }
     }
@@ -218,7 +218,7 @@ class SteamGridDB @Inject constructor() {
             val response = httpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Failed to fetch grids for game $gameId - HTTP ${response.code}")
                 return@withContext Pair(null, null)
             }
@@ -227,14 +227,14 @@ class SteamGridDB @Inject constructor() {
             val json = JSONObject(body)
 
             if (!json.optBoolean("success", false)) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("API returned success=false for grids (game $gameId)")
                 return@withContext Pair(null, null)
             }
 
             val dataArray = json.optJSONArray("data")
             if (dataArray == null || dataArray.length() == 0) {
-                Timber.Forest.tag("SteamGridDB").d("No grid images found for game $gameId")
+                Timber.tag("SteamGridDB").d("No grid images found for game $gameId")
                 return@withContext Pair(null, null)
             }
 
@@ -265,7 +265,7 @@ class SteamGridDB @Inject constructor() {
                 val imageResponse = httpClient.newCall(imageRequest).execute()
 
                 if (!imageResponse.isSuccessful) {
-                    Timber.Forest.tag("SteamGridDB")
+                    Timber.tag("SteamGridDB")
                         .w("Failed to download grid image from $imageUrl - HTTP ${imageResponse.code}")
                     continue
                 }
@@ -282,10 +282,10 @@ class SteamGridDB @Inject constructor() {
                     try {
                         FileOutputStream(heroFile).use { it.write(imageBytes) }
                         heroPath = heroFile.absolutePath
-                        Timber.Forest.tag("SteamGridDB")
+                        Timber.tag("SteamGridDB")
                             .i("Found horizontal grid for hero: ${heroFile.name}")
                     } catch (e: Exception) {
-                        Timber.Forest.tag("SteamGridDB").e(e, "Failed to save hero image")
+                        Timber.tag("SteamGridDB").e(e, "Failed to save hero image")
                     }
                 } else if (isHorizontal == false && capsulePath == null) {
                     // This is vertical - use for capsule
@@ -293,10 +293,10 @@ class SteamGridDB @Inject constructor() {
                     try {
                         FileOutputStream(capsuleFile).use { it.write(imageBytes) }
                         capsulePath = capsuleFile.absolutePath
-                        Timber.Forest.tag("SteamGridDB")
+                        Timber.tag("SteamGridDB")
                             .i("Found vertical grid for capsule: ${capsuleFile.name}")
                     } catch (e: Exception) {
-                        Timber.Forest.tag("SteamGridDB").e(e, "Failed to save capsule image")
+                        Timber.tag("SteamGridDB").e(e, "Failed to save capsule image")
                     }
                 }
                 // If we don't need this image, we just skip it (no temp file to delete)
@@ -309,17 +309,17 @@ class SteamGridDB @Inject constructor() {
 
             // Log if we didn't find both images
             if (heroPath == null) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("No horizontal grid found for hero (game $gameId)")
             }
             if (capsulePath == null) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("No vertical grid found for capsule (game $gameId)")
             }
 
             return@withContext Pair(heroPath, capsulePath)
         } catch (e: Exception) {
-            Timber.Forest.tag("SteamGridDB").e(e, "Error fetching grids for game $gameId")
+            Timber.tag("SteamGridDB").e(e, "Error fetching grids for game $gameId")
             return@withContext Pair(null, null)
         }
     }
@@ -345,7 +345,7 @@ class SteamGridDB @Inject constructor() {
                 "logo" -> LOGOS_ENDPOINT
 
                 else -> {
-                    Timber.Forest.tag("SteamGridDB")
+                    Timber.tag("SteamGridDB")
                         .w("Unknown image type: $imageType (grids should use fetchGrids)")
                     return@withContext null
                 }
@@ -361,7 +361,7 @@ class SteamGridDB @Inject constructor() {
             val response = httpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Failed to fetch $imageType for game $gameId - HTTP ${response.code}")
                 return@withContext null
             }
@@ -370,14 +370,14 @@ class SteamGridDB @Inject constructor() {
             val json = JSONObject(body)
 
             if (!json.optBoolean("success", false)) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("API returned success=false for $imageType (game $gameId)")
                 return@withContext null
             }
 
             val dataArray = json.optJSONArray("data")
             if (dataArray == null || dataArray.length() == 0) {
-                Timber.Forest.tag("SteamGridDB").d("No $imageType images found for game $gameId")
+                Timber.tag("SteamGridDB").d("No $imageType images found for game $gameId")
                 return@withContext null
             }
 
@@ -386,7 +386,7 @@ class SteamGridDB @Inject constructor() {
             val imageUrl = firstImage.optString("url", "")
 
             if (imageUrl.isEmpty()) {
-                Timber.Forest.tag("SteamGridDB").w("No URL in $imageType data for game $gameId")
+                Timber.tag("SteamGridDB").w("No URL in $imageType data for game $gameId")
                 return@withContext null
             }
 
@@ -410,7 +410,7 @@ class SteamGridDB @Inject constructor() {
             val imageResponse = httpClient.newCall(imageRequest).execute()
 
             if (!imageResponse.isSuccessful) {
-                Timber.Forest.tag("SteamGridDB")
+                Timber.tag("SteamGridDB")
                     .w("Failed to download image from $imageUrl - HTTP ${imageResponse.code}")
                 return@withContext null
             }
@@ -420,11 +420,11 @@ class SteamGridDB @Inject constructor() {
             // Save to file
             FileOutputStream(outputFile).use { it.write(imageBytes) }
 
-            Timber.Forest.tag("SteamGridDB")
+            Timber.tag("SteamGridDB")
                 .i("Saved $imageType image to ${outputFile.absolutePath}")
             return@withContext outputFile.absolutePath
         } catch (e: Exception) {
-            Timber.Forest.tag("SteamGridDB").e(e, "Error fetching $imageType for game $gameId")
+            Timber.tag("SteamGridDB").e(e, "Error fetching $imageType for game $gameId")
             return@withContext null
         }
     }
@@ -442,19 +442,19 @@ class SteamGridDB @Inject constructor() {
     ): ImageFetchResult = withContext(Dispatchers.IO) {
         val apiKey = getApiKey()
         if (apiKey == null) {
-            Timber.Forest.tag("SteamGridDB")
+            Timber.tag("SteamGridDB")
                 .i("Skipping image fetch for '$gameName' - API key not configured")
             return@withContext ImageFetchResult(null, null, null, null, null)
         }
 
         if (!PrefManager.fetchSteamGridDBImages) {
-            Timber.Forest.tag("SteamGridDB").d("Image fetching is disabled in settings")
+            Timber.tag("SteamGridDB").d("Image fetching is disabled in settings")
             return@withContext ImageFetchResult(null, null, null, null, null)
         }
 
         val gameFolder = File(gameFolderPath)
         if (!gameFolder.exists() || !gameFolder.isDirectory) {
-            Timber.Forest.tag("SteamGridDB").w("Game folder does not exist: $gameFolderPath")
+            Timber.tag("SteamGridDB").w("Game folder does not exist: $gameFolderPath")
             return@withContext ImageFetchResult(null, null, null, null, null)
         }
 
@@ -500,7 +500,7 @@ class SteamGridDB @Inject constructor() {
         }?.isNotEmpty() == true
 
         if (existingGridHero && existingGridCapsule && existingHero && existingLogo) {
-            Timber.Forest.tag("SteamGridDB")
+            Timber.tag("SteamGridDB")
                 .d("All images already exist for '$gameName', skipping fetch")
             val gridHeroFile = gameFolder.listFiles { file ->
                 file.isFile &&
@@ -626,7 +626,7 @@ class SteamGridDB @Inject constructor() {
                 releaseDate = if (searchResult.releaseDate > 0) searchResult.releaseDate else null,
             )
         } catch (e: Exception) {
-            Timber.Forest.tag("SteamGridDB").w(e, "Failed to update metadata after fetch")
+            Timber.tag("SteamGridDB").w(e, "Failed to update metadata after fetch")
         }
 
         return@withContext ImageFetchResult(

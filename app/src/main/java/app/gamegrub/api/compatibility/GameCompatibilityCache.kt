@@ -57,7 +57,7 @@ class GameCompatibilityCache @Inject constructor(
                 return
             }
 
-            val rawCache = Json.Default.decodeFromString<Map<String, CachedEntry>>(cacheJson)
+            val rawCache = Json.decodeFromString<Map<String, CachedEntry>>(cacheJson)
             val now = System.currentTimeMillis()
 
             rawCache.forEach { (gameName, entry) ->
@@ -68,16 +68,16 @@ class GameCompatibilityCache @Inject constructor(
 
             val expiredCount = rawCache.size - cache.size
             if (expiredCount > 0) {
-                Timber.Forest.tag("GameCompatibilityCache").d("Loaded ${cache.size} valid entries ($expiredCount expired)")
+                Timber.tag("GameCompatibilityCache").d("Loaded ${cache.size} valid entries ($expiredCount expired)")
             } else {
-                Timber.Forest.tag("GameCompatibilityCache").d("Loaded ${cache.size} entries from storage")
+                Timber.tag("GameCompatibilityCache").d("Loaded ${cache.size} entries from storage")
             }
 
             if (expiredCount > 0) {
                 persistCache()
             }
         } catch (e: Exception) {
-            Timber.Forest.tag("GameCompatibilityCache").e(e, "Failed to load cache")
+            Timber.tag("GameCompatibilityCache").e(e, "Failed to load cache")
         } finally {
             loaded.set(true)
         }
@@ -87,11 +87,11 @@ class GameCompatibilityCache @Inject constructor(
         scope.launch {
             try {
                 val cacheSnapshot: Map<String, CachedEntry> = cache.toMap()
-                val cacheJson = Json.Default.encodeToString(cacheSnapshot)
+                val cacheJson = Json.encodeToString(cacheSnapshot)
                 cacheFile.writeText(cacheJson)
-                Timber.Forest.tag("GameCompatibilityCache").d("Persisted ${cache.size} entries")
+                Timber.tag("GameCompatibilityCache").d("Persisted ${cache.size} entries")
             } catch (e: Exception) {
-                Timber.Forest.tag("GameCompatibilityCache").e(e, "Failed to persist cache")
+                Timber.tag("GameCompatibilityCache").e(e, "Failed to persist cache")
             }
         }
     }
@@ -103,7 +103,7 @@ class GameCompatibilityCache @Inject constructor(
 
         if (System.currentTimeMillis() - entry.timestamp >= CACHE_TTL_MS) {
             cache.remove(gameName)
-            Timber.Forest.tag("GameCompatibilityCache").d("Expired entry removed on access: $gameName")
+            Timber.tag("GameCompatibilityCache").d("Expired entry removed on access: $gameName")
             persistCache()
             return null
         }
@@ -156,7 +156,7 @@ class GameCompatibilityCache @Inject constructor(
         if (cacheFile.exists()) {
             cacheFile.delete()
         }
-        Timber.Forest.tag("GameCompatibilityCache").d("Cache cleared")
+        Timber.tag("GameCompatibilityCache").d("Cache cleared")
     }
 
     fun size(): Int {

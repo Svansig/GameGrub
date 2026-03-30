@@ -66,4 +66,3 @@ internal object XServerControlsProfileResolver {
             ?: profiles.firstOrNull()
     }
 }
-

@@ -50,4 +50,3 @@ internal object XServerPerformanceHudConfigStore {
         PrefManager.performanceHudSize = config.size.prefValue
     }
 }
-

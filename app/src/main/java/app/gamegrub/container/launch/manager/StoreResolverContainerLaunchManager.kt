@@ -41,4 +41,3 @@ internal class StoreResolverContainerLaunchManager : ContainerLaunchManager {
         return StoreLaunchCommandResolver.build(launchContext)
     }
 }
-

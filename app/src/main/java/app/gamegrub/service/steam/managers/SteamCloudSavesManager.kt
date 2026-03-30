@@ -6,16 +6,16 @@ import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.service.steam.di.SteamAppInfoClient
 import app.gamegrub.service.steam.di.SteamCloudClient
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import timber.log.Timber
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamCloudSavesManager @Inject constructor(
@@ -88,8 +88,11 @@ class SteamCloudSavesManager @Inject constructor(
                     }
                     break
                 } catch (e: Exception) {
-                    if (attempt == 3) Timber.e(e, "Cloud sync failed after 3 attempts")
-                    else delay(1000L * attempt)
+                    if (attempt == 3) {
+                        Timber.e(e, "Cloud sync failed after 3 attempts")
+                    } else {
+                        delay(1000L * attempt)
+                    }
                 }
             }
             syncResult
@@ -97,5 +100,4 @@ class SteamCloudSavesManager @Inject constructor(
             releaseSync(appId)
         }
     }
-
 }

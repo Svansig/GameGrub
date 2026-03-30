@@ -26,4 +26,3 @@ class SteamDeviceIdentityManager @Inject constructor() {
         return androidId.hashCode()
     }
 }
-

@@ -27,14 +27,14 @@ object GameFeedbackUtils {
         tags: List<String>,
         notes: String?,
     ): Boolean = withContext(Dispatchers.IO) {
-        Timber.Forest.d("GameFeedbackUtils: Starting submitGameFeedback method with rating=$rating")
+        Timber.d("GameFeedbackUtils: Starting submitGameFeedback method with rating=$rating")
         try {
             val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
             val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
             val container = ContainerUtils.getContainer(context, appId)
             val configJson = JSONObject(container.containerJson)
-            Timber.Forest.d("config string is: " + container.containerJson)
-            Timber.Forest.d("configJson: $configJson")
+            Timber.d("config string is: " + container.containerJson)
+            Timber.d("configJson: $configJson")
 
             // Get the game name from container or use a fallback
             val gameName = when (gameSource) {
@@ -49,64 +49,64 @@ object GameFeedbackUtils {
                 }
 
                 GameSource.AMAZON -> {
-                    val productId = AmazonService.Companion.getProductIdByAppId(gameId)
+                    val productId = AmazonService.getProductIdByAppId(gameId)
                     if (!productId.isNullOrBlank()) {
-                        AmazonService.Companion.getAmazonGameOf(productId)?.title ?: ""
+                        AmazonService.getAmazonGameOf(productId)?.title ?: ""
                     } else {
                         ""
                     }
                 }
 
                 GameSource.EPIC -> {
-                    val game = EpicService.Companion.getEpicGameOf(gameId)
+                    val game = EpicService.getEpicGameOf(gameId)
                     game?.title ?: ""
                 }
 
                 GameSource.GOG -> {
-                    val game = GOGService.Companion.getGOGGameOf(gameId.toString())
+                    val game = GOGService.getGOGGameOf(gameId.toString())
                     game?.title ?: ""
                 }
 
                 GameSource.STEAM -> {
-                    val appInfo = SteamService.Companion.getAppInfoOf(gameId)
+                    val appInfo = SteamService.getAppInfoOf(gameId)
                     appInfo?.name ?: ""
                 }
             }
 
             if (gameName.isEmpty()) {
-                Timber.Forest.e("SubmitGameFeedback: Could not get game name for appId $appId")
+                Timber.e("SubmitGameFeedback: Could not get game name for appId $appId")
                 return@withContext false
             }
-            Timber.Forest.d("GameFeedbackUtils: Game name: $gameName")
+            Timber.d("GameFeedbackUtils: Game name: $gameName")
 
             // Get GPU info if available
             val gpu = try {
-                Timber.Forest.d("GameFeedbackUtils: About to get GPU info")
+                Timber.d("GameFeedbackUtils: About to get GPU info")
                 val gpuInfo = GPUInformation.getRenderer(context)
-                Timber.Forest.d("GameFeedbackUtils: GPU info: $gpuInfo")
+                Timber.d("GameFeedbackUtils: GPU info: $gpuInfo")
                 gpuInfo
             } catch (e: Exception) {
-                Timber.Forest.e(e, "GameFeedbackUtils: Failed to get GPU info: ${e.message}")
+                Timber.e(e, "GameFeedbackUtils: Failed to get GPU info: ${e.message}")
                 "Unknown GPU"
             }
 
             // Get SOC identifier
             val soc = try {
                 val socName = HardwareUtils.getSOCName()
-                Timber.Forest.d("GameFeedbackUtils: SOC info: $socName")
+                Timber.d("GameFeedbackUtils: SOC info: $socName")
                 socName
             } catch (e: Exception) {
-                Timber.Forest.e(e, "GameFeedbackUtils: Failed to get SOC info: ${e.message}")
+                Timber.e(e, "GameFeedbackUtils: Failed to get SOC info: ${e.message}")
                 null
             }
 
             // Get Android version
             val androidVer = Build.VERSION.RELEASE
-            Timber.Forest.d("GameFeedbackUtils: Android version: $androidVer")
+            Timber.d("GameFeedbackUtils: Android version: $androidVer")
 
             // Get app version
             val appVersion = BuildConfig.VERSION_NAME
-            Timber.Forest.d("GameFeedbackUtils: App version: $appVersion")
+            Timber.d("GameFeedbackUtils: App version: $appVersion")
 
             // Retrieve session data from container metadata
             val avgFpsStr = container.getSessionMetadata("avg_fps", "")
@@ -115,7 +115,7 @@ object GameFeedbackUtils {
                 try {
                     avgFpsStr.toFloat()
                 } catch (e: NumberFormatException) {
-                    Timber.Forest.w("GameFeedbackUtils: Failed to parse avg_fps: $avgFpsStr")
+                    Timber.w("GameFeedbackUtils: Failed to parse avg_fps: $avgFpsStr")
                     null
                 }
             } else {
@@ -125,14 +125,14 @@ object GameFeedbackUtils {
                 try {
                     sessionLengthSecStr.toInt()
                 } catch (e: NumberFormatException) {
-                    Timber.Forest.w("GameFeedbackUtils: Failed to parse session_length_sec: $sessionLengthSecStr")
+                    Timber.w("GameFeedbackUtils: Failed to parse session_length_sec: $sessionLengthSecStr")
                     null
                 }
             } else {
                 null
             }
 
-            Timber.Forest.i("GameFeedbackUtils: Submitting game feedback: game=$gameName, device=${Build.MODEL}, rating=$rating, tags=${tags.joinToString()}, avgFps=$avgFps, sessionLengthSec=$sessionLengthSec")
+            Timber.i("GameFeedbackUtils: Submitting game feedback: game=$gameName, device=${Build.MODEL}, rating=$rating, tags=${tags.joinToString()}, avgFps=$avgFps, sessionLengthSec=$sessionLengthSec")
 
             val result = GameRunApi.submit(
                 gameName = gameName,
@@ -152,17 +152,17 @@ object GameFeedbackUtils {
 
             when (result) {
                 is ApiResult.Success -> {
-                    Timber.Forest.i("GameFeedbackUtils: Game feedback submitted successfully (id=${result.data.id})")
+                    Timber.i("GameFeedbackUtils: Game feedback submitted successfully (id=${result.data.id})")
                     true
                 }
 
                 is ApiResult.HttpError -> {
-                    Timber.Forest.e("GameFeedbackUtils: HTTP error ${result.code}: ${result.message}")
+                    Timber.e("GameFeedbackUtils: HTTP error ${result.code}: ${result.message}")
                     false
                 }
 
                 is ApiResult.NetworkError -> {
-                    Timber.Forest.e(
+                    Timber.e(
                         result.exception,
                         "GameFeedbackUtils: Network error during submission",
                     )
@@ -170,7 +170,7 @@ object GameFeedbackUtils {
                 }
             }
         } catch (e: Exception) {
-            Timber.Forest.e(e, "GameFeedbackUtils: Failed to prepare game feedback: ${e.message}")
+            Timber.e(e, "GameFeedbackUtils: Failed to prepare game feedback: ${e.message}")
             false
         }
     }

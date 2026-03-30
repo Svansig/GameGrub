@@ -11,13 +11,15 @@ import app.gamegrub.utils.manifest.ManifestContentTypes
 import app.gamegrub.utils.manifest.ManifestEntry
 import app.gamegrub.utils.manifest.ManifestRepository
 import app.gamegrub.utils.network.Net
-import dagger.hilt.android.qualifiers.ApplicationContext
 import com.winlator.box86_64.Box86_64PresetManager
 import com.winlator.container.Container
 import com.winlator.contents.ContentProfile
 import com.winlator.core.KeyValueSet
 import com.winlator.fexcore.FEXCorePresetManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -29,8 +31,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class BestConfigService @Inject constructor(
@@ -86,7 +86,7 @@ class BestConfigService @Inject constructor(
         val cacheKey = "${gameName}_$gpuName"
 
         cache.getCached(cacheKey)?.let {
-            Timber.Forest.tag("BestConfigService").d("Using cached config for $cacheKey")
+            Timber.tag("BestConfigService").d("Using cached config for $cacheKey")
             return@withContext it
         }
 
@@ -122,7 +122,7 @@ class BestConfigService @Inject constructor(
 
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    Timber.Forest.tag("BestConfigService")
+                    Timber.tag("BestConfigService")
                         .w("API request failed - HTTP ${response.code}")
                     return@withContext null
                 }
@@ -132,7 +132,7 @@ class BestConfigService @Inject constructor(
 
                 val bestConfigJson = jsonResponse.getJSONObject("bestConfig")
                 val bestConfig =
-                    Json.Default.parseToJsonElement(bestConfigJson.toString()).jsonObject
+                    Json.parseToJsonElement(bestConfigJson.toString()).jsonObject
 
                 val bestConfigResponse = BestConfigResponse(
                     bestConfig = bestConfig,
@@ -143,13 +143,13 @@ class BestConfigService @Inject constructor(
 
                 cache.cache(cacheKey, bestConfigResponse)
 
-                Timber.Forest.tag("BestConfigService")
+                Timber.tag("BestConfigService")
                     .d("Fetched best config for $gameName on $gpuName (matchType: ${bestConfigResponse.matchType})")
 
                 bestConfigResponse
             }
         } catch (e: Exception) {
-            Timber.Forest.tag("BestConfigService")
+            Timber.tag("BestConfigService")
                 .e(e, "Error fetching best config: ${e.message}")
             null
         }
@@ -162,22 +162,22 @@ class BestConfigService @Inject constructor(
         return when (matchType) {
             "exact_gpu_match" -> CompatibilityMessage(
                 text = context.getString(R.string.best_config_exact_gpu_match),
-                color = Color.Companion.Green,
+                color = Color.Green,
             )
 
             "gpu_family_match" -> CompatibilityMessage(
                 text = context.getString(R.string.best_config_gpu_family_match),
-                color = Color.Companion.Green,
+                color = Color.Green,
             )
 
             "fallback_match" -> CompatibilityMessage(
                 text = context.getString(R.string.best_config_fallback_match),
-                color = Color.Companion.Yellow,
+                color = Color.Yellow,
             )
 
             else -> CompatibilityMessage(
                 text = context.getString(R.string.best_config_compatibility_unknown),
-                color = Color.Companion.Gray,
+                color = Color.Gray,
             )
         }
     }
@@ -323,7 +323,7 @@ class BestConfigService @Inject constructor(
             val kvs = KeyValueSet(dxwrapperConfig)
             val version = kvs.get("version")
             if (version.isNotEmpty() && !ManifestComponentHelper.versionExists(version, availableDxvk)) {
-                Timber.Forest.tag("BestConfigService").w("DXVK version $version not found, updating to PrefManager default")
+                Timber.tag("BestConfigService").w("DXVK version $version not found, updating to PrefManager default")
                 return "DXVK $version"
                 filteredJson.put("dxwrapperConfig", PrefManager.dxWrapperConfig)
             }
@@ -334,7 +334,7 @@ class BestConfigService @Inject constructor(
             val kvs = KeyValueSet(dxwrapperConfig)
             val version = kvs.get("vkd3dVersion")
             if (version.isNotEmpty() && !ManifestComponentHelper.versionExists(version, availableVkd3d)) {
-                Timber.Forest.tag("BestConfigService").w("VKD3D version $version not found, updating to PrefManager default")
+                Timber.tag("BestConfigService").w("VKD3D version $version not found, updating to PrefManager default")
                 return "VKD3D $version"
                 filteredJson.put("dxwrapperConfig", PrefManager.dxWrapperConfig)
             }
@@ -348,12 +348,13 @@ class BestConfigService @Inject constructor(
                 containerVariant.equals(Container.GLIBC, ignoreCase = true) -> availableBox64Glibc
 
                 else -> {
-                    Timber.Forest.tag("BestConfigService").w("Unknown container variant '$containerVariant', defaulting to glibc Box64 versions")
+                    Timber.tag("BestConfigService")
+                        .w("Unknown container variant '$containerVariant', defaulting to glibc Box64 versions")
                     availableBox64Glibc
                 }
             }
             if (!ManifestComponentHelper.versionExists(box64Version, box64VersionsToCheck)) {
-                Timber.Forest.tag("BestConfigService")
+                Timber.tag("BestConfigService")
                     .w("Box64 version $box64Version not found in $containerVariant variant entries, updating to PrefManager default")
                 return "Box64 $box64Version"
                 filteredJson.put("box64Version", PrefManager.box64Version)
@@ -366,14 +367,14 @@ class BestConfigService @Inject constructor(
                 !ManifestComponentHelper.versionExists(box64Version, availableWowBox64) &&
                 emulator != "FEXCore"
             ) {
-                Timber.Forest.tag("BestConfigService").w("WoWBox64 version $box64Version not found, updating to PrefManager default")
+                Timber.tag("BestConfigService").w("WoWBox64 version $box64Version not found, updating to PrefManager default")
                 return "WoWBox64 $box64Version"
             }
         }
 
         // Validate FEXCore version
         if (fexcoreVersion.isNotEmpty() && !ManifestComponentHelper.versionExists(fexcoreVersion, availableFexcore)) {
-            Timber.Forest.tag("BestConfigService").w("FEXCore version $fexcoreVersion not found, updating to PrefManager default")
+            Timber.tag("BestConfigService").w("FEXCore version $fexcoreVersion not found, updating to PrefManager default")
             return "FEXCore $fexcoreVersion"
             filteredJson.put("fexcoreVersion", PrefManager.fexcoreVersion)
         }
@@ -386,12 +387,13 @@ class BestConfigService @Inject constructor(
                 containerVariant.equals(Container.GLIBC, ignoreCase = true) -> availableWineGlibc
 
                 else -> {
-                    Timber.Forest.tag("BestConfigService").w("Unknown container variant '$containerVariant', checking against all wine versions")
+                    Timber.tag("BestConfigService")
+                        .w("Unknown container variant '$containerVariant', checking against all wine versions")
                     (availableWineBionic + availableWineGlibc).distinct()
                 }
             }
             if (!ManifestComponentHelper.versionExists(wineVersion, wineVersionsToCheck)) {
-                Timber.Forest.tag("BestConfigService")
+                Timber.tag("BestConfigService")
                     .w("Wine version $wineVersion not found in $containerVariant variant entries, updating to PrefManager default")
                 return "Wine $wineVersion"
                 filteredJson.put("wineVersion", PrefManager.wineVersion)
@@ -408,7 +410,7 @@ class BestConfigService @Inject constructor(
             }
             val driverVersion = configMap["version"] ?: ""
             if (driverVersion.isNotEmpty() && !ManifestComponentHelper.versionExists(driverVersion, availableDrivers)) {
-                Timber.Forest.tag("BestConfigService")
+                Timber.tag("BestConfigService")
                     .w("Graphics driver version $driverVersion not found for $containerVariant variant, updating to PrefManager default")
                 return "Graphics driver $driverVersion"
             }
@@ -418,7 +420,7 @@ class BestConfigService @Inject constructor(
         if (box64Preset.isNotEmpty()) {
             val preset = Box86_64PresetManager.getPreset("box64", context, box64Preset)
             if (preset == null) {
-                Timber.Forest.tag("BestConfigService").w("Box64 preset $box64Preset not found, updating to PrefManager default")
+                Timber.tag("BestConfigService").w("Box64 preset $box64Preset not found, updating to PrefManager default")
                 return "Box64 preset $box64Preset"
                 filteredJson.put("box64Preset", PrefManager.box64Preset)
             }
@@ -429,7 +431,7 @@ class BestConfigService @Inject constructor(
         if (fexcorePreset.isNotEmpty()) {
             val preset = FEXCorePresetManager.getPreset(context, fexcorePreset)
             if (preset == null) {
-                Timber.Forest.tag("BestConfigService").w("FEXCore preset $fexcorePreset not found, updating to PrefManager default")
+                Timber.tag("BestConfigService").w("FEXCore preset $fexcorePreset not found, updating to PrefManager default")
                 return "FEXCore preset $fexcorePreset"
                 filteredJson.put("fexcorePreset", PrefManager.fexcorePreset)
             }
@@ -443,7 +445,7 @@ class BestConfigService @Inject constructor(
         configJson: JsonObject,
         matchType: String,
     ): List<ManifestInstallRequest> {
-        val updatedConfigJson = Json.Default.parseToJsonElement(configJson.toString()).jsonObject
+        val updatedConfigJson = Json.parseToJsonElement(configJson.toString()).jsonObject
         val filteredConfig = filterConfigByMatchType(updatedConfigJson, matchType)
         val filteredJson = JSONObject(filteredConfig.toString())
         val installed = ManifestComponentHelper.loadInstalledContentLists(context)
@@ -676,7 +678,7 @@ class BestConfigService @Inject constructor(
                 return resultMap
             } else {
                 if (!originalJson.has("containerVariant") || originalJson.isNull("containerVariant")) {
-                    Timber.Forest.tag("BestConfigService").w("containerVariant is missing or null in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("containerVariant is missing or null in original config, returning empty map")
                     return mapOf()
                 }
 
@@ -686,16 +688,16 @@ class BestConfigService @Inject constructor(
                     if (containerVariant.equals(Container.GLIBC, ignoreCase = true)) {
                         originalJson.put("wineVersion", "wine-9.2-x86_64")
                     } else {
-                        Timber.Forest.tag("BestConfigService").w("wineVersion is missing or null in original config, returning empty map")
+                        Timber.tag("BestConfigService").w("wineVersion is missing or null in original config, returning empty map")
                         return mapOf()
                     }
                 }
                 if (!originalJson.has("dxwrapper") || originalJson.isNull("dxwrapper")) {
-                    Timber.Forest.tag("BestConfigService").w("dxwrapper is missing or null in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("dxwrapper is missing or null in original config, returning empty map")
                     return mapOf()
                 }
                 if (!originalJson.has("dxwrapperConfig") || originalJson.isNull("dxwrapperConfig")) {
-                    Timber.Forest.tag("BestConfigService").w("dxwrapperConfig is missing or null in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("dxwrapperConfig is missing or null in original config, returning empty map")
                     return mapOf()
                 }
 
@@ -705,24 +707,24 @@ class BestConfigService @Inject constructor(
                 val dxwrapperConfig = originalJson.optString("dxwrapperConfig", "")
 
                 if (containerVariant.isEmpty()) {
-                    Timber.Forest.tag("BestConfigService").w("containerVariant is empty in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("containerVariant is empty in original config, returning empty map")
                     return mapOf()
                 }
                 if (wineVersion.isEmpty()) {
-                    Timber.Forest.tag("BestConfigService").w("wineVersion is empty in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("wineVersion is empty in original config, returning empty map")
                     return mapOf()
                 }
                 if (dxwrapper.isEmpty()) {
-                    Timber.Forest.tag("BestConfigService").w("dxwrapper is empty in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("dxwrapper is empty in original config, returning empty map")
                     return mapOf()
                 }
                 if (dxwrapperConfig.isEmpty()) {
-                    Timber.Forest.tag("BestConfigService").w("dxwrapperConfig is empty in original config, returning empty map")
+                    Timber.tag("BestConfigService").w("dxwrapperConfig is empty in original config, returning empty map")
                     return mapOf()
                 }
 
                 // Step 1: Filter config based on match type
-                val updatedConfigJson = Json.Default.parseToJsonElement(originalJson.toString()).jsonObject
+                val updatedConfigJson = Json.parseToJsonElement(originalJson.toString()).jsonObject
                 val filteredConfig = filterConfigByMatchType(updatedConfigJson, matchType)
                 val filteredJson = JSONObject(filteredConfig.toString())
 
@@ -730,7 +732,8 @@ class BestConfigService @Inject constructor(
                 val missingContent = validateComponentVersions(context, filteredJson)
                 if (missingContent != null) {
                     lastMissingContentDescription = missingContent
-                    Timber.Forest.tag("BestConfigService").w("Component version validation failed for: $missingContent, returning empty map")
+                    Timber.tag("BestConfigService")
+                        .w("Component version validation failed for: $missingContent, returning empty map")
                     return mapOf()
                 }
 
@@ -818,7 +821,7 @@ class BestConfigService @Inject constructor(
                 return resultMap
             }
         } catch (e: Exception) {
-            Timber.Forest.tag("BestConfigService").e(e, "Failed to parse config to ContainerData: ${e.message}")
+            Timber.tag("BestConfigService").e(e, "Failed to parse config to ContainerData: ${e.message}")
             return mapOf()
         }
     }

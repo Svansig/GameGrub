@@ -55,4 +55,3 @@ internal object StoreLaunchCommandResolver {
         return "winhandler.exe $args"
     }
 }
-

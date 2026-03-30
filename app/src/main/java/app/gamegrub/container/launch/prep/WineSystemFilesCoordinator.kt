@@ -16,12 +16,12 @@ import com.winlator.core.KeyValueSet
 import com.winlator.core.OnExtractFileListener
 import com.winlator.core.TarCompressorUtils
 import com.winlator.core.WineInfo
-import com.winlator.core.envvars.EnvVars
-import com.winlator.xenvironment.ImageFs
-import com.winlator.xserver.ScreenInfo
 import com.winlator.core.WineStartMenuCreator
 import com.winlator.core.WineThemeManager
 import com.winlator.core.WineUtils
+import com.winlator.core.envvars.EnvVars
+import com.winlator.xenvironment.ImageFs
+import com.winlator.xserver.ScreenInfo
 import java.io.File
 import java.util.Arrays
 import org.json.JSONException
@@ -497,4 +497,3 @@ internal object WineSystemFilesCoordinator {
         )
     }
 }
-

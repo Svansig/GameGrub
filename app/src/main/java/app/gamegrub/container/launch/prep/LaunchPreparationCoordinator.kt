@@ -86,4 +86,3 @@ internal object LaunchPreparationCoordinator {
         imageFs.createArchFile(container.wineVersion)
     }
 }
-

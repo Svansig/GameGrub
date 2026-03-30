@@ -8,4 +8,3 @@ package app.gamegrub.container.launch.command
 internal interface StoreLaunchCommandBuilder {
     fun build(context: LaunchCommandContext): String?
 }
-

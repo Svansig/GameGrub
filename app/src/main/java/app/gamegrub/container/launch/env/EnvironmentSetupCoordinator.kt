@@ -187,18 +187,18 @@ internal object EnvironmentSetupCoordinator {
         guestProgramLauncherComponent.wineInfo = xServerState.value.wineInfo
         gameExecutable =
             "wine explorer /desktop=shell," + xServer.screenInfo + " " +
-                launchManager.buildWineStartCommand(
-                    context = context,
-                    appId = appId,
-                    container = nonNullContainer,
-                    bootToContainer = bootToContainer,
-                    testGraphics = testGraphics,
-                    appLaunchInfo = appLaunchInfo,
-                    envVars = envVars,
-                    guestProgramLauncherComponent = guestProgramLauncherComponent,
-                    gameSource = gameSource,
-                ) +
-                (if (nonNullContainer.execArgs.isNotEmpty()) " " + nonNullContainer.execArgs else "")
+            launchManager.buildWineStartCommand(
+                context = context,
+                appId = appId,
+                container = nonNullContainer,
+                bootToContainer = bootToContainer,
+                testGraphics = testGraphics,
+                appLaunchInfo = appLaunchInfo,
+                envVars = envVars,
+                guestProgramLauncherComponent = guestProgramLauncherComponent,
+                gameSource = gameSource,
+            ) +
+            (if (nonNullContainer.execArgs.isNotEmpty()) " " + nonNullContainer.execArgs else "")
 
         preInstallCommands = PreInstallSteps.getPreInstallCommands(
             nonNullContainer,
@@ -448,5 +448,3 @@ internal object EnvironmentSetupCoordinator {
         return environment
     }
 }
-
-

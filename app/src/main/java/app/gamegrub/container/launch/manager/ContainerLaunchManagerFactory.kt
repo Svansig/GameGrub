@@ -8,4 +8,3 @@ internal object ContainerLaunchManagerFactory {
         return StoreResolverContainerLaunchManager()
     }
 }
-

@@ -107,4 +107,3 @@ internal object XServerPhysicalControllerCoordinator {
         profile.loadControllers()
     }
 }
-

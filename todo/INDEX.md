@@ -27,6 +27,8 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-013 | P3 | Reduce direct event bus subscriptions inside composables | `ui/screen` | `todo/UI-013.md` |
 | UI-014 | P2 | Extract route/navigation side effects out of screen-level composables | `ui/screen + ui/model` | `todo/UI-014.md` |
 | UI-015 | P3 | Consolidate duplicate platform action components into shared UI primitives | `ui/component + ui/screen/library` | `todo/UI-015.md` |
+| UI-016 | P2 | Replace global launch/network reads in UI with injected state gateways | `ui/GameGrubMain + ui/model` | `todo/UI-016.md` |
+| UI-017 | P2 | Remove direct `PrefManager` access from target composables via ViewModel state | `ui/screen + ui/model` | `todo/UI-017.md` |
 
 ## Backlog - Cohesion
 
@@ -46,6 +48,8 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-012 | P3 | Create dependency guardrails for utils packages | `utils + architecture` | `todo/COH-012.md` |
 | COH-013 | P2 | Define boundary between platform services and shared download pipeline | `service + downloader` | `todo/COH-013.md` |
 | COH-014 | P3 | Introduce refactor checklist for cross-layer pull requests | `docs + process` | `todo/COH-014.md` |
+| COH-015 | P2 | Introduce `LaunchRequestGateway` and migrate away from static launch request manager access | `app + ui/model` | `todo/COH-015.md` |
+| COH-016 | P2 | Introduce `PreferencesGateway` and phase out direct global `PrefManager` reads | `app + service + ui` | `todo/COH-016.md` |
 
 ## Backlog - Readability
 
@@ -122,6 +126,8 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | TEST-012 | P3 | Add regression tests for settings persistence flows | `ui/screen/settings + PrefManager` | `todo/TEST-012.md` |
 | TEST-013 | P2 | Add contract tests for service-domain boundary invariants | `service/domain tests` | `todo/TEST-013.md` |
 | TEST-014 | P3 | Add snapshot tests for navigation state reducers | `ui/model + navigation` | `todo/TEST-014.md` |
+| TEST-015 | P2 | Add contract tests for launch request gateway and pending-launch state behavior | `app/src/test` | `todo/TEST-015.md` |
+| TEST-016 | P2 | Add regression tests for gateway-backed preferences and service facades | `app/src/test + service tests` | `todo/TEST-016.md` |
 
 ## Backlog - CI and Build
 
@@ -141,6 +147,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | CI-012 | P3 | Add artifact retention policy and cleanup automation | `CI + release artifacts` | `todo/CI-012.md` |
 | CI-013 | P2 | Add gate ensuring changed refactor tickets include parent/child links when split | `CI automation + tickets` | `todo/CI-013.md` |
 | CI-014 | P3 | Add CI summary comment for documentation impact compliance | `.github/workflows` | `todo/CI-014.md` |
+| CI-015 | P3 | Add CI guard to flag new global singleton/companion access in touched files | `CI + static checks` | `todo/CI-015.md` |
 
 ## Backlog - Security
 
@@ -179,6 +186,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | DOC-012 | P3 | Add docs maintenance cadence and ownership table | `docs + process` | `todo/DOC-012.md` |
 | DOC-013 | P2 | Add refactor progress dashboard doc linked to ticket themes | `docs + todo` | `todo/DOC-013.md` |
 | DOC-014 | P3 | Add codebase map for legacy-to-refactor transition zones | `docs + architecture` | `todo/DOC-014.md` |
+| DOC-015 | P2 | Document global-state migration strategy and approved gateway patterns | `docs + architecture` | `todo/DOC-015.md` |
 
 ## Backlog - Service Refactoring
 
@@ -199,6 +207,9 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-013 | P2 | Consolidate shutdown/cleanup helpers | `service/steam` | `todo/SRV-013.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | `service/steam` | `todo/SRV-014.md` |
 | SRV-015 | P3 | Consolidate companion constants into domain config | `service/steam` | `todo/SRV-015.md` |
+| SRV-016a | P1 | Add download orchestration methods to SteamInstallDomain | `service/steam` | `todo/SRV-016a.md` |
+| SRV-016b | P1 | Migrate download call sites to SteamInstallDomain | `service/steam` | `todo/SRV-016b.md` |
+| SRV-016c | P2 | Clean up download-related imports and constants | `service/steam` | `todo/SRV-016c.md` |
 | SRV-016 | P2 | Move authentication side effects from service callbacks into domains | `service/steam` | `todo/SRV-016.md` |
 | SRV-017 | P2 | Replace remaining static facade entry points with injected pathways | `service/steam` | `todo/SRV-017.md` |
 | SRV-018 | P2 | Split SteamService startup pipeline into explicit stages | `service/steam` | `todo/SRV-018.md` |
@@ -206,6 +217,10 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-020 | P3 | Add service-domain migration verification checklist | `service/steam + docs` | `todo/SRV-020.md` |
 | SRV-021 | P2 | Move platform credential refresh flow behind domain boundary | `service/steam + auth domain` | `todo/SRV-021.md` |
 | SRV-022 | P3 | Remove residual orchestration helpers from SteamService companion and route to domains | `service/steam` | `todo/SRV-022.md` |
+| SRV-023 | P2 | Remove direct `SteamService.requireInstance/getInstance` usage from pre-launch utilities | `container launch + utils/preInstallSteps` | `todo/SRV-023.md` |
+| SRV-024 | P2 | Replace `SteamService` companion data access wrappers with injected domain gateways | `service/steam + callers` | `todo/SRV-024.md` |
+| SRV-025 | P3 | Reduce companion-object API surface in non-Steam platform services | `service/gog + service/epic + service/amazon` | `todo/SRV-025.md` |
+| SRV-026 | P3 | Convert mutable global service flags to scoped state holders with explicit ownership | `service/steam + service/*` | `todo/SRV-026.md` |
 
 ## In Progress
 

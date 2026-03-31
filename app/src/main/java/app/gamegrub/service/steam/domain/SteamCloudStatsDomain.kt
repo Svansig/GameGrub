@@ -9,6 +9,7 @@ import app.gamegrub.statsgen.Achievement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.StateFlow
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,7 +40,7 @@ class SteamCloudStatsDomain @Inject constructor(
     suspend fun generateAchievements(appId: Int, configDirectory: String) =
         achievementManager.generateAchievements(appId, configDirectory)
 
-    fun getGseSaveDirs(context: Context, appId: Int): List<java.io.File> =
+    fun getGseSaveDirs(context: Context, appId: Int): List<File> =
         achievementManager.getGseSaveDirs(context, appId)
 
     suspend fun syncAchievementsFromGoldberg(context: Context, appId: Int) =
@@ -49,6 +50,6 @@ class SteamCloudStatsDomain @Inject constructor(
         appId: Int,
         configDirectory: String,
         unlockedNames: Set<String>,
-        gseStatsDir: java.io.File,
+        gseStatsDir: File,
     ) = achievementManager.storeAchievementUnlocks(appId, configDirectory, unlockedNames, gseStatsDir)
 }

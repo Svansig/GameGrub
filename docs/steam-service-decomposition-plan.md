@@ -1,406 +1,275 @@
-# SteamService Decomposition Plan
+# SteamService Decomposition Plan (Status + Handoff)
 
-## Overview
+## Purpose
 
-Transform SteamService from a 3800-line god class with 38 managers into a thin coordinator backed by 5 well-scoped domain classes.
+This document is a live status tracker for the Steam decomposition effort.
+It replaces stale assumptions with current evidence and provides an explicit handoff checklist for the next agent.
 
-**Current State:**
-- SteamService: ~2662 lines
-- 38 managers in `managers/`
-- 3 aggregator managers (Account, Session, Library) + fragmented Install domain
-
-**Target State:**
-- SteamService: ~300 lines (thin coordinator)
-- 5 domain classes with clear boundaries
-- Managers consolidated into domains
+Snapshot date: **2026-03-31** (workspace state).
 
 ---
 
-## Phase 1: Create Domain Coordinator Classes
+## Current Architecture Snapshot (Evidence)
 
-### 1.1 SteamAccountDomain
-**New file:** `service/steam/domain/SteamAccountDomain.kt`
+### SteamService
 
-```kotlin
-@Singleton
-class SteamAccountDomain @Inject constructor(
-    val authService: SteamAuthService,
-    val userManager: SteamUserManager,
-    val friendsManager: SteamFriendsManager,
-    val deviceIdentityManager: SteamDeviceIdentityManager,
-)
+- `app/src/main/java/app/gamegrub/service/steam/SteamService.kt`
+  - Still large: **2663 lines**.
+  - Injects 5 domains (`SteamAccountDomain`, `SteamLibraryDomain`, `SteamSessionDomain`, `SteamCloudStatsDomain`, `SteamInstallDomain`).
+  - Still injects multiple DAOs directly (`SteamAppDao`, `SteamLicenseDao`, `CachedLicenseDao`, etc.).
+  - Companion object still provides many static APIs and still routes some calls through manager singletons.
+
+### Domain classes (all exist)
+
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamAccountDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamLibraryDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamSessionDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamCloudStatsDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamInstallDomain.kt`
+
+### Manager inventory (current)
+
+- Managers folder currently contains **23 files**:
+  - `DownloadManager.kt`, `PicsChangesManager.kt`, `SteamAchievementManager.kt`, `SteamAppSessionManager.kt`, `SteamAuthService.kt`, `SteamCatalogManager.kt`, `SteamCloudSavesManager.kt`, `SteamControllerConfigManager.kt`, `SteamControllerTemplateRoutingManager.kt`, `SteamControllerWorkshopDownloadManager.kt`, `SteamDepotSelectionManager.kt`, `SteamDeviceIdentityManager.kt`, `SteamDlcDepotManager.kt`, `SteamDlcOwnershipManager.kt`, `SteamDownloadPlanManager.kt`, `SteamFriendsManager.kt`, `SteamInputManager.kt`, `SteamInstalledExeManager.kt`, `SteamInstallManager.kt`, `SteamLaunchConfigManager.kt`, `SteamSessionFilesManager.kt`, `SteamTicketManager.kt`, `SteamUserManager.kt`.
+
+### Aggregator managers removed
+
+These no longer exist as classes:
+
+- `SteamAccountManager`
+- `SteamSessionManager`
+- `SteamLibraryManager`
+- `SteamCloudStatsManager`
+
+---
+
+## Phase-by-Phase Status Against Original Plan
+
+Status labels:
+
+- `Done`
+- `Partial`
+- `Not Started`
+
+### Phase 1 - Create domain coordinator classes
+
+- **Status: `Done`**
+- All 5 domain files exist under `service/steam/domain/`.
+
+### Phase 2 - Move manager logic into domains
+
+- **Status: `Partial`**
+- Done:
+  - Domain wrappers exist for account/session/cloud/install concerns.
+  - `SteamLibraryDomain` already holds meaningful logic (license sync, owned games fetch, DAO coordination).
+- Not done:
+  - Most domains still expose manager internals instead of owning behavior.
+  - `SteamInstallDomain` is still a thin wrapper over `SteamInstallManager` and `SteamInputManager`.
+  - Install sub-managers remain separate (`SteamDownloadPlanManager`, `SteamDepotSelectionManager`, etc.).
+
+### Phase 3 - Update SteamService to use domains
+
+- **Status: `Partial`**
+- Done:
+  - Domain injection is in place.
+  - Several call sites already delegate via domains.
+- Not done:
+  - Companion still holds manager gateways (`catalogManager`, `installManager`, `inputManager`).
+  - Service still calls manager internals via domain getters (`libraryDomain.getDownloadManager()`, `libraryDomain.getPicsChangesManager()`).
+  - Cloud/achievement APIs still access `cloudStatsDomain.achievementManager` directly.
+
+### Phase 4 - Delete empty manager classes
+
+- **Status: `Partial`**
+- Done:
+  - Old high-level aggregator manager classes were removed (account/session/library/cloudstats managers).
+- Not done:
+  - Install stack managers and several helper managers are still present and actively used.
+
+### Phase 5 - Shrink SteamService to thin coordinator
+
+- **Status: `Not Started`**
+- Service remains 2663 lines with substantial business logic and direct DB/network orchestration.
+
+---
+
+## Gap List (Concrete)
+
+### Gap A - Companion object still manager-centric
+
+In `SteamService` companion object:
+
+- `catalogManager` still resolves to `SteamCatalogManager` singleton fallback.
+- `installManager` still points to `SteamInstallManager` singleton.
+- `inputManager` still points to `SteamInputManager` singleton fallback.
+
+Impact:
+
+- Preserves old architecture shape and keeps static manager coupling.
+
+### Gap B - LibraryDomain still leaks internal managers
+
+`SteamLibraryDomain` exposes:
+
+- `getDownloadManager()`
+- `getPicsChangesManager()`
+- `getCatalogManager()`
+
+`SteamService` uses these getters for operations such as clear/delete and download cleanup.
+
+Impact:
+
+- Domain is not yet a true boundary; caller still reaches manager-level APIs.
+
+### Gap C - InstallDomain does not own install behavior yet
+
+`SteamInstallDomain` mostly delegates to manager objects and still references manager model types.
+
+Impact:
+
+- The highest-churn and highest-complexity domain remains fragmented.
+
+### Gap D - CloudStatsDomain still exposes manager internals
+
+`SteamService` calls `cloudStatsDomain.achievementManager` directly for generate/clear/sync/store flows.
+
+Impact:
+
+- Domain boundary is bypassed, increasing coupling and migration risk.
+
+### Gap E - SteamService still contains heavy business logic
+
+Examples still in service:
+
+- Download planning and orchestration.
+- Steam Input template routing/download glue.
+- PICS batching and DB-updating flow coordination.
+- Large static API surface in companion object.
+
+Impact:
+
+- Prevents reaching thin-coordinator target and keeps test surface broad.
+
+---
+
+## Next Agent Checklist (Explicit Continuation Plan)
+
+Use this checklist in order. Each step is intentionally small and reviewable.
+
+### 1) Replace manager gateways in SteamService companion
+
+- [ ] Remove companion `catalogManager` property and route usages to domain-owned methods.
+- [ ] Remove companion `installManager` property and route usages to `installDomain` methods.
+- [ ] Remove companion `inputManager` property and route usages to `installDomain` methods.
+- [ ] Keep static API signatures stable where possible to avoid call-site breakage.
+
+Primary file:
+
+- `app/src/main/java/app/gamegrub/service/steam/SteamService.kt`
+
+### 2) Stop exposing manager getters from SteamLibraryDomain
+
+- [ ] Add explicit domain methods for currently leaked operations:
+  - `clearPicsChanges()`
+  - `clearDownloadState()`
+  - `deleteDownloadStateForApp(appId: Int)`
+  - `getAllDownloadingApps()`
+  - `deleteDownloadingApp(appId: Int)`
+- [ ] Replace all `libraryDomain.getDownloadManager()` and `libraryDomain.getPicsChangesManager()` calls in `SteamService`.
+- [ ] Remove `getDownloadManager()`, `getPicsChangesManager()`, and `getCatalogManager()` from `SteamLibraryDomain`.
+
+Primary files:
+
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamLibraryDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/SteamService.kt`
+
+### 3) Move install/input orchestration into SteamInstallDomain
+
+- [ ] Expand `SteamInstallDomain` API so `SteamService` no longer calls manager singletons directly.
+- [ ] Migrate these operations first (highest payoff):
+  - build download plan
+  - resolve installed exe
+  - steam input route/manifest/workshop config workflow
+- [ ] Keep behavior unchanged initially; use delegation while moving call sites, then inline manager logic incrementally.
+
+Primary files:
+
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamInstallDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/SteamService.kt`
+- `app/src/main/java/app/gamegrub/service/steam/managers/SteamInstallManager.kt`
+- `app/src/main/java/app/gamegrub/service/steam/managers/SteamInputManager.kt`
+
+### 4) Encapsulate cloud achievement operations in domain
+
+- [ ] Add domain-level methods in `SteamCloudStatsDomain` for generate/clear/getDirs/sync/store.
+- [ ] Replace all direct `cloudStatsDomain.achievementManager` accesses in `SteamService`.
+
+Primary files:
+
+- `app/src/main/java/app/gamegrub/service/steam/domain/SteamCloudStatsDomain.kt`
+- `app/src/main/java/app/gamegrub/service/steam/SteamService.kt`
+
+### 5) Delete or demote redundant manager layers
+
+- [ ] After call-sites are migrated, remove wrapper-only managers first:
+  - `SteamInstallManager.kt`
+  - `SteamInputManager.kt`
+  - then evaluate `SteamCatalogManager.kt`
+- [ ] Keep low-level reusable helpers only if they provide isolated, testable logic.
+
+Primary folder:
+
+- `app/src/main/java/app/gamegrub/service/steam/managers/`
+
+### 6) Reduce SteamService size and responsibilities
+
+- [ ] Move non-lifecycle business logic behind domain methods.
+- [ ] Keep in service only lifecycle, connection state, and event wiring.
+- [ ] Re-evaluate whether PICS loops should become a dedicated coordinator/service after domain boundaries are stable.
+
+---
+
+## Test and Validation Checklist
+
+Run after each logical step (or grouped PR-sized change):
+
+```powershell
+.\gradlew.bat testDebugUnitTest
+.\gradlew.bat assembleDebug
 ```
 
-**Purpose:** Wraps `SteamAccountManager`. Exists for symmetry with other domains.
+Target tests to keep aligned with refactors:
 
-**Note:** This is already mostly done—`SteamAccountManager` already aggregates these 4. Just rename and relocate.
+- `app/src/test/java/app/gamegrub/service/steam/managers/SteamDomainManagersSmokeTest.kt`
+- `app/src/test/java/app/gamegrub/service/steam/managers/SteamDownloadPlanManagerTest.kt`
+- `app/src/test/java/app/gamegrub/service/steam/managers/SteamControllerConfigManagerTest.kt`
+- `app/src/test/java/app/gamegrub/service/steam/managers/SteamControllerTemplateRoutingManagerTest.kt`
+- `app/src/test/java/app/gamegrub/service/steam/managers/SteamControllerWorkshopDownloadManagerTest.kt`
 
----
+Important note:
 
-### 1.2 SteamLibraryDomain
-**New file:** `service/steam/domain/SteamLibraryDomain.kt`
-
-```kotlin
-@Singleton
-class SteamLibraryDomain @Inject constructor(
-    private val libraryClient: SteamLibraryClient,
-    private val connection: SteamConnection,
-    // DAOs
-    private val appDao: SteamAppDao,
-    private val licenseDao: SteamLicenseDao,
-    private val appInfoDao: AppInfoDao,
-    private val cachedLicenseDao: CachedLicenseDao,
-    private val downloadingAppInfoDao: DownloadingAppInfoDao,
-    // Managers to delegate to
-    private val picsChangesManager: PicsChangesManager,
-    private val downloadManager: DownloadManager,
-    private val catalogManager: SteamCatalogManager,
-)
-```
-
-**Purpose:** Merges:
-- `SteamLibraryManager` (DB + library sync)
-- `PicsChangesManager` (PICS change tracking)
-- `DownloadManager` (download state)
-- `SteamCatalogManager` (depot/app metadata)
-
-**Rationale:** These are all "library data" concerns. PICS changes update library metadata. Download state is tied to library entries. Catalog is cached library data.
+- As domains absorb logic, add domain-focused tests and reduce direct manager-focused tests accordingly.
 
 ---
 
-### 1.3 SteamSessionDomain
-**New file:** `service/steam/domain/SteamSessionDomain.kt`
+## Recommended Work Split for Parallel Agents
 
-```kotlin
-@Singleton
-class SteamSessionDomain @Inject constructor(
-    val appSessionManager: SteamAppSessionManager,
-    val sessionFilesManager: SteamSessionFilesManager,
-    val ticketManager: SteamTicketManager,
-)
-```
+If running multiple agents/PRs in parallel, use this split:
 
-**Purpose:** Wraps `SteamSessionManager`. Already well-structured—just rename for symmetry.
+1. **Agent A:** SteamService companion cleanup + library-domain API tightening.
+2. **Agent B:** Install domain expansion + install/input call-site migration.
+3. **Agent C:** Cloud stats domain encapsulation + tests.
+
+Merge order recommendation: **A -> B -> C** (A reduces shared surface first).
 
 ---
 
-### 1.4 SteamCloudStatsDomain
-**New file:** `service/steam/domain/SteamCloudStatsDomain.kt`
+## Definition of Done (Decomposition)
 
-```kotlin
-@Singleton
-class SteamCloudStatsDomain @Inject constructor(
-    private val cloudClient: SteamCloudClient,
-    private val statsClient: SteamStatsClient,
-    private val appInfoDao: AppInfoDao,
-) {
-    // Internal managers - create as inner classes or private
-    private val cloudSavesManager: CloudSavesManager = ...
-    private val achievementManager: AchievementManager = ...
-}
-```
+The decomposition is complete when all are true:
 
-**Purpose:** Merges:
-- `SteamCloudSavesManager`
-- `SteamAchievementManager`
-
-**Rationale:** Both are "gameplay session bookends"—what happens before launch (cloud download) and after exit (cloud upload + achievement sync).
-
----
-
-### 1.5 SteamInstallDomain (THE BIG ONE)
-**New file:** `service/steam/domain/SteamInstallDomain.kt`
-
-```kotlin
-@Singleton
-class SteamInstallDomain @Inject constructor(
-    private val libraryClient: SteamLibraryClient,
-    private val connection: SteamConnection,
-) {
-    // Install orchestration
-    fun buildDownloadPlan(...): DownloadPlan = ...
-    fun resolveInstalledExe(...): String = ...
-    fun getDownloadableDepots(...): Map<Int, DepotInfo> = ...
-    
-    // Input handling (merged from 4 managers)
-    fun resolveControllerConfig(...): String? = ...
-    fun downloadWorkshopConfig(...): Deferred<Unit> = ...
-    
-    // Depot operations (merged from 4 managers)
-    fun selectDepots(...): Map<Int, DepotInfo> = ...
-    fun checkDlcOwnership(...): Set<Int> = ...
-    fun resolveMainAppDlcIds(...): List<Int> = ...
-}
-```
-
-**Purpose:** Consolidates the fragmented Install domain:
-- `SteamInstallManager` (just delegates)
-- `SteamDownloadPlanManager`
-- `SteamDepotSelectionManager`
-- `SteamDlcDepotManager`
-- `SteamDlcOwnershipManager`
-- `SteamInstalledExeManager`
-- `SteamLaunchConfigManager`
-- `SteamInputManager`
-- `SteamControllerConfigManager`
-- `SteamControllerTemplateRoutingManager`
-- `SteamControllerWorkshopDownloadManager`
-
-**Rationale:** These are all "install pipeline" concerns—how a game gets from Steam server to playable on device.
-
----
-
-## Phase 2: Move Manager Logic Into Domains
-
-### 2.1 AccountDomain (Simplest)
-**Actions:**
-1. Copy `SteamAccountManager.kt` → `domain/SteamAccountDomain.kt`
-2. Rename class to `SteamAccountDomain`
-3. Update imports
-4. Delete old file
-
-**No logic changes needed**—just rename and move.
-
----
-
-### 2.2 LibraryDomain (Medium complexity)
-**Actions:**
-1. Move `SteamLibraryManager` logic into domain
-2. Move `PicsChangesManager` logic into domain (or keep as delegate)
-3. Move `DownloadManager` logic into domain
-4. Move `SteamCatalogManager` logic into domain
-5. Update DI bindings
-
-**Key decisions:**
-- Keep managers as internal classes? Or inline all logic?
-- Recommendation: Keep as private inner classes for now (easier to test incrementally)
-
----
-
-### 2.3 SessionDomain (Simplest)
-**Actions:**
-1. Copy `SteamSessionManager.kt` → `domain/SteamSessionDomain.kt`
-2. Rename class
-3. Update dependencies from injected to constructor
-
----
-
-### 2.4 CloudStatsDomain (Medium complexity)
-**Actions:**
-1. Move `SteamCloudSavesManager` logic into domain
-2. Move `SteamAchievementManager` logic into domain
-3. Delete `SteamCloudStatsManager` (it just aggregates these two)
-
-**Key insight:** `SteamCloudStatsManager` exists only to aggregate. Delete it and put logic directly in domain.
-
----
-
-### 2.5 InstallDomain (Complex)
-**Actions:**
-1. This is the big consolidation. Strategy:
-   - Create the domain class with all the public APIs
-   - Move logic from each manager into domain methods
-   - Delete the now-redundant managers
-
-**Order of operations:**
-1. Create domain with all 10+ manager references injected
-2. For each manager, create a corresponding method in domain that delegates to it
-3. Run tests to verify nothing broke
-4. Inline the manager logic (remove the indirection)
-5. Delete the manager class
-
-**Files to delete:**
-- `SteamInstallManager.kt`
-- `SteamDownloadPlanManager.kt`
-- `SteamDepotSelectionManager.kt`
-- `SteamDlcDepotManager.kt`
-- `SteamDlcOwnershipManager.kt`
-- `SteamInstalledExeManager.kt`
-- `SteamLaunchConfigManager.kt`
-- `SteamInputManager.kt`
-- `SteamControllerConfigManager.kt`
-- `SteamControllerTemplateRoutingManager.kt`
-- `SteamControllerWorkshopDownloadManager.kt`
-
----
-
-## Phase 3: Update SteamService to Use Domains
-
-### Before
-```kotlin
-class SteamService : Service() {
-    @Inject lateinit var libraryManager: SteamLibraryManager
-    @Inject lateinit var downloadManager: DownloadManager
-    @Inject lateinit var picsChangesManager: PicsChangesManager
-    @Inject lateinit var sessionManager: SteamSessionManager
-    @Inject lateinit var accountManager: SteamAccountManager
-    @Inject lateinit var cloudStatsManager: SteamCloudStatsManager
-    // ... 30+ more managers
-}
-```
-
-### After
-```kotlin
-class SteamService : Service() {
-    @Inject lateinit var accountDomain: SteamAccountDomain
-    @Inject lateinit var libraryDomain: SteamLibraryDomain
-    @Inject lateinit var sessionDomain: SteamSessionDomain
-    @Inject lateinit var cloudStatsDomain: SteamCloudStatsDomain
-    @Inject lateinit var installDomain: SteamInstallDomain
-    
-    // Keep only service-level concerns:
-    // - Connection management (steamClient, callbackManager)
-    // - Foreground service lifecycle
-    // - Network monitoring
-    // - PICS channels and jobs
-}
-```
-
-**Update all references in SteamService:**
-1. `libraryManager.xxx()` → `libraryDomain.xxx()`
-2. `downloadManager.xxx()` → `libraryDomain.downloadManager.xxx()`
-3. `picsChangesManager.xxx()` → `libraryDomain.picsChangesManager.xxx()`
-4. `sessionManager.xxx()` → `sessionDomain.xxx()`
-5. `accountManager.xxx()` → `accountDomain.xxx()`
-6. `cloudStatsManager.xxx()` → `cloudStatsDomain.xxx()`
-7. `installManager.xxx()` → `installDomain.xxx()`
-8. `catalogManager.xxx()` → `libraryDomain.catalogManager.xxx()`
-9. `inputManager.xxx()` → `installDomain.inputManager.xxx()`
-
----
-
-## Phase 4: Delete Empty Manager Classes
-
-### After logic moves, delete:
-```
-service/steam/managers/
-├── SteamAccountManager.kt      (moved to domain)
-├── SteamSessionManager.kt      (moved to domain)
-├── SteamLibraryManager.kt      (moved to domain)
-├── SteamCloudStatsManager.kt   (logic inlined, delete)
-├── SteamInstallManager.kt      (moved to domain)
-├── SteamInputManager.kt        (moved to domain)
-├── SteamControllerConfigManager.kt       (deleted)
-├── SteamControllerTemplateRoutingManager.kt (deleted)
-├── SteamControllerWorkshopDownloadManager.kt (deleted)
-├── SteamDownloadPlanManager.kt (deleted)
-├── SteamDepotSelectionManager.kt (deleted)
-├── SteamDlcDepotManager.kt     (deleted)
-├── SteamDlcOwnershipManager.kt (deleted)
-├── SteamInstalledExeManager.kt (deleted)
-├── SteamLaunchConfigManager.kt (deleted)
-└── SteamCatalogManager.kt      (moved to domain)
-```
-
-### Keep (reusable components, not managers):
-```
-service/steam/managers/
-├── SteamAuthService.kt         (domain delegates to this)
-├── SteamUserManager.kt         (domain delegates to this)
-├── SteamFriendsManager.kt     (domain delegates to this)
-├── SteamDeviceIdentityManager.kt (domain delegates to this)
-├── SteamAppSessionManager.kt   (session domain delegates)
-├── SteamSessionFilesManager.kt (session domain delegates)
-├── SteamTicketManager.kt       (session domain delegates)
-├── SteamCloudSavesManager.kt  (cloudstats domain delegates)
-├── SteamAchievementManager.kt (cloudstats domain delegates)
-├── PicsChangesManager.kt      (library domain delegates)
-├── DownloadManager.kt          (library domain delegates)
-└── SteamUnifiedFriends.kt     (separate, used by events)
-```
-
----
-
-## Phase 5: Shrink SteamService to Thin Coordinator
-
-### Target: ~300 lines
-
-**Keep in SteamService:**
-1. Service lifecycle (`onCreate`, `onStartCommand`, `onDestroy`)
-2. Connection management (`steamClient`, `callbackManager`, `callbackSubscriptions`)
-3. Steam handler lazy getters (`steamUser`, `steamApps`, `steamFriends`, etc.)
-4. Network monitoring (`connectivityManager`, `networkCallback`)
-5. PICS channels and jobs (`appPicsChannel`, `packagePicsChannel`, `picsGetProductInfoJob`, etc.)
-6. Foreground service setup (`notificationHelper`)
-7. Event emission (`GameGrubApp.events.emit(...)`)
-
-**Move to domains:**
-1. All business logic (library queries, download planning, session orchestration)
-2. DB operations
-3. Steam API calls
-
-### Extract Further: Consider SteamPicsSyncService
-
-The continuous PICS polling (`continuousPICSGetProductInfo`, `continuousPICSChangesChecker`) could be its own service class, started/stopped by SteamService but running independently.
-
-```kotlin
-class SteamPicsSyncService(
-    private val libraryDomain: SteamLibraryDomain,
-    private val steamClient: SteamClient,
-) {
-    // Runs PICS sync jobs
-    // Emits events on changes
-}
-```
-
----
-
-## File Movement Summary
-
-### New Files (Phase 1)
-```
-service/steam/domain/
-├── SteamAccountDomain.kt
-├── SteamLibraryDomain.kt
-├── SteamSessionDomain.kt
-├── SteamCloudStatsDomain.kt
-└── SteamInstallDomain.kt
-```
-
-### Modified Files (Phase 2-3)
-- `SteamService.kt` — Update injections and method calls
-- `SteamModule.kt` — Add domain bindings
-
-### Deleted Files (Phase 4)
-- All manager files that get inlined into domains
-- Specifically: 20+ files from the managers folder
-
----
-
-## Testing Strategy
-
-### Before Each Phase
-1. Run `./gradlew testDebugUnitTest` — ensure existing tests pass
-
-### After Each Phase
-1. Run `./gradlew testDebugUnitTest`
-2. Run `./gradlew assembleDebug` — verify build
-3. Manual smoke test on device
-
-### Key Test Files to Update
-- `SteamDomainManagersSmokeTest.kt` — update to test domains instead of managers
-
----
-
-## Risks and Mitigations
-
-| Risk | Mitigation |
-|------|-------------|
-| Breaking existing API (static methods on SteamService) | Keep static methods on SteamService, delegate to domains internally |
-| Circular dependencies | Domains depend on interfaces (SteamConnection, SteamLibraryClient), not each other |
-| Test breakage | Keep existing manager classes as delegates initially, migrate tests incrementally |
-| Runtime crashes | Test thoroughly at each phase before deleting manager classes |
-
----
-
-## Timeline Estimate
-
-| Phase | Effort | Files Changed |
-|-------|--------|---------------|
-| Phase 1: Create domains | Low | 5 new files |
-| Phase 2: Move logic | Medium | 20+ files modified |
-| Phase 3: Update SteamService | Medium | 1 file (SteamService.kt) + DI |
-| Phase 4: Delete empty managers | Low | 20+ deletions |
-| Phase 5: Shrink SteamService | Low | 1 file (SteamService.kt) |
-
-**Total:** ~30 file changes over 5 phases, can be done incrementally.
+- `SteamService` has no direct dependency on manager singletons for business behavior.
+- Domains expose behavior-oriented APIs, not manager getters.
+- Wrapper-only managers are removed or converted to private/internal helpers behind domains.
+- Steam service logic is primarily lifecycle/connection/event coordination.
+- Tests primarily target domain behavior and key integration seams.

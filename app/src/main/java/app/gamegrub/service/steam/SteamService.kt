@@ -290,14 +290,18 @@ class SteamService : Service(), IChallengeUrlChanged {
         const val INVALID_PKG_ID: Int = Int.MAX_VALUE
         private const val STEAM_CONTROLLER_CONFIG_FILENAME = "steam_controller.vdf"
         private val catalogManager: app.gamegrub.service.steam.managers.SteamCatalogManager
-            get() = instance?.let { it.libraryDomain.getCatalogManager() }
+            get() = instance?.libraryDomain?.getCatalogManager()
                 ?: app.gamegrub.service.steam.managers.SteamCatalogManager
 
         private val installManager: app.gamegrub.service.steam.managers.SteamInstallManager
             get() = app.gamegrub.service.steam.managers.SteamInstallManager
 
+        private val installDomain: app.gamegrub.service.steam.domain.SteamInstallDomain
+            get() = instance?.installDomain
+                ?: throw IllegalStateException("SteamService not running")
+
         private val inputManager: app.gamegrub.service.steam.managers.SteamInputManager
-            get() = instance?.let { it.installDomain.inputManager }
+            get() = instance?.installDomain?.inputManager
                 ?: app.gamegrub.service.steam.managers.SteamInputManager
 
         var requestTimeout = 30.seconds
@@ -635,7 +639,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         fun choosePrimaryExe(
             files: List<FileData>?,
             gameName: String,
-        ): FileData? = installManager.choosePrimaryExe(files, gameName)
+        ): FileData? = installDomain.choosePrimaryExe(files, gameName)
 
         /**
          * Picks the real shipped EXE for a Steam app.
@@ -650,7 +654,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val steamClient = instance?.steamClient
             val licenses = runBlocking { getLicensesFromDb() }
 
-            return installManager.resolveInstalledExe(
+            return installDomain.resolveInstalledExe(
                 appInfo = appInfo,
                 canQueryManifests = steamClient != null && licenses.isNotEmpty(),
                 fallbackExecutable = {
@@ -666,14 +670,14 @@ class SteamService : Service(), IChallengeUrlChanged {
                             source = file,
                             path = file.fileName,
                             totalSize = file.totalSize,
-                            hasExecutableFlag = installManager.hasExecutableFlag(file.flags),
-                            isStub = installManager.isStub(file),
+                            hasExecutableFlag = installDomain.hasExecutableFlag(file.flags),
+                            isStub = installDomain.isStub(file),
                         )
                     }
                 },
                 choosePrimary = { candidates, gameName ->
                     val files = candidates.map { it.source }
-                    val chosen = installManager.choosePrimaryExe(files, gameName)
+                    val chosen = installDomain.choosePrimaryExe(files, gameName)
                     if (chosen == null) {
                         null
                     } else {
@@ -699,11 +703,11 @@ class SteamService : Service(), IChallengeUrlChanged {
             val svc = instance ?: return false
             svc.scope.launch {
                 svc.db.withTransaction {
-                    svc.libraryDomain.getDownloadManager().deleteAppData(appId)
+                    svc.libraryDomain.deleteAppData(appId)
 
                     val indirectDlcAppIds = getDownloadableDlcAppsOf(appId).orEmpty().map { it.id }
                     indirectDlcAppIds.forEach { dlcAppId ->
-                        svc.libraryDomain.getDownloadManager().deleteAppData(dlcAppId)
+                        svc.libraryDomain.deleteAppData(dlcAppId)
                     }
                 }
             }
@@ -921,12 +925,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                 ?.steamInputManifestPath
                 ?.trim()
                 .orEmpty()
-            return inputManager.resolveSteamInputManifestFile(appDirPath, manifestPath)
+            return installDomain.resolveSteamInputManifestFile(appDirPath, manifestPath)
         }
 
         private fun loadConfigFromManifest(
             manifestFile: File,
-        ): String? = inputManager.loadConfigFromManifest(manifestFile)
+        ): String? = installDomain.loadConfigFromManifest(manifestFile)
 
         private fun readBuiltInSteamInputTemplate(fileName: String): String? {
             val assets = instance?.assets ?: return null
@@ -945,7 +949,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun resolveSteamControllerVdfText(appId: Int): String? {
             val config = getAppInfoOf(appId)?.config ?: return null
-            val route = inputManager.routeFor(config.steamControllerTemplateIndex)
+            val route = installDomain.routeFor(config.steamControllerTemplateIndex)
             return when (route.source) {
                 app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.Downloaded -> {
                     readDownloadedSteamInputTemplate(appId)
@@ -979,7 +983,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.d("depots is empty? %s", downloadableDepots.isEmpty())
             if (downloadableDepots.isEmpty()) return null
 
-            val plan = installManager.buildDownloadPlan(
+            val plan = installDomain.buildDownloadPlan(
                 appId = appId,
                 downloadableDepots = downloadableDepots,
                 userSelectedDlcAppIds = userSelectedDlcAppIds,
@@ -1133,7 +1137,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                         val appConfig = getAppInfoOf(appId)?.config
                         if (appConfig != null) {
-                            inputManager.tryDownloadWorkshopControllerConfig(
+                            installDomain.tryDownloadWorkshopControllerConfig(
                                 templateIndex = appConfig.steamControllerTemplateIndex,
                                 configDetails = appConfig.steamControllerConfigDetails,
                                 appDirPath = getAppDirPath(appId),
@@ -1702,9 +1706,9 @@ class SteamService : Service(), IChallengeUrlChanged {
                 svc.db.withTransaction {
                     svc.libraryDomain.clearAllLibraryData()
                     if (clearCloudSyncState) {
-                        svc.libraryDomain.getPicsChangesManager().deleteAllChanges()
+                        svc.libraryDomain.deleteAllPicsChanges()
                     }
-                    svc.libraryDomain.getDownloadManager().clearAll()
+                    svc.libraryDomain.clearDownloadState()
                     svc.sessionDomain.clearAllTickets()
                 }
             }
@@ -1816,24 +1820,24 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         suspend fun generateAchievements(appId: Int, configDirectory: String) {
-            val mgr = requireInstance().cloudStatsDomain.achievementManager
+            val mgr = requireInstance().cloudStatsDomain
             mgr.generateAchievements(appId, configDirectory)
             cachedAchievements = mgr.cachedAchievements.value
             cachedAchievementsAppId = mgr.cachedAchievementsAppId.value
         }
 
         fun clearCachedAchievements() {
-            requireInstance().cloudStatsDomain.achievementManager.clearCachedAchievements()
+            requireInstance().cloudStatsDomain.clearCachedAchievements()
             cachedAchievements = null
             cachedAchievementsAppId = null
         }
 
         fun getGseSaveDirs(context: Context, appId: Int): List<File> {
-            return instance?.cloudStatsDomain?.achievementManager?.getGseSaveDirs(context, appId) ?: emptyList()
+            return instance?.cloudStatsDomain?.getGseSaveDirs(context, appId) ?: emptyList()
         }
 
         suspend fun syncAchievementsFromGoldberg(context: Context, appId: Int) {
-            instance?.cloudStatsDomain?.achievementManager?.syncAchievementsFromGoldberg(context, appId)
+            instance?.cloudStatsDomain?.syncAchievementsFromGoldberg(context, appId)
         }
 
         @Suppress("UNUSED")
@@ -1843,7 +1847,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             unlockedNames: Set<String>,
             gseStatsDir: File,
         ): Result<Unit> {
-            return instance?.cloudStatsDomain?.achievementManager?.storeAchievementUnlocks(
+            return instance?.cloudStatsDomain?.storeAchievementUnlocks(
                 appId = appId,
                 configDirectory = configDirectory,
                 unlockedNames = unlockedNames,
@@ -1874,16 +1878,16 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         // clear stale download records (completed games) but keep interrupted ones (preserves DLC selection)
         scope.launch {
-            for (record in libraryDomain.getDownloadManager().getAllDownloadingApps()) {
+            for (record in libraryDomain.getAllDownloadingApps()) {
                 if (isAppInstalled(record.appId)) {
-                    libraryDomain.getDownloadManager().deleteDownloadingApp(record.appId)
+                    libraryDomain.deleteDownloadingApp(record.appId)
                 }
             }
         }
 
         notificationHelper = NotificationHelper(applicationContext)
 
-        // pause downloads when WiFi/Ethernet connectivity changes
+        // pause downloads when Wi-Fi/Ethernet connectivity changes
         connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
         networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onLost(p0: Network) = checkAndPauseDownloads()
@@ -1900,7 +1904,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
             }
 
-            // no transition guard needed — if WiFi already down, downloadJobs is empty (no-op)
+            // no transition guard needed — if Wi-Fi already down, downloadJobs is empty (no-op)
             private fun checkAndPauseDownloads() {
                 if (PrefManager.downloadOnWifiOnly && !hasActiveWifiOrEthernet()) {
                     for ((appId, info) in downloadJobs.entries.toList()) {

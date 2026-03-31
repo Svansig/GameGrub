@@ -228,8 +228,15 @@ class SteamLibraryDomain @Inject constructor(
             depot.dlcAppId != SteamService.INVALID_APP_ID
         }
 
-    // Delegate access to internal managers
-    fun getDownloadManager(): DownloadManager = downloadManager
-    fun getPicsChangesManager(): PicsChangesManager = picsChangesManager
-    fun getCatalogManager(): SteamCatalogManager = catalogManager
+    suspend fun checkDlcOwnershipViaPICSBatch(dlcAppIds: Set<Int>): Set<Int> =
+        catalogManager.checkDlcOwnershipViaPICSBatch(dlcAppIds)
+
+    // Download state operations - encapsulate in domain
+    suspend fun deleteAppData(appId: Int) = downloadManager.deleteAppData(appId)
+    suspend fun clearDownloadState() = downloadManager.clearAll()
+    suspend fun getAllDownloadingApps() = downloadManager.getAllDownloadingApps()
+    suspend fun deleteDownloadingApp(appId: Int) = downloadManager.deleteDownloadingApp(appId)
+
+    // PICS changes operations - encapsulate in domain
+    suspend fun deleteAllPicsChanges() = picsChangesManager.deleteAllChanges()
 }

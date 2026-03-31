@@ -830,22 +830,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             fetchFileWithFallback("steam.tzst", dest, onDownloadProgress)
         }
 
-        private fun resolveSteamInputManifestFile(
-            appId: Int,
-            appDirPath: String,
-        ): File? {
-            val manifestPath = getAppInfoOf(appId)
-                ?.config
-                ?.steamInputManifestPath
-                ?.trim()
-                .orEmpty()
-            return installDomain.resolveSteamInputManifestFile(appDirPath, manifestPath)
-        }
-
-        private fun loadConfigFromManifest(
-            manifestFile: File,
-        ): String? = installDomain.loadConfigFromManifest(manifestFile)
-
         private fun readBuiltInSteamInputTemplate(fileName: String): String? {
             val assets = instance?.assets ?: return null
             return runCatching {
@@ -870,9 +854,11 @@ class SteamService : Service(), IChallengeUrlChanged {
                 }
 
                 app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.Manifest -> {
-                    val manifestFile = resolveSteamInputManifestFile(appId, getAppDirPath(appId))
+                    val manifestPath = config.steamInputManifestPath?.trim().orEmpty()
+                    val appPath = getAppDirPath(appId)
+                    val manifestFile = installDomain.resolveSteamInputManifestFile(appPath, manifestPath)
                         ?: return null
-                    loadConfigFromManifest(manifestFile)
+                    installDomain.loadConfigFromManifest(manifestFile)
                 }
 
                 app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.BuiltIn -> {

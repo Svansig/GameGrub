@@ -45,6 +45,7 @@ Each ticket should include:
 - Problem statement
 - Acceptance criteria
 - Validation plan
+- Documentation impact
 - Links (docs, PRs, commits)
 
 Use `todo/TICKET_TEMPLATE.md` for new tickets.
@@ -54,7 +55,8 @@ Use `todo/TICKET_TEMPLATE.md` for new tickets.
 1. Pick from `todo/INDEX.md` in priority order unless there is a release-driven override.
 2. Move status to `In Progress` before coding.
 3. Keep acceptance criteria and validation evidence updated in the ticket.
-4. Move to `Done` only after merge + validation.
+4. Update docs as part of the change and record doc impact in the ticket.
+5. Move to `Done` only after merge + validation.
 
 ## Backlog hygiene
 
@@ -62,4 +64,5 @@ Use `todo/TICKET_TEMPLATE.md` for new tickets.
 - Add links to related plans/docs in every ticket.
 - If a ticket is large, split it before implementation starts.
 - Prefer small, mergeable increments with explicit acceptance criteria.
+- For older tickets missing `Documentation impact`, add it when the ticket is first touched.
 

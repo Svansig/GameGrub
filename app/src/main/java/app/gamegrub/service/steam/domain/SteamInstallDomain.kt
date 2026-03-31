@@ -1,22 +1,71 @@
 package app.gamegrub.service.steam.domain
 
+import app.gamegrub.GameGrubApp
 import app.gamegrub.data.DepotInfo
+import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.ManifestInfo
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamControllerConfigDetail
-import app.gamegrub.service.steam.managers.SteamCatalogManager
+import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.steam.managers.SteamInputManager
 import app.gamegrub.service.steam.managers.SteamInstalledExeManager
 import `in`.dragonbra.javasteam.types.FileData
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SteamInstallDomain @Inject constructor(
-    val catalogManager: SteamCatalogManager,
     val inputManager: SteamInputManager,
+    val libraryDomain: SteamLibraryDomain,
 ) {
+    val downloadJobs = ConcurrentHashMap<Int, DownloadInfo>()
+
+    fun getAppDownloadInfo(appId: Int): DownloadInfo? = downloadJobs[appId]
+
+    private fun notifyDownloadStarted(appId: Int) {
+        GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
+    }
+
+    private fun notifyDownloadStopped(appId: Int) {
+        GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, false))
+    }
+
+    fun removeDownloadJob(appId: Int) {
+        val removed = downloadJobs.remove(appId)
+        if (removed != null) {
+            notifyDownloadStopped(appId)
+        }
+    }
+
+    suspend fun completeAppDownload(
+        downloadInfo: DownloadInfo,
+        downloadingAppId: Int,
+        entitledDepotIds: List<Int>,
+        selectedDlcAppIds: List<Int>,
+        appDirPath: String,
+    ) {
+        libraryDomain.upsertInstalledAppDownloadState(
+            appId = downloadingAppId,
+            entitledDepotIds = entitledDepotIds,
+            selectedDlcAppIds = selectedDlcAppIds,
+        )
+
+        downloadInfo.downloadingAppIds.removeIf { it == downloadingAppId }
+
+        if (downloadInfo.downloadingAppIds.isEmpty()) {
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                app.gamegrub.utils.storage.MarkerUtils.addMarker(appDirPath, app.gamegrub.enums.Marker.DOWNLOAD_COMPLETE_MARKER)
+                app.gamegrub.utils.storage.MarkerUtils.removeMarker(appDirPath, app.gamegrub.enums.Marker.STEAM_DLL_REPLACED)
+                app.gamegrub.utils.storage.MarkerUtils.removeMarker(appDirPath, app.gamegrub.enums.Marker.STEAM_COLDCLIENT_USED)
+            }
+
+            libraryDomain.deleteDownloadingApp(downloadInfo.gameId)
+            GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
+            downloadInfo.clearPersistedBytesDownloaded(appDirPath)
+        }
+    }
     fun buildDownloadPlan(
         appId: Int,
         downloadableDepots: Map<Int, DepotInfo>,

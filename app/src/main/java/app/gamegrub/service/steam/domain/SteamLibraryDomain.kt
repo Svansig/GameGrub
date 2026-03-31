@@ -1,7 +1,9 @@
 package app.gamegrub.service.steam.domain
 
 import app.gamegrub.data.CachedLicense
+import app.gamegrub.data.AppInfo
 import app.gamegrub.data.DepotInfo
+import app.gamegrub.data.DownloadingAppInfo
 import app.gamegrub.data.OwnedGames
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamLicense
@@ -16,7 +18,6 @@ import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamLibraryClient
 import app.gamegrub.service.steam.managers.DownloadManager
 import app.gamegrub.service.steam.managers.PicsChangesManager
-import app.gamegrub.service.steam.managers.SteamCatalogManager
 import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.utils.storage.MarkerUtils
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
@@ -45,7 +46,6 @@ class SteamLibraryDomain @Inject constructor(
     private val downloadingAppInfoDao: DownloadingAppInfoDao,
     private val picsChangesManager: PicsChangesManager,
     private val downloadManager: DownloadManager,
-    private val catalogManager: SteamCatalogManager,
 ) {
     data class LicenseSyncResult(
         val addedCount: Int,
@@ -142,10 +142,46 @@ class SteamLibraryDomain @Inject constructor(
     // App info operations
     suspend fun getInstalledApp(appId: Int) = appInfoDao.getInstalledApp(appId)
     suspend fun deleteAppInfo(appId: Int) = appInfoDao.deleteApp(appId)
+    suspend fun upsertInstalledAppDownloadState(
+        appId: Int,
+        entitledDepotIds: List<Int>,
+        selectedDlcAppIds: List<Int>,
+    ) {
+        val existing = appInfoDao.getInstalledApp(appId)
+        if (existing != null) {
+            val updatedDownloadedDepots = (existing.downloadedDepots + entitledDepotIds).distinct().sorted()
+            val updatedDlcDepots = (existing.dlcDepots + selectedDlcAppIds).distinct().sorted()
+            appInfoDao.update(
+                AppInfo(
+                    id = appId,
+                    isDownloaded = true,
+                    downloadedDepots = updatedDownloadedDepots,
+                    dlcDepots = updatedDlcDepots,
+                ),
+            )
+        } else {
+            appInfoDao.insert(
+                AppInfo(
+                    id = appId,
+                    isDownloaded = true,
+                    downloadedDepots = entitledDepotIds.sorted(),
+                    dlcDepots = selectedDlcAppIds.sorted(),
+                ),
+            )
+        }
+    }
 
     // Downloading app info operations
     suspend fun getDownloadingAppInfo(appId: Int) = downloadingAppInfoDao.getDownloadingApp(appId)
     suspend fun getDownloadingAppInfoOf(appId: Int) = getDownloadingAppInfo(appId)
+    suspend fun saveDownloadingAppInfo(appId: Int, dlcAppIds: List<Int>) {
+        downloadingAppInfoDao.insert(
+            DownloadingAppInfo(
+                appId = appId,
+                dlcAppIds = dlcAppIds,
+            ),
+        )
+    }
     suspend fun getAllDownloadingApps() = downloadingAppInfoDao.getAll()
     suspend fun deleteDownloadingApp(appId: Int) = downloadingAppInfoDao.deleteApp(appId)
     suspend fun deleteAllDownloadingApps() = downloadingAppInfoDao.deleteAll()
@@ -228,14 +264,10 @@ class SteamLibraryDomain @Inject constructor(
             depot.dlcAppId != SteamService.INVALID_APP_ID
         }
 
-    suspend fun checkDlcOwnershipViaPICSBatch(dlcAppIds: Set<Int>): Set<Int> =
-        catalogManager.checkDlcOwnershipViaPICSBatch(dlcAppIds)
 
     // Download state operations - encapsulate in domain
     suspend fun deleteAppData(appId: Int) = downloadManager.deleteAppData(appId)
     suspend fun clearDownloadState() = downloadManager.clearAll()
-    suspend fun getAllDownloadingApps() = downloadManager.getAllDownloadingApps()
-    suspend fun deleteDownloadingApp(appId: Int) = downloadManager.deleteDownloadingApp(appId)
 
     // PICS changes operations - encapsulate in domain
     suspend fun deleteAllPicsChanges() = picsChangesManager.deleteAllChanges()

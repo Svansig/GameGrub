@@ -280,7 +280,13 @@ ubuntufs/src/
 2. Select the highest-priority unblocked ticket
 3. Read the ticket file (for example `todo/UI-004.md`) and follow its acceptance criteria
 4. Update ticket status as work progresses (`Backlog` -> `In Progress` -> `Done`)
-5. Link validation evidence and PR references in the ticket
+5. Update the ticket's documentation impact and links to updated docs
+6. Link validation evidence and PR references in the ticket
+
+### Documentation Directive
+- Every change must include documentation updates.
+- Each PR must include a `Documentation Impact` note.
+- If no docs are changed, include `Documentation Impact: No doc changes required` with a concrete reason.
 
 ### Adding a New Service (Steam/GOG/Epic/Amazon)
 1. Create service class in `app/src/main/java/app/gamegrub/service/`

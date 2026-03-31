@@ -40,6 +40,7 @@ Work planning and task tracking is maintained in-repo under `todo/`.
 - Backlog index: `todo/INDEX.md`
 - Ticket guide: `todo/README.md`
 - Ticket template: `todo/TICKET_TEMPLATE.md`
+- Every PR must include documentation updates (or a `Documentation Impact: No doc changes required` note with reason).
 
 When working on cleanup/refactor work, pick a ticket from `todo/INDEX.md`, update status in the ticket file, and link the PR before moving it to `Done`.
 

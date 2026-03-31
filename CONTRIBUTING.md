@@ -17,6 +17,21 @@ Thanks for your interest in contributing! We welcome pull requests, bug reports,
 - Keep ticket status current (`Backlog`, `In Progress`, `Blocked`, `Done`).
 - Link ticket ID in your PR description and update ticket links after merge.
 
+## Documentation Requirement
+
+Every change must include documentation updates.
+
+- Update the most relevant docs for the change (`docs/`, `README.md`, `AGENTS.md`, ticket notes, or code comments where appropriate).
+- In your PR, include a short **Documentation Impact** note describing what was updated.
+- If a change truly requires no doc edits, include **Documentation Impact: No doc changes required** with a clear reason.
+
+## PR Checklist
+
+- [ ] Ticket linked from `todo/INDEX.md` and ticket file updated.
+- [ ] Documentation updated for this change.
+- [ ] PR description includes a `Documentation Impact` section.
+- [ ] Validation steps/results are included.
+
 ## Reporting Issues
 
 Please report bugs and request support through our [Discord server](https://discord.gg/2hKv4VfZfE). GitHub issues will be automatically closed.

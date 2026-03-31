@@ -88,6 +88,26 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | DOC-003 | P2 | Add launch pipeline sequence diagram docs | `docs` | `todo/DOC-003.md` |
 | DOC-004 | P2 | Add contribution examples for common refactors | `docs + contributing` | `todo/DOC-004.md` |
 
+## Backlog - Service Refactoring
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| SRV-001 | P1 | Move download orchestration to SteamInstallDomain | `service/steam` | `todo/SRV-001.md` |
+| SRV-002 | P2 | Move installer/download helpers to SteamInstallDomain | `service/steam` | `todo/SRV-002.md` |
+| SRV-003 | P2 | Remove DepotDownloader import from SteamService | `service/steam` | `todo/SRV-003.md` |
+| SRV-004 | P1 | Move session/launch orchestration to SteamSessionDomain | `service/steam` | `todo/SRV-004.md` |
+| SRV-005 | P2 | Move login helper to SteamAccountDomain | `service/steam` | `todo/SRV-005.md` |
+| SRV-006 | P2 | Move PICS/sync utility methods to appropriate domains | `service/steam` | `todo/SRV-006.md` |
+| SRV-007 | P2 | Deprecate SteamService companion service locator pattern | `service/steam` | `todo/SRV-007.md` |
+| SRV-008 | P3 | Remove library wrapper facades from companion | `service/steam` | `todo/SRV-008.md` |
+| SRV-009 | P1 | Remove remaining class fields that belong in domains | `service/steam` | `todo/SRV-009.md` |
+| SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | `service/steam` | `todo/SRV-010.md` |
+| SRV-011 | P3 | Move Windows launch info helper to SteamInstallDomain | `service/steam` | `todo/SRV-011.md` |
+| SRV-012 | P2 | Remove cloud stats wrapper facades from companion | `service/steam` | `todo/SRV-012.md` |
+| SRV-013 | P2 | Consolidate shutdown/cleanup helpers | `service/steam` | `todo/SRV-013.md` |
+| SRV-014 | P1 | Remove DAO injections from SteamService | `service/steam` | `todo/SRV-014.md` |
+| SRV-015 | P3 | Consolidate companion constants into domain config | `service/steam` | `todo/SRV-015.md` |
+
 ## In Progress
 
 | ID | Priority | Title | Owner | File |

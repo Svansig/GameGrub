@@ -1,41 +1,41 @@
-# COH-010 - Consolidate cross-platform auth flow ownership model
+# PERF-010 - Optimize background work scheduling to reduce contention
 
-- **ID**: `COH-010`
-- **Area**: `service/auth + ui/model`
+- **ID**: `PERF-010`
+- **Area**: `work scheduling + service`
 - **Priority**: `P2`
 - **Status**: `Backlog`
 - **Owner**: `TBD`
-- **Documentation Impact**: `Expected auth ownership model docs update.`
+- **Documentation Impact**: `Expected background scheduling docs update.`
 - **Reviewer**: `TBD`
 
 ## Problem
 
-Auth flow ownership is fragmented across UI helpers, handlers, and services.
+Concurrent background tasks can contend for resources and degrade responsiveness.
 
 ## Scope
 
 - In scope:
-  - Define ownership map for auth responsibilities.
-  - Align one cross-platform auth path to the model.
+  - Analyze background job concurrency and sequencing.
+  - Tune scheduling to reduce contention.
 - Out of scope:
-  - Complete auth subsystem rewrite.
+  - Full job system replacement.
 
 ## Dependencies and Decomposition
 
-- Parent ticket: `todo/UI-011.md`
+- Parent ticket: `todo/PERF-003.md`
 - Child tickets: `N/A`
-- Related follow-ups: `todo/TEST-005.md`
+- Related follow-ups: `todo/REL-002.md`
 - Blocker (if `Blocked`): `N/A`
 
 ## Acceptance Criteria
 
-- [ ] Auth ownership model documented and agreed.
-- [ ] One path migrated to model with no behavior regression.
+- [ ] Scheduling contention hotspots identified.
+- [ ] One or more low-risk scheduling improvements applied.
 - [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
 
-- [ ] Manual auth success/error/cancel paths verified.
+- [ ] Repeatable comparison shows reduced contention.
 - [ ] Implementation commit created before review.
 - [ ] Independent review completed and recorded.
 - [ ] Post-review changes committed.

@@ -1,36 +1,36 @@
-# UI-013 - Reduce direct event bus subscriptions inside composables
+# TEST-010 - Add tests for cancellation and resume edge cases
 
-- **ID**: `UI-013`
-- **Area**: `ui/screen`
-- **Priority**: `P3`
+- **ID**: `TEST-010`
+- **Area**: `service + ui`
+- **Priority**: `P2`
 - **Status**: `Backlog`
 - **Owner**: `TBD`
-- **Documentation Impact**: `Expected event-handling boundary docs update.`
+- **Documentation Impact**: `Expected test strategy docs update.`
 - **Reviewer**: `TBD`
 
 ## Problem
 
-Direct event bus subscriptions in composables increase lifecycle risk.
+Cancellation/resume paths are high risk and can regress silently.
 
 ## Scope
 
 - In scope:
-  - Move selected subscriptions to ViewModel/coordinator layer.
-  - Keep composables reactive to state/effects.
+  - Add tests for cancel/resume operations in target flows.
+  - Cover race-condition-like orderings where feasible.
 - Out of scope:
-  - Event system replacement.
+  - Full concurrency model rewrite.
 
 ## Dependencies and Decomposition
 
-- Parent ticket: `todo/COH-003.md`
+- Parent ticket: `todo/REL-009.md`
 - Child tickets: `N/A`
-- Related follow-ups: `todo/UI-010.md`
+- Related follow-ups: `todo/REL-002.md`
 - Blocker (if `Blocked`): `N/A`
 
 ## Acceptance Criteria
 
-- [ ] Direct composable event subscriptions reduced in target flows.
-- [ ] Lifecycle ownership clarified for migrated event handling.
+- [ ] Cancel/resume edge-case tests added.
+- [ ] Targeted failure modes are covered.
 - [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
@@ -44,7 +44,7 @@ Direct event bus subscriptions in composables increase lifecycle risk.
 
 ## Links
 
-- Related docs: `ARCHITECTURE.md`
+- Related docs: `todo/TEST-003.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
 

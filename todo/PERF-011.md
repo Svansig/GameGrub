@@ -1,41 +1,41 @@
-# COH-010 - Consolidate cross-platform auth flow ownership model
+# PERF-011 - Tune container launch prechecks for faster start
 
-- **ID**: `COH-010`
-- **Area**: `service/auth + ui/model`
-- **Priority**: `P2`
+- **ID**: `PERF-011`
+- **Area**: `container launch`
+- **Priority**: `P3`
 - **Status**: `Backlog`
 - **Owner**: `TBD`
-- **Documentation Impact**: `Expected auth ownership model docs update.`
+- **Documentation Impact**: `Expected launch performance notes update.`
 - **Reviewer**: `TBD`
 
 ## Problem
 
-Auth flow ownership is fragmented across UI helpers, handlers, and services.
+Container launch prechecks may add avoidable startup latency.
 
 ## Scope
 
 - In scope:
-  - Define ownership map for auth responsibilities.
-  - Align one cross-platform auth path to the model.
+  - Profile precheck sequence.
+  - Optimize low-risk repeated checks.
 - Out of scope:
-  - Complete auth subsystem rewrite.
+  - Sacrificing safety checks for speed.
 
 ## Dependencies and Decomposition
 
-- Parent ticket: `todo/UI-011.md`
+- Parent ticket: `todo/PERF-001.md`
 - Child tickets: `N/A`
-- Related follow-ups: `todo/TEST-005.md`
+- Related follow-ups: `todo/REL-006.md`
 - Blocker (if `Blocked`): `N/A`
 
 ## Acceptance Criteria
 
-- [ ] Auth ownership model documented and agreed.
-- [ ] One path migrated to model with no behavior regression.
+- [ ] Precheck timings captured.
+- [ ] Startup latency reduced for target scenario.
 - [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
 
-- [ ] Manual auth success/error/cancel paths verified.
+- [ ] Launch timing compared before/after.
 - [ ] Implementation commit created before review.
 - [ ] Independent review completed and recorded.
 - [ ] Post-review changes committed.

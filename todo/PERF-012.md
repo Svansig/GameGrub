@@ -1,41 +1,41 @@
-# COH-011 - Standardize app-level coordinator placement rules
+# PERF-012 - Add performance budget guardrails for key interactions
 
-- **ID**: `COH-011`
-- **Area**: `app/gamegrub`
+- **ID**: `PERF-012`
+- **Area**: `ui + docs`
 - **Priority**: `P3`
 - **Status**: `Backlog`
 - **Owner**: `TBD`
-- **Documentation Impact**: `Expected coordinator placement rules docs update.`
+- **Documentation Impact**: `Create performance budget guideline docs.`
 - **Reviewer**: `TBD`
 
 ## Problem
 
-Coordinator classes can be introduced in inconsistent locations.
+Without budgets, regressions in key interactions are easy to miss.
 
 ## Scope
 
 - In scope:
-  - Define coordinator placement rules and naming conventions.
-  - Apply to representative coordinator classes.
+  - Define practical budgets for a small set of critical interactions.
+  - Add check guidance for PRs touching those areas.
 - Out of scope:
-  - Renaming every coordinator in one pass.
+  - Hard CI gating on all budgets.
 
 ## Dependencies and Decomposition
 
-- Parent ticket: `todo/COH-004.md`
+- Parent ticket: `todo/PERF-008.md`
 - Child tickets: `N/A`
-- Related follow-ups: `todo/READ-002.md`
+- Related follow-ups: `todo/CI-011.md`
 - Blocker (if `Blocked`): `N/A`
 
 ## Acceptance Criteria
 
-- [ ] Coordinator placement rule doc added.
-- [ ] Representative coordinators aligned.
+- [ ] Budget definitions documented.
+- [ ] Interaction list with target thresholds added.
 - [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
 
-- [ ] Architecture review confirms new placements are consistent.
+- [ ] Team can apply budget checks to a sample PR.
 - [ ] Implementation commit created before review.
 - [ ] Independent review completed and recorded.
 - [ ] Post-review changes committed.
@@ -44,7 +44,7 @@ Coordinator classes can be introduced in inconsistent locations.
 
 ## Links
 
-- Related docs: `ARCHITECTURE.md`
+- Related docs: `docs/process-improvement-log.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
 

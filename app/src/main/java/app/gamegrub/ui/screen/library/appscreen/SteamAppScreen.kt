@@ -1295,32 +1295,11 @@ class SteamAppScreen : BaseAppScreen() {
                         setPendingUpdateVerifyOperation(gameId, null)
 
                         if (operation != null) {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val container = ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
-                                installDomain.downloadApp(gameId)
-                                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
-                                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
-                                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
-
-                                if (operation == AppOptionMenuType.VerifyFiles) {
-                                    val accountId = SteamService.getSteam3AccountId()
-                                    if (accountId != null) {
-                                        val prefixToPath: (String) -> String = { prefix ->
-                                            PathType.from(prefix).toAbsPath(context, gameId, accountId)
-                                        }
-                                        SteamService.forceSyncUserFiles(
-                                            appId = gameId,
-                                            prefixToPath = prefixToPath,
-                                            overrideLocalChangeNumber = -1,
-                                        ).await()
-                                    } else {
-                                        SnackbarManager.show(context.getString(R.string.steam_not_logged_in))
-                                    }
-                                }
-
-                                container.isNeedsUnpacking = true
-                                container.saveData()
-                            }
+                            getSteamAppScreenViewModel(context).verifyAppWithCloudSync(
+                                appId = gameId,
+                                shouldSyncCloud = (operation == AppOptionMenuType.VerifyFiles),
+                                onComplete = { /* No additional UI actions needed */ },
+                            )
                         }
                     }
                 }
@@ -1330,37 +1309,8 @@ class SteamAppScreen : BaseAppScreen() {
                         hideInstallDialog(gameId)
                         // Install ImageFS with loading progress
                         // Note: This should ideally show a loading dialog, but for now we'll do it in the background
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                val container = ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
-                                val variant = container.containerVariant
-
-                                if (!SteamService.isImageFsInstallable(context, variant)) {
-                                    SteamService.downloadImageFs(
-                                        onDownloadProgress = { /* TODO: Update loading dialog progress */ },
-                                        this,
-                                        variant = variant,
-                                        context = context,
-                                    ).await()
-                                }
-                                if (!SteamService.isImageFsInstalled(context)) {
-                                    withContext(Dispatchers.Main) {
-                                        SplitCompat.install(context)
-                                    }
-                                    ImageFsInstaller.installIfNeededFuture(context, context.assets, container) { progress ->
-                                        // TODO: Update loading dialog progress
-                                    }.get()
-                                }
-                                // After installation, trigger container edit
-                                SnackbarManager.show(context.getString(R.string.steam_imagefs_installed))
-                            } catch (e: Exception) {
-                                SnackbarManager.show(
-                                    context.getString(
-                                        R.string.steam_imagefs_install_failed,
-                                        e.message ?: "",
-                                    ),
-                                )
-                            }
+                        getSteamAppScreenViewModel(context).installImageFs(gameId) {
+                            // ImageFS installation completed
                         }
                     }
                 }

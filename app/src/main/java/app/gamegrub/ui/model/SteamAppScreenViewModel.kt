@@ -24,6 +24,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import com.google.android.play.core.splitcompat.SplitCompat
+import com.winlator.xenvironment.ImageFsInstaller
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -242,8 +244,54 @@ class SteamAppScreenViewModel @Inject constructor(
                     ).await()
                 }
             }
+            container.isNeedsUnpacking = true
+            container.saveData()
             withContext(Dispatchers.Main) {
                 onComplete()
+            }
+        }
+    }
+
+    /**
+     * Install ImageFS for a Steam app.
+     */
+    fun installImageFs(appId: Int, onComplete: () -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            try {
+                val container = ContainerUtils.getOrCreateContainer(context, appId)
+                val variant = container.containerVariant
+
+                if (!SteamService.isImageFsInstallable(context, variant)) {
+                    SteamService.downloadImageFs(
+                        onDownloadProgress = { /* TODO: Update loading dialog progress */ },
+                        this,
+                        variant = variant,
+                        context = context,
+                    ).await()
+                }
+                if (!SteamService.isImageFsInstalled(context)) {
+                    withContext(Dispatchers.Main) {
+                        SplitCompat.install(context)
+                    }
+                    ImageFsInstaller.installIfNeededFuture(context, context.assets, container) { progress ->
+                        // TODO: Update loading dialog progress
+                    }.get()
+                }
+                withContext(Dispatchers.Main) {
+                    app.gamegrub.ui.utils.SnackbarManager.show(
+                        context.getString(app.gamegrub.R.string.steam_imagefs_installed),
+                    )
+                    onComplete()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    app.gamegrub.ui.utils.SnackbarManager.show(
+                        context.getString(
+                            app.gamegrub.R.string.steam_imagefs_install_failed,
+                            e.message ?: "",
+                        ),
+                    )
+                }
             }
         }
     }

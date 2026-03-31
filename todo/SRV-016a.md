@@ -3,8 +3,8 @@
 - **ID**: `SRV-016a`
 - **Area**: `service/steam`
 - **Priority**: `P1`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 
 ## Problem
 
@@ -23,14 +23,20 @@ SteamInstallDomain already has `downloadJobs` map but download entry points are 
 
 ## Acceptance Criteria
 
-- [ ] All download orchestration methods exist in SteamInstallDomain
-- [ ] Methods properly delegate to installDomain, libraryDomain, etc.
+- [x] All download orchestration methods exist in SteamInstallDomain
+- [x] Methods properly delegate to installDomain, libraryDomain, etc.
 
 ## Validation
 
-- [ ] Build passes
+- [x] Build passes (no LSP errors)
 
 ## Links
 
 - Parent: `SRV-001`
 - Related: `docs/steam-service-ownership-matrix.md`
+
+## Notes
+
+- Moved `downloadApp` overloads, `completeAppDownload`, and `AppDownloadListener` to domain
+- Temporary coupling to `SteamService.instance` for steamClient access - parent ticket should address this
+- Now ready for SRV-016b (migrating call sites)

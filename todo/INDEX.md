@@ -241,3 +241,4 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
 | SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |
+| SRV-016a | P1 | Add download orchestration methods to SteamInstallDomain | TBD | `todo/SRV-016a.md` |

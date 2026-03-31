@@ -198,6 +198,7 @@ Concretely, treat the following previous `Keep` calls as transitional only:
 - PICS extraction: `SteamPicsSyncDomain` wired, removed channels/methods from SteamService
 - Download extraction: `downloadJobs` in `SteamInstallDomain`, notification delegation
 - Auth extraction: Account state in `SteamAccountDomain`, callbacks updated
+- Download orchestration (SRV-016a): Moved `downloadApp` overloads, `completeAppDownload`, `AppDownloadListener` to `SteamInstallDomain`
 
 
 

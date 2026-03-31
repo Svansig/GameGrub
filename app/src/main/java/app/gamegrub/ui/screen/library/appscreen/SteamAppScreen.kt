@@ -40,6 +40,7 @@ import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
+import app.gamegrub.ui.model.getSteamAppScreenViewModel
 import app.gamegrub.ui.component.dialog.GameManagerDialog
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
@@ -652,9 +653,7 @@ class SteamAppScreen : BaseAppScreen() {
                 ),
             )
         } else if (SteamService.hasPartialDownload(gameId)) {
-            CoroutineScope(Dispatchers.IO).launch {
-                installDomain.downloadApp(gameId)
-            }
+            getSteamAppScreenViewModel(context).downloadApp(gameId) { result -> /* fire and forget */ }
         } else if (!isInstalled) {
             // Request storage permissions first, then show install dialog
             // This will be handled by the permission launcher in AdditionalDialogs
@@ -677,9 +676,7 @@ class SteamAppScreen : BaseAppScreen() {
         if (downloadInfo != null) {
             downloadInfo.cancel()
         } else {
-            CoroutineScope(Dispatchers.IO).launch {
-                installDomain.downloadApp(gameId)
-            }
+            getSteamAppScreenViewModel(context).downloadApp(gameId) { result -> /* fire and forget */ }
         }
     }
 
@@ -710,10 +707,7 @@ class SteamAppScreen : BaseAppScreen() {
     }
 
     override fun onUpdateClick(context: Context, libraryItem: LibraryItem) {
-        val installDomain = getSteamInstallDomain(context)
-        CoroutineScope(Dispatchers.IO).launch {
-            installDomain.downloadApp(libraryItem.gameId)
-        }
+        getSteamAppScreenViewModel(context).downloadApp(libraryItem.gameId) { result -> /* fire and forget */ }
     }
 
     /**
@@ -986,10 +980,7 @@ class SteamAppScreen : BaseAppScreen() {
         ContainerUtils.applyToContainer(context, libraryItem.appId, config)
 
         if (container.language != config.language) {
-            val installDomain = getSteamInstallDomain(context)
-            CoroutineScope(Dispatchers.IO).launch {
-                installDomain.downloadApp(libraryItem.gameId)
-            }
+            getSteamAppScreenViewModel(context).downloadApp(libraryItem.gameId) { result -> /* fire and forget */ }
         }
     }
 
@@ -1292,9 +1283,7 @@ class SteamAppScreen : BaseAppScreen() {
                                 event = "game_install_started",
                                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
                             )
-                            CoroutineScope(Dispatchers.IO).launch {
-                                installDomain.downloadApp(gameId)
-                            }
+            getSteamAppScreenViewModel(context).downloadApp(gameId) { result -> /* fire and forget */ }
                         }
                     }
                 }
@@ -1314,12 +1303,8 @@ class SteamAppScreen : BaseAppScreen() {
                         )
                         val downloadInfo = installDomain.getAppDownloadInfo(gameId)
                         downloadInfo?.cancel()
-                        CoroutineScope(Dispatchers.IO).launch {
-                            SteamService.deleteApp(gameId)
-                            GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(gameId))
-                            withContext(Dispatchers.Main) {
-                                hideInstallDialog(gameId)
-                            }
+                        getSteamAppScreenViewModel(context).deleteApp(gameId) {
+                            hideInstallDialog(gameId)
                         }
                     }
                 }

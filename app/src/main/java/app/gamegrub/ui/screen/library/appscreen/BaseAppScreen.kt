@@ -52,6 +52,18 @@ private interface ContainerConfigTransferEntryPoint {
     fun containerConfigTransfer(): ContainerConfigTransfer
 }
 
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface SteamInstallDomainEntryPoint {
+    fun steamInstallDomain(): app.gamegrub.service.steam.domain.SteamInstallDomain
+}
+
+private fun getSteamInstallDomain(context: Context): app.gamegrub.service.steam.domain.SteamInstallDomain {
+    return EntryPointAccessors
+        .fromApplication(context.applicationContext, SteamInstallDomainEntryPoint::class.java)
+        .steamInstallDomain()
+}
+
 /**
  * Abstract base class for AppScreen implementations.
  * This defines the contract that all game source-specific screens must implement.
@@ -728,7 +740,7 @@ abstract class BaseAppScreen {
 
         // Get download info based on game source for progress tracking
         val downloadInfo = when (libraryItem.gameSource) {
-            GameSource.STEAM -> SteamService.getAppDownloadInfo(displayInfo.gameId)
+            GameSource.STEAM -> getSteamInstallDomain(context).getAppDownloadInfo(displayInfo.gameId)
 
             GameSource.EPIC -> app.gamegrub.service.epic.EpicService.getDownloadInfo(displayInfo.gameId)
 

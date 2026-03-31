@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,8 +49,24 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.CompatibilityBadge
 import app.gamegrub.ui.utils.ListItemImage
 import app.gamegrub.utils.game.CustomGameScanner
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface SteamInstallDomainEntryPoint {
+    fun steamInstallDomain(): app.gamegrub.service.steam.domain.SteamInstallDomain
+}
+
+private fun getSteamInstallDomain(context: Context): app.gamegrub.service.steam.domain.SteamInstallDomain {
+    return EntryPointAccessors
+        .fromApplication(context.applicationContext, SteamInstallDomainEntryPoint::class.java)
+        .steamInstallDomain()
+}
 
 /**
  * List view card with compact layout.
@@ -198,9 +215,10 @@ private fun InstallStatusBadge(
     appInfo: LibraryItem,
     isRefreshing: Boolean,
 ) {
+    val context = LocalContext.current
     val isSteam = appInfo.gameSource == GameSource.STEAM
     val downloadInfo = remember(appInfo.appId) {
-        if (isSteam) SteamService.getAppDownloadInfo(appInfo.gameId) else null
+        if (isSteam) getSteamInstallDomain(context).getAppDownloadInfo(appInfo.gameId) else null
     }
     var downloadProgress by remember(downloadInfo) {
         mutableFloatStateOf(downloadInfo?.getProgress() ?: 0f)

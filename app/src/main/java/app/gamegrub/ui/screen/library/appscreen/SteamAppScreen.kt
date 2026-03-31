@@ -89,6 +89,12 @@ private interface BestConfigServiceEntryPoint {
     fun bestConfigService(): BestConfigService
 }
 
+private fun getSteamInstallDomain(context: Context): app.gamegrub.service.steam.domain.SteamInstallDomain {
+    return EntryPointAccessors
+        .fromApplication(context.applicationContext, SteamInstallDomainEntryPoint::class.java)
+        .steamInstallDomain()
+}
+
 private data class InstallSizeInfo(
     val downloadSize: String,
     val installSize: String,
@@ -512,11 +518,13 @@ class SteamAppScreen : BaseAppScreen() {
 
     override fun isDownloading(context: Context, libraryItem: LibraryItem): Boolean {
         // download job is removed on completion, so non-null means actively downloading
-        return SteamService.getAppDownloadInfo(libraryItem.gameId) != null
+        val installDomain = getSteamInstallDomain(context)
+        return installDomain.getAppDownloadInfo(libraryItem.gameId) != null
     }
 
     override fun getDownloadProgress(context: Context, libraryItem: LibraryItem): Float {
-        val downloadInfo = SteamService.getAppDownloadInfo(libraryItem.gameId)
+        val installDomain = getSteamInstallDomain(context)
+        val downloadInfo = installDomain.getAppDownloadInfo(libraryItem.gameId)
         return downloadInfo?.getProgress() ?: 0f
     }
 
@@ -535,7 +543,7 @@ class SteamAppScreen : BaseAppScreen() {
         val appId = libraryItem.gameId
         val disposables = mutableListOf<() -> Unit>()
 
-        var progressDisposer = attachDownloadProgressListener(appId, onProgressChanged)
+        var progressDisposer = attachDownloadProgressListener(context, appId, onProgressChanged)
 
         val installListener: (AndroidEvent.LibraryInstallStatusChanged) -> Unit = { event ->
             if (event.appId == appId) {
@@ -549,7 +557,7 @@ class SteamAppScreen : BaseAppScreen() {
             if (event.appId == appId) {
                 if (event.isDownloading) {
                     progressDisposer?.invoke()
-                    progressDisposer = attachDownloadProgressListener(appId, onProgressChanged)
+                    progressDisposer = attachDownloadProgressListener(context, appId, onProgressChanged)
                     onHasPartialDownloadChanged?.invoke(true)
                 } else {
                     progressDisposer?.invoke()
@@ -579,10 +587,12 @@ class SteamAppScreen : BaseAppScreen() {
     }
 
     private fun attachDownloadProgressListener(
+        context: Context,
         appId: Int,
         onProgressChanged: (Float) -> Unit,
     ): (() -> Unit)? {
-        val downloadInfo = SteamService.getAppDownloadInfo(appId) ?: return null
+        val installDomain = getSteamInstallDomain(context)
+        val downloadInfo = installDomain.getAppDownloadInfo(appId) ?: return null
         val listener: (Float) -> Unit = { progress ->
             onProgressChanged(progress)
         }
@@ -623,7 +633,8 @@ class SteamAppScreen : BaseAppScreen() {
         onClickPlay: (Boolean) -> Unit,
     ) {
         val gameId = libraryItem.gameId
-        val downloadInfo = SteamService.getAppDownloadInfo(gameId)
+        val installDomain = getSteamInstallDomain(context)
+        val downloadInfo = installDomain.getAppDownloadInfo(gameId)
         val isDownloading = downloadInfo != null && (downloadInfo.getProgress() ?: 0f) < 1f
         val isInstalled = SteamService.isAppInstalled(gameId)
 
@@ -642,7 +653,7 @@ class SteamAppScreen : BaseAppScreen() {
             )
         } else if (SteamService.hasPartialDownload(gameId)) {
             CoroutineScope(Dispatchers.IO).launch {
-                SteamService.downloadApp(gameId)
+                installDomain.downloadApp(gameId)
             }
         } else if (!isInstalled) {
             // Request storage permissions first, then show install dialog
@@ -660,13 +671,14 @@ class SteamAppScreen : BaseAppScreen() {
 
     override fun onPauseResumeClick(context: Context, libraryItem: LibraryItem) {
         val gameId = libraryItem.gameId
-        val downloadInfo = SteamService.getAppDownloadInfo(gameId)
+        val installDomain = getSteamInstallDomain(context)
+        val downloadInfo = installDomain.getAppDownloadInfo(gameId)
 
         if (downloadInfo != null) {
             downloadInfo.cancel()
         } else {
             CoroutineScope(Dispatchers.IO).launch {
-                SteamService.downloadApp(gameId)
+                installDomain.downloadApp(gameId)
             }
         }
     }
@@ -674,7 +686,8 @@ class SteamAppScreen : BaseAppScreen() {
     override fun onDeleteDownloadClick(context: Context, libraryItem: LibraryItem) {
         val gameId = libraryItem.gameId
         val isInstalled = SteamService.isAppInstalled(gameId)
-        val downloadInfo = SteamService.getAppDownloadInfo(gameId)
+        val installDomain = getSteamInstallDomain(context)
+        val downloadInfo = installDomain.getAppDownloadInfo(gameId)
         val isDownloading = downloadInfo != null && (downloadInfo.getProgress() ?: 0f) < 1f
 
         if (isDownloading || SteamService.hasPartialDownload(gameId)) {
@@ -697,8 +710,9 @@ class SteamAppScreen : BaseAppScreen() {
     }
 
     override fun onUpdateClick(context: Context, libraryItem: LibraryItem) {
+        val installDomain = getSteamInstallDomain(context)
         CoroutineScope(Dispatchers.IO).launch {
-            SteamService.downloadApp(libraryItem.gameId)
+            installDomain.downloadApp(libraryItem.gameId)
         }
     }
 
@@ -972,8 +986,9 @@ class SteamAppScreen : BaseAppScreen() {
         ContainerUtils.applyToContainer(context, libraryItem.appId, config)
 
         if (container.language != config.language) {
+            val installDomain = getSteamInstallDomain(context)
             CoroutineScope(Dispatchers.IO).launch {
-                SteamService.downloadApp(libraryItem.gameId)
+                installDomain.downloadApp(libraryItem.gameId)
             }
         }
     }
@@ -1064,6 +1079,7 @@ class SteamAppScreen : BaseAppScreen() {
         }
         var installSizeInfo by remember(gameId) { mutableStateOf<InstallSizeInfo?>(null) }
         fun launchPendingInstall(selectedDlcIds: List<Int>) {
+            val installDomain = getSteamInstallDomain(context)
             val installedApp = SteamService.getInstalledApp(gameId)
             if (installedApp != null) {
                 // Remove markers if the app is already installed
@@ -1078,7 +1094,7 @@ class SteamAppScreen : BaseAppScreen() {
             )
             storageLocationConfirmedForInstall = false
             CoroutineScope(Dispatchers.IO).launch {
-                SteamService.downloadApp(gameId, selectedDlcIds, isUpdateOrVerify = false)
+                installDomain.downloadApp(gameId, selectedDlcIds, isUpdateOrVerify = false)
             }
         }
 
@@ -1271,12 +1287,13 @@ class SteamAppScreen : BaseAppScreen() {
                         if (pendingInstallDlcIds != null) {
                             continuePendingInstallIfAuthorized()
                         } else {
+                            val installDomain = getSteamInstallDomain(context)
                             PostHog.capture(
                                 event = "game_install_started",
                                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
                             )
                             CoroutineScope(Dispatchers.IO).launch {
-                                SteamService.downloadApp(gameId)
+                                installDomain.downloadApp(gameId)
                             }
                         }
                     }
@@ -1290,11 +1307,12 @@ class SteamAppScreen : BaseAppScreen() {
 
                 DialogType.CANCEL_APP_DOWNLOAD -> {
                     {
+                        val installDomain = getSteamInstallDomain(context)
                         PostHog.capture(
                             event = "game_install_cancelled",
                             properties = mapOf("game_name" to (appInfo?.name ?: "")),
                         )
-                        val downloadInfo = SteamService.getAppDownloadInfo(gameId)
+                        val downloadInfo = installDomain.getAppDownloadInfo(gameId)
                         downloadInfo?.cancel()
                         CoroutineScope(Dispatchers.IO).launch {
                             SteamService.deleteApp(gameId)
@@ -1309,13 +1327,14 @@ class SteamAppScreen : BaseAppScreen() {
                 DialogType.UPDATE_VERIFY_CONFIRM -> {
                     {
                         hideInstallDialog(gameId)
+                        val installDomain = getSteamInstallDomain(context)
                         val operation = getPendingUpdateVerifyOperation(gameId)
                         setPendingUpdateVerifyOperation(gameId, null)
 
                         if (operation != null) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 val container = ContainerUtils.getOrCreateContainer(context, libraryItem.appId)
-                                SteamService.downloadApp(gameId)
+                                installDomain.downloadApp(gameId)
                                 MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
                                 MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
                                 MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)

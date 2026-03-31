@@ -403,10 +403,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             return getInstalledApp(appId)?.dlcDepots
         }
 
-        fun getAppDownloadInfo(appId: Int): DownloadInfo? {
-            return installDomain.getAppDownloadInfo(appId)
-        }
-
         fun isAppInstalled(appId: Int): Boolean {
             return MarkerUtils.hasMarker(getAppDirPath(appId), Marker.DOWNLOAD_COMPLETE_MARKER)
         }
@@ -611,11 +607,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             return File(appDirPath).deleteRecursively()
         }
 
-        fun downloadApp(appId: Int): DownloadInfo? = installDomain.downloadApp(appId)
-
-        fun downloadApp(appId: Int, dlcAppIds: List<Int>, isUpdateOrVerify: Boolean): DownloadInfo? =
-            installDomain.downloadApp(appId, dlcAppIds, isUpdateOrVerify)
-
         fun isImageFsInstalled(context: Context): Boolean {
             return ImageFs.find(context).rootDir.exists()
         }
@@ -808,22 +799,6 @@ class SteamService : Service(), IChallengeUrlChanged {
                 }
             }
         }
-
-        fun downloadApp(
-            appId: Int,
-            downloadableDepots: Map<Int, DepotInfo>,
-            userSelectedDlcAppIds: List<Int>,
-            branch: String,
-            containerLanguage: String,
-            isUpdateOrVerify: Boolean,
-        ): DownloadInfo? = installDomain.downloadApp(
-            appId = appId,
-            downloadableDepots = downloadableDepots,
-            userSelectedDlcAppIds = userSelectedDlcAppIds,
-            branch = branch,
-            containerLanguage = containerLanguage,
-            isUpdateOrVerify = isUpdateOrVerify,
-        )
 
         private suspend fun completeAppDownload(
             downloadInfo: DownloadInfo,

@@ -889,39 +889,19 @@ class SteamAppScreen : BaseAppScreen() {
                         event = "cloud_sync_forced",
                         properties = mapOf("game_name" to appInfo.name),
                     )
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val accountId = SteamService.getSteam3AccountId()
-                        if (accountId == null) {
-                            SnackbarManager.show(context.getString(R.string.steam_not_logged_in))
-                            return@launch
-                        }
-
-                        val containerManager = ContainerManager(context)
-                        val container = ContainerUtils.getOrCreateContainer(context, appId)
-                        containerManager.activateContainer(container)
-
-                        val prefixToPath: (String) -> String = { prefix ->
-                            PathType.from(prefix).toAbsPath(context, gameId, accountId)
-                        }
-                        val syncResult = SteamService.forceSyncUserFiles(
-                            appId = gameId,
-                            prefixToPath = prefixToPath,
-                        ).await()
-
-                        when (syncResult.syncResult) {
+                    getSteamAppScreenViewModel(context).syncUserCloudFiles(appId, gameId) { syncResult ->
+                        when (syncResult) {
                             SyncResult.Success -> {
                                 SnackbarManager.show(context.getString(R.string.steam_cloud_sync_success))
                             }
-
                             SyncResult.UpToDate -> {
                                 SnackbarManager.show(context.getString(R.string.steam_cloud_sync_up_to_date))
                             }
-
                             else -> {
                                 SnackbarManager.show(
                                     context.getString(
                                         R.string.steam_cloud_sync_failed,
-                                        syncResult.syncResult,
+                                        syncResult,
                                     ),
                                 )
                             }
@@ -1084,9 +1064,7 @@ class SteamAppScreen : BaseAppScreen() {
                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
             )
             storageLocationConfirmedForInstall = false
-            CoroutineScope(Dispatchers.IO).launch {
-                installDomain.downloadApp(gameId, selectedDlcIds, isUpdateOrVerify = false)
-            }
+            getSteamAppScreenViewModel(context).downloadAppWithDlc(gameId, selectedDlcIds) { result -> /* fire and forget */ }
         }
 
         fun showPendingInstallDialog() {

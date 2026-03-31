@@ -4,6 +4,14 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.gamegrub.service.steam.domain.SteamInstallDomain
+import app.gamegrub.service.steam.SteamService
+import app.gamegrub.utils.container.ContainerManager
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.enums.PathType
+import app.gamegrub.enums.SyncResult
+import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.enums.Marker
+import app.gamegrub.service.steam.SteamPaths
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -55,6 +63,71 @@ class SteamAppScreenViewModel @Inject constructor(
                 withContext(Dispatchers.Main) {
                     onResult(Result.failure(e))
                 }
+            }
+        }
+    }
+
+    /**
+     * Start download for a Steam app with specific DLC list.
+     */
+    fun downloadAppWithDlc(appId: Int, dlcAppIds: List<Int>, onResult: (Result<Unit>) -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            try {
+                steamInstallDomain.downloadApp(appId, dlcAppIds, isUpdateOrVerify = false)
+                withContext(Dispatchers.Main) {
+                    onResult(Result.success(Unit))
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onResult(Result.failure(e))
+                }
+            }
+        }
+    }
+
+    /**
+     * Sync cloud files for a Steam app.
+     */
+    fun syncUserCloudFiles(appId: Int, gameId: Int, onResult: (SyncResult) -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            val accountId = SteamService.getSteam3AccountId()
+            if (accountId == null) {
+                withContext(Dispatchers.Main) {
+                    onResult(SyncResult.Failed) // Use appropriate error result
+                }
+                return@launch
+            }
+
+            val containerManager = ContainerManager(context)
+            val container = ContainerUtils.getOrCreateContainer(context, appId)
+            containerManager.activateContainer(container)
+
+            val prefixToPath: (String) -> String = { prefix ->
+                PathType.from(prefix).toAbsPath(context, gameId, accountId)
+            }
+            val syncResult = SteamService.forceSyncUserFiles(
+                appId = gameId,
+                prefixToPath = prefixToPath,
+            ).await()
+
+            withContext(Dispatchers.Main) {
+                onResult(syncResult.syncResult)
+            }
+        }
+    }
+
+    /**
+     * Verify/update an installed app and clean up markers.
+     */
+    fun verifyAppWithCleanup(appId: Int, onComplete: () -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            val container = ContainerUtils.getOrCreateContainer(context, appId)
+            steamInstallDomain.downloadApp(appId)
+            MarkerUtils.removeMarker(app.gamegrub.service.steam.SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
+            MarkerUtils.removeMarker(app.gamegrub.service.steam.SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
+            MarkerUtils.removeMarker(app.gamegrub.service.steam.SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
+            withContext(Dispatchers.Main) {
+                onComplete()
             }
         }
     }

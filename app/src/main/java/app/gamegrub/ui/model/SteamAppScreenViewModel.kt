@@ -217,4 +217,34 @@ class SteamAppScreenViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Verify/update an installed app with optional cloud sync.
+     */
+    fun verifyAppWithCloudSync(appId: Int, shouldSyncCloud: Boolean, onComplete: () -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            val container = ContainerUtils.getOrCreateContainer(context, appId)
+            steamInstallDomain.downloadApp(appId)
+            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
+            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
+            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
+            
+            if (shouldSyncCloud) {
+                val accountId = SteamService.getSteam3AccountId()
+                if (accountId != null) {
+                    val prefixToPath: (String) -> String = { prefix ->
+                        PathType.from(prefix).toAbsPath(context, appId, accountId)
+                    }
+                    SteamService.forceSyncUserFiles(
+                        appId = appId,
+                        prefixToPath = prefixToPath,
+                        overrideLocalChangeNumber = -1,
+                    ).await()
+                }
+            }
+            withContext(Dispatchers.Main) {
+                onComplete()
+            }
+        }
+    }
 }

@@ -195,15 +195,25 @@ class SteamAppScreenViewModel @Inject constructor(
     /**
      * Delete/uninstall a Steam app and clean up container.
      */
-    fun deleteAppWithContainerCleanup(appId: Int, onComplete: () -> Unit) {
+    fun deleteAppWithContainerCleanup(appId: Int, onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            app.gamegrub.service.steam.SteamService.deleteApp(appId)
-            app.gamegrub.GameGrubApp.events.emit(
-                app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
-            )
-            app.gamegrub.utils.container.ContainerUtils.deleteContainer(context, appId)
-            withContext(Dispatchers.Main) {
-                onComplete()
+            try {
+                val success = app.gamegrub.service.steam.SteamService.deleteApp(appId)
+                app.gamegrub.GameGrubApp.events.emit(
+                    app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
+                )
+                app.gamegrub.utils.container.ContainerUtils.deleteContainer(context, appId)
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        onResult(Result.success(Unit))
+                    } else {
+                        onResult(Result.failure(Exception("Delete failed")))
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onResult(Result.failure(e))
+                }
             }
         }
     }

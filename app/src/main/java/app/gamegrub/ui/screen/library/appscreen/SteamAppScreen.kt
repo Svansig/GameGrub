@@ -1400,13 +1400,9 @@ class SteamAppScreen : BaseAppScreen() {
                         onClick = {
                             hideUninstallDialog(libraryItem.appId)
 
-                            CoroutineScope(Dispatchers.IO).launch {
-                                val success = SteamService.deleteApp(gameId)
-                                withContext(Dispatchers.Main) {
-                                    ContainerUtils.deleteContainer(context, libraryItem.appId)
-                                }
-                                withContext(Dispatchers.Main) {
-                                    if (success) {
+                            getSteamAppScreenViewModel(context).deleteAppWithContainerCleanup(gameId) { result ->
+                                result.fold(
+                                    onSuccess = {
                                         GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(gameId))
                                         SnackbarManager.show(
                                             context.getString(
@@ -1418,10 +1414,11 @@ class SteamAppScreen : BaseAppScreen() {
                                             event = "game_uninstalled",
                                             properties = mapOf("game_name" to (appInfo?.name ?: "")),
                                         )
-                                    } else {
+                                    },
+                                    onFailure = {
                                         SnackbarManager.show(context.getString(R.string.steam_uninstall_failed))
-                                    }
-                                }
+                                    },
+                                )
                             }
                         },
                     ) {

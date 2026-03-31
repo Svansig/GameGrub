@@ -208,7 +208,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-014 | P1 | Remove DAO injections from SteamService | `service/steam` | `todo/SRV-014.md` |
 | SRV-015 | P3 | Consolidate companion constants into domain config | `service/steam` | `todo/SRV-015.md` |
 | SRV-016a | P1 | Add download orchestration methods to SteamInstallDomain | `service/steam` | `todo/SRV-016a.md` |
-| SRV-016b | P1 | Migrate download call sites to SteamInstallDomain | `service/steam` | `todo/SRV-016b.md` |
+| SRV-016b | P1 | Migrate download call sites to SteamInstallDomain | Done | `todo/SRV-016b.md` |
 | SRV-016c | P2 | Clean up download-related imports and constants | `service/steam` | `todo/SRV-016c.md` |
 | SRV-016 | P2 | Move authentication side effects from service callbacks into domains | `service/steam` | `todo/SRV-016.md` |
 | SRV-017 | P2 | Replace remaining static facade entry points with injected pathways | `service/steam` | `todo/SRV-017.md` |
@@ -242,3 +242,4 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
 | SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |
 | SRV-016a | P1 | Add download orchestration methods to SteamInstallDomain | TBD | `todo/SRV-016a.md` |
+| SRV-016b | P1 | Migrate download call sites to SteamInstallDomain | TBD | `todo/SRV-016b.md` |

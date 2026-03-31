@@ -618,51 +618,10 @@ class SteamService : Service(), IChallengeUrlChanged {
             return File(appDirPath).deleteRecursively()
         }
 
-        fun downloadApp(appId: Int): DownloadInfo? {
-            val currentDownloadInfo = getAppDownloadInfo(appId)
-            if (currentDownloadInfo != null) {
-                return currentDownloadInfo
-            } else {
-                // If downloading app info exists
-                val downloadingAppInfo = getDownloadingAppInfoOf(appId)
-                if (downloadingAppInfo != null) {
-                    return downloadApp(appId, downloadingAppInfo.dlcAppIds, isUpdateOrVerify = false)
-                } else {
-                    // Otherwise it is verifying files
-                    val dlcAppIds = getInstalledDlcDepotsOf(appId).orEmpty().toMutableList()
+        fun downloadApp(appId: Int): DownloadInfo? = installDomain.downloadApp(appId)
 
-                    getDownloadableDlcAppsOf(appId)?.forEach { dlcApp ->
-                        val installedDlcApp = getInstalledApp(dlcApp.id)
-                        if (installedDlcApp != null) {
-                            dlcAppIds.add(installedDlcApp.id)
-                        }
-                    }
-
-                    return downloadApp(appId, dlcAppIds, isUpdateOrVerify = true)
-                }
-            }
-        }
-
-        fun downloadApp(appId: Int, dlcAppIds: List<Int>, isUpdateOrVerify: Boolean): DownloadInfo? {
-            if (!checkWifiOrNotify()) return null
-            val ctx = instance?.applicationContext ?: return null
-            return getAppInfoOf(appId)?.let {
-                val container = ContainerManager(ctx).getContainerById("STEAM_$appId")
-                val containerLanguage = container?.language ?: PrefManager.containerLanguage
-
-                Timber.tag("SteamService").d("downloadApp: downloading app $appId with language $containerLanguage")
-
-                val depots = getDownloadableDepots(appId = appId, preferredLanguage = containerLanguage)
-                downloadApp(
-                    appId = appId,
-                    downloadableDepots = depots,
-                    userSelectedDlcAppIds = dlcAppIds,
-                    branch = "public",
-                    containerLanguage = containerLanguage,
-                    isUpdateOrVerify = isUpdateOrVerify,
-                )
-            }
-        }
+        fun downloadApp(appId: Int, dlcAppIds: List<Int>, isUpdateOrVerify: Boolean): DownloadInfo? =
+            installDomain.downloadApp(appId, dlcAppIds, isUpdateOrVerify)
 
         fun isImageFsInstalled(context: Context): Boolean {
             return ImageFs.find(context).rootDir.exists()
@@ -864,46 +823,14 @@ class SteamService : Service(), IChallengeUrlChanged {
             branch: String,
             containerLanguage: String,
             isUpdateOrVerify: Boolean,
-        ): DownloadInfo? {
-            val appDirPath = getAppDirPath(appId)
-
-            if (!checkWifiOrNotify()) return null
-            if (getAppDownloadInfo(appId) != null) return getAppDownloadInfo(appId)
-            Timber.d("depots is empty? %s", downloadableDepots.isEmpty())
-            if (downloadableDepots.isEmpty()) return null
-
-            val plan = installDomain.buildDownloadPlan(
-                appId = appId,
-                downloadableDepots = downloadableDepots,
-                userSelectedDlcAppIds = userSelectedDlcAppIds,
-                mainDepots = getMainAppDepots(appId, containerLanguage),
-                downloadableDlcApps = getDownloadableDlcAppsOf(appId).orEmpty(),
-                installedDownloadedDepots = getInstalledApp(appId)?.downloadedDepots,
-                isUpdateOrVerify = isUpdateOrVerify,
-                invalidAppId = INVALID_APP_ID,
-                initialMainAppDlcIds = getMainAppDlcIdsWithoutProperDepotDlcIds(appId),
-            )
-
-            val mainAppDepots = plan.mainAppDepots
-            val dlcAppDepots = plan.dlcAppDepots
-            val selectedDepots = plan.selectedDepots
-            val downloadingAppIds = CopyOnWriteArrayList(plan.downloadingAppIds)
-            val calculatedDlcAppIds = CopyOnWriteArrayList(plan.calculatedDlcAppIds)
-            val mainAppDlcIds = plan.mainAppDlcIds
-
-            Timber.i("selectedDepots is empty? %s", selectedDepots.isEmpty())
-
-            if (selectedDepots.isEmpty()) return null
-
-            Timber.i("Starting download for $appId")
-            Timber.i("App contains ${mainAppDepots.size} depot(s): ${mainAppDepots.keys}")
-            Timber.i("DLC contains ${dlcAppDepots.size} depot(s): ${dlcAppDepots.keys}")
-            Timber.i("downloadingAppIds: $downloadingAppIds")
-
-            // Save downloading app info
-            runBlocking {
-                instance?.libraryDomain?.saveDownloadingAppInfo(appId, userSelectedDlcAppIds)
-            }
+        ): DownloadInfo? = installDomain.downloadApp(
+            appId = appId,
+            downloadableDepots = downloadableDepots,
+            userSelectedDlcAppIds = userSelectedDlcAppIds,
+            branch = branch,
+            containerLanguage = containerLanguage,
+            isUpdateOrVerify = isUpdateOrVerify,
+        )
 
             val info = DownloadInfo(selectedDepots.size, appId, downloadingAppIds).also { di ->
                 di.setPersistencePath(appDirPath)

@@ -199,3 +199,4 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 |---|---|---|---|---|
 | SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
+| SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |

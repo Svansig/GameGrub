@@ -149,4 +149,3 @@ object SteamControllerConfigManager {
         return null
     }
 }
-

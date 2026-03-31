@@ -88,4 +88,3 @@ object SteamControllerWorkshopDownloadManager {
         return fileUrl
     }
 }
-

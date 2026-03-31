@@ -2,9 +2,9 @@ package app.gamegrub.service.steam.domain
 
 import app.gamegrub.data.GameProcessInfo
 import app.gamegrub.data.PostSyncInfo
-import `in`.dragonbra.javasteam.steam.handlers.steamapps.GamePlayedInfo
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
+import `in`.dragonbra.javasteam.steam.handlers.steamapps.GamePlayedInfo
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope

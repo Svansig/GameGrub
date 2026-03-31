@@ -18,7 +18,9 @@ object SteamControllerTemplateRoutingManager {
     fun routeFor(templateIndex: Int): TemplateRoute {
         return when (templateIndex) {
             1 -> TemplateRoute(source = TemplateSource.Downloaded)
+
             13 -> TemplateRoute(source = TemplateSource.Manifest)
+
             2, 12 -> TemplateRoute(
                 source = TemplateSource.BuiltIn,
                 builtInTemplateName = "controller_xboxone_gamepad_fps.vdf",
@@ -45,4 +47,3 @@ object SteamControllerTemplateRoutingManager {
         return routeFor(templateIndex).source == TemplateSource.Downloaded
     }
 }
-

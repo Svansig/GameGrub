@@ -74,4 +74,3 @@ object SteamDepotSelectionManager {
         return map
     }
 }
-

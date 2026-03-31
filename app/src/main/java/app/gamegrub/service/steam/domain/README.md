@@ -4,9 +4,11 @@ This directory contains the domain layer for Steam integration.
 
 ## End Goal
 
-Domains are the business workflow owners for Steam. The target is a thin `SteamService` shell that delegates to domains for all non-Android logic.
+Domains are the business workflow owners for Steam. The target is a thin `SteamService` shell that delegates to domains for all non-Android
+logic.
 
 In end-state architecture, each domain:
+
 - owns a cohesive workflow area,
 - coordinates repositories/DAOs and manager helpers,
 - exposes stable methods for service and UI-facing facades,
@@ -15,33 +17,33 @@ In end-state architecture, each domain:
 ## Domain Responsibilities
 
 - `SteamAccountDomain`
-  - Authentication/login flow orchestration.
-  - Persona/friends/account identity behavior.
-  - Account runtime state model (login progress, user identity, QR flow state).
+    - Authentication/login flow orchestration.
+    - Persona/friends/account identity behavior.
+    - Account runtime state model (login progress, user identity, QR flow state).
 
 - `SteamLibraryDomain`
-  - Library/catalog metadata and license persistence workflows.
-  - Owned games refresh and app/license mapping.
-  - Download state persistence boundaries (`AppInfo`, `DownloadingAppInfo`, cached licenses).
+    - Library/catalog metadata and license persistence workflows.
+    - Owned games refresh and app/license mapping.
+    - Download state persistence boundaries (`AppInfo`, `DownloadingAppInfo`, cached licenses).
 
 - `SteamPicsSyncDomain`
-  - PICS change polling and product-info sync loops.
-  - PICS channels/job lifecycle and token-driven batch sync behavior.
-  - Emission of metadata updates into library persistence paths.
+    - PICS change polling and product-info sync loops.
+    - PICS channels/job lifecycle and token-driven batch sync behavior.
+    - Emission of metadata updates into library persistence paths.
 
 - `SteamInstallDomain`
-  - Install/download planning and executable resolution behavior.
-  - Steam Input template routing and config resolution.
-  - High-level install orchestration helpers used by download coordinator logic.
+    - Install/download planning and executable resolution behavior.
+    - Steam Input template routing and config resolution.
+    - High-level install orchestration helpers used by download coordinator logic.
 
 - `SteamSessionDomain`
-  - App launch/close session orchestration.
-  - Running-process notifications and playing-session policy.
-  - Session file/ticket lifecycle behavior.
+    - App launch/close session orchestration.
+    - Running-process notifications and playing-session policy.
+    - Session file/ticket lifecycle behavior.
 
 - `SteamCloudStatsDomain`
-  - Achievement generation/cache/state transitions.
-  - Cloud stats and user file sync orchestration.
+    - Achievement generation/cache/state transitions.
+    - Cloud stats and user file sync orchestration.
 
 ## What Belongs Here
 

@@ -19,9 +19,13 @@ object SteamDlcOwnershipManager {
             when {
                 // Base-game depots always download.
                 depot.dlcAppId == invalidAppId -> true
+
                 hasLicense(depot.dlcAppId) -> true
+
                 hasPicsApp(depot.dlcAppId) -> true
+
                 depot.dlcAppId in ownedGameIds -> true
+
                 else -> false
             }
         }
@@ -65,5 +69,3 @@ object SteamDlcOwnershipManager {
         }
     }
 }
-
-

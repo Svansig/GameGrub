@@ -7,6 +7,7 @@ This directory contains manager/helper components used by Steam domains.
 Managers are focused, reusable implementation helpers. They should not become a second orchestration layer that bypasses domains.
 
 In end-state architecture, managers:
+
 - implement narrow algorithms or integration details,
 - remain stateless or hold tightly scoped internal state,
 - are composed by domains,

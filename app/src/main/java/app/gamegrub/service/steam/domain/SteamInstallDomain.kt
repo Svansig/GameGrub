@@ -26,7 +26,6 @@ import `in`.dragonbra.javasteam.depotdownloader.DepotDownloader
 import `in`.dragonbra.javasteam.depotdownloader.IDownloadListener
 import `in`.dragonbra.javasteam.depotdownloader.data.AppItem
 import `in`.dragonbra.javasteam.depotdownloader.data.DownloadItem
-import `in`.dragonbra.javasteam.steam.steamclient.SteamClient
 import `in`.dragonbra.javasteam.types.FileData
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -38,7 +37,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -111,7 +109,7 @@ class SteamInstallDomain @Inject constructor(
      */
     fun downloadApp(appId: Int, dlcAppIds: List<Int>, isUpdateOrVerify: Boolean): DownloadInfo? {
         if (!checkWifiOrNotify()) return null
-        val appInfo = runBlocking { libraryDomain.getAppInfoOf(appId) } ?: return null
+        runBlocking { libraryDomain.getAppInfoOf(appId) } ?: return null
 
         val container = ContainerManager(context).getContainerById("STEAM_$appId")
         val containerLanguage = container?.language ?: PrefManager.containerLanguage

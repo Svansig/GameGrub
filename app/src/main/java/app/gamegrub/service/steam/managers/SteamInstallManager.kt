@@ -53,4 +53,3 @@ object SteamInstallManager {
         choosePrimary = choosePrimary,
     )
 }
-

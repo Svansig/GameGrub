@@ -1,7 +1,7 @@
 package app.gamegrub.service.steam.domain
 
-import app.gamegrub.data.CachedLicense
 import app.gamegrub.data.AppInfo
+import app.gamegrub.data.CachedLicense
 import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.DownloadingAppInfo
 import app.gamegrub.data.OwnedGames
@@ -182,6 +182,7 @@ class SteamLibraryDomain @Inject constructor(
             ),
         )
     }
+
     suspend fun getAllDownloadingApps() = downloadingAppInfoDao.getAll()
     suspend fun deleteDownloadingApp(appId: Int) = downloadingAppInfoDao.deleteApp(appId)
     suspend fun deleteAllDownloadingApps() = downloadingAppInfoDao.deleteAll()
@@ -263,7 +264,6 @@ class SteamLibraryDomain @Inject constructor(
         getMainAppDepots(appId, "english").filterValues { depot ->
             depot.dlcAppId != SteamService.INVALID_APP_ID
         }
-
 
     // Download state operations - encapsulate in domain
     suspend fun deleteAppData(appId: Int) = downloadManager.deleteAppData(appId)

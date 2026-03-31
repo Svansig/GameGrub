@@ -23,12 +23,9 @@ import app.gamegrub.data.LaunchInfo
 import app.gamegrub.data.OwnedGames
 import app.gamegrub.data.PostSyncInfo
 import app.gamegrub.data.SteamApp
-import app.gamegrub.data.SteamFriend
 import app.gamegrub.data.SteamLicense
 import app.gamegrub.data.UserFileInfo
 import app.gamegrub.db.GameGrubDatabase
-import app.gamegrub.db.dao.SteamAppDao
-import app.gamegrub.db.dao.SteamLicenseDao
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.SaveLocation
@@ -53,7 +50,6 @@ import `in`.dragonbra.javasteam.depotdownloader.DepotDownloader
 import `in`.dragonbra.javasteam.depotdownloader.IDownloadListener
 import `in`.dragonbra.javasteam.depotdownloader.data.AppItem
 import `in`.dragonbra.javasteam.depotdownloader.data.DownloadItem
-import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import `in`.dragonbra.javasteam.enums.EResult
@@ -86,7 +82,6 @@ import `in`.dragonbra.javasteam.steam.handlers.steamuser.callback.LoggedOnCallba
 import `in`.dragonbra.javasteam.steam.handlers.steamuser.callback.PlayingSessionStateCallback
 import `in`.dragonbra.javasteam.steam.handlers.steamuserstats.SteamUserStats
 import `in`.dragonbra.javasteam.steam.handlers.steamworkshop.SteamWorkshop
-import `in`.dragonbra.javasteam.steam.steamclient.AsyncJobFailedException
 import `in`.dragonbra.javasteam.steam.steamclient.SteamClient
 import `in`.dragonbra.javasteam.steam.steamclient.callbackmgr.CallbackManager
 import `in`.dragonbra.javasteam.steam.steamclient.callbacks.ConnectedCallback
@@ -104,7 +99,6 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.Collections
 import java.util.EnumSet
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -121,18 +115,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -317,7 +301,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             private set
         var isLoggingOut: Boolean
             get() = instance?.accountDomain?.isLoggingOut ?: false
-            private set(value) { instance?.accountDomain?.setLoggingOut(value) }
+            private set(value) {
+                instance?.accountDomain?.setLoggingOut(value)
+            }
         val isLoggedIn: Boolean
             get() = instance?.steamClient?.steamID?.isValid == true
         var isWaitingForQRAuth: Boolean = false
@@ -1732,7 +1718,6 @@ class SteamService : Service(), IChallengeUrlChanged {
     override fun onCreate() {
         super.onCreate()
         instance = this
-
 
         // JavaSteam logger CME hot-fix
         runCatching {

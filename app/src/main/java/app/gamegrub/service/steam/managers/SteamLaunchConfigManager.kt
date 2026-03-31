@@ -109,4 +109,3 @@ object SteamLaunchConfigManager {
         return cleanA.take(5) == cleanB.take(5)
     }
 }
-

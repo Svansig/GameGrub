@@ -221,6 +221,14 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-025 | P3 | Reduce companion-object API surface in non-Steam platform services | `service/gog + service/epic + service/amazon` | `todo/SRV-025.md` |
 | SRV-026 | P3 | Convert mutable global service flags to scoped state holders with explicit ownership | `service/steam + service/*` | `todo/SRV-026.md` |
 | SRV-027 | P2 | Migrate UI download callers to direct domain injection | `service/steam + ui` | `todo/SRV-027.md` |
+| SRV-028 | P2 | Evaluate JavaSteam `SteamNotifications` integration usefulness and feasibility | `service/steam + notifications` | `todo/SRV-028.md` |
+| SRV-029 | P2 | Evaluate JavaSteam `FriendMessages` integration usefulness and feasibility | `service/steam + social` | `todo/SRV-029.md` |
+| SRV-030 | P2 | Evaluate JavaSteam `UserAccount` and `AuthenticationSupport` integration usefulness and feasibility | `service/steam + auth` | `todo/SRV-030.md` |
+| SRV-031 | P3 | Evaluate JavaSteam `SteamGameCoordinator` integration usefulness and feasibility | `service/steam + multiplayer` | `todo/SRV-031.md` |
+| SRV-032 | P3 | Evaluate JavaSteam `SteamNetworking` integration usefulness and feasibility | `service/steam + networking` | `todo/SRV-032.md` |
+| SRV-033 | P3 | Evaluate JavaSteam `PublishedFile` integration usefulness and feasibility | `service/steam + content` | `todo/SRV-033.md` |
+| SRV-034 | P3 | Evaluate JavaSteam `SteamWorkshop` integration usefulness and feasibility | `service/steam + workshop` | `todo/SRV-034.md` |
+| SRV-035 | P3 | Evaluate JavaSteam `SteamScreenshots` integration usefulness and feasibility | `service/steam + media` | `todo/SRV-035.md` |
 
 ## In Progress
 

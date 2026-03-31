@@ -33,3 +33,12 @@ Use this running log to capture opportunities discovered while implementing or r
 - **Owner**: `TBD`
 - **Status**: `Done`
 
+- **Date**: `2026-03-31`
+- **Ticket**: `N/A (local dedup cleanup)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: `BestConfigService` repeated key-presence checks and driver-version parsing logic in multiple branches.
+- **Proposed Action**: Centralize JSON field extraction and parsing in private helpers to cut copy/paste paths and reduce drift risk.
+- **Owner**: `TBD`
+- **Status**: `Done`
+

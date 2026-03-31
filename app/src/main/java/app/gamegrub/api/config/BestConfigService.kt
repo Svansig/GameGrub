@@ -35,7 +35,7 @@ import timber.log.Timber
 @Singleton
 class BestConfigService @Inject constructor(
     private val cache: BestConfigCache,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private val httpClient = Net.http
 
@@ -206,6 +206,92 @@ class BestConfigService @Inject constructor(
 
         // For no_match or unknown, return empty config
         return JsonObject(emptyMap())
+    }
+
+    private fun JSONObject.hasNonNull(key: String): Boolean {
+        return has(key) && !isNull(key)
+    }
+
+    private fun MutableMap<String, Any?>.putStringIfPresent(
+        source: JSONObject,
+        key: String,
+        defaultValue: String = "",
+    ) {
+        if (source.hasNonNull(key)) {
+            this[key] = source.optString(key, defaultValue)
+        }
+    }
+
+    private fun MutableMap<String, Any?>.putBooleanIfPresent(
+        source: JSONObject,
+        key: String,
+        defaultValue: Boolean,
+    ) {
+        if (source.hasNonNull(key)) {
+            this[key] = source.optBoolean(key, defaultValue)
+        }
+    }
+
+    private fun MutableMap<String, Any?>.putByteIfPresent(
+        source: JSONObject,
+        key: String,
+        defaultValue: Int,
+    ) {
+        if (source.hasNonNull(key)) {
+            this[key] = source.optInt(key, defaultValue).toByte()
+        }
+    }
+
+    private fun parseGraphicsDriverVersion(graphicsDriverConfig: String): String {
+        val firstSplit = graphicsDriverConfig.split(";")
+        val parts = if (firstSplit.size > 1) firstSplit else graphicsDriverConfig.split(",")
+        val configMap = parts.associate { part ->
+            val kv = part.split("=", limit = 2)
+            if (kv.size == 2) {
+                kv[0] to kv[1]
+            } else {
+                part to ""
+            }
+        }
+        return configMap["version"] ?: ""
+    }
+
+    private fun buildBasicContainerDataMap(source: JSONObject): Map<String, Any?> {
+        val resultMap = mutableMapOf<String, Any?>()
+        resultMap.putStringIfPresent(source, "executablePath")
+        resultMap.putBooleanIfPresent(source, "useLegacyDRM", PrefManager.useLegacyDRM)
+        return resultMap
+    }
+
+    private fun buildContainerDataMapFromJson(source: JSONObject): Map<String, Any?> {
+        val resultMap = mutableMapOf<String, Any?>()
+        resultMap.putStringIfPresent(source, "executablePath")
+        resultMap.putStringIfPresent(source, "graphicsDriver")
+        resultMap.putStringIfPresent(source, "graphicsDriverVersion")
+        resultMap.putStringIfPresent(source, "graphicsDriverConfig")
+        resultMap.putStringIfPresent(source, "dxwrapper")
+        resultMap.putStringIfPresent(source, "dxwrapperConfig")
+        resultMap.putStringIfPresent(source, "execArgs")
+        resultMap.putByteIfPresent(source, "startupSelection", PrefManager.startupSelection)
+        resultMap.putStringIfPresent(source, "box64Version")
+        resultMap.putStringIfPresent(source, "box64Preset")
+        resultMap.putStringIfPresent(source, "containerVariant")
+        resultMap.putStringIfPresent(source, "wineVersion")
+        resultMap.putStringIfPresent(source, "emulator")
+        resultMap.putStringIfPresent(source, "fexcoreVersion")
+        resultMap.putStringIfPresent(source, "fexcoreTSOMode")
+        resultMap.putStringIfPresent(source, "fexcoreX87Mode")
+        resultMap.putStringIfPresent(source, "fexcoreMultiBlock")
+        resultMap.putStringIfPresent(source, "fexcorePreset")
+        resultMap.putBooleanIfPresent(source, "useLegacyDRM", PrefManager.useLegacyDRM)
+        resultMap.putBooleanIfPresent(source, "steamOfflineMode", PrefManager.steamOfflineMode)
+        resultMap.putStringIfPresent(source, "envVars", PrefManager.envVars)
+        resultMap.putStringIfPresent(source, "cpuList", PrefManager.cpuList)
+        resultMap.putStringIfPresent(source, "cpuListWoW64", PrefManager.cpuListWoW64)
+        resultMap.putStringIfPresent(source, "audioDriver", PrefManager.audioDriver)
+        resultMap.putStringIfPresent(source, "wincomponents", PrefManager.winComponents)
+        resultMap.putStringIfPresent(source, "videoMemorySize", PrefManager.videoMemorySize)
+        return resultMap
     }
 
     /**
@@ -402,13 +488,7 @@ class BestConfigService @Inject constructor(
 
         // Validate graphics driver version (from graphicsDriverConfig)
         if (containerVariant.equals(Container.BIONIC, ignoreCase = true) && graphicsDriverConfig.isNotEmpty()) {
-            val firstSplit = graphicsDriverConfig.split(";")
-            val parts = if (firstSplit.size > 1) firstSplit else graphicsDriverConfig.split(",")
-            val configMap = parts.associate { part ->
-                val kv = part.split("=", limit = 2)
-                if (kv.size == 2) kv[0] to kv[1] else part to ""
-            }
-            val driverVersion = configMap["version"] ?: ""
+            val driverVersion = parseGraphicsDriverVersion(graphicsDriverConfig)
             if (driverVersion.isNotEmpty() && !ManifestComponentHelper.versionExists(driverVersion, availableDrivers)) {
                 Timber.tag("BestConfigService")
                     .w("Graphics driver version $driverVersion not found for $containerVariant variant, updating to PrefManager default")
@@ -635,13 +715,7 @@ class BestConfigService @Inject constructor(
         }
 
         if (containerVariant.equals(Container.BIONIC, ignoreCase = true) && graphicsDriverConfig.isNotEmpty()) {
-            val firstSplit = graphicsDriverConfig.split(";")
-            val parts = if (firstSplit.size > 1) firstSplit else graphicsDriverConfig.split(",")
-            val configMap = parts.associate { part ->
-                val kv = part.split("=", limit = 2)
-                if (kv.size == 2) kv[0] to kv[1] else part to ""
-            }
-            val driverVersion = configMap["version"] ?: ""
+            val driverVersion = parseGraphicsDriverVersion(graphicsDriverConfig)
             if (driverVersion.isNotEmpty() && !ManifestComponentHelper.versionExists(driverVersion, locallyAvailableDrivers)) {
                 val entry = ManifestComponentHelper.findManifestEntryForVersion(driverVersion, manifestDrivers)
                 if (entry != null) {
@@ -668,14 +742,7 @@ class BestConfigService @Inject constructor(
             val originalJson = JSONObject(configJson.toString())
 
             if (!applyKnownConfig) {
-                val resultMap = mutableMapOf<String, Any?>()
-                if (originalJson.has("executablePath") && !originalJson.isNull("executablePath")) {
-                    resultMap["executablePath"] = originalJson.optString("executablePath", "")
-                }
-                if (originalJson.has("useLegacyDRM") && !originalJson.isNull("useLegacyDRM")) {
-                    resultMap["useLegacyDRM"] = originalJson.optBoolean("useLegacyDRM", PrefManager.useLegacyDRM)
-                }
-                return resultMap
+                return buildBasicContainerDataMap(originalJson)
             } else {
                 if (!originalJson.has("containerVariant") || originalJson.isNull("containerVariant")) {
                     Timber.tag("BestConfigService").w("containerVariant is missing or null in original config, returning empty map")
@@ -738,87 +805,7 @@ class BestConfigService @Inject constructor(
                 }
 
                 // Step 3: Build map with only fields present in filteredJson (not defaults)
-                val resultMap = mutableMapOf<String, Any?>()
-                if (filteredJson.has("executablePath") && !filteredJson.isNull("executablePath")) {
-                    resultMap["executablePath"] = filteredJson.optString("executablePath", "")
-                }
-                if (filteredJson.has("graphicsDriver") && !filteredJson.isNull("graphicsDriver")) {
-                    resultMap["graphicsDriver"] = filteredJson.optString("graphicsDriver", "")
-                }
-                if (filteredJson.has("graphicsDriverVersion") && !filteredJson.isNull("graphicsDriverVersion")) {
-                    resultMap["graphicsDriverVersion"] = filteredJson.optString("graphicsDriverVersion", "")
-                }
-                if (filteredJson.has("graphicsDriverConfig") && !filteredJson.isNull("graphicsDriverConfig")) {
-                    resultMap["graphicsDriverConfig"] = filteredJson.optString("graphicsDriverConfig", "")
-                }
-                if (filteredJson.has("dxwrapper") && !filteredJson.isNull("dxwrapper")) {
-                    resultMap["dxwrapper"] = filteredJson.optString("dxwrapper", "")
-                }
-                if (filteredJson.has("dxwrapperConfig") && !filteredJson.isNull("dxwrapperConfig")) {
-                    resultMap["dxwrapperConfig"] = filteredJson.optString("dxwrapperConfig", "")
-                }
-                if (filteredJson.has("execArgs") && !filteredJson.isNull("execArgs")) {
-                    resultMap["execArgs"] = filteredJson.optString("execArgs", "")
-                }
-                if (filteredJson.has("startupSelection") && !filteredJson.isNull("startupSelection")) {
-                    resultMap["startupSelection"] = filteredJson.optInt("startupSelection", PrefManager.startupSelection).toByte()
-                }
-                if (filteredJson.has("box64Version") && !filteredJson.isNull("box64Version")) {
-                    resultMap["box64Version"] = filteredJson.optString("box64Version", "")
-                }
-                if (filteredJson.has("box64Preset") && !filteredJson.isNull("box64Preset")) {
-                    resultMap["box64Preset"] = filteredJson.optString("box64Preset", "")
-                }
-                if (filteredJson.has("containerVariant") && !filteredJson.isNull("containerVariant")) {
-                    resultMap["containerVariant"] = filteredJson.optString("containerVariant", "")
-                }
-                if (filteredJson.has("wineVersion") && !filteredJson.isNull("wineVersion")) {
-                    resultMap["wineVersion"] = filteredJson.optString("wineVersion", "")
-                }
-                if (filteredJson.has("emulator") && !filteredJson.isNull("emulator")) {
-                    resultMap["emulator"] = filteredJson.optString("emulator", "")
-                }
-                if (filteredJson.has("fexcoreVersion") && !filteredJson.isNull("fexcoreVersion")) {
-                    resultMap["fexcoreVersion"] = filteredJson.optString("fexcoreVersion", "")
-                }
-                if (filteredJson.has("fexcoreTSOMode") && !filteredJson.isNull("fexcoreTSOMode")) {
-                    resultMap["fexcoreTSOMode"] = filteredJson.optString("fexcoreTSOMode", "")
-                }
-                if (filteredJson.has("fexcoreX87Mode") && !filteredJson.isNull("fexcoreX87Mode")) {
-                    resultMap["fexcoreX87Mode"] = filteredJson.optString("fexcoreX87Mode", "")
-                }
-                if (filteredJson.has("fexcoreMultiBlock") && !filteredJson.isNull("fexcoreMultiBlock")) {
-                    resultMap["fexcoreMultiBlock"] = filteredJson.optString("fexcoreMultiBlock", "")
-                }
-                if (filteredJson.has("fexcorePreset") && !filteredJson.isNull("fexcorePreset")) {
-                    resultMap["fexcorePreset"] = filteredJson.optString("fexcorePreset", "")
-                }
-                if (filteredJson.has("useLegacyDRM") && !filteredJson.isNull("useLegacyDRM")) {
-                    resultMap["useLegacyDRM"] = filteredJson.optBoolean("useLegacyDRM", PrefManager.useLegacyDRM)
-                }
-                if (filteredJson.has("steamOfflineMode") && !filteredJson.isNull("steamOfflineMode")) {
-                    resultMap["steamOfflineMode"] = filteredJson.optBoolean("steamOfflineMode", PrefManager.steamOfflineMode)
-                }
-                if (filteredJson.has("envVars") && !filteredJson.isNull("envVars")) {
-                    resultMap["envVars"] = filteredJson.optString("envVars", PrefManager.envVars)
-                }
-                if (filteredJson.has("cpuList") && !filteredJson.isNull("cpuList")) {
-                    resultMap["cpuList"] = filteredJson.optString("cpuList", PrefManager.cpuList)
-                }
-                if (filteredJson.has("cpuListWoW64") && !filteredJson.isNull("cpuListWoW64")) {
-                    resultMap["cpuListWoW64"] = filteredJson.optString("cpuListWoW64", PrefManager.cpuListWoW64)
-                }
-                if (filteredJson.has("audioDriver") && !filteredJson.isNull("audioDriver")) {
-                    resultMap["audioDriver"] = filteredJson.optString("audioDriver", PrefManager.audioDriver)
-                }
-                if (filteredJson.has("wincomponents") && !filteredJson.isNull("wincomponents")) {
-                    resultMap["wincomponents"] = filteredJson.optString("wincomponents", PrefManager.winComponents)
-                }
-                if (filteredJson.has("videoMemorySize") && !filteredJson.isNull("videoMemorySize")) {
-                    resultMap["videoMemorySize"] = filteredJson.optString("videoMemorySize", PrefManager.videoMemorySize)
-                }
-
-                return resultMap
+                return buildContainerDataMapFromJson(filteredJson)
             }
         } catch (e: Exception) {
             Timber.tag("BestConfigService").e(e, "Failed to parse config to ContainerData: ${e.message}")

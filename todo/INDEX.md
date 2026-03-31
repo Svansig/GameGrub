@@ -124,4 +124,5 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 
 | ID | Priority | Title | PR | File |
 |---|---|---|---|---|
-| _none_ |  |  |  |  |
+| SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
+| SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |

@@ -38,16 +38,19 @@ Concretely, treat the following previous `Keep` calls as transitional only:
 | Member | Current | End-state owner | Decision |
 |---|---|---|---|
 | `logger` | `SteamService` | `SteamService` | Keep |
-| `db` | `SteamService` | Domain transaction boundaries (`SteamLibraryDomain`/`SteamSessionDomain`) | Move usage out of service |
+| `db` | `SteamService` | Domain transaction boundaries | Keep for transaction boundary (SRV-014) |
 | `steamClientProvider` | `SteamService` DI | `SteamService` wiring layer | Keep |
-| `licenseDao` | `SteamService` | `SteamLibraryDomain` | Move (remaining usages) |
-| `appDao` | `SteamService` | `SteamLibraryDomain` | Move (remaining usages) |
+| `licenseDao` | `SteamService` | `SteamLibraryDomain` | Done - removed (SRV-014) |
+| `appDao` | `SteamService` | `SteamLibraryDomain` | Done - removed (SRV-014) |
 | `libraryDomain` | `SteamService` DI | `SteamService` delegation boundary | Keep |
 | `sessionDomain` | `SteamService` DI | `SteamService` delegation boundary | Keep |
 | `notificationHelper` | `SteamService` | `SteamService` | Keep |
 | `callbackManager` | `SteamService` | `SteamService` | Keep |
 | `steamClient` | `SteamService` | `SteamService` | Keep |
 | `callbackSubscriptions` | `SteamService` | `SteamService` | Keep |
+| `picsGetProductInfoJob` | `SteamService` | `SteamPicsSyncDomain` | Done - removed (SRV-009) |
+| `picsChangesCheckerJob` | `SteamService` | `SteamPicsSyncDomain` | Done - removed (SRV-009) |
+| `friendCheckerJob` | `SteamService` | `SteamAccountDomain` | Done - removed (SRV-009) |
 | `_unifiedFriends` | `SteamService` | `SteamService` callback wiring | Keep |
 | `_steamUser` | `SteamService` | `SteamService` handler wiring | Keep |
 | `_steamApps` | `SteamService` | `SteamService` handler wiring (domain-access via adapter) | Keep (encapsulate access) |

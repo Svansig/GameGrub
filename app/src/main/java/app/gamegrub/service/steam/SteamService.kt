@@ -176,13 +176,6 @@ class SteamService : Service(), IChallengeUrlChanged {
     lateinit var steamClientProvider: app.gamegrub.service.steam.di.SteamClientProvider
 
     @Inject
-    lateinit var licenseDao: SteamLicenseDao
-
-    @Inject
-    lateinit var appDao: SteamAppDao
-
-
-    @Inject
     lateinit var libraryDomain: app.gamegrub.service.steam.domain.SteamLibraryDomain
 
     @Inject
@@ -213,11 +206,6 @@ class SteamService : Service(), IChallengeUrlChanged {
 
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
-
-    // Add these as class properties
-    private var picsGetProductInfoJob: Job? = null
-    private var picsChangesCheckerJob: Job? = null
-    private var friendCheckerJob: Job? = null
 
     @Inject
     lateinit var accountDomain: app.gamegrub.service.steam.domain.SteamAccountDomain
@@ -457,8 +445,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                 appDlcDepots = getAppDlc(appId),
                 invalidAppId = INVALID_APP_ID,
                 ownedGameIds = ownedGameIds,
-                hasLicense = { dlcAppId -> instance?.licenseDao?.findLicense(dlcAppId) != null },
-                hasPicsApp = { dlcAppId -> instance?.appDao?.findApp(dlcAppId) != null },
+                hasLicense = { dlcAppId -> runBlocking { instance?.libraryDomain?.findLicense(dlcAppId) } != null },
+                hasPicsApp = { dlcAppId -> runBlocking { instance?.libraryDomain?.findApp(dlcAppId) } != null },
             )
         }
 
@@ -2164,8 +2152,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                     }
                 }
 
-                picsChangesCheckerJob = picsSyncDomain.continuousPICSChangesChecker(scope, _steamApps)
-                picsGetProductInfoJob = picsSyncDomain.continuousPICSGetProductInfo(scope, _steamApps)
+                picsSyncDomain.continuousPICSChangesChecker(scope, _steamApps)
+                picsSyncDomain.continuousPICSGetProductInfo(scope, _steamApps)
 
                 // Tell steam we're online, this allows friends to update.
                 _steamFriends?.setPersonaState(PrefManager.personaState)

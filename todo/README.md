@@ -8,6 +8,23 @@ This directory is the project-local ticket tracker for work that needs coordinat
 - Make ticket context available to contributors and coding agents.
 - Link plans and docs directly to actionable tasks.
 
+## Current Program Goal
+
+The current program goal is **refactor-first**: make the codebase more manageable, cohesive, and maintainable.
+
+Until this goal is explicitly changed, prioritize tickets that directly reduce complexity, improve boundaries, and improve testability/readability of existing behavior.
+
+## Ticket Acceptance Filter (Refactor Phase)
+
+Create or prioritize tickets only when they primarily do one or more of the following:
+
+- Reduce architectural coupling or responsibility sprawl.
+- Improve code organization, naming, readability, and ownership clarity.
+- Improve reliability/testability of existing flows without broad feature expansion.
+- Improve docs/process specifically to support refactor execution.
+
+During this phase, avoid introducing new feature scope unless it is required to complete refactor acceptance criteria.
+
 ## Ticket ID and file naming
 
 - Use existing area IDs when available (for example `UI-001`).

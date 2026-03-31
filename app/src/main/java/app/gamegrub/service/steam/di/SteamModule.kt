@@ -3,6 +3,7 @@ package app.gamegrub.service.steam.di
 import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.EncryptedAppTicketDao
 import app.gamegrub.db.dao.SteamAppDao
+import app.gamegrub.service.steam.managers.SteamInputManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,4 +66,8 @@ object SteamModule {
     @Provides
     @Singleton
     fun provideSteamPreferences(): SteamPreferences = SteamPreferencesAdapter()
+
+    @Provides
+    @Singleton
+    fun provideSteamInputManager(): SteamInputManager = SteamInputManager
 }

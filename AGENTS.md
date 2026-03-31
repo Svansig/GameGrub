@@ -283,10 +283,23 @@ ubuntufs/src/
 5. Update the ticket's documentation impact and links to updated docs
 6. Link validation evidence and PR references in the ticket
 
+### Ticket Decomposition and Continuity Rules
+- If a ticket is too complex to complete safely in one pass, create child tickets in `todo/` immediately and link them from the parent ticket.
+- If a child ticket is required to complete the current ticket's acceptance criteria, start and work that child ticket immediately.
+- If work reveals new required follow-up tasks, create those tickets immediately (do not defer ticket creation).
+- Do not abandon a ticket once it is marked `In Progress`; either finish it, or explicitly mark it `Blocked` with a concrete blocker and linked child/follow-up tickets.
+
 ### Documentation Directive
 - Every change must include documentation updates.
 - Each PR must include a `Documentation Impact` note.
 - If no docs are changed, include `Documentation Impact: No doc changes required` with a concrete reason.
+
+### Completion and Review Protocol
+- When implementation for a ticket is complete, commit the work before requesting review.
+- Have a different agent/reviewer perform an independent check.
+- Apply review feedback, then confirm all resulting changes are committed.
+- Do not mark a ticket `Done` until implementation, review, and post-review commits are complete.
+- Log improvement opportunities in `docs/process-improvement-log.md` for both code quality and workflow quality.
 
 ### Adding a New Service (Steam/GOG/Epic/Amazon)
 1. Create service class in `app/src/main/java/app/gamegrub/service/`

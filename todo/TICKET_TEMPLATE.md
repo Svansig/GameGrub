@@ -6,6 +6,7 @@
 - **Status**: `<Backlog|In Progress|Blocked|Done>`
 - **Owner**: `<name or TBD>`
 - **Documentation Impact**: `<What docs changed, or 'No doc changes required' with reason>`
+- **Reviewer**: `<different agent/reviewer or TBD>`
 
 ## Problem
 
@@ -17,6 +18,13 @@
   - <item>
 - Out of scope:
   - <item>
+
+## Dependencies and Decomposition
+
+- Parent ticket: `<ID or N/A>`
+- Child tickets: `<ID list or N/A>`
+- Related follow-ups: `<ID list or N/A>`
+- Blocker (if `Blocked`): `<concrete blocker or N/A>`
 
 ## Acceptance Criteria
 
@@ -31,6 +39,10 @@
 - [ ] `./gradlew lintKotlin` passes for touched files.
 - [ ] Manual flow checks captured.
 - [ ] PR description includes `Documentation Impact`.
+- [ ] Implementation commit created before review.
+- [ ] Independent review completed and recorded.
+- [ ] Post-review changes committed.
+- [ ] Improvement opportunities logged in `docs/process-improvement-log.md`.
 
 ## Links
 

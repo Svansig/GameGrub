@@ -56,7 +56,18 @@ Use `todo/TICKET_TEMPLATE.md` for new tickets.
 2. Move status to `In Progress` before coding.
 3. Keep acceptance criteria and validation evidence updated in the ticket.
 4. Update docs as part of the change and record doc impact in the ticket.
-5. Move to `Done` only after merge + validation.
+5. Commit implementation changes before requesting review.
+6. Request independent review from a different agent/reviewer.
+7. Commit all post-review updates.
+8. Record improvement opportunities in `docs/process-improvement-log.md`.
+9. Move to `Done` only after merge + validation.
+
+## Ticket decomposition and continuity
+
+- If a ticket is too large or complex, split it into additional tickets immediately and cross-link parent/child tickets.
+- If split tickets are required for the current ticket to reach acceptance, begin those tickets immediately.
+- If implementation uncovers new required work, create the new ticket(s) immediately and link them before continuing.
+- Do not abandon `In Progress` tickets; either complete them or mark `Blocked` with a concrete blocker and linked follow-up tickets.
 
 ## Backlog hygiene
 

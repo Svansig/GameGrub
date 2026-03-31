@@ -4,7 +4,7 @@ This document provides guidelines and commands for agentic coding agents working
 
 ## Project Overview
 
-GameNative is an Android application (fork of Pluvia) that allows playing Steam, Epic, and GOG games on Android devices. It uses:
+GameNative is an Android application (fork of Pluvia) that allows playing Steam, Epic, GOG, and Amazon games on Android devices. It uses:
 - **Language**: Kotlin
 - **Build System**: Gradle with Kotlin DSL
 - **UI**: Jetpack Compose
@@ -22,6 +22,7 @@ All commands use `./gradlew` from the project root.
 - **Debug**: `./gradlew assembleDebug`
 - **Release**: `./gradlew assembleRelease`
 - **Release Signed**: `./gradlew assembleReleaseSigned`
+- **Release Gold**: `./gradlew assembleReleaseGold`
 
 ### Running Tests
 
@@ -265,6 +266,11 @@ app/src/
 ├── test/                 # Unit tests
 ├── androidTest/          # Instrumented tests
 └── sharedTest/           # Shared test code
+
+ubuntufs/src/
+├── main/                 # Dynamic feature module resources/code
+├── test/                 # Unit tests
+└── androidTest/          # Instrumented tests
 ```
 
 ## Common Tasks
@@ -312,17 +318,17 @@ app/src/
 ## Structure Deviations
 
 - **Legacy code**: `com.winlator/` package (XServer, renderer, container) - inherited from Pluvia fork
-- **Duplicate dirs**: `ui/component/` (12 files + 4 subdirs) vs `ui/components/` (2 files) - prefer singular
-- **Nested utils**: `utils/launchdependencies/`, `utils/preInstallSteps/` - acceptable as nested
+- **UI components dir**: `ui/component/` is the active directory; references to `ui/components/` are legacy/outdated
+- **Nested utils**: utils are partially reorganized into subpackages (`utils/auth/`, `utils/container/`, `utils/game/`, `utils/general/`, etc.); legacy nested dirs like `utils/launchdependencies/` and `utils/preInstallSteps/` still exist
 
 ## CI/Build Gaps
 
 - **No Kotlinter in PR checks**: `pluvia-pr-check.yml` only runs tests, not lint
-- **Release uses debug signing**: `app/build.gradle.kts` line 120-121 - `release` build uses debug keystore (only `release-signed` uses production)
+- **Release uses debug signing**: `app/build.gradle.kts` `release` build type still signs with debug keystore (only `release-signed`/`release-gold` use production keystore)
 - **Custom build type**: `release-signed` uses dual signing with lineage for Play Store updates
 
 ## Anti-Patterns
 
 - No `DO NOT`/`NEVER`/`ALWAYS` comment-based rules in source code
-- One `@Deprecated` in `AmazonOAuthActivity.kt` (legacy WebView callback)
+- `@Deprecated` exists beyond legacy OAuth callback use (for example in `utils/general/NoToast.kt` and `ui/enums/SortOption.kt`)
 - All uppercase "NEVER"/"ALWAYS" in code are constants, not anti-pattern comments

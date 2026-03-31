@@ -33,6 +33,17 @@ You can support GameNative on Ko-fi at https://ko-fi.com/gamenative
    Get your API key from: https://www.steamgriddb.com/profile/preferences
    If the API key is not configured, the app will log a message but continue to work normally without fetching images.
 
+## SteamService Ownership
+
+`SteamService` is being migrated toward a thin Android service shell.
+
+- Current state: lifecycle + callback wiring are in `SteamService`, while a growing set of business logic is in domains (`SteamLibraryDomain`, `SteamSessionDomain`, `SteamAccountDomain`, `SteamCloudStatsDomain`, `SteamInstallDomain`).
+- End-state: `SteamService` keeps lifecycle/wiring only; business workflows, persistence coordination, and orchestration live in domains/managers.
+- Contributor rule: do not add new direct DAO logic to `SteamService`; add or extend domain methods and call them from service/callback wiring.
+
+Exhaustive member-by-member ownership audit (every `SteamService` field and method):
+- `docs/steam-service-ownership-matrix.md`
+
 ## Community
 
 Join our [Discord server](https://discord.gg/2hKv4VfZfE) for support and updates.

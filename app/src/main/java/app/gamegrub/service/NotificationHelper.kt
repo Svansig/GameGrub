@@ -21,14 +21,14 @@ import javax.inject.Inject
  *
  * Creates and manages foreground service notifications for Steam, GOG, Epic, and Amazon.
  */
-class NotificationHelper @Inject constructor(@ApplicationContext private val context: Context) {
+class NotificationHelper @Inject constructor(@param:ApplicationContext private val context: Context) {
 
     companion object {
-        private const val CHANNEL_ID = "pluvia_foreground_service"
-        private const val CHANNEL_NAME = "GameNative Foreground Service"
+        private const val CHANNEL_ID = "gamegrub_foreground_service"
+        private const val CHANNEL_NAME = "GameGrub Foreground Service"
         private const val NOTIFICATION_ID = 1
 
-        const val ACTION_EXIT = "com.oxgames.pluvia.EXIT"
+        const val ACTION_EXIT = "com.svansig.gamegrub.EXIT"
     }
 
     private val notificationManager: NotificationManager =
@@ -63,7 +63,7 @@ class NotificationHelper @Inject constructor(@ApplicationContext private val con
     fun createForegroundNotification(content: String): Notification {
         val intent = Intent(
             Intent.ACTION_VIEW,
-            "pluvia://home".toUri(),
+            "gamegrub://home".toUri(),
             context,
             MainActivity::class.java,
         ).apply {

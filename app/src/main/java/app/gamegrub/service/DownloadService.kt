@@ -78,14 +78,14 @@ object DownloadService {
     }
 
     fun getSizeFromStoreDisplay(appId: Int): String {
-        // How big is the game? The store should know. Human readable.
+        // How big is the game? The store should know. Human-readable.
         val depots = SteamService.getDownloadableDepots(appId)
         val installBytes = depots.values.sumOf { it.manifests["public"]?.size ?: 0L }
         return StorageUtils.formatBinarySize(installBytes)
     }
 
     suspend fun getSizeOnDiskDisplay(appId: Int, setResult: (String) -> Unit) {
-        // Outputs "3.76GiB" etc to the result lambda without locking up the main thread
+        // Outputs "3.76GiB" etc. to the result lambda without locking up the main thread
         withContext(Dispatchers.IO) {
             // Do it async
             if (SteamService.isAppInstalled(appId)) {

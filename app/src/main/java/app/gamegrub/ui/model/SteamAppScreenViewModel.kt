@@ -3,41 +3,25 @@ package app.gamegrub.ui.model
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.gamegrub.service.steam.domain.SteamInstallDomain
-import app.gamegrub.service.steam.SteamService
-import app.gamegrub.utils.container.ContainerManager
-import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.enums.Marker
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.utils.storage.MarkerUtils
-import app.gamegrub.enums.Marker
 import app.gamegrub.service.steam.SteamPaths
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.android.qualifiers.ApplicationContext
+import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.domain.SteamInstallDomain
+import app.gamegrub.utils.container.ContainerUtils
+import app.gamegrub.utils.storage.MarkerUtils
+import com.google.android.play.core.splitcompat.SplitCompat
+import com.winlator.container.ContainerManager
+import com.winlator.xenvironment.ImageFsInstaller
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
-import com.google.android.play.core.splitcompat.SplitCompat
-import com.winlator.xenvironment.ImageFsInstaller
 
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface SteamAppScreenViewModelEntryPoint {
-    fun steamAppScreenViewModel(): SteamAppScreenViewModel
-}
-
-fun getSteamAppScreenViewModel(context: Context): SteamAppScreenViewModel {
-    return EntryPointAccessors
-        .fromApplication(context.applicationContext, SteamAppScreenViewModelEntryPoint::class.java)
-        .steamAppScreenViewModel()
-}
 
 /**
  * ViewModel for Steam game screen operations.
@@ -46,7 +30,7 @@ fun getSteamAppScreenViewModel(context: Context): SteamAppScreenViewModel {
 @HiltViewModel
 class SteamAppScreenViewModel @Inject constructor(
     private val steamInstallDomain: SteamInstallDomain,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val TAG = "SteamAppScreenViewModel"
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -90,12 +74,12 @@ class SteamAppScreenViewModel @Inject constructor(
     /**
      * Sync cloud files for a Steam app.
      */
-    fun syncUserCloudFiles(appId: Int, gameId: Int, onResult: (SyncResult) -> Unit) {
+    fun syncUserCloudFiles(appId: String, gameId: Int, onResult: (SyncResult) -> Unit) {
         viewModelScope.launch(ioDispatcher) {
             val accountId = SteamService.getSteam3AccountId()
             if (accountId == null) {
                 withContext(Dispatchers.Main) {
-                    onResult(SyncResult.Failed) // Use appropriate error result
+                    onResult(SyncResult.UnknownFail) // Use appropriate error result
                 }
                 return@launch
             }
@@ -123,11 +107,11 @@ class SteamAppScreenViewModel @Inject constructor(
      */
     fun verifyAppWithCleanup(appId: Int, onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            val container = ContainerUtils.getOrCreateContainer(context, appId)
+            val container = ContainerUtils.getOrCreateContainer(context, appId.toString())
             steamInstallDomain.downloadApp(appId)
-            MarkerUtils.removeMarker(app.gamegrub.service.steam.SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
-            MarkerUtils.removeMarker(app.gamegrub.service.steam.SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
-            MarkerUtils.removeMarker(app.gamegrub.service.steam.SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
+            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
+            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
+            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
             withContext(Dispatchers.Main) {
                 onComplete()
             }
@@ -200,11 +184,11 @@ class SteamAppScreenViewModel @Inject constructor(
     fun deleteAppWithContainerCleanup(appId: Int, onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch(ioDispatcher) {
             try {
-                val success = app.gamegrub.service.steam.SteamService.deleteApp(appId)
+                val success = SteamService.deleteApp(appId)
                 app.gamegrub.GameGrubApp.events.emit(
                     app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
                 )
-                app.gamegrub.utils.container.ContainerUtils.deleteContainer(context, appId)
+                ContainerUtils.deleteContainer(context, appId.toString())
                 withContext(Dispatchers.Main) {
                     if (success) {
                         onResult(Result.success(Unit))
@@ -225,12 +209,12 @@ class SteamAppScreenViewModel @Inject constructor(
      */
     fun verifyAppWithCloudSync(appId: Int, shouldSyncCloud: Boolean, onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            val container = ContainerUtils.getOrCreateContainer(context, appId)
+            val container = ContainerUtils.getOrCreateContainer(context, appId.toString())
             steamInstallDomain.downloadApp(appId)
             MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
             MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
             MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
-            
+
             if (shouldSyncCloud) {
                 val accountId = SteamService.getSteam3AccountId()
                 if (accountId != null) {
@@ -258,7 +242,7 @@ class SteamAppScreenViewModel @Inject constructor(
     fun installImageFs(appId: Int, onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
             try {
-                val container = ContainerUtils.getOrCreateContainer(context, appId)
+                val container = ContainerUtils.getOrCreateContainer(context, appId.toString())
                 val variant = container.containerVariant
 
                 if (!SteamService.isImageFsInstallable(context, variant)) {

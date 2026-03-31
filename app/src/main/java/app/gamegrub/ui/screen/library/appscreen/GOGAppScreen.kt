@@ -19,12 +19,12 @@ import app.gamegrub.data.GOGGame
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.gog.GOGConstants
-
 import app.gamegrub.service.gog.domain.getGOGInstallDomain
-import app.gamegrub.ui.model.getGOGAppScreenViewModel
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
+import app.gamegrub.ui.model.CancelDownloadResult
+import app.gamegrub.ui.model.GOGAppScreenViewModel
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
@@ -39,7 +39,9 @@ import timber.log.Timber
  * GOG-specific implementation of BaseAppScreen
  * Handles GOG games with integration to the Python gogdl backend
  */
-class GOGAppScreen : BaseAppScreen() {
+class GOGAppScreen(
+    private val viewModel: GOGAppScreenViewModel,
+) : BaseAppScreen() {
     companion object {
         private const val TAG = "GOGAppScreen"
 
@@ -165,7 +167,7 @@ class GOGAppScreen : BaseAppScreen() {
     override fun isInstalled(context: Context, libraryItem: LibraryItem): Boolean {
         Timber.tag(TAG).d("isInstalled: checking appId=${libraryItem.appId}")
         return try {
-                    // GOG domain expects numeric gameId
+            // GOG domain expects numeric gameId
             val installed = getGOGInstallDomain(context).isGameInstalled(libraryItem.gameId.toString())
             Timber.tag(TAG).d("isInstalled: appId=${libraryItem.appId}, result=$installed")
             installed
@@ -240,7 +242,7 @@ class GOGAppScreen : BaseAppScreen() {
     private fun showGOGInstallConfirmationDialog(context: Context, libraryItem: LibraryItem) {
         val gameId = libraryItem.gameId.toString()
         Timber.tag(TAG).i("Showing install confirmation dialog for: ${libraryItem.appId}")
-        getGOGAppScreenViewModel(context).showInstallConfirmationDialog(gameId) { dialogData ->
+        viewModel.showInstallConfirmationDialog(gameId) { dialogData ->
             // Calculate sizes
             val downloadSize = StorageUtils.formatBinarySize(dialogData.downloadSize)
             val availableSpace = StorageUtils.formatBinarySize(
@@ -270,7 +272,7 @@ class GOGAppScreen : BaseAppScreen() {
         val containerData = loadContainerData(context, libraryItem)
         Timber.d("Downloading GOG game to: $installPath")
         SnackbarManager.show("Starting download for ${libraryItem.name}...")
-        getGOGAppScreenViewModel(context).downloadGame(
+        viewModel.downloadGame(
             gameId = gameId,
             installPath = installPath,
             language = containerData.language,
@@ -331,7 +333,7 @@ class GOGAppScreen : BaseAppScreen() {
 
     private fun performUninstall(context: Context, libraryItem: LibraryItem) {
         Timber.i("Uninstalling GOG game: ${libraryItem.appId}")
-        getGOGAppScreenViewModel(context).uninstallGame(
+        viewModel.uninstallGame(
             context = context,
             libraryItem = libraryItem,
             onResult = { result ->
@@ -363,7 +365,7 @@ class GOGAppScreen : BaseAppScreen() {
     override fun getInstallPath(context: Context, libraryItem: LibraryItem): String? {
         Timber.tag(TAG).d("getInstallPath: appId=${libraryItem.appId}")
         return try {
-                    // GOG domain expects numeric gameId
+            // GOG domain expects numeric gameId
             val path = getGOGInstallDomain(context).getInstallPath(libraryItem.gameId.toString())
             Timber.tag(TAG).d("getInstallPath: appId=${libraryItem.appId}, path=$path")
             path
@@ -393,7 +395,7 @@ class GOGAppScreen : BaseAppScreen() {
             val gameId = libraryItem.gameId.toString()
             val installPath = getGOGInstallDomain(context).getInstallPath(gameId)
                 ?: GOGConstants.getGameInstallPath(libraryItem.name)
-            getGOGAppScreenViewModel(context).updateContainerConfig(
+            viewModel.updateContainerConfig(
                 gameId = gameId,
                 installPath = installPath,
                 newLanguage = config.language,
@@ -453,7 +455,7 @@ class GOGAppScreen : BaseAppScreen() {
                 Timber.tag(TAG).d("[OBSERVE] Download status changed for ${libraryItem.appId}, isDownloading=${event.isDownloading}")
                 if (event.isDownloading) {
                     // Download started - attach progress listener
-            // GOG domain expects numeric gameId
+                    // GOG domain expects numeric gameId
                     val downloadInfo = getGOGInstallDomain(context).getDownloadInfo(libraryItem.gameId.toString())
                     if (downloadInfo != null) {
                         // Remove previous listener if exists
@@ -564,7 +566,7 @@ class GOGAppScreen : BaseAppScreen() {
                     {
                         hideInstallDialog(appId)
                         val gameId = libraryItem.gameId.toString()
-                        getGOGAppScreenViewModel(context).cancelDownloadAndMaybeUninstall(
+                        viewModel.cancelDownloadAndMaybeUninstall(
                             context = context,
                             gameId = gameId,
                             libraryItem = libraryItem,
@@ -573,6 +575,7 @@ class GOGAppScreen : BaseAppScreen() {
                                     is CancelDownloadResult.WasAlreadyInstalled -> {
                                         // Do nothing
                                     }
+
                                     is CancelDownloadResult.Success -> {
                                         if (result.wasDownloading) {
                                             SnackbarManager.show("Download cancelled")

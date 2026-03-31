@@ -40,7 +40,7 @@ import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
-import app.gamegrub.ui.model.getSteamAppScreenViewModel
+import app.gamegrub.ui.model.SteamAppScreenViewModel
 import app.gamegrub.ui.component.dialog.GameManagerDialog
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
@@ -271,7 +271,9 @@ private fun buildNotEnoughSpaceState(context: Context, info: InstallSizeInfo): M
 /**
  * Steam-specific implementation of BaseAppScreen
  */
-class SteamAppScreen : BaseAppScreen() {
+class SteamAppScreen(
+    private val viewModel: SteamAppScreenViewModel,
+) : BaseAppScreen() {
     companion object {
         // Shared state for uninstall dialog - list of appIds that should show the dialog
         private val uninstallDialogAppIds = mutableStateListOf<String>()
@@ -653,7 +655,7 @@ class SteamAppScreen : BaseAppScreen() {
                 ),
             )
         } else if (SteamService.hasPartialDownload(gameId)) {
-            getSteamAppScreenViewModel(context).downloadApp(gameId) { result -> /* fire and forget */ }
+            viewModel.downloadApp(gameId) { result -> /* fire and forget */ }
         } else if (!isInstalled) {
             // Request storage permissions first, then show install dialog
             // This will be handled by the permission launcher in AdditionalDialogs
@@ -676,7 +678,7 @@ class SteamAppScreen : BaseAppScreen() {
         if (downloadInfo != null) {
             downloadInfo.cancel()
         } else {
-            getSteamAppScreenViewModel(context).downloadApp(gameId) { result -> /* fire and forget */ }
+            viewModel.downloadApp(gameId) { result -> /* fire and forget */ }
         }
     }
 
@@ -707,7 +709,7 @@ class SteamAppScreen : BaseAppScreen() {
     }
 
     override fun onUpdateClick(context: Context, libraryItem: LibraryItem) {
-        getSteamAppScreenViewModel(context).downloadApp(libraryItem.gameId) { result -> /* fire and forget */ }
+        viewModel.downloadApp(libraryItem.gameId) { result -> /* fire and forget */ }
     }
 
     /**
@@ -889,7 +891,7 @@ class SteamAppScreen : BaseAppScreen() {
                         event = "cloud_sync_forced",
                         properties = mapOf("game_name" to appInfo.name),
                     )
-                    getSteamAppScreenViewModel(context).syncUserCloudFiles(appId, gameId) { syncResult ->
+                    viewModel.syncUserCloudFiles(appId, gameId) { syncResult ->
                         when (syncResult) {
                             SyncResult.Success -> {
                                 SnackbarManager.show(context.getString(R.string.steam_cloud_sync_success))
@@ -960,7 +962,7 @@ class SteamAppScreen : BaseAppScreen() {
         ContainerUtils.applyToContainer(context, libraryItem.appId, config)
 
         if (container.language != config.language) {
-            getSteamAppScreenViewModel(context).downloadApp(libraryItem.gameId) { result -> /* fire and forget */ }
+            viewModel.downloadApp(libraryItem.gameId) { result -> /* fire and forget */ }
         }
     }
 
@@ -1064,7 +1066,7 @@ class SteamAppScreen : BaseAppScreen() {
                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
             )
             storageLocationConfirmedForInstall = false
-            getSteamAppScreenViewModel(context).downloadAppWithDlc(gameId, selectedDlcIds) { result -> /* fire and forget */ }
+            viewModel.downloadAppWithDlc(gameId, selectedDlcIds) { result -> /* fire and forget */ }
         }
 
         fun showPendingInstallDialog() {
@@ -1261,7 +1263,7 @@ class SteamAppScreen : BaseAppScreen() {
                                 event = "game_install_started",
                                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
                             )
-            getSteamAppScreenViewModel(context).downloadApp(gameId) { result -> /* fire and forget */ }
+            viewModel.downloadApp(gameId) { result -> /* fire and forget */ }
                         }
                     }
                 }
@@ -1281,7 +1283,7 @@ class SteamAppScreen : BaseAppScreen() {
                         )
                         val downloadInfo = installDomain.getAppDownloadInfo(gameId)
                         downloadInfo?.cancel()
-                        getSteamAppScreenViewModel(context).deleteApp(gameId) {
+                        viewModel.deleteApp(gameId) {
                             hideInstallDialog(gameId)
                         }
                     }
@@ -1295,7 +1297,7 @@ class SteamAppScreen : BaseAppScreen() {
                         setPendingUpdateVerifyOperation(gameId, null)
 
                         if (operation != null) {
-                            getSteamAppScreenViewModel(context).verifyAppWithCloudSync(
+                            viewModel.verifyAppWithCloudSync(
                                 appId = gameId,
                                 shouldSyncCloud = (operation == AppOptionMenuType.VerifyFiles),
                                 onComplete = { /* No additional UI actions needed */ },
@@ -1309,7 +1311,7 @@ class SteamAppScreen : BaseAppScreen() {
                         hideInstallDialog(gameId)
                         // Install ImageFS with loading progress
                         // Note: This should ideally show a loading dialog, but for now we'll do it in the background
-                        getSteamAppScreenViewModel(context).installImageFs(gameId) {
+                        viewModel.installImageFs(gameId) {
                             // ImageFS installation completed
                         }
                     }
@@ -1350,7 +1352,7 @@ class SteamAppScreen : BaseAppScreen() {
                         onClick = {
                             hideUninstallDialog(libraryItem.appId)
 
-                            getSteamAppScreenViewModel(context).deleteAppWithContainerCleanup(gameId) { result ->
+                            viewModel.deleteAppWithContainerCleanup(gameId) { result ->
                                 result.fold(
                                     onSuccess = {
                                         GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(gameId))

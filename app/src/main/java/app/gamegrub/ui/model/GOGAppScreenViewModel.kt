@@ -6,11 +6,8 @@ import androidx.lifecycle.viewModelScope
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.domain.GOGInstallDomain
 import app.gamegrub.utils.storage.StorageUtils
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -18,17 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface GOGAppScreenViewModelEntryPoint {
-    fun gogAppScreenViewModel(): GOGAppScreenViewModel
-}
-
-fun getGOGAppScreenViewModel(context: Context): GOGAppScreenViewModel {
-    return EntryPointAccessors
-        .fromApplication(context.applicationContext, GOGAppScreenViewModelEntryPoint::class.java)
-        .gogAppScreenViewModel()
-}
 
 /**
  * ViewModel for GOG game screen operations.

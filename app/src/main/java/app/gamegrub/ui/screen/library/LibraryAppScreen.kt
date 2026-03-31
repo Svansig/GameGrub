@@ -87,6 +87,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -101,6 +102,8 @@ import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.internal.fakeAppInfo
+import app.gamegrub.ui.model.GOGAppScreenViewModel
+import app.gamegrub.ui.model.SteamAppScreenViewModel
 import app.gamegrub.ui.screen.library.appscreen.AmazonAppScreen
 import app.gamegrub.ui.screen.library.appscreen.CustomGameAppScreen
 import app.gamegrub.ui.screen.library.appscreen.EpicAppScreen
@@ -445,15 +448,19 @@ fun AppScreen(
             .steamGridDB()
     }
 
-    // Get the appropriate screen model based on game source
-    val screenModel = remember(libraryItem.gameSource, steamGridDB) {
-        when (libraryItem.gameSource) {
-            app.gamegrub.data.GameSource.STEAM -> SteamAppScreen()
-            app.gamegrub.data.GameSource.CUSTOM_GAME -> CustomGameAppScreen(steamGridDB)
-            app.gamegrub.data.GameSource.GOG -> GOGAppScreen()
-            app.gamegrub.data.GameSource.EPIC -> EpicAppScreen()
-            app.gamegrub.data.GameSource.AMAZON -> AmazonAppScreen()
+    // Create the source-specific screen model and resolve view models via Android APIs.
+    val screenModel = when (libraryItem.gameSource) {
+        app.gamegrub.data.GameSource.STEAM -> {
+            val steamViewModel: SteamAppScreenViewModel = hiltViewModel()
+            remember(steamViewModel) { SteamAppScreen(steamViewModel) }
         }
+        app.gamegrub.data.GameSource.CUSTOM_GAME -> remember(steamGridDB) { CustomGameAppScreen(steamGridDB) }
+        app.gamegrub.data.GameSource.GOG -> {
+            val gogViewModel: GOGAppScreenViewModel = hiltViewModel()
+            remember(gogViewModel) { GOGAppScreen(gogViewModel) }
+        }
+        app.gamegrub.data.GameSource.EPIC -> remember { EpicAppScreen() }
+        app.gamegrub.data.GameSource.AMAZON -> remember { AmazonAppScreen() }
     }
 
     // Render the content using the model

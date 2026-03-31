@@ -42,3 +42,12 @@ Use this running log to capture opportunities discovered while implementing or r
 - **Owner**: `TBD`
 - **Status**: `Done`
 
+- **Date**: `2026-03-31`
+- **Ticket**: `N/A (Hilt compile fix)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: `@HiltViewModel` classes were accessed from singleton entry points, which bypasses ViewModel lifecycle ownership and breaks Hilt validation.
+- **Proposed Action**: Standardize app-screen wiring to resolve `@HiltViewModel` only through Compose/Android ViewModel APIs and pass instances into non-composable screen models.
+- **Owner**: `TBD`
+- **Status**: `Done`
+

@@ -6,8 +6,16 @@ Thanks for your interest in contributing! We welcome pull requests, bug reports,
 
 1. Join our [Discord server](https://discord.gg/2hKv4VfZfE) to discuss what you're working on
 2. Fork the repo and create a branch for your changes
-3. See the **Building** section in the [README](README.md) for setup instructions
-4. Submit a pull request with a clear description of what your change does and why
+3. Pick or create a local ticket in `todo/INDEX.md` (details in `todo/README.md`)
+4. See the **Building** section in the [README](README.md) for setup instructions
+5. Submit a pull request with a clear description of what your change does and why
+
+## Local Ticket Workflow
+
+- Tickets are tracked in-repo under `todo/`.
+- Use `todo/TICKET_TEMPLATE.md` for new tickets.
+- Keep ticket status current (`Backlog`, `In Progress`, `Blocked`, `Done`).
+- Link ticket ID in your PR description and update ticket links after merge.
 
 ## Reporting Issues
 

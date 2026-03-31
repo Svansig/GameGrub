@@ -181,31 +181,20 @@ Concretely, treat the following previous `Keep` calls as transitional only:
 ## Migration Phases
 
 1. **Service shell + DAO boundary cleanup** (done)
-   - Removed several unused direct DAO injections from `SteamService`.
-   - Download-state persistence moved to `SteamLibraryDomain`.
-2. **PICS extraction** (in progress)
-   - `SteamPicsSyncDomain` created with channels/jobs/methods.
-   - Need to wire domain jobs in `onLoggedOn` callback instead of service fields.
-3. **Download extraction**
-   - Move `downloadApp*`, `completeAppDownload`, `AppDownloadListener`, download state map/jobs to install/download coordinator.
-4. **Auth/session extraction**
-   - Move `login` internals and logout/cleanup policy to `SteamAccountDomain` and service lifecycle coordinator.
-5. **Facade removal**
-   - Remove companion wrappers after call-site migration; retain only minimal app entrypoints if unavoidable.
-
-## Current Work
-
-### Phase 2: PICS Extraction (in progress)
-- [ ] Update `onLoggedOn` to use domain's jobs instead of service fields
-- [ ] Remove duplicate PICS channel fields from SteamService (use domain instead)
-- [ ] Remove `continuousPICS*` methods from SteamService (delegate to domain)
-- [ ] Verify appTokens is accessed via domain
+2. **PICS extraction** (done)
+3. **Download extraction** (done)
+4. **Auth/session extraction** (done)
+   - `_loginResult`, `familyGroupMembers`, `localPersona` moved to `SteamAccountDomain`.
+   - `isLoggingOut` managed via domain.
+   - Updated callbacks to use domain state.
+5. **Facade tightening** (in progress)
+   - Remove unused companion wrappers after call-site migration.
 
 ## Done So Far
 
-- Fixed broken catalog accessor compile path in companion.
-- Moved download-state persistence writes from `SteamService` into `SteamLibraryDomain` (`saveDownloadingAppInfo`, `upsertInstalledAppDownloadState`).
-- Removed several unused direct DAO injections from `SteamService`.
+- PICS extraction: `SteamPicsSyncDomain` wired, removed channels/methods from SteamService
+- Download extraction: `downloadJobs` in `SteamInstallDomain`, notification delegation
+- Auth extraction: Account state in `SteamAccountDomain`, callbacks updated
 
 
 

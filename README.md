@@ -33,6 +33,16 @@ You can support GameNative on Ko-fi at https://ko-fi.com/gamenative
    Get your API key from: https://www.steamgriddb.com/profile/preferences
    If the API key is not configured, the app will log a message but continue to work normally without fetching images.
 
+## Local Tickets
+
+Work planning and task tracking is maintained in-repo under `todo/`.
+
+- Backlog index: `todo/INDEX.md`
+- Ticket guide: `todo/README.md`
+- Ticket template: `todo/TICKET_TEMPLATE.md`
+
+When working on cleanup/refactor work, pick a ticket from `todo/INDEX.md`, update status in the ticket file, and link the PR before moving it to `Done`.
+
 ## SteamService Ownership
 
 `SteamService` is being migrated toward a thin Android service shell.

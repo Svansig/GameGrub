@@ -54,12 +54,14 @@ GameNative is an Android application that lets you play Windows games from Steam
 ```
 ui/
 ├── screen/          # Compose screens (Library, Settings, etc.)
-├── components/      # Reusable Compose components
+├── component/       # Reusable Compose components
 ├── theme/           # Material3 theming
 ├── widget/          # Custom Android views (PerformanceHud)
 ├── model/           # ViewModels (@HiltViewModel)
-└── util/            # UI utilities
+└── utils/           # UI utilities
 ```
+
+UI placement and boundary cleanup guidance is tracked in `docs/ui-placement/`.
 
 **Pattern:** MVVM with Jetpack Compose
 - ViewModels expose `StateFlow` for UI state
@@ -203,7 +205,7 @@ GameGrubApp.events.emit(AndroidEvent.BackPressed)
 ### 1. Launching a Game
 
 ```
-User taps "Play" 
+User taps "Play"
     → ViewModel calls service.launchGame()
     → Service creates Wine container
     → XServer starts

@@ -275,6 +275,13 @@ ubuntufs/src/
 
 ## Common Tasks
 
+### Picking Work (Local Tickets)
+1. Open `todo/INDEX.md`
+2. Select the highest-priority unblocked ticket
+3. Read the ticket file (for example `todo/UI-004.md`) and follow its acceptance criteria
+4. Update ticket status as work progresses (`Backlog` -> `In Progress` -> `Done`)
+5. Link validation evidence and PR references in the ticket
+
 ### Adding a New Service (Steam/GOG/Epic/Amazon)
 1. Create service class in `app/src/main/java/app/gamegrub/service/`
 2. Add Hilt module binding if needed

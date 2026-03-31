@@ -3,8 +3,8 @@
 - **ID**: `SRV-016c`
 - **Area**: `service/steam`
 - **Priority**: `P2`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 
 ## Problem
 
@@ -21,14 +21,18 @@ After download orchestration is fully in domain, clean up SteamService imports a
 
 ## Acceptance Criteria
 
-- [ ] DepotDownloader imports removed from SteamService
-- [ ] Build passes
+- [x] DepotDownloader imports removed from SteamService
+- [x] Build passes
 
 ## Validation
 
-- [ ] Build passes
+- [x] Build passes (no LSP errors)
 
 ## Links
 
 - Parent: `SRV-001`
 - Related: `SRV-016a`, `SRV-016b`
+
+## Notes
+
+- Done as part of SRV-016b commit - removed imports when removing download code

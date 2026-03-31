@@ -1,356 +1,403 @@
 package app.gamegrub.statsgen
 
 import java.io.File
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
+/**
+ * Parses Steam stat/achievement schema data and writes normalized JSON config files.
+ *
+ * The generator preserves legacy output structure and key ordering for compatibility with
+ * existing config consumers.
+ */
 class StatsAchievementsGenerator {
     private val vdfParser = VdfParser()
-
-    private fun escapeUnicode(text: String): String {
-        val sb = StringBuilder()
-        for (char in text) {
-            when {
-                char.code < 32 || char.code > 126 -> {
-                    sb.append(String.format("\\u%04x", char.code))
-                }
-
-                char == '\\' -> sb.append("\\")
-
-                char == '"' -> sb.append("\\\"")
-
-                else -> sb.append(char)
-            }
-        }
-        return sb.toString()
+    private val jsonWriter = Json {
+        prettyPrint = true
+        explicitNulls = false
     }
 
+    /**
+     * Generates in-memory stats/achievements and writes `achievements.json` / `stats.json`.
+     *
+     * Compatibility notes:
+     * - `achievements.json` is always written (empty array when no achievements exist).
+     * - `stats.json` is only written when at least one stat exists.
+     * - Stat normalization matches legacy behavior and throws when no numeric fallback exists.
+     */
     fun generateStatsAchievements(schema: ByteArray, configDirectory: String): ProcessingResult {
+        val parsedData = parseSchema(schema)
+        val outputData = buildOutputData(parsedData.achievements, parsedData.stats)
+        val configDir = createConfigDirectory(configDirectory)
+
+        writeAchievementsJson(configDir, outputData.achievements)
+        writeStatsJson(configDir, outputData.stats)
+
+        return ProcessingResult(
+            achievements = parsedData.achievements,
+            stats = parsedData.stats,
+            copyDefaultUnlockedImg = outputData.copyDefaultUnlockedImg,
+            copyDefaultLockedImg = outputData.copyDefaultLockedImg,
+            nameToBlockBit = parsedData.nameToBlockBit,
+        )
+    }
+
+    private fun parseSchema(schema: ByteArray): ParsedSchemaData {
         val parsedSchema = vdfParser.binaryLoads(schema)
         val achievementsOut = mutableListOf<Achievement>()
         val statsOut = mutableListOf<Stat>()
         val nameToBlockBit = mutableMapOf<String, Pair<Int, Int>>()
 
-        for ((_, appData) in parsedSchema) {
-            if (appData !is Map<*, *>) continue
-            val sch = appData as Map<String, Any>
-            val statInfo = sch["stats"] as? Map<String, Any> ?: continue
+        for (appData in parsedSchema.values) {
+            val schemaMap = appData.asStringAnyMap() ?: continue
+            val statInfo = schemaMap["stats"].asStringAnyMap() ?: continue
 
             for ((statKey, statData) in statInfo) {
-                if (statData !is Map<*, *>) continue
-                val stat = statData as Map<String, Any>
-                val statType = stat["type"]?.toString() ?: continue
+                val statMap = statData.asStringAnyMap() ?: continue
+                val statType = statMap["type"]?.toString() ?: continue
 
-                if (statType == StatType.STAT_TYPE_BITS || statType == StatType.ACHIEVEMENTS) {
-                    val bits = stat["bits"] as? Map<String, Any> ?: continue
-                    for ((achNumKey, achData) in bits) {
-                        if (achData !is Map<*, *>) continue
-                        val ach = achData as Map<String, Any>
-                        val display = ach["display"] as? Map<String, Any> ?: emptyMap()
-
-                        val achievementBuilder = mutableMapOf<String, Any>()
-                        achievementBuilder["hidden"] = 0
-
-                        for ((displayKey, displayValue) in display) {
-                            when (displayKey.lowercase()) {
-                                "name" -> {
-                                    if (displayValue is Map<*, *>) {
-                                        val langMap = mutableMapOf<String, String>()
-                                        for ((lang, text) in displayValue) {
-                                            langMap[lang.toString()] = text.toString()
-                                        }
-                                        achievementBuilder["displayName"] = langMap
-                                    } else {
-                                        achievementBuilder["displayName"] = mapOf("english" to displayValue.toString())
-                                    }
-                                }
-
-                                "desc" -> {
-                                    if (displayValue is Map<*, *>) {
-                                        val langMap = mutableMapOf<String, String>()
-                                        for ((lang, text) in displayValue) {
-                                            langMap[lang.toString()] = text.toString()
-                                        }
-                                        achievementBuilder["description"] = langMap
-                                    } else {
-                                        achievementBuilder["description"] = mapOf("english" to displayValue.toString())
-                                    }
-                                }
-
-                                "hidden" -> {
-                                    val value = try {
-                                        displayValue.toString().toInt()
-                                    } catch (e: NumberFormatException) {
-                                        displayValue
-                                    }
-                                    achievementBuilder["hidden"] = value
-                                }
-
-                                else -> {
-                                    achievementBuilder[displayKey] = displayValue
-                                }
-                            }
-                        }
-
-                        achievementBuilder["name"] = ach["name"] ?: ""
-                        val achName = ach["name"]?.toString() ?: ""
-                        if (achName.isNotEmpty()) {
-                            val blockId = statKey.toIntOrNull()
-                            val bitIndex = achNumKey.toIntOrNull()
-                            if (blockId != null && bitIndex != null) {
-                                nameToBlockBit[achName] = Pair(blockId, bitIndex)
-                            }
-                        }
-                        if (ach.containsKey("progress")) {
-                            achievementBuilder["progress"] = ach["progress"] as Any
-                        }
-
-                        val achievement = Achievement(
-                            name = achievementBuilder["name"]?.toString() ?: "",
-                            displayName = achievementBuilder["displayName"] as? Map<String, String>,
-                            description = achievementBuilder["description"] as? Map<String, String>,
-                            hidden = (achievementBuilder["hidden"] as? Number)?.toInt() ?: 0,
-                            icon = achievementBuilder["icon"]?.toString(),
-                            iconGray = achievementBuilder["icon_gray"]?.toString(),
-                            icongray = achievementBuilder["icongray"]?.toString(),
-                            progress = achievementBuilder["progress"] as? Map<String, Any>,
-                        )
-                        achievementsOut.add(achievement)
-                    }
+                if (isAchievementStatType(statType)) {
+                    achievementsOut += parseAchievements(statKey, statMap, nameToBlockBit)
                 } else {
-                    val statBuilder = mutableMapOf<String, Any>()
-                    statBuilder["id"] = statKey
-                    statBuilder["default"] = "0"
-                    statBuilder["global"] = "0"
-                    statBuilder["name"] = stat["name"] ?: ""
-
-                    if (stat.containsKey("min")) {
-                        statBuilder["min"] = stat["min"] as Any
-                    }
-
-                    when (statType) {
-                        StatType.INT -> statBuilder["type"] = "int"
-                        StatType.FLOAT -> statBuilder["type"] = "float"
-                        StatType.AVGRATE -> statBuilder["type"] = "avgrate"
-                        StatType.STAT_TYPE_INT -> statBuilder["type"] = "int"
-                        StatType.STAT_TYPE_FLOAT -> statBuilder["type"] = "float"
-                        StatType.STAT_TYPE_AVGRATE -> statBuilder["type"] = "avgrate"
-                    }
-
-                    if (stat.containsKey("Default")) {
-                        statBuilder["default"] = stat["Default"] as Any
-                    } else if (stat.containsKey("default")) {
-                        statBuilder["default"] = stat["default"] as Any
-                    }
-
-                    val statObj = Stat(
-                        id = statBuilder["id"]?.toString() ?: "",
-                        name = statBuilder["name"]?.toString() ?: "",
-                        type = statBuilder["type"]?.toString() ?: "int",
-                        default = statBuilder["default"]?.toString() ?: "0",
-                        global = statBuilder["global"]?.toString() ?: "0",
-                        min = statBuilder["min"]?.toString(),
-                    )
-                    statsOut.add(statObj)
+                    statsOut += parseStat(statKey, statMap, statType)
                 }
             }
         }
 
+        return ParsedSchemaData(
+            achievements = achievementsOut,
+            stats = statsOut,
+            nameToBlockBit = nameToBlockBit,
+        )
+    }
+
+    private fun parseAchievements(
+        statKey: String,
+        stat: Map<String, Any?>,
+        nameToBlockBit: MutableMap<String, Pair<Int, Int>>,
+    ): List<Achievement> {
+        val bits = stat["bits"].asStringAnyMap() ?: return emptyList()
+        return bits.mapNotNull { (achievementIndex, achievementData) ->
+            val achievementMap = achievementData.asStringAnyMap() ?: return@mapNotNull null
+            val displayMap = achievementMap["display"].asStringAnyMap() ?: emptyMap()
+            val parsedDisplay = parseDisplay(displayMap)
+
+            val achievementName = achievementMap["name"]?.toString().orEmpty()
+            rememberAchievementBitIndex(statKey, achievementIndex, achievementName, nameToBlockBit)
+
+            Achievement(
+                name = achievementName,
+                displayName = parsedDisplay.displayName,
+                description = parsedDisplay.description,
+                hidden = parsedDisplay.hidden,
+                icon = parsedDisplay.icon,
+                iconGray = parsedDisplay.iconGray,
+                icongray = parsedDisplay.icongray,
+                progress = achievementMap["progress"].asStringAnyMapWithoutNullValues(),
+            )
+        }
+    }
+
+    private fun parseDisplay(display: Map<String, Any?>): ParsedDisplay {
+        var displayName: Map<String, String>? = null
+        var description: Map<String, String>? = null
+        var hidden = 0
+
+        for ((key, value) in display) {
+            when (key.lowercase()) {
+                "name" -> displayName = toLocalizedText(value)
+                "desc" -> description = toLocalizedText(value)
+                "hidden" -> hidden = toHiddenInt(value)
+            }
+        }
+
+        return ParsedDisplay(
+            displayName = displayName,
+            description = description,
+            hidden = hidden,
+            icon = display["icon"]?.toString(),
+            iconGray = display["icon_gray"]?.toString(),
+            icongray = display["icongray"]?.toString(),
+        )
+    }
+
+    private fun parseStat(statKey: String, stat: Map<String, Any?>, statType: String): Stat {
+        val normalizedType = normalizeStatType(statType)
+        val defaultValue = when {
+            stat.containsKey("Default") -> stat["Default"]
+            stat.containsKey("default") -> stat["default"]
+            else -> "0"
+        }
+
+        return Stat(
+            id = statKey,
+            name = stat["name"]?.toString().orEmpty(),
+            type = normalizedType,
+            default = defaultValue?.toString() ?: "0",
+            global = "0",
+            min = stat["min"]?.toString(),
+        )
+    }
+
+    private fun buildOutputData(achievements: List<Achievement>, stats: List<Stat>): OutputData {
         var copyDefaultUnlockedImg = false
         var copyDefaultLockedImg = false
-        val outputAchievements = mutableListOf<Map<String, Any>>()
 
-        for (ach in achievementsOut) {
-            val outputAch = mutableMapOf<String, Any>()
-            outputAch["name"] = ach.name
-            outputAch["displayName"] = ach.displayName ?: emptyMap<String, String>()
-            outputAch["description"] = ach.description ?: emptyMap<String, String>()
-            outputAch["hidden"] = ach.hidden
-
-            val icon = ach.icon
-            if (!icon.isNullOrEmpty()) {
-                outputAch["icon"] = "img/$icon"
+        val outputAchievements = achievements.map { achievement ->
+            val iconPath = if (!achievement.icon.isNullOrEmpty()) {
+                "img/${achievement.icon}"
             } else {
-                outputAch["icon"] = "img/steam_default_icon_unlocked.jpg"
                 copyDefaultUnlockedImg = true
+                "img/steam_default_icon_unlocked.jpg"
             }
 
-            val iconGray = ach.iconGray
-            if (!iconGray.isNullOrEmpty()) {
-                outputAch["icon_gray"] = "img/$iconGray"
+            val iconGrayPath = if (!achievement.iconGray.isNullOrEmpty()) {
+                "img/${achievement.iconGray}"
             } else {
-                outputAch["icon_gray"] = "img/steam_default_icon_locked.jpg"
                 copyDefaultLockedImg = true
+                "img/steam_default_icon_locked.jpg"
             }
 
-            val icongray = ach.icongray
-            if (!icongray.isNullOrEmpty()) {
-                outputAch["icongray"] = icongray
-            }
-
-            if (ach.progress != null) {
-                outputAch["progress"] = ach.progress
-            }
-
-            ach.unlocked?.let { outputAch["unlocked"] = it }
-            ach.unlockTimestamp?.let { outputAch["unlockTimestamp"] = it }
-            ach.formattedUnlockTime?.let { outputAch["formattedUnlockTime"] = it }
-
-            outputAchievements.add(outputAch)
+            OutputAchievement(
+                hidden = achievement.hidden,
+                displayName = achievement.displayName ?: emptyMap(),
+                description = achievement.description ?: emptyMap(),
+                icon = iconPath,
+                iconGray = iconGrayPath,
+                name = achievement.name,
+                unlocked = achievement.unlocked,
+                unlockTimestamp = achievement.unlockTimestamp,
+                formattedUnlockTime = achievement.formattedUnlockTime,
+            )
         }
 
-        val outputStats = mutableListOf<Map<String, Any>>()
-        for (stat in statsOut) {
-            val outputStat = mutableMapOf<String, Any>()
-            outputStat["id"] = stat.id
-            outputStat["name"] = stat.name
-            outputStat["type"] = stat.type
-
-            var defaultNum: String
-            var globalNum: String
-
-            if (stat.type.lowercase() == "int") {
-                try {
-                    val defaultInt = stat.default.toInt()
-                    val globalInt = stat.global.toInt()
-                    defaultNum = defaultInt.toString()
-                    globalNum = globalInt.toString()
-                } catch (e: NumberFormatException) {
-                    try {
-                        val defaultFloat = stat.default.toFloat().toInt()
-                        val globalFloat = stat.global.toFloat().toInt()
-                        defaultNum = defaultFloat.toString()
-                        globalNum = globalFloat.toString()
-                    } catch (e2: NumberFormatException) {
-                        if (!stat.min.isNullOrEmpty()) {
-                            defaultNum = stat.min.toInt().toString()
-                            globalNum = "0"
-                        } else {
-                            throw IllegalArgumentException("min not exist in stat and no way to get the data. please report with the appid")
-                        }
-                    }
-                }
-            } else {
-                defaultNum = stat.default.toFloat().toString()
-                globalNum = stat.global.toFloat().toString()
-            }
-
-            outputStat["default"] = defaultNum
-            outputStat["global"] = globalNum
-            outputStats.add(outputStat)
+        val outputStats = stats.map { stat ->
+            val (defaultNum, globalNum) = normalizeNumericDefaults(stat)
+            OutputStat(
+                id = stat.id,
+                default = defaultNum,
+                global = globalNum,
+                name = stat.name,
+                type = stat.type,
+            )
         }
 
-        // Create output directory
+        return OutputData(
+            achievements = outputAchievements,
+            stats = outputStats,
+            copyDefaultUnlockedImg = copyDefaultUnlockedImg,
+            copyDefaultLockedImg = copyDefaultLockedImg,
+        )
+    }
+
+    /**
+     * Normalizes stat numeric defaults to the same shape expected by existing stats.json readers.
+     */
+    private fun normalizeNumericDefaults(stat: Stat): Pair<String, String> {
+        if (stat.type.lowercase() == "int") {
+            val intValues = runCatching {
+                stat.default.toInt().toString() to stat.global.toInt().toString()
+            }.getOrNull()
+            if (intValues != null) {
+                return intValues
+            }
+
+            val floatValues = runCatching {
+                stat.default.toFloat().toInt().toString() to stat.global.toFloat().toInt().toString()
+            }.getOrNull()
+            if (floatValues != null) {
+                return floatValues
+            }
+
+            val minValue = stat.min?.toIntOrNull()
+            if (minValue != null) {
+                return minValue.toString() to "0"
+            }
+
+            throw IllegalArgumentException("min not exist in stat and no way to get the data. please report with the appid")
+        }
+
+        return stat.default.toFloat().toString() to stat.global.toFloat().toString()
+    }
+
+    private fun createConfigDirectory(configDirectory: String): File {
         val configDir = File(configDirectory)
         if (!configDir.exists()) {
             configDir.mkdirs()
         }
+        return configDir
+    }
 
-        // Write achievements.json (always; use [] when empty)
+    private fun writeAchievementsJson(configDir: File, achievements: List<OutputAchievement>) {
         val achievementsFile = File(configDir, "achievements.json")
         if (achievementsFile.exists()) {
             achievementsFile.delete()
         }
-        val achievementsJsonContent = if (outputAchievements.isNotEmpty()) {
-            val jsonBuilder = StringBuilder()
-            jsonBuilder.append("[\n")
 
-            val orderedKeys = listOf(
-                "hidden", "displayName", "description", "icon", "icon_gray", "name",
-                "unlocked", "unlockTimestamp", "formattedUnlockTime",
-            )
+        val achievementsJsonContent = jsonWriter.encodeToString(buildAchievementsJson(achievements))
 
-            for ((index, ach) in outputAchievements.withIndex()) {
-                if (index > 0) jsonBuilder.append(",\n")
-                jsonBuilder.append("  {\n")
-
-                val achMap = ach.toMap()
-                var firstKey = true
-
-                for (key in orderedKeys) {
-                    val value = achMap[key]
-                    if (value != null) {
-                        if (!firstKey) jsonBuilder.append(",\n")
-                        firstKey = false
-
-                        when (key) {
-                            "displayName", "description" -> {
-                                jsonBuilder.append("    \"$key\": ")
-                                if (value is Map<*, *>) {
-                                    jsonBuilder.append("{\n")
-                                    val langEntries = value.entries.toList()
-                                    for ((langIndex, langEntry) in langEntries.withIndex()) {
-                                        if (langIndex > 0) jsonBuilder.append(",\n")
-                                        val escapedText = escapeUnicode(langEntry.value.toString())
-                                        jsonBuilder.append("      \"${langEntry.key}\": \"$escapedText\"")
-                                    }
-                                    jsonBuilder.append("\n    }")
-                                } else {
-                                    val escapedText = escapeUnicode(value.toString())
-                                    jsonBuilder.append("\"$escapedText\"")
-                                }
-                            }
-
-                            "hidden", "unlockTimestamp" -> {
-                                jsonBuilder.append("    \"$key\": $value")
-                            }
-
-                            "unlocked" -> {
-                                jsonBuilder.append("    \"$key\": ${value.toString().lowercase()}")
-                            }
-
-                            else -> {
-                                jsonBuilder.append("    \"$key\": \"${escapeUnicode(value.toString())}\"")
-                            }
-                        }
-                    }
-                }
-                jsonBuilder.append("\n  }")
-            }
-
-            jsonBuilder.append("\n]")
-            jsonBuilder.toString()
-        } else {
-            "[]"
-        }
         achievementsFile.writeText(achievementsJsonContent, Charsets.UTF_8)
+    }
 
-        // Write stats.json
-        if (outputStats.isNotEmpty()) {
-            val statsFile = File(configDir, "stats.json")
-            if (statsFile.exists()) {
-                statsFile.delete()
+    private fun buildAchievementsJson(achievements: List<OutputAchievement>): JsonArray {
+        return buildJsonArray {
+            for (achievement in achievements) {
+                add(
+                    buildJsonObject {
+                        put("hidden", achievement.hidden)
+                        put("displayName", achievement.displayName.toJsonObject())
+                        put("description", achievement.description.toJsonObject())
+                        put("icon", achievement.icon)
+                        put("icon_gray", achievement.iconGray)
+                        put("name", achievement.name)
+
+                        achievement.unlocked?.let { put("unlocked", it) }
+                        achievement.unlockTimestamp?.let { put("unlockTimestamp", it) }
+                        achievement.formattedUnlockTime?.let { put("formattedUnlockTime", it) }
+                    },
+                )
             }
+        }
+    }
 
-            val jsonBuilder = StringBuilder()
-            jsonBuilder.append("[\n")
-
-            for ((index, stat) in outputStats.withIndex()) {
-                if (index > 0) jsonBuilder.append(",\n")
-                jsonBuilder.append("  {\n")
-
-                // Define the desired order of properties
-                val orderedKeys = listOf("id", "default", "global", "name", "type")
-                val statMap = stat.toMap()
-
-                for ((keyIndex, key) in orderedKeys.withIndex()) {
-                    val value = statMap[key]
-                    if (value != null) {
-                        if (keyIndex > 0) jsonBuilder.append(",\n")
-                        jsonBuilder.append("    \"$key\": \"$value\"")
-                    }
-                }
-                jsonBuilder.append("\n  }")
-            }
-
-            jsonBuilder.append("\n]")
-            statsFile.writeText(jsonBuilder.toString(), Charsets.UTF_8)
+    private fun writeStatsJson(configDir: File, stats: List<OutputStat>) {
+        if (stats.isEmpty()) {
+            return
         }
 
-        return ProcessingResult(
-            achievements = achievementsOut,
-            stats = statsOut,
-            copyDefaultUnlockedImg = copyDefaultUnlockedImg,
-            copyDefaultLockedImg = copyDefaultLockedImg,
-            nameToBlockBit = nameToBlockBit,
-        )
+        val statsFile = File(configDir, "stats.json")
+        if (statsFile.exists()) {
+            statsFile.delete()
+        }
+
+        val statsJsonContent = jsonWriter.encodeToString(buildStatsJson(stats))
+
+        statsFile.writeText(statsJsonContent, Charsets.UTF_8)
     }
+
+    private fun buildStatsJson(stats: List<OutputStat>): JsonArray {
+        return buildJsonArray {
+            for (stat in stats) {
+                add(
+                    buildJsonObject {
+                        put("id", stat.id)
+                        put("default", stat.default)
+                        put("global", stat.global)
+                        put("name", stat.name)
+                        put("type", stat.type)
+                    },
+                )
+            }
+        }
+    }
+
+    private fun Map<String, String>.toJsonObject(): JsonObject {
+        return buildJsonObject {
+            for ((key, value) in this@toJsonObject) {
+                put(key, JsonPrimitive(value))
+            }
+        }
+    }
+
+    private fun isAchievementStatType(statType: String): Boolean {
+        return statType == StatType.STAT_TYPE_BITS || statType == StatType.ACHIEVEMENTS
+    }
+
+    private fun normalizeStatType(statType: String): String {
+        return when (statType) {
+            StatType.INT, StatType.STAT_TYPE_INT -> "int"
+            StatType.FLOAT, StatType.STAT_TYPE_FLOAT -> "float"
+            StatType.AVGRATE, StatType.STAT_TYPE_AVGRATE -> "avgrate"
+            else -> "int"
+        }
+    }
+
+    private fun rememberAchievementBitIndex(
+        statKey: String,
+        achievementIndex: String,
+        achievementName: String,
+        nameToBlockBit: MutableMap<String, Pair<Int, Int>>,
+    ) {
+        if (achievementName.isEmpty()) {
+            return
+        }
+
+        val blockId = statKey.toIntOrNull() ?: return
+        val bitIndex = achievementIndex.toIntOrNull() ?: return
+        nameToBlockBit[achievementName] = blockId to bitIndex
+    }
+
+    private fun toLocalizedText(value: Any?): Map<String, String> {
+        val valueMap = value.asStringAnyMap()
+        if (valueMap != null) {
+            return valueMap.mapValues { (_, text) -> text.toString() }
+        }
+        return mapOf("english" to value.toString())
+    }
+
+    private fun toHiddenInt(value: Any?): Int {
+        return when (value) {
+            is Number -> value.toInt()
+            else -> value?.toString()?.toIntOrNull() ?: 0
+        }
+    }
+
+    private fun Any?.asStringAnyMap(): Map<String, Any?>? {
+        val rawMap = this as? Map<*, *> ?: return null
+        return rawMap.entries.associate { (key, value) -> key.toString() to value }
+    }
+
+    private fun Any?.asStringAnyMapWithoutNullValues(): Map<String, Any>? {
+        val rawMap = this as? Map<*, *> ?: return null
+        return rawMap.entries
+            .filter { (_, value) -> value != null }
+            .associate { (key, value) -> key.toString() to (value as Any) }
+    }
+
+    private data class ParsedSchemaData(
+        val achievements: List<Achievement>,
+        val stats: List<Stat>,
+        val nameToBlockBit: Map<String, Pair<Int, Int>>,
+    )
+
+    private data class ParsedDisplay(
+        val displayName: Map<String, String>?,
+        val description: Map<String, String>?,
+        val hidden: Int,
+        val icon: String?,
+        val iconGray: String?,
+        val icongray: String?,
+    )
+
+    private data class OutputAchievement(
+        val hidden: Int,
+        val displayName: Map<String, String>,
+        val description: Map<String, String>,
+        val icon: String,
+        val iconGray: String,
+        val name: String,
+        val unlocked: Boolean?,
+        val unlockTimestamp: Int?,
+        val formattedUnlockTime: String?,
+    )
+
+    private data class OutputStat(
+        val id: String,
+        val default: String,
+        val global: String,
+        val name: String,
+        val type: String,
+    )
+
+    private data class OutputData(
+        val achievements: List<OutputAchievement>,
+        val stats: List<OutputStat>,
+        val copyDefaultUnlockedImg: Boolean,
+        val copyDefaultLockedImg: Boolean,
+    )
 }

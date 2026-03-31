@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
+import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.EpicGame
@@ -64,6 +65,13 @@ class LibraryViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    private data class PlatformAuthState(
+        val steamLoggedIn: Boolean,
+        val gogLoggedIn: Boolean,
+        val epicLoggedIn: Boolean,
+        val amazonLoggedIn: Boolean,
+    )
+
     private val _state = MutableStateFlow(LibraryState(isLoading = true))
     val state: StateFlow<LibraryState> = _state.asStateFlow()
 
@@ -98,7 +106,7 @@ class LibraryViewModel @Inject constructor(
 
     // Track debounce job for search
     private var searchDebounceJob: Job? = null
-    private val SEARCH_DEBOUNCE_MS = 500L // 500ms debounce
+    private val searchDebounceMs = 500L // 500ms debounce
 
     // Cache GPU name to avoid repeated calls
     private val gpuName: String by lazy {
@@ -118,6 +126,8 @@ class LibraryViewModel @Inject constructor(
     }
 
     init {
+        refreshPlatformAuthState()
+
         viewModelScope.launch(Dispatchers.IO) {
             steamAppDao.getAllOwnedApps(
                 // ownerIds = SteamService.familyMembers.ifEmpty { listOf((SteamService.getSteam3AccountId() ?: 0L).toInt()) },
@@ -267,7 +277,7 @@ class LibraryViewModel @Inject constructor(
 
         // Start new debounce job
         searchDebounceJob = viewModelScope.launch {
-            delay(SEARCH_DEBOUNCE_MS)
+            delay(searchDebounceMs)
             // Only trigger filter after user stops typing
             onFilterApps()
         }
@@ -302,6 +312,8 @@ class LibraryViewModel @Inject constructor(
     fun onRefresh() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
+
+            refreshPlatformAuthState()
 
             // Clear compatibility cache on manual refresh to get fresh data
             gameCompatibilityService.clearCache()
@@ -353,6 +365,165 @@ class LibraryViewModel @Inject constructor(
             customGameScanner.invalidateCache()
             onFilterApps(paginationCurrentPage)
         }
+    }
+
+    fun onGogOAuthResult(
+        resultCode: Int,
+        authCode: String?,
+        errorMessage: String?,
+    ) {
+        val payload = OAuthResultPayload(
+            resultCode = resultCode,
+            authCode = authCode,
+            errorMessage = errorMessage,
+        )
+        val message = LibraryAuthResultParser.resolveErrorMessage(
+            payload = payload,
+            cancelFallbackMessage = context.getString(R.string.gog_login_cancel),
+        )
+        if (message != null) {
+            postAuthMessage(message)
+            return
+        }
+
+        val code = authCode ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching { GOGService.authenticateWithCode(context, code) }.getOrElse {
+                Timber.tag("LibraryViewModel").e(it, "GOG authentication failed")
+                postAuthMessage(context.getString(R.string.gog_login_cancel))
+                return@launch
+            }
+
+            if (result.isSuccess) {
+                GOGService.start(context)
+                GOGService.triggerLibrarySync(context)
+                postAuthMessage(context.getString(R.string.gog_login_success_title))
+                refreshPlatformAuthState()
+                onFilterApps(paginationCurrentPage)
+            } else {
+                postAuthMessage(result.exceptionOrNull()?.message ?: context.getString(R.string.gog_login_cancel))
+            }
+        }
+    }
+
+    fun onEpicOAuthResult(
+        resultCode: Int,
+        authCode: String?,
+        errorMessage: String?,
+    ) {
+        val payload = OAuthResultPayload(
+            resultCode = resultCode,
+            authCode = authCode,
+            errorMessage = errorMessage,
+        )
+        val message = LibraryAuthResultParser.resolveErrorMessage(
+            payload = payload,
+            cancelFallbackMessage = context.getString(R.string.epic_login_cancel),
+        )
+        if (message != null) {
+            postAuthMessage(message)
+            return
+        }
+
+        val code = authCode ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching { EpicService.authenticateWithCode(context, code) }.getOrElse {
+                Timber.tag("LibraryViewModel").e(it, "Epic authentication failed")
+                postAuthMessage(context.getString(R.string.epic_login_cancel))
+                return@launch
+            }
+
+            if (result.isSuccess) {
+                EpicService.start(context)
+                EpicService.triggerLibrarySync(context)
+                postAuthMessage(context.getString(R.string.epic_login_success_title))
+                refreshPlatformAuthState()
+                onFilterApps(paginationCurrentPage)
+            } else {
+                postAuthMessage(result.exceptionOrNull()?.message ?: context.getString(R.string.epic_login_cancel))
+            }
+        }
+    }
+
+    fun onAmazonOAuthResult(
+        resultCode: Int,
+        authCode: String?,
+        errorMessage: String?,
+    ) {
+        val payload = OAuthResultPayload(
+            resultCode = resultCode,
+            authCode = authCode,
+            errorMessage = errorMessage,
+        )
+        val message = LibraryAuthResultParser.resolveErrorMessage(
+            payload = payload,
+            cancelFallbackMessage = context.getString(R.string.amazon_login_cancel),
+        )
+        if (message != null) {
+            postAuthMessage(message)
+            return
+        }
+
+        val code = authCode ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = runCatching { AmazonService.authenticateWithCode(context, code) }.getOrElse {
+                Timber.tag("LibraryViewModel").e(it, "Amazon authentication failed")
+                postAuthMessage(context.getString(R.string.amazon_login_cancel))
+                return@launch
+            }
+
+            if (result.isSuccess) {
+                AmazonService.start(context)
+                AmazonService.triggerLibrarySync(context)
+                postAuthMessage(context.getString(R.string.amazon_login_success_title))
+                refreshPlatformAuthState()
+                onFilterApps(paginationCurrentPage)
+            } else {
+                postAuthMessage(result.exceptionOrNull()?.message ?: context.getString(R.string.amazon_login_cancel))
+            }
+        }
+    }
+
+    fun refreshPlatformAuthState() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val auth = snapshotPlatformAuthState()
+            _state.update {
+                it.copy(
+                    isSteamLoggedIn = auth.steamLoggedIn,
+                    isGogLoggedIn = auth.gogLoggedIn,
+                    isEpicLoggedIn = auth.epicLoggedIn,
+                    isAmazonLoggedIn = auth.amazonLoggedIn,
+                )
+            }
+        }
+    }
+
+    fun onAuthMessageShown(eventId: Long) {
+        _state.update {
+            if (it.authMessageEventId == eventId) {
+                it.copy(authMessage = null)
+            } else {
+                it
+            }
+        }
+    }
+
+    private fun postAuthMessage(message: String) {
+        _state.update {
+            it.copy(
+                authMessage = message,
+                authMessageEventId = it.authMessageEventId + 1,
+            )
+        }
+    }
+
+    private fun snapshotPlatformAuthState(): PlatformAuthState {
+        return PlatformAuthState(
+            steamLoggedIn = SteamService.isLoggedIn,
+            gogLoggedIn = GOGService.hasStoredCredentials(context),
+            epicLoggedIn = EpicService.hasStoredCredentials(context),
+            amazonLoggedIn = AmazonService.hasStoredCredentials(context),
+        )
     }
 
     private fun onFilterApps(paginationPage: Int = 0): Job {
@@ -603,7 +774,11 @@ class LibraryViewModel @Inject constructor(
                 PrefManager.epicInstalledGamesCount = epicInstalledCount
                 PrefManager.amazonInstalledGamesCount = amazonInstalledCount
                 Timber.tag("LibraryViewModel")
-                    .d("Saved counts - Custom: ${customGameItems.size}, Steam: ${steamFilteredBeforeCompatibility.size}, GOG: ${filteredGOGGames.size}, GOG installed: $gogInstalledCount, Epic: ${filteredEpicGames.size}, Epic installed: $epicInstalledCount, Amazon installed: $amazonInstalledCount")
+                    .d(
+                        "Saved counts - Custom: ${customGameItems.size}, Steam: ${steamFilteredBeforeCompatibility.size}, " +
+                            "GOG: ${filteredGOGGames.size}, GOG installed: $gogInstalledCount, Epic: ${filteredEpicGames.size}, " +
+                            "Epic installed: $epicInstalledCount, Amazon installed: $amazonInstalledCount",
+                    )
             }
 
             // Compute effective source filters based on current tab
@@ -621,6 +796,8 @@ class LibraryViewModel @Inject constructor(
                 currentTab.showCustom
             }
 
+            val authState = snapshotPlatformAuthState()
+
             val includeGOG = (
                 if (currentTab == LibraryTab.ALL) {
                     currentState.showGOGInLibrary
@@ -628,7 +805,7 @@ class LibraryViewModel @Inject constructor(
                     currentTab.showGoG
                 }
                 ) &&
-                GOGService.hasStoredCredentials(context)
+                authState.gogLoggedIn
 
             val includeEpic = (
                 if (currentTab == LibraryTab.ALL) {
@@ -637,7 +814,7 @@ class LibraryViewModel @Inject constructor(
                     currentTab.showEpic
                 }
                 ) &&
-                EpicService.hasStoredCredentials(context)
+                authState.epicLoggedIn
 
             val includeAmazon = (
                 if (currentTab == LibraryTab.ALL) {
@@ -646,7 +823,7 @@ class LibraryViewModel @Inject constructor(
                     currentTab.showAmazon
                 }
                 ) &&
-                AmazonService.hasStoredCredentials(context)
+                authState.amazonLoggedIn
 
             // Combine both lists and apply sort option
             val sortComparator: Comparator<LibraryEntry> = when (currentState.currentSortOption) {
@@ -707,15 +884,19 @@ class LibraryViewModel @Inject constructor(
                     lastPaginationPage = lastPageInCurrentFilter + 1,
                     totalAppsInFilter = totalFound,
                     isLoading = false, // Loading complete
+                    isSteamLoggedIn = authState.steamLoggedIn,
+                    isGogLoggedIn = authState.gogLoggedIn,
+                    isEpicLoggedIn = authState.epicLoggedIn,
+                    isAmazonLoggedIn = authState.amazonLoggedIn,
                     // Per-source counts for tab badges
                     // Use user prefs + auth state only (not current tab) so badges stay stable across tab switches
                     allCount = (if (currentState.showSteamInLibrary) steamEntries.size else 0) +
                         (if (currentState.showCustomGamesInLibrary) customEntries.size else 0) +
-                        (if (currentState.showGOGInLibrary && GOGService.hasStoredCredentials(context)) gogEntries.size else 0) +
-                        (if (currentState.showEpicInLibrary && EpicService.hasStoredCredentials(context)) epicEntries.size else 0) +
+                        (if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogEntries.size else 0) +
+                        (if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicEntries.size else 0) +
                         (
                             if (currentState.showAmazonInLibrary &&
-                                AmazonService.hasStoredCredentials(context)
+                                authState.amazonLoggedIn
                             ) {
                                 amazonEntries.size
                             } else {
@@ -723,10 +904,10 @@ class LibraryViewModel @Inject constructor(
                             }
                             ),
                     steamCount = if (currentState.showSteamInLibrary) steamEntries.size else 0,
-                    gogCount = if (currentState.showGOGInLibrary && GOGService.hasStoredCredentials(context)) gogEntries.size else 0,
-                    epicCount = if (currentState.showEpicInLibrary && EpicService.hasStoredCredentials(context)) epicEntries.size else 0,
+                    gogCount = if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogEntries.size else 0,
+                    epicCount = if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicEntries.size else 0,
                     amazonCount = if (currentState.showAmazonInLibrary &&
-                        AmazonService.hasStoredCredentials(context)
+                        authState.amazonLoggedIn
                     ) {
                         amazonEntries.size
                     } else {

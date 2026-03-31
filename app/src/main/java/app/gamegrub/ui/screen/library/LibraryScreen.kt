@@ -65,10 +65,6 @@ import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.amazon.AmazonService
-import app.gamegrub.service.epic.EpicService
-import app.gamegrub.service.gog.GOGService
-import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.GamepadAction
 import app.gamegrub.ui.component.GamepadActionBar
 import app.gamegrub.ui.component.GamepadButton
@@ -97,10 +93,8 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.PlatformAuthUiHelpers
 import app.gamegrub.ui.utils.PlatformLogoutCallbacks
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import app.gamegrub.utils.game.CustomGameScanner
 import java.io.File
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,6 +109,12 @@ fun HomeLibraryScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    LaunchedEffect(state.authMessageEventId) {
+        val message = state.authMessage ?: return@LaunchedEffect
+        SnackbarManager.show(message)
+        viewModel.onAuthMessageShown(state.authMessageEventId)
+    }
 
     LibraryScreenContent(
         state = state,
@@ -138,6 +138,10 @@ fun HomeLibraryScreen(
         onTabChanged = viewModel::onTabChanged,
         onPreviousTab = viewModel::onPreviousTab,
         onNextTab = viewModel::onNextTab,
+        onGogOAuthResult = viewModel::onGogOAuthResult,
+        onEpicOAuthResult = viewModel::onEpicOAuthResult,
+        onAmazonOAuthResult = viewModel::onAmazonOAuthResult,
+        onRefreshPlatformAuthState = viewModel::refreshPlatformAuthState,
         isOffline = isOffline,
     )
 }
@@ -166,6 +170,10 @@ private fun LibraryScreenContent(
     onTabChanged: (LibraryTab) -> Unit,
     onPreviousTab: () -> Unit,
     onNextTab: () -> Unit,
+    onGogOAuthResult: (Int, String?, String?) -> Unit,
+    onEpicOAuthResult: (Int, String?, String?) -> Unit,
+    onAmazonOAuthResult: (Int, String?, String?) -> Unit,
+    onRefreshPlatformAuthState: () -> Unit,
     isOffline: Boolean = false,
 ) {
     val context = LocalContext.current
@@ -174,106 +182,31 @@ private fun LibraryScreenContent(
     val gogOAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        if (result.resultCode != android.app.Activity.RESULT_OK) {
-            val message = result.data?.getStringExtra(GOGOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.gog_login_cancel)
-            SnackbarManager.show(message)
-            return@rememberLauncherForActivityResult
-        }
-        val code = result.data?.getStringExtra(GOGOAuthActivity.EXTRA_AUTH_CODE)
-        if (code == null) {
-            val message = result.data?.getStringExtra(GOGOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.gog_login_cancel)
-            SnackbarManager.show(message)
-            return@rememberLauncherForActivityResult
-        }
-        lifecycleScope.launch {
-            PlatformOAuthHandlers.handleGogAuthentication(
-                context = context,
-                authCode = code,
-                coroutineScope = lifecycleScope,
-                onLoadingChange = { },
-                onError = { msg ->
-                    if (msg != null) {
-                        SnackbarManager.show(msg)
-                    }
-                },
-                onSuccess = {
-                    SnackbarManager.show(context.getString(R.string.gog_login_success_title))
-                },
-                onDialogClose = { },
-            )
-        }
+        onGogOAuthResult(
+            result.resultCode,
+            result.data?.getStringExtra(GOGOAuthActivity.EXTRA_AUTH_CODE),
+            result.data?.getStringExtra(GOGOAuthActivity.EXTRA_ERROR),
+        )
     }
 
     val epicOAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        if (result.resultCode != android.app.Activity.RESULT_OK) {
-            val message = result.data?.getStringExtra(EpicOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.epic_login_cancel)
-            SnackbarManager.show(message)
-            return@rememberLauncherForActivityResult
-        }
-        val code = result.data?.getStringExtra(EpicOAuthActivity.EXTRA_AUTH_CODE)
-        if (code == null) {
-            val message = result.data?.getStringExtra(EpicOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.epic_login_cancel)
-            SnackbarManager.show(message)
-            return@rememberLauncherForActivityResult
-        }
-        lifecycleScope.launch {
-            PlatformOAuthHandlers.handleEpicAuthentication(
-                context = context,
-                authCode = code,
-                coroutineScope = lifecycleScope,
-                onLoadingChange = { },
-                onError = { msg ->
-                    if (msg != null) {
-                        SnackbarManager.show(msg)
-                    }
-                },
-                onSuccess = {
-                    SnackbarManager.show(context.getString(R.string.epic_login_success_title))
-                },
-                onDialogClose = { },
-            )
-        }
+        onEpicOAuthResult(
+            result.resultCode,
+            result.data?.getStringExtra(EpicOAuthActivity.EXTRA_AUTH_CODE),
+            result.data?.getStringExtra(EpicOAuthActivity.EXTRA_ERROR),
+        )
     }
 
     val amazonOAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-        if (result.resultCode != android.app.Activity.RESULT_OK) {
-            val message = result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.amazon_login_cancel)
-            SnackbarManager.show(message)
-            return@rememberLauncherForActivityResult
-        }
-        val code = result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_AUTH_CODE)
-        if (code == null) {
-            val message = result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.amazon_login_cancel)
-            SnackbarManager.show(message)
-            return@rememberLauncherForActivityResult
-        }
-        lifecycleScope.launch {
-            PlatformOAuthHandlers.handleAmazonAuthentication(
-                context = context,
-                authCode = code,
-                coroutineScope = lifecycleScope,
-                onLoadingChange = { },
-                onError = { msg ->
-                    if (msg != null) {
-                        SnackbarManager.show(msg)
-                    }
-                },
-                onSuccess = {
-                    SnackbarManager.show(context.getString(R.string.amazon_login_success_title))
-                },
-                onDialogClose = { },
-            )
-        }
+        onAmazonOAuthResult(
+            result.resultCode,
+            result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_AUTH_CODE),
+            result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_ERROR),
+        )
     }
 
     var selectedAppId by remember { mutableStateOf<String?>(null) }
@@ -385,7 +318,7 @@ private fun LibraryScreenContent(
             val folder = File(path)
             val canAccess = try {
                 folder.exists() && (folder.isDirectory && folder.canRead())
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             }
 
@@ -831,10 +764,10 @@ private fun LibraryScreenContent(
             Box(modifier = Modifier.fillMaxSize()) {
                 // When on Steam/GOG/Epic/Amazon tab and not logged in, or LOCAL tab with no custom games, show splash
                 val showEmptyStateSplash = when (state.currentTab) {
-                    LibraryTab.STEAM -> !SteamService.isLoggedIn
-                    LibraryTab.GOG -> !GOGService.hasStoredCredentials(context)
-                    LibraryTab.EPIC -> !EpicService.hasStoredCredentials(context)
-                    LibraryTab.AMAZON -> !AmazonService.hasStoredCredentials(context)
+                    LibraryTab.STEAM -> !state.isSteamLoggedIn
+                    LibraryTab.GOG -> !state.isGogLoggedIn
+                    LibraryTab.EPIC -> !state.isEpicLoggedIn
+                    LibraryTab.AMAZON -> !state.isAmazonLoggedIn
                     LibraryTab.LOCAL -> PrefManager.customGamesCount == 0
                     else -> false
                 }
@@ -1055,9 +988,6 @@ private fun LibraryScreenContent(
 
             // System menu (START) - renders on top of everything
             val context = LocalContext.current
-            val gogLoggedIn = app.gamegrub.service.gog.GOGAuthManager.hasStoredCredentials(context)
-            val epicLoggedIn = app.gamegrub.service.epic.EpicAuthManager.hasStoredCredentials(context)
-            val amazonLoggedIn = app.gamegrub.service.amazon.AmazonAuthManager.hasStoredCredentials(context)
 
             SystemMenu(
                 isOpen = isSystemMenuOpen,
@@ -1066,9 +996,9 @@ private fun LibraryScreenContent(
                 onLogout = onLogout,
                 onGoOnline = onGoOnline,
                 isOffline = isOffline,
-                gogLoggedIn = gogLoggedIn,
-                epicLoggedIn = epicLoggedIn,
-                amazonLoggedIn = amazonLoggedIn,
+                gogLoggedIn = state.isGogLoggedIn,
+                epicLoggedIn = state.isEpicLoggedIn,
+                amazonLoggedIn = state.isAmazonLoggedIn,
                 onGogLoginClick = {
                     gogOAuthLauncher.launch(Intent(context, GOGOAuthActivity::class.java))
                 },
@@ -1076,7 +1006,7 @@ private fun LibraryScreenContent(
                     PlatformAuthUiHelpers.logoutGog(
                         context = context,
                         scope = lifecycleScope,
-                        callbacks = PlatformLogoutCallbacks(),
+                        callbacks = PlatformLogoutCallbacks(onSuccess = onRefreshPlatformAuthState),
                     )
                 },
                 onEpicLoginClick = {
@@ -1086,7 +1016,7 @@ private fun LibraryScreenContent(
                     PlatformAuthUiHelpers.logoutEpic(
                         context = context,
                         scope = lifecycleScope,
-                        callbacks = PlatformLogoutCallbacks(),
+                        callbacks = PlatformLogoutCallbacks(onSuccess = onRefreshPlatformAuthState),
                     )
                 },
                 onAmazonLoginClick = {
@@ -1096,7 +1026,7 @@ private fun LibraryScreenContent(
                     PlatformAuthUiHelpers.logoutAmazon(
                         context = context,
                         scope = lifecycleScope,
-                        callbacks = PlatformLogoutCallbacks(),
+                        callbacks = PlatformLogoutCallbacks(onSuccess = onRefreshPlatformAuthState),
                     )
                 },
             )
@@ -1226,6 +1156,10 @@ private fun Preview_LibraryScreenContent() {
             },
             onPreviousTab = {},
             onNextTab = {},
+            onGogOAuthResult = { _, _, _ -> },
+            onEpicOAuthResult = { _, _, _ -> },
+            onAmazonOAuthResult = { _, _, _ -> },
+            onRefreshPlatformAuthState = {},
         )
     }
 }

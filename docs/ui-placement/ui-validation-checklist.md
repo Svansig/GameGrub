@@ -60,3 +60,17 @@ Use additional module-specific commands as needed for touched area.
   - ...
 ```
 
+## Recent Evidence
+
+### UI-004
+
+- Triage IDs: `UI-004`
+- Commands prepared:
+  - `./gradlew testDebugUnitTest --tests "app.gamegrub.ui.model.LibraryAuthResultParserTest"`
+- Manual checks:
+  - [ ] GOG login success/cancel
+  - [ ] Epic login success/cancel
+  - [ ] Amazon login success/cancel
+- Residual risks:
+  - Full `lintKotlin` and end-to-end auth device verification still pending.
+

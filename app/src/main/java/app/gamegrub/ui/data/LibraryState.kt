@@ -49,6 +49,16 @@ data class LibraryState(
     // Current library tab for quick filter access
     val currentTab: LibraryTab = LibraryTab.ALL,
 
+    // Platform auth state derived by ViewModel (used by splash and system menu)
+    val isSteamLoggedIn: Boolean = false,
+    val isGogLoggedIn: Boolean = false,
+    val isEpicLoggedIn: Boolean = false,
+    val isAmazonLoggedIn: Boolean = false,
+
+    // One-shot auth feedback consumed by UI snackbar handling
+    val authMessage: String? = null,
+    val authMessageEventId: Long = 0,
+
     // Per-source game counts for tab badges
     val allCount: Int = 0,
     val steamCount: Int = 0,

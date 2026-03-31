@@ -24,3 +24,12 @@ Use this running log to capture opportunities discovered while implementing or r
 - **Owner**: `TBD`
 - **Status**: `Backlog`
 
+- **Date**: `2026-03-31`
+- **Ticket**: `todo/UI-004.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: OAuth callback parsing logic was duplicated across composables and difficult to unit test.
+- **Proposed Action**: Keep auth-result parsing in small pure helpers with dedicated tests before wiring side effects in ViewModel.
+- **Owner**: `TBD`
+- **Status**: `Done`
+

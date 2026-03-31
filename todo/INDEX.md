@@ -12,7 +12,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| UI-004 | P1 | Move library auth flow out of composables | `ui/screen/library` | `todo/UI-004.md` |
 | UI-001 | P1 | Move GOG app operations out of UI class | `ui/screen/library/appscreen` | `todo/UI-001.md` |
 | UI-002 | P1 | Remove unmanaged IO scopes from GOG UI paths | `ui/screen/library/appscreen` | `todo/UI-002.md` |
 | UI-003 | P1 | Remove unmanaged IO scopes from Steam UI paths | `ui/screen/library/appscreen` | `todo/UI-003.md` |
@@ -227,7 +226,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Owner | File |
 |---|---|---|---|---|
-| _none_ |  |  |  |  |
+| UI-004 | P1 | Move library auth flow out of composables | TBD | `todo/UI-004.md` |
 
 ## Blocked
 

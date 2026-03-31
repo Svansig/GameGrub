@@ -3,6 +3,7 @@ package app.gamegrub.ui
 import android.view.Window
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import androidx.core.view.WindowCompat
 
 class ImmersiveModeManager(private val window: Window) {
 
@@ -10,14 +11,14 @@ class ImmersiveModeManager(private val window: Window) {
 
     fun applyImmersiveMode() {
         if (desiredSystemUiVisible) {
-            window.setDecorFitsSystemWindows(true)
+            WindowCompat.setDecorFitsSystemWindows(window, true)
             window.insetsController?.show(
                 WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars(),
             )
             return
         }
 
-        window.setDecorFitsSystemWindows(false)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         window.insetsController?.let { controller ->
             controller.hide(
                 WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars(),

@@ -213,11 +213,9 @@ class GOGManager @Inject constructor(
                         if (gameDetails != null) {
                             Timber.tag("GOG").d("Got Game Details for ID: $id")
                             val game = parseGameObject(gameDetails)
-                            if (game != null) {
-                                games.add(game)
-                                Timber.tag("GOG").d("Refreshed Game: ${game.title}")
-                                totalProcessed++
-                            }
+                            games.add(game)
+                            Timber.tag("GOG").d("Refreshed Game: ${game.title}")
+                            totalProcessed++
                         }
                     } else {
                         Timber.w("GOG game ID $id not found in library after refresh")
@@ -433,10 +431,6 @@ class GOGManager @Inject constructor(
             }
 
             val game = parseGameObject(gameDetails)
-            if (game == null) {
-                Timber.tag("GOG").w("Skipping Invalid GOG App with id: $gameId")
-                return Result.success(null)
-            }
             insertGame(game)
             return Result.success(game)
         } catch (e: Exception) {

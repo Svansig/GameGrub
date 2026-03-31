@@ -815,7 +815,7 @@ object ContainerUtils {
                                     bestConfig.matchType,
                                     true,
                                 )
-                                if (parsedConfig != null && parsedConfig.isNotEmpty()) {
+                                if (parsedConfig.isNotEmpty()) {
                                     bestConfigMap = parsedConfig
                                 }
                             }

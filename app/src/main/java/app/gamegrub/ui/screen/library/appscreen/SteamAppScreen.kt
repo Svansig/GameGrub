@@ -210,7 +210,7 @@ private suspend fun applyConfigForContainer(
             true,
         )
         val missingContentDescription = bestConfigService.consumeLastMissingContentDescription()
-        if (parsedConfig != null && parsedConfig.isNotEmpty()) {
+        if (parsedConfig.isNotEmpty()) {
             val updatedContainerData = ContainerUtils.applyBestConfigMapToContainerData(
                 containerData,
                 parsedConfig,

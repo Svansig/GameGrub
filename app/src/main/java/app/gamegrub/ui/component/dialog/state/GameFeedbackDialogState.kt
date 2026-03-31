@@ -40,7 +40,10 @@ data class GameFeedbackDialogState(
                     visible = savedMap["visible"] as Boolean,
                     appId = savedMap["appId"] as String,
                     rating = savedMap["rating"] as Int,
-                    selectedTags = (savedMap["selectedTags"] as List<String>).toSet(),
+                    selectedTags = (savedMap["selectedTags"] as? List<*>)
+                        ?.filterIsInstance<String>()
+                        ?.toSet()
+                        ?: emptySet(),
                     feedbackText = savedMap["feedbackText"] as String,
                     confirmBtnText = savedMap["confirmBtnText"] as String,
                     dismissBtnText = savedMap["dismissBtnText"] as String,

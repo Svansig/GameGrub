@@ -390,7 +390,7 @@ internal object EnvironmentSetupCoordinator {
 
         val isCustomGame = gameSource == GameSource.CUSTOM_GAME
         val gameIdForTicket = ContainerUtils.extractGameIdFromContainerId(appId)
-        if (!bootToContainer && !isCustomGame && gameIdForTicket != null && !nonNullContainer.isLaunchRealSteam) {
+        if (!bootToContainer && !isCustomGame && !nonNullContainer.isLaunchRealSteam) {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val ticket = SteamService.instance?.getEncryptedAppTicket(gameIdForTicket)
@@ -420,7 +420,7 @@ internal object EnvironmentSetupCoordinator {
         if (gameSource == GameSource.STEAM) {
             val gameIdInt = ContainerUtils.extractGameIdFromContainerId(appId)
             val achAppId = SteamService.cachedAchievementsAppId
-            if (gameIdInt != null && achAppId != null) {
+            if (achAppId != null) {
                 val watchDirs = SteamService.getGseSaveDirs(context, gameIdInt)
                 val displayNameMap = SteamService.cachedAchievements?.associate { ach ->
                     ach.name to (

@@ -51,3 +51,12 @@ Use this running log to capture opportunities discovered while implementing or r
 - **Owner**: `TBD`
 - **Status**: `Done`
 
+- **Date**: `2026-03-31`
+- **Ticket**: `N/A (compile warning cleanup pass)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Nullability drift left several impossible null checks and one unchecked cast, obscuring intent and increasing warning noise during `:app:compileDebugKotlin`.
+- **Proposed Action**: Prefer non-null return contracts in call sites, use safe collection restoration in savers, and update deprecated Material3/WebView usage during warning cleanup slices.
+- **Owner**: `TBD`
+- **Status**: `Done`
+

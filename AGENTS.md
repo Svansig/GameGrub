@@ -275,6 +275,11 @@ ubuntufs/src/
 
 ## Common Tasks
 
+### Current Focus (Refactor Phase)
+- The current project focus is refactoring the codebase into a more manageable, cohesive, and understandable structure.
+- Prefer tasks that improve boundaries, reduce complexity, and improve maintainability/testability of existing behavior.
+- Do not expand feature scope unless it is required to complete an active refactor ticket.
+
 ### Picking Work (Local Tickets)
 1. Open `todo/INDEX.md`
 2. Select the highest-priority unblocked ticket

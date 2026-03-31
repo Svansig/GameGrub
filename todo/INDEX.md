@@ -2,6 +2,12 @@
 
 Use this file as the quick backlog board. Full details live in each ticket file.
 
+## Refactor-Phase Execution Rule
+
+Current execution is refactor-first. Prioritize tickets that reduce complexity and improve maintainability of existing behavior (`UI-*`, `COH-*`, `READ-*`, `SRV-*`, and refactor-supporting `TEST-*`/`DOC-*`).
+
+During this phase, defer tickets that primarily expand scope beyond refactor goals unless they are required dependencies for active refactor work.
+
 ## Backlog - UI
 
 | ID | Priority | Title | Area | File |
@@ -19,6 +25,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | UI-011 | P2 | Extract OAuth launcher callback wiring from screen composables | `ui/screen/library + settings` | `todo/UI-011.md` |
 | UI-012 | P3 | Standardize dialog state ownership across screens | `ui/component/dialog + ui/screen` | `todo/UI-012.md` |
 | UI-013 | P3 | Reduce direct event bus subscriptions inside composables | `ui/screen` | `todo/UI-013.md` |
+| UI-014 | P2 | Extract route/navigation side effects out of screen-level composables | `ui/screen + ui/model` | `todo/UI-014.md` |
+| UI-015 | P3 | Consolidate duplicate platform action components into shared UI primitives | `ui/component + ui/screen/library` | `todo/UI-015.md` |
 
 ## Backlog - Cohesion
 
@@ -36,6 +44,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | COH-010 | P2 | Consolidate cross-platform auth flow ownership model | `service/auth + ui/model` | `todo/COH-010.md` |
 | COH-011 | P3 | Standardize app-level coordinator placement rules | `app/gamegrub` | `todo/COH-011.md` |
 | COH-012 | P3 | Create dependency guardrails for utils packages | `utils + architecture` | `todo/COH-012.md` |
+| COH-013 | P2 | Define boundary between platform services and shared download pipeline | `service + downloader` | `todo/COH-013.md` |
+| COH-014 | P3 | Introduce refactor checklist for cross-layer pull requests | `docs + process` | `todo/COH-014.md` |
 
 ## Backlog - Readability
 
@@ -53,6 +63,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | READ-010 | P2 | Add focused package overviews for service domains | `service/steam/domain` | `todo/READ-010.md` |
 | READ-011 | P3 | Standardize error-message phrasing style guide | `ui + service` | `todo/READ-011.md` |
 | READ-012 | P3 | Add ownership headers for high-risk files | `ui + service + docs` | `todo/READ-012.md` |
+| READ-013 | P2 | Standardize naming for async job and task identifiers | `service + background work` | `todo/READ-013.md` |
+| READ-014 | P3 | Add concise file-level intent notes for critical legacy interop files | `com.winlator + integration points` | `todo/READ-014.md` |
 
 ## Backlog - Performance
 
@@ -70,6 +82,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | PERF-010 | P2 | Optimize background work scheduling to reduce contention | `work scheduling + service` | `todo/PERF-010.md` |
 | PERF-011 | P3 | Tune container launch prechecks for faster start | `container launch` | `todo/PERF-011.md` |
 | PERF-012 | P3 | Add performance budget guardrails for key interactions | `ui + docs` | `todo/PERF-012.md` |
+| PERF-013 | P2 | Reduce repeated parsing and allocation in auth/session hot paths | `service/auth + session` | `todo/PERF-013.md` |
+| PERF-014 | P3 | Add lightweight memory-snapshot comparison workflow for refactor PRs | `profiling + docs` | `todo/PERF-014.md` |
 
 ## Backlog - Reliability
 
@@ -87,6 +101,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | REL-010 | P2 | Harden offline-mode transitions across platforms | `ui + service` | `todo/REL-010.md` |
 | REL-011 | P3 | Standardize recovery from partial install states | `service/install` | `todo/REL-011.md` |
 | REL-012 | P3 | Add reliability incident review template | `docs + process` | `todo/REL-012.md` |
+| REL-013 | P2 | Harden cache invalidation and stale-data fallback behavior | `service + data cache` | `todo/REL-013.md` |
+| REL-014 | P3 | Add defensive guards for null/empty platform payload edge cases | `service/platform adapters` | `todo/REL-014.md` |
 
 ## Backlog - Testing
 
@@ -104,6 +120,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | TEST-010 | P2 | Add tests for cancellation and resume edge cases | `service + ui` | `todo/TEST-010.md` |
 | TEST-011 | P3 | Add deterministic fake clock utilities for time-based tests | `app/src/test` | `todo/TEST-011.md` |
 | TEST-012 | P3 | Add regression tests for settings persistence flows | `ui/screen/settings + PrefManager` | `todo/TEST-012.md` |
+| TEST-013 | P2 | Add contract tests for service-domain boundary invariants | `service/domain tests` | `todo/TEST-013.md` |
+| TEST-014 | P3 | Add snapshot tests for navigation state reducers | `ui/model + navigation` | `todo/TEST-014.md` |
 
 ## Backlog - CI and Build
 
@@ -121,6 +139,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | CI-010 | P2 | Add CI guard for required ticket lifecycle fields | `CI automation` | `todo/CI-010.md` |
 | CI-011 | P3 | Publish CI runbook for common failure categories | `docs + CI` | `todo/CI-011.md` |
 | CI-012 | P3 | Add artifact retention policy and cleanup automation | `CI + release artifacts` | `todo/CI-012.md` |
+| CI-013 | P2 | Add gate ensuring changed refactor tickets include parent/child links when split | `CI automation + tickets` | `todo/CI-013.md` |
+| CI-014 | P3 | Add CI summary comment for documentation impact compliance | `.github/workflows` | `todo/CI-014.md` |
 
 ## Backlog - Security
 
@@ -138,6 +158,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | SEC-010 | P2 | Add guardrails for external file input validation | `storage + imports` | `todo/SEC-010.md` |
 | SEC-011 | P3 | Review exported components and manifest hardening | `AndroidManifest` | `todo/SEC-011.md` |
 | SEC-012 | P3 | Add security review checklist for high-risk PRs | `docs + process` | `todo/SEC-012.md` |
+| SEC-013 | P2 | Audit and reduce sensitive fields persisted in local debug artifacts | `storage + debug tooling` | `todo/SEC-013.md` |
+| SEC-014 | P3 | Add hardening checklist for third-party SDK configuration | `build + runtime config` | `todo/SEC-014.md` |
 
 ## Backlog - Documentation
 
@@ -155,6 +177,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | DOC-010 | P2 | Add glossary-linked onboarding map for new contributors | `README + docs` | `todo/DOC-010.md` |
 | DOC-011 | P3 | Add platform-specific troubleshooting pages | `docs + platform flows` | `todo/DOC-011.md` |
 | DOC-012 | P3 | Add docs maintenance cadence and ownership table | `docs + process` | `todo/DOC-012.md` |
+| DOC-013 | P2 | Add refactor progress dashboard doc linked to ticket themes | `docs + todo` | `todo/DOC-013.md` |
+| DOC-014 | P3 | Add codebase map for legacy-to-refactor transition zones | `docs + architecture` | `todo/DOC-014.md` |
 
 ## Backlog - Service Refactoring
 
@@ -180,6 +204,8 @@ Use this file as the quick backlog board. Full details live in each ticket file.
 | SRV-018 | P2 | Split SteamService startup pipeline into explicit stages | `service/steam` | `todo/SRV-018.md` |
 | SRV-019 | P3 | Introduce shared domain result wrappers for service operations | `service/steam/domain` | `todo/SRV-019.md` |
 | SRV-020 | P3 | Add service-domain migration verification checklist | `service/steam + docs` | `todo/SRV-020.md` |
+| SRV-021 | P2 | Move platform credential refresh flow behind domain boundary | `service/steam + auth domain` | `todo/SRV-021.md` |
+| SRV-022 | P3 | Remove residual orchestration helpers from SteamService companion and route to domains | `service/steam` | `todo/SRV-022.md` |
 
 ## In Progress
 

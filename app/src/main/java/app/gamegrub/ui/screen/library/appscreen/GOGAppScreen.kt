@@ -21,6 +21,7 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.service.gog.GOGConstants
 
 import app.gamegrub.service.gog.domain.getGOGInstallDomain
+import app.gamegrub.ui.model.getGOGAppScreenViewModel
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
@@ -32,9 +33,6 @@ import app.gamegrub.utils.storage.StorageUtils
 import com.winlator.container.ContainerData
 import java.io.File
 import java.util.Locale
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -242,65 +240,52 @@ class GOGAppScreen : BaseAppScreen() {
     private fun showGOGInstallConfirmationDialog(context: Context, libraryItem: LibraryItem) {
         val gameId = libraryItem.gameId.toString()
         Timber.tag(TAG).i("Showing install confirmation dialog for: ${libraryItem.appId}")
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val game = getGOGInstallDomain(context).getGOGGameOf(gameId)
-
-                // Calculate sizes
-                val downloadSize = StorageUtils.formatBinarySize(game?.downloadSize ?: 0L)
-                val availableSpace = StorageUtils.formatBinarySize(
-                    StorageUtils.getAvailableSpace(GOGConstants.defaultGOGGamesPath),
-                )
-
-                val message = context.getString(
-                    R.string.gog_install_confirmation_message,
-                    downloadSize,
-                    availableSpace,
-                )
-                val state = app.gamegrub.ui.component.dialog.state.MessageDialogState(
-                    visible = true,
-                    type = app.gamegrub.ui.enums.DialogType.INSTALL_APP,
-                    title = context.getString(R.string.gog_install_game_title),
-                    message = message,
-                    confirmBtnText = context.getString(R.string.download),
-                    dismissBtnText = context.getString(R.string.cancel),
-                )
-                showInstallDialog(libraryItem.appId, state)
-            } catch (e: Exception) {
-                Timber.e(e, "Failed to show install dialog for: ${libraryItem.appId}")
-            }
+        getGOGAppScreenViewModel(context).showInstallConfirmationDialog(gameId) { dialogData ->
+            // Calculate sizes
+            val downloadSize = StorageUtils.formatBinarySize(dialogData.downloadSize)
+            val availableSpace = StorageUtils.formatBinarySize(
+                StorageUtils.getAvailableSpace(GOGConstants.defaultGOGGamesPath),
+            )
+            val message = context.getString(
+                R.string.gog_install_confirmation_message,
+                downloadSize,
+                availableSpace,
+            )
+            val state = app.gamegrub.ui.component.dialog.state.MessageDialogState(
+                visible = true,
+                type = app.gamegrub.ui.enums.DialogType.INSTALL_APP,
+                title = context.getString(R.string.gog_install_game_title),
+                message = message,
+                confirmBtnText = context.getString(R.string.download),
+                dismissBtnText = context.getString(R.string.cancel),
+            )
+            showInstallDialog(libraryItem.appId, state)
         }
     }
 
     private fun performDownload(context: Context, libraryItem: LibraryItem, onClickPlay: (Boolean) -> Unit) {
         val gameId = libraryItem.gameId.toString()
         Timber.i("Starting GOG game download: ${libraryItem.appId}")
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // Get install path
-                val installPath = GOGConstants.getGameInstallPath(libraryItem.name)
-                val containerData = loadContainerData(context, libraryItem)
-
-                Timber.d("Downloading GOG game to: $installPath")
-
-                SnackbarManager.show("Starting download for ${libraryItem.name}...")
-
-                // Start download - GOGInstallDomain will handle monitoring, database updates, verification, and events
-                val result = getGOGInstallDomain(context).downloadGame(gameId, installPath, containerData.language)
-
-                if (result.isSuccess) {
-                    Timber.i("GOG download started successfully for: $gameId")
-                    // Success toast will be shown when download completes (monitored by GOGService)
-                } else {
-                    val error = result.exceptionOrNull()
-                    Timber.e(error, "Failed to start GOG download")
-                    SnackbarManager.show("Failed to start download: ${error?.message}")
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Error during GOG download")
-                SnackbarManager.show("Download error: ${e.message}")
-            }
-        }
+        val installPath = GOGConstants.getGameInstallPath(libraryItem.name)
+        val containerData = loadContainerData(context, libraryItem)
+        Timber.d("Downloading GOG game to: $installPath")
+        SnackbarManager.show("Starting download for ${libraryItem.name}...")
+        getGOGAppScreenViewModel(context).downloadGame(
+            gameId = gameId,
+            installPath = installPath,
+            language = containerData.language,
+            onResult = { result ->
+                result.fold(
+                    onSuccess = {
+                        Timber.i("GOG download started successfully for: $gameId")
+                    },
+                    onFailure = { error ->
+                        Timber.e(error, "Failed to start GOG download")
+                        SnackbarManager.show("Failed to start download: ${error.message}")
+                    },
+                )
+            },
+        )
     }
 
     override fun onPauseResumeClick(context: Context, libraryItem: LibraryItem) {
@@ -346,24 +331,22 @@ class GOGAppScreen : BaseAppScreen() {
 
     private fun performUninstall(context: Context, libraryItem: LibraryItem) {
         Timber.i("Uninstalling GOG game: ${libraryItem.appId}")
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // Delegate to GOGInstallDomain which calls GOGService
-                val result = getGOGInstallDomain(context).deleteGame(context, libraryItem)
-
-                if (result.isSuccess) {
-                    Timber.i("Successfully uninstalled GOG game: ${libraryItem.appId}")
-                    SnackbarManager.show("Game uninstalled successfully")
-                } else {
-                    val error = result.exceptionOrNull()
-                    Timber.e(error, "Failed to uninstall GOG game: ${libraryItem.appId}")
-                    SnackbarManager.show("Failed to uninstall game: ${error?.message}")
-                }
-            } catch (e: Exception) {
-                Timber.e(e, "Error uninstalling GOG game")
-                SnackbarManager.show("Failed to uninstall game: ${e.message}")
-            }
-        }
+        getGOGAppScreenViewModel(context).uninstallGame(
+            context = context,
+            libraryItem = libraryItem,
+            onResult = { result ->
+                result.fold(
+                    onSuccess = {
+                        Timber.i("Successfully uninstalled GOG game: ${libraryItem.appId}")
+                        SnackbarManager.show("Game uninstalled successfully")
+                    },
+                    onFailure = { error ->
+                        Timber.e(error, "Failed to uninstall GOG game: ${libraryItem.appId}")
+                        SnackbarManager.show("Failed to uninstall game: ${error.message}")
+                    },
+                )
+            },
+        )
     }
 
     override fun onUpdateClick(context: Context, libraryItem: LibraryItem) {
@@ -407,16 +390,25 @@ class GOGAppScreen : BaseAppScreen() {
         Timber.tag(TAG).d("saveContainerConfig: saved container config for ${libraryItem.appId}")
 
         if (previousLanguage != config.language) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val gameId = libraryItem.gameId.toString()
-                if (!getGOGInstallDomain(context).isGameInstalled(gameId)) return@launch
-                if (getGOGInstallDomain(context).getDownloadInfo(gameId)?.isActive() == true) return@launch
-
-                val installPath = getGOGInstallDomain(context).getInstallPath(gameId)
-                    ?: GOGConstants.getGameInstallPath(libraryItem.name)
-
-                getGOGInstallDomain(context).downloadGame(gameId, installPath, config.language)
-            }
+            val gameId = libraryItem.gameId.toString()
+            val installPath = getGOGInstallDomain(context).getInstallPath(gameId)
+                ?: GOGConstants.getGameInstallPath(libraryItem.name)
+            getGOGAppScreenViewModel(context).updateContainerConfig(
+                gameId = gameId,
+                installPath = installPath,
+                newLanguage = config.language,
+                oldLanguage = previousLanguage,
+                onResult = { result ->
+                    result.fold(
+                        onSuccess = {
+                            Timber.tag(TAG).d("Container config update triggered re-download if needed")
+                        },
+                        onFailure = { error ->
+                            Timber.tag(TAG).e(error, "Failed to update container config")
+                        },
+                    )
+                },
+            )
         }
     }
 
@@ -572,29 +564,26 @@ class GOGAppScreen : BaseAppScreen() {
                     {
                         hideInstallDialog(appId)
                         val gameId = libraryItem.gameId.toString()
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val downloadInfo = getGOGInstallDomain(context).getDownloadInfo(gameId)
-                            val wasDownloading = downloadInfo != null &&
-                                downloadInfo.isActive() &&
-                                (downloadInfo.getProgress() ?: 0f) < 1f
-                            downloadInfo?.cancel()
-                            downloadInfo?.awaitCompletion()
-                            getGOGInstallDomain(context).cleanupDownload(gameId)
-
-                            val isInstalledAfterCancel = getGOGInstallDomain(context).isGameInstalled(gameId)
-                            if (isInstalledAfterCancel) {
-                                // Download completed and game ended up installed; don't show "Download cancelled"
-                                return@launch
-                            }
-
-                            val result = getGOGInstallDomain(context).deleteGame(context, libraryItem)
-                            if (wasDownloading && !isInstalledAfterCancel) {
-                                SnackbarManager.show("Download cancelled")
-                            }
-                            if (result.isFailure) {
-                                SnackbarManager.show("Failed to delete download: ${result.exceptionOrNull()?.message}")
-                            }
-                        }
+                        getGOGAppScreenViewModel(context).cancelDownloadAndMaybeUninstall(
+                            context = context,
+                            gameId = gameId,
+                            libraryItem = libraryItem,
+                            onResult = { result ->
+                                when (result) {
+                                    is CancelDownloadResult.WasAlreadyInstalled -> {
+                                        // Do nothing
+                                    }
+                                    is CancelDownloadResult.Success -> {
+                                        if (result.wasDownloading) {
+                                            SnackbarManager.show("Download cancelled")
+                                        }
+                                        if (result.uninstallResult.isFailure) {
+                                            SnackbarManager.show("Failed to delete download: ${result.uninstallResult.exceptionOrNull()?.message}")
+                                        }
+                                    }
+                                }
+                            },
+                        )
                     }
                 }
 

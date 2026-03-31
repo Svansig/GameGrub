@@ -210,6 +210,10 @@ class SteamService : Service(), IChallengeUrlChanged {
     @Inject
     lateinit var accountDomain: app.gamegrub.service.steam.domain.SteamAccountDomain
 
+    // Compatibility bridge for existing UI/session call sites during steam-domain refactor.
+    val localPersona
+        get() = accountDomain.localPersona
+
     @Inject
     lateinit var cloudStatsDomain: app.gamegrub.service.steam.domain.SteamCloudStatsDomain
 
@@ -286,7 +290,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         private fun notifyDownloadStarted(appId: Int) {
-            installDomain.notifyDownloadStarted(appId)
+            GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
         }
 
         /** Returns true if there is an incomplete download on disk (no complete marker). */
@@ -297,9 +301,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         // Track whether a game is currently running to prevent premature service stop.
         @JvmStatic
         var keepAlive: Boolean
-            get() = instance?.sessionDomain?.getKeepAlive() ?: keepAliveFallback
+            get() = instance?.sessionDomain?.getKeepAlive() ?: false
             set(value) {
-                keepAliveFallback = value
                 instance?.sessionDomain?.setKeepAlive(value)
             }
 
@@ -630,9 +633,9 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun downloadApp(appId: Int): DownloadInfo? {
-            val currentDownloadInfo = downloadJobs[appId]
+            val currentDownloadInfo = getAppDownloadInfo(appId)
             if (currentDownloadInfo != null) {
-                return downloadApp(appId, currentDownloadInfo.downloadingAppIds, isUpdateOrVerify = false)
+                return currentDownloadInfo
             } else {
                 // If downloading app info exists
                 val downloadingAppInfo = getDownloadingAppInfoOf(appId)
@@ -879,7 +882,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val appDirPath = getAppDirPath(appId)
 
             if (!checkWifiOrNotify()) return null
-            if (downloadJobs.contains(appId)) return getAppDownloadInfo(appId)
+            if (getAppDownloadInfo(appId) != null) return getAppDownloadInfo(appId)
             Timber.d("depots is empty? %s", downloadableDepots.isEmpty())
             if (downloadableDepots.isEmpty()) return null
 
@@ -1141,7 +1144,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 di.setDownloadJob(downloadJob)
             }
 
-            downloadJobs[appId] = info
+            installDomain.downloadJobs[appId] = info
             notifyDownloadStarted(appId)
             return info
         }
@@ -1590,7 +1593,6 @@ class SteamService : Service(), IChallengeUrlChanged {
         private fun cancelLongLivedSteamJobs() {
             // Cancel previous continuous jobs or else they will continue to run even after logout
             instance?.picsSyncDomain?.cancelPicsJobs()
-            instance?.friendCheckerJob?.cancel()
         }
 
         private fun performLogOffDuties() {
@@ -1609,14 +1611,13 @@ class SteamService : Service(), IChallengeUrlChanged {
         // Add helper to detect if any downloads or cloud sync are in progress
         fun hasActiveOperations(): Boolean {
             val anySyncInProgress = instance?.sessionDomain?.hasActiveSessionOperations() == true
-            return anySyncInProgress || downloadJobs.values.any { it.getProgress() < 1f }
+            return anySyncInProgress || installDomain.downloadJobs.values.any { it.getProgress() < 1f }
         }
 
         // Should service auto-stop when idle (backgrounded)?
         var autoStopWhenIdle: Boolean
-            get() = instance?.sessionDomain?.getAutoStopWhenIdle() ?: autoStopWhenIdleFallback
+            get() = instance?.sessionDomain?.getAutoStopWhenIdle() ?: false
             set(value) {
-                autoStopWhenIdleFallback = value
                 instance?.sessionDomain?.setAutoStopWhenIdle(value)
             }
 
@@ -1732,9 +1733,6 @@ class SteamService : Service(), IChallengeUrlChanged {
         super.onCreate()
         instance = this
 
-        // Apply pre-service companion state writes to the injected session manager instance.
-        sessionDomain.setKeepAlive(keepAliveFallback)
-        sessionDomain.setAutoStopWhenIdle(autoStopWhenIdleFallback)
 
         // JavaSteam logger CME hot-fix
         runCatching {
@@ -2225,13 +2223,15 @@ class SteamService : Service(), IChallengeUrlChanged {
                         callback.personaState
                     }
 
+                    val resolvedGameName = libraryDomain.findApp(callback.gamePlayedAppId)?.name ?: callback.gameName
+
                     accountDomain.updateLocalPersona {
                         it.copy(
                             avatarHash = avatarHash,
                             name = playerName,
                             state = state,
                             gameAppID = callback.gamePlayedAppId,
-                            gameName = requireInstance().libraryDomain.findApp(callback.gamePlayedAppId)?.name ?: callback.gameName,
+                            gameName = resolvedGameName,
                         )
                     }
 

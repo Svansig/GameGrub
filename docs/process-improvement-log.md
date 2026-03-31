@@ -15,5 +15,12 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
-- _No entries yet._
+- **Date**: `2026-03-31`
+- **Ticket**: `N/A (compile stabilization pass)`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Compile-only regressions were introduced during service/domain refactors without a fast guard for cross-file API moves.
+- **Proposed Action**: Add a lightweight CI/local gate that always runs `:app:compileDebugKotlin` after Steam refactor slices.
+- **Owner**: `TBD`
+- **Status**: `Backlog`
 

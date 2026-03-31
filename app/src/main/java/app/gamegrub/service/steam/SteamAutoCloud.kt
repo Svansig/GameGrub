@@ -78,6 +78,8 @@ object SteamAutoCloud {
         onProgress: ((message: String, progress: Float) -> Unit)? = null,
     ): Deferred<PostSyncInfo?> = parentScope.async {
         val postSyncInfo: PostSyncInfo?
+        val changeNumbersDao = steamInstance.db.appChangeNumbersDao()
+        val fileChangeListsDao = steamInstance.db.appFileChangeListsDao()
 
         Timber.i("Retrieving save files of ${appInfo.name}")
 
@@ -666,7 +668,7 @@ object SteamAutoCloud {
         microsecTotal = measureTime {
             val localAppChangeNumber =
                 overrideLocalChangeNumber
-                    ?: steamInstance.changeNumbersDao.getByAppId(appInfo.id)?.changeNumber ?: -1
+                    ?: changeNumbersDao.getByAppId(appInfo.id)?.changeNumber ?: -1
 
             val changeNumber = if (localAppChangeNumber >= 0) localAppChangeNumber else 0
             val appFileListChange =
@@ -755,7 +757,7 @@ object SteamAutoCloud {
                     Timber.i("Uploading local user files")
 
                     val fileChanges =
-                        steamInstance.fileChangeListsDao.getByAppId(appInfo.id)!!.let {
+                        fileChangeListsDao.getByAppId(appInfo.id)!!.let {
                             val result = getFilesDiff(allLocalUserFiles, it.userFileInfo)
 
                             result.second
@@ -799,7 +801,7 @@ object SteamAutoCloud {
 
                     microsecAcPrepUserFiles = measureTime {
                         hasLocalChanges =
-                            steamInstance.fileChangeListsDao.getByAppId(appInfo.id)?.let {
+                            fileChangeListsDao.getByAppId(appInfo.id)?.let {
                                 getFilesDiff(allLocalUserFiles, it.userFileInfo).first
                             } == true
                     }.inWholeMicroseconds
@@ -849,7 +851,7 @@ object SteamAutoCloud {
                 microsecAcExit = measureTime {
                     // var fileChanges: FileChanges? = null
 
-                    val hasLocalChanges = steamInstance.fileChangeListsDao.getByAppId(appInfo.id)
+                    val hasLocalChanges = fileChangeListsDao.getByAppId(appInfo.id)
                         ?.let {
                             val result = getFilesDiff(allLocalUserFiles, it.userFileInfo)
                             // fileChanges = result.second

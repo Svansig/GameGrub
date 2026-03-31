@@ -9,17 +9,17 @@ import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.ManifestInfo
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamControllerConfigDetail
+import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.steam.managers.SteamInputManager
-import app.gamegrub.service.steam.managers.SteamInstalledExeManager
-import app.gamegrub.service.steam.managers.SteamCatalogManager
-import app.gamegrub.service.steam.managers.SteamInstallManager
-import app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.managers.SteamCatalogManager
+import app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager
+import app.gamegrub.service.steam.managers.SteamInputManager
+import app.gamegrub.service.steam.managers.SteamInstallManager
+import app.gamegrub.service.steam.managers.SteamInstalledExeManager
 import app.gamegrub.utils.network.Net
 import app.gamegrub.utils.storage.MarkerUtils
-import app.gamegrub.enums.Marker
 import com.winlator.container.ContainerManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import `in`.dragonbra.javasteam.depotdownloader.DepotDownloader
@@ -27,22 +27,25 @@ import `in`.dragonbra.javasteam.depotdownloader.IDownloadListener
 import `in`.dragonbra.javasteam.depotdownloader.data.AppItem
 import `in`.dragonbra.javasteam.depotdownloader.data.DownloadItem
 import `in`.dragonbra.javasteam.steam.steamclient.SteamClient
+import `in`.dragonbra.javasteam.types.FileData
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.Request
 import timber.log.Timber
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamInstallDomain @Inject constructor(
@@ -56,7 +59,7 @@ class SteamInstallDomain @Inject constructor(
 
     fun getAppDownloadInfo(appId: Int): DownloadInfo? = downloadJobs[appId]
 
-    private fun notifyDownloadStarted(appId: Int) {
+    fun notifyDownloadStarted(appId: Int) {
         GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
     }
 
@@ -152,9 +155,29 @@ class SteamInstallDomain @Inject constructor(
     }
 
     private suspend fun getOwnedAppDlc(appId: Int): Map<Int, DepotInfo> {
-        // This would need access to steam client and account info
-        // For now, delegate to library domain
-        return libraryDomain.getOwnedAppDlc(appId)
+        val appDlc = libraryDomain.getAppDlc(appId)
+        if (appDlc.isEmpty()) {
+            return emptyMap()
+        }
+
+        val dlcAppIds = appDlc.values
+            .map { it.dlcAppId }
+            .filter { it != SteamService.INVALID_APP_ID }
+            .toSet()
+
+        val ownedGameIds = if (dlcAppIds.isEmpty()) {
+            emptySet()
+        } else {
+            libraryDomain.checkDlcOwnership(dlcAppIds)
+        }
+
+        return SteamCatalogManager.filterOwnedAppDlc(
+            appDlcDepots = appDlc,
+            invalidAppId = SteamService.INVALID_APP_ID,
+            ownedGameIds = ownedGameIds,
+            hasLicense = { dlcAppId -> libraryDomain.findLicense(dlcAppId) != null },
+            hasPicsApp = { dlcAppId -> libraryDomain.findApp(dlcAppId) != null },
+        )
     }
 
     /**
@@ -243,10 +266,25 @@ class SteamInstallDomain @Inject constructor(
                 var decompressRatio = 0.0
 
                 when (PrefManager.downloadSpeed) {
-                    8 -> { downloadRatio = 0.6; decompressRatio = 0.2 }
-                    16 -> { downloadRatio = 1.2; decompressRatio = 0.4 }
-                    24 -> { downloadRatio = 1.5; decompressRatio = 0.5 }
-                    32 -> { downloadRatio = 2.4; decompressRatio = 0.8 }
+                    8 -> {
+                        downloadRatio = 0.6
+                        decompressRatio = 0.2
+                    }
+
+                    16 -> {
+                        downloadRatio = 1.2
+                        decompressRatio = 0.4
+                    }
+
+                    24 -> {
+                        downloadRatio = 1.5
+                        decompressRatio = 0.5
+                    }
+
+                    32 -> {
+                        downloadRatio = 2.4
+                        decompressRatio = 0.8
+                    }
                 }
 
                 val cpuCores = Runtime.getRuntime().availableProcessors()

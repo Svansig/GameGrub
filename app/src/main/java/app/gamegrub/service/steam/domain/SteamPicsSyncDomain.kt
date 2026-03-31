@@ -2,11 +2,11 @@ package app.gamegrub.service.steam.domain
 
 import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamApp
-import app.gamegrub.db.dao.AppInfoDao
+import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.db.dao.SteamLicenseDao
-import app.gamegrub.enums.ELicenseFlags
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.steam.generateSteamApp
+import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.SteamApps
 import kotlinx.coroutines.CoroutineScope
@@ -15,8 +15,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.future.await
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -26,7 +29,7 @@ import javax.inject.Singleton
 
 @Singleton
 class SteamPicsSyncDomain @Inject constructor(
-    private val appDao: AppInfoDao,
+    private val appDao: SteamAppDao,
     private val licenseDao: SteamLicenseDao,
     private val libraryDomain: SteamLibraryDomain,
 ) {

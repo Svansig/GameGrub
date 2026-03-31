@@ -191,4 +191,20 @@ class SteamAppScreenViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Delete/uninstall a Steam app and clean up container.
+     */
+    fun deleteAppWithContainerCleanup(appId: Int, onComplete: () -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            app.gamegrub.service.steam.SteamService.deleteApp(appId)
+            app.gamegrub.GameGrubApp.events.emit(
+                app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
+            )
+            app.gamegrub.utils.container.ContainerUtils.deleteContainer(context, appId)
+            withContext(Dispatchers.Main) {
+                onComplete()
+            }
+        }
+    }
 }

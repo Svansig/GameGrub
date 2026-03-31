@@ -221,6 +221,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-024 | P2 | Replace `SteamService` companion data access wrappers with injected domain gateways | `service/steam + callers` | `todo/SRV-024.md` |
 | SRV-025 | P3 | Reduce companion-object API surface in non-Steam platform services | `service/gog + service/epic + service/amazon` | `todo/SRV-025.md` |
 | SRV-026 | P3 | Convert mutable global service flags to scoped state holders with explicit ownership | `service/steam + service/*` | `todo/SRV-026.md` |
+| SRV-027 | P2 | Migrate UI download callers to direct domain injection | `service/steam + ui` | `todo/SRV-027.md` |
 
 ## In Progress
 

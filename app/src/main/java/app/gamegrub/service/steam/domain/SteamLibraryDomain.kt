@@ -1,4 +1,4 @@
-package app.gamegrub.service.steam.managers
+package app.gamegrub.service.steam.domain
 
 import app.gamegrub.data.CachedLicense
 import app.gamegrub.data.DepotInfo
@@ -14,6 +14,9 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamLibraryClient
+import app.gamegrub.service.steam.managers.DownloadManager
+import app.gamegrub.service.steam.managers.PicsChangesManager
+import app.gamegrub.service.steam.managers.SteamCatalogManager
 import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.utils.storage.MarkerUtils
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
@@ -27,8 +30,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+/**
+ * Library domain: game metadata, PICS sync, download state, and app info.
+ * Coordinates: SteamLibraryManager, PicsChangesManager, DownloadManager, CatalogManager
+ */
 @Singleton
-class SteamLibraryManager @Inject constructor(
+class SteamLibraryDomain @Inject constructor(
     private val libraryClient: SteamLibraryClient,
     private val connection: SteamConnection,
     private val appDao: SteamAppDao,
@@ -36,6 +43,9 @@ class SteamLibraryManager @Inject constructor(
     private val appInfoDao: AppInfoDao,
     private val cachedLicenseDao: CachedLicenseDao,
     private val downloadingAppInfoDao: DownloadingAppInfoDao,
+    private val picsChangesManager: PicsChangesManager,
+    private val downloadManager: DownloadManager,
+    private val catalogManager: SteamCatalogManager,
 ) {
     data class LicenseSyncResult(
         val addedCount: Int,
@@ -208,7 +218,7 @@ class SteamLibraryManager @Inject constructor(
     }
 
     suspend fun getMainAppDepots(appId: Int, language: String): Map<Int, DepotInfo> {
-        language.hashCode() // keep signature stable while using DB-backed depots.
+        language.hashCode()
         return findApp(appId)?.depots.orEmpty()
     }
 
@@ -217,4 +227,9 @@ class SteamLibraryManager @Inject constructor(
         getMainAppDepots(appId, "english").filterValues { depot ->
             depot.dlcAppId != SteamService.INVALID_APP_ID
         }
+
+    // Delegate access to internal managers
+    fun getDownloadManager(): DownloadManager = downloadManager
+    fun getPicsChangesManager(): PicsChangesManager = picsChangesManager
+    fun getCatalogManager(): SteamCatalogManager = catalogManager
 }

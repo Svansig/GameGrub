@@ -85,7 +85,7 @@ class SteamAuthClientAdapter @Inject constructor(
                 this.password = password
                 this.persistentSession = rememberSession
                 this.authenticator = authenticator
-                this.deviceFriendlyName = service.deviceIdentityManager.getMachineName(service)
+                this.deviceFriendlyName = service.accountDomain.deviceIdentityManager.getMachineName(service)
                 this.clientOSType = EOSType.WinUnknown
             }
 
@@ -116,7 +116,7 @@ class SteamAuthClientAdapter @Inject constructor(
                 ?: return@withContext AuthResult(false, error = "Service not running")
 
             val authDetails = AuthSessionDetails().apply {
-                this.deviceFriendlyName = service.deviceIdentityManager.getMachineName(service)
+                this.deviceFriendlyName = service.accountDomain.deviceIdentityManager.getMachineName(service)
                 this.clientOSType = EOSType.WinUnknown
                 this.persistentSession = true
             }

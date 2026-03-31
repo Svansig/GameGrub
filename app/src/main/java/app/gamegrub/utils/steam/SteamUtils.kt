@@ -271,7 +271,7 @@ object SteamUtils {
             accessToken = PrefManager.accessToken,
             personaName = service.localPersona.value.name.ifBlank { PrefManager.username },
         )
-        service.sessionFilesManager.applyAutoLoginUserChanges(
+        service.sessionDomain.applyAutoLoginUserChanges(
             imageFs = imageFs,
             session = session,
         )

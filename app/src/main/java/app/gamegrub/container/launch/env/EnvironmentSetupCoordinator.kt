@@ -361,7 +361,7 @@ internal object EnvironmentSetupCoordinator {
                 accessToken = PrefManager.accessToken,
                 personaName = steamService.localPersona.value.name.ifBlank { PrefManager.username },
             )
-            steamService.sessionFilesManager.setupRealSteamSessionFiles(
+            steamService.sessionDomain.setupRealSteamSessionFiles(
                 session = session,
                 imageFs = imageFs,
                 guestProgramLauncherComponent = guestProgramLauncherComponent,

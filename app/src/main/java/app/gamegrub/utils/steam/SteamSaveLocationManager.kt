@@ -15,19 +15,19 @@ object SteamSaveLocationManager {
 
         try {
             val service = SteamService.instance
-            val accountId = service?.userManager?.getSteam3AccountId()
+            val accountId = service?.accountDomain?.userManager?.getSteam3AccountId()
                 ?: PrefManager.steamUserAccountId.toLong().takeIf { it > 0L }
                 ?: 0L
-            val steamId64 = service?.userManager?.getSteamId64()?.toString() ?: "0"
+            val steamId64 = service?.accountDomain?.userManager?.getSteamId64()?.toString() ?: "0"
             val steam3AccountId = accountId.toString()
 
             val basePath = mapping.pathType.toAbsPath(context, steamAppId, accountId)
 
-            val sourceRelativePath = service?.userManager?.substituteSteamIdTokens(mapping.sourceRelativePath)
+            val sourceRelativePath = service?.accountDomain?.userManager?.substituteSteamIdTokens(mapping.sourceRelativePath)
                 ?: mapping.sourceRelativePath
                     .replace("{64BitSteamID}", steamId64)
                     .replace("{Steam3AccountID}", steam3AccountId)
-            val targetRelativePath = service?.userManager?.substituteSteamIdTokens(mapping.targetRelativePath)
+            val targetRelativePath = service?.accountDomain?.userManager?.substituteSteamIdTokens(mapping.targetRelativePath)
                 ?: mapping.targetRelativePath
                     .replace("{64BitSteamID}", steamId64)
                     .replace("{Steam3AccountID}", steam3AccountId)

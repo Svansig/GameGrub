@@ -23,7 +23,6 @@ import app.gamegrub.data.LaunchInfo
 import app.gamegrub.data.OwnedGames
 import app.gamegrub.data.PostSyncInfo
 import app.gamegrub.data.SteamApp
-import app.gamegrub.data.SteamControllerConfigDetail
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.data.SteamLicense
 import app.gamegrub.data.UserFileInfo
@@ -44,19 +43,7 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
-import app.gamegrub.service.steam.managers.DownloadManager
 import app.gamegrub.service.steam.managers.LaunchIntentResult
-import app.gamegrub.service.steam.managers.PicsChangesManager
-import app.gamegrub.service.steam.managers.SteamAchievementManager
-import app.gamegrub.service.steam.managers.SteamAppSessionManager
-import app.gamegrub.service.steam.managers.SteamAuthService
-import app.gamegrub.service.steam.managers.SteamCloudSavesManager
-import app.gamegrub.service.steam.managers.SteamDeviceIdentityManager
-import app.gamegrub.service.steam.managers.SteamFriendsManager
-import app.gamegrub.service.steam.managers.SteamLibraryManager
-import app.gamegrub.service.steam.managers.SteamSessionFilesManager
-import app.gamegrub.service.steam.managers.SteamTicketManager
-import app.gamegrub.service.steam.managers.SteamUserManager
 import app.gamegrub.statsgen.Achievement
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
@@ -220,16 +207,10 @@ class SteamService : Service(), IChallengeUrlChanged {
     lateinit var downloadingAppInfoDao: DownloadingAppInfoDao
 
     @Inject
-    lateinit var libraryManager: SteamLibraryManager
+    lateinit var libraryDomain: app.gamegrub.service.steam.domain.SteamLibraryDomain
 
     @Inject
-    lateinit var downloadManager: DownloadManager
-
-    @Inject
-    lateinit var picsChangesManager: PicsChangesManager
-
-    @Inject
-    lateinit var ticketManager: SteamTicketManager
+    lateinit var sessionDomain: app.gamegrub.service.steam.domain.SteamSessionDomain
 
     private lateinit var notificationHelper: NotificationHelper
 
@@ -294,28 +275,13 @@ class SteamService : Service(), IChallengeUrlChanged {
     val localPersona = _localPersona.asStateFlow()
 
     @Inject
-    lateinit var authService: SteamAuthService
+    lateinit var accountDomain: app.gamegrub.service.steam.domain.SteamAccountDomain
 
     @Inject
-    lateinit var cloudSavesManager: SteamCloudSavesManager
+    lateinit var cloudStatsDomain: app.gamegrub.service.steam.domain.SteamCloudStatsDomain
 
     @Inject
-    lateinit var appSessionManager: SteamAppSessionManager
-
-    @Inject
-    lateinit var achievementManager: SteamAchievementManager
-
-    @Inject
-    lateinit var friendsManager: SteamFriendsManager
-
-    @Inject
-    lateinit var userManager: SteamUserManager
-
-    @Inject
-    lateinit var deviceIdentityManager: SteamDeviceIdentityManager
-
-    @Inject
-    lateinit var sessionFilesManager: SteamSessionFilesManager
+    lateinit var installDomain: app.gamegrub.service.steam.domain.SteamInstallDomain
 
     companion object {
         const val MAX_PICS_BUFFER = 256
@@ -323,9 +289,16 @@ class SteamService : Service(), IChallengeUrlChanged {
         const val INVALID_APP_ID: Int = Int.MAX_VALUE
         const val INVALID_PKG_ID: Int = Int.MAX_VALUE
         private const val STEAM_CONTROLLER_CONFIG_FILENAME = "steam_controller.vdf"
-        private val catalogManager = app.gamegrub.service.steam.managers.SteamCatalogManager
-        private val installManager = app.gamegrub.service.steam.managers.SteamInstallManager
-        private val inputManager = app.gamegrub.service.steam.managers.SteamInputManager
+        private val catalogManager: app.gamegrub.service.steam.managers.SteamCatalogManager
+            get() = instance?.let { it.libraryDomain.getCatalogManager() }
+                ?: app.gamegrub.service.steam.managers.SteamCatalogManager
+
+        private val installManager: app.gamegrub.service.steam.managers.SteamInstallManager
+            get() = app.gamegrub.service.steam.managers.SteamInstallManager
+
+        private val inputManager: app.gamegrub.service.steam.managers.SteamInputManager
+            get() = instance?.let { it.installDomain.inputManager }
+                ?: app.gamegrub.service.steam.managers.SteamInputManager
 
         var requestTimeout = 30.seconds
         var responseTimeout = 120.seconds
@@ -399,16 +372,16 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         /** Returns true if there is an incomplete download on disk (no complete marker). */
         fun hasPartialDownload(appId: Int): Boolean = runBlocking {
-            requireInstance().libraryManager.hasPartialDownload(appId)
+            requireInstance().libraryDomain.hasPartialDownload(appId)
         }
 
         // Track whether a game is currently running to prevent premature service stop.
         @JvmStatic
         var keepAlive: Boolean
-            get() = instance?.appSessionManager?.keepAlive ?: keepAliveFallback
+            get() = instance?.sessionDomain?.getKeepAlive() ?: keepAliveFallback
             set(value) {
                 keepAliveFallback = value
-                instance?.appSessionManager?.keepAlive = value
+                instance?.sessionDomain?.setKeepAlive(value)
             }
 
         @Volatile
@@ -433,7 +406,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         fun getSteamId64(): Long? {
             val svc = instance
             if (svc != null) {
-                return svc.userManager.getSteamId64()
+                return svc.accountDomain.userManager.getSteamId64()
             }
             return PrefManager.steamUserSteamId64.takeIf { it > 0L }
         }
@@ -441,7 +414,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         fun getSteam3AccountId(): Long? {
             val svc = instance
             if (svc != null) {
-                return svc.userManager.getSteam3AccountId()
+                return svc.accountDomain.userManager.getSteam3AccountId()
             }
             return PrefManager.steamUserAccountId.toLong().takeIf { it > 0L }
         }
@@ -458,7 +431,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 Timber.w("Ignoring setPersonaState because SteamService is not running")
                 return
             }
-            svc.friendsManager.setPersonaState(state)
+            svc.accountDomain.friendsManager.setPersonaState(state)
         }
 
         suspend fun requestUserPersona() {
@@ -467,7 +440,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 Timber.w("Ignoring requestUserPersona because SteamService is not running")
                 return
             }
-            svc.friendsManager.requestUserPersona()
+            svc.accountDomain.friendsManager.requestUserPersona()
         }
 
         suspend fun getSelfCurrentlyPlayingAppId(): Int? {
@@ -476,13 +449,13 @@ class SteamService : Service(), IChallengeUrlChanged {
                 Timber.w("Ignoring getSelfCurrentlyPlayingAppId because SteamService is not running")
                 return null
             }
-            return svc.friendsManager.getSelfCurrentlyPlayingAppId()
+            return svc.accountDomain.friendsManager.getSelfCurrentlyPlayingAppId()
         }
 
         suspend fun kickPlayingSession(onlyGame: Boolean = true): Boolean =
             withContext(Dispatchers.IO) {
                 val svc = instance ?: return@withContext false
-                svc.appSessionManager.kickPlayingSession(onlyGame) { onlyStopGame ->
+                svc.sessionDomain.kickPlayingSession(onlyGame) { onlyStopGame ->
                     svc._steamUser?.kickPlayingSession(onlyStopGame = onlyStopGame)
                         ?: throw IllegalStateException("SteamUser is not initialized")
                 }
@@ -499,27 +472,27 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun getPkgInfoOf(appId: Int): SteamLicense? = runBlocking {
-            requireInstance().libraryManager.getPkgInfoOf(appId)
+            requireInstance().libraryDomain.getPkgInfoOf(appId)
         }
 
         fun getAppInfoOf(appId: Int): SteamApp? = runBlocking {
-            requireInstance().libraryManager.getAppInfoOf(appId)
+            requireInstance().libraryDomain.getAppInfoOf(appId)
         }
 
         fun getDownloadingAppInfoOf(appId: Int): DownloadingAppInfo? = runBlocking {
-            requireInstance().libraryManager.getDownloadingAppInfoOf(appId)
+            requireInstance().libraryDomain.getDownloadingAppInfoOf(appId)
         }
 
         fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? = runBlocking {
-            requireInstance().libraryManager.getDownloadableDlcAppsOf(appId)
+            requireInstance().libraryDomain.getDownloadableDlcAppsOf(appId)
         }
 
         fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? = runBlocking {
-            requireInstance().libraryManager.getHiddenDlcAppsOf(appId)
+            requireInstance().libraryDomain.getHiddenDlcAppsOf(appId)
         }
 
         fun getInstalledApp(appId: Int): AppInfo? = runBlocking {
-            requireInstance().libraryManager.getInstalledApp(appId)
+            requireInstance().libraryDomain.getInstalledApp(appId)
         }
 
         fun getInstalledDepotsOf(appId: Int): List<Int>? {
@@ -573,7 +546,7 @@ class SteamService : Service(), IChallengeUrlChanged {
          *
          * @return number of newly discovered appIds that were scheduled for PICS.
          */
-        suspend fun refreshOwnedGamesFromServer(): Int = requireInstance().libraryManager.refreshOwnedGamesFromServer()
+        suspend fun refreshOwnedGamesFromServer(): Int = requireInstance().libraryDomain.refreshOwnedGamesFromServer()
 
         /**
          * Common Filter for downloadable depots
@@ -726,11 +699,11 @@ class SteamService : Service(), IChallengeUrlChanged {
             val svc = instance ?: return false
             svc.scope.launch {
                 svc.db.withTransaction {
-                    svc.downloadManager.deleteAppData(appId)
+                    svc.libraryDomain.getDownloadManager().deleteAppData(appId)
 
                     val indirectDlcAppIds = getDownloadableDlcAppsOf(appId).orEmpty().map { it.id }
                     indirectDlcAppIds.forEach { dlcAppId ->
-                        svc.downloadManager.deleteAppData(dlcAppId)
+                        svc.libraryDomain.getDownloadManager().deleteAppData(dlcAppId)
                     }
                 }
             }
@@ -938,10 +911,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.d("Downloading steam.tzst to %s", dest)
             fetchFileWithFallback("steam.tzst", dest, onDownloadProgress)
         }
-
-        private fun selectSteamControllerConfig(
-            details: List<SteamControllerConfigDetail>,
-        ): SteamControllerConfigDetail? = inputManager.selectSteamControllerConfig(details)
 
         private fun resolveSteamInputManifestFile(
             appId: Int,
@@ -1437,7 +1406,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         suspend fun notifyRunningProcesses(vararg gameProcesses: GameProcessInfo) =
             withContext(Dispatchers.IO) {
                 val svc = instance ?: return@withContext
-                svc.appSessionManager.notifyRunningProcesses(
+                svc.sessionDomain.notifyRunningProcesses(
                     gameProcesses = gameProcesses,
                     isConnected = isConnected,
                     resolvePlayedInfo = { gameProcess ->
@@ -1485,7 +1454,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             prefixToPath: (String) -> String,
             isOffline: Boolean = false,
             onProgress: ((message: String, progress: Float) -> Unit)? = null,
-        ): Deferred<PostSyncInfo> = instance?.appSessionManager?.beginLaunchApp(
+        ): Deferred<PostSyncInfo> = instance?.sessionDomain?.beginLaunchApp(
             appId = appId,
             isOffline = isOffline,
             isConnected = isConnected,
@@ -1528,7 +1497,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         val pendingRemoteOperations = steamCloud.signalAppLaunchIntent(
                             appId = appId,
                             clientId = clientId,
-                            machineName = steamInstance.deviceIdentityManager.getMachineName(steamInstance),
+                            machineName = steamInstance.accountDomain.deviceIdentityManager.getMachineName(steamInstance),
                             ignorePendingOperations = ignorePendingOperations,
                             osType = EOSType.AndroidUnknown,
                         ).await()
@@ -1557,7 +1526,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             preferredSave: SaveLocation = SaveLocation.None,
             parentScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
             overrideLocalChangeNumber: Long? = null,
-        ): Deferred<PostSyncInfo> = instance?.cloudSavesManager?.forceSyncUserFiles(
+        ): Deferred<PostSyncInfo> = instance?.cloudStatsDomain?.forceSyncUserFiles(
             appId = appId,
             prefixToPath = prefixToPath,
             preferredSave = preferredSave,
@@ -1567,12 +1536,12 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun closeApp(context: Context, appId: Int, isOffline: Boolean, prefixToPath: (String) -> String): Deferred<Unit> {
             val svc = instance
-            val sessionManager = svc?.appSessionManager
-            if (svc == null || sessionManager == null) {
+            val serviceSessionDomain = svc?.sessionDomain
+            if (svc == null || serviceSessionDomain == null) {
                 return CoroutineScope(Dispatchers.IO).async { }
             }
 
-            return sessionManager.closeApp(
+            return serviceSessionDomain.closeApp(
                 appId = appId,
                 isOffline = isOffline,
                 isConnected = isConnected,
@@ -1643,14 +1612,14 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             steamUser.logOn(
                 LogOnDetails(
-                    username = svc.userManager.removeSpecialChars(username).trim(),
-                    password = password?.let { svc.userManager.removeSpecialChars(it).trim() },
+                    username = svc.accountDomain.userManager.removeSpecialChars(username).trim(),
+                    password = password?.let { svc.accountDomain.userManager.removeSpecialChars(it).trim() },
                     shouldRememberPassword = rememberSession,
                     twoFactorCode = twoFactorAuth,
                     authCode = emailAuth,
                     accessToken = refreshToken,
-                    loginID = svc.deviceIdentityManager.getUniqueDeviceId(svc),
-                    machineName = svc.deviceIdentityManager.getMachineName(svc),
+                    loginID = svc.accountDomain.deviceIdentityManager.getUniqueDeviceId(svc),
+                    machineName = svc.accountDomain.deviceIdentityManager.getMachineName(svc),
                     chatMode = ChatMode.NEW_STEAM_CHAT,
                 ),
             )
@@ -1661,14 +1630,14 @@ class SteamService : Service(), IChallengeUrlChanged {
             password: String,
             rememberSession: Boolean,
             authenticator: IAuthenticator,
-        ) = requireInstance().authService.loginWithCredentials(
+        ) = requireInstance().accountDomain.authService.loginWithCredentials(
             username = username,
             password = password,
             rememberSession = rememberSession,
             authenticator = authenticator,
         )
 
-        suspend fun startLoginWithQr() = requireInstance().authService.loginWithQr()
+        suspend fun startLoginWithQr() = requireInstance().accountDomain.authService.loginWithQr()
 
         fun completeLoginWithAuthTokens(
             username: String,
@@ -1687,7 +1656,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun stopLoginWithQr() {
-            requireInstance().authService.cancelQrLogin()
+            requireInstance().accountDomain.authService.cancelQrLogin()
         }
 
         fun stop() {
@@ -1699,7 +1668,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun logOut() {
-            requireInstance().authService.logOut()
+            requireInstance().accountDomain.authService.logOut()
             isLoggingOut = true
         }
 
@@ -1731,12 +1700,12 @@ class SteamService : Service(), IChallengeUrlChanged {
             val svc = instance ?: return
             svc.scope.launch {
                 svc.db.withTransaction {
-                    svc.libraryManager.clearAllLibraryData()
+                    svc.libraryDomain.clearAllLibraryData()
                     if (clearCloudSyncState) {
-                        svc.picsChangesManager.deleteAllChanges()
+                        svc.libraryDomain.getPicsChangesManager().deleteAllChanges()
                     }
-                    svc.downloadManager.clearAll()
-                    svc.ticketManager.clearAllTickets()
+                    svc.libraryDomain.getDownloadManager().clearAll()
+                    svc.sessionDomain.clearAllTickets()
                 }
             }
         }
@@ -1759,20 +1728,20 @@ class SteamService : Service(), IChallengeUrlChanged {
             cancelLongLivedSteamJobs()
         }
 
-        suspend fun getOwnedGames(friendID: Long): List<OwnedGames> = instance?.libraryManager?.getOwnedGames(friendID) ?: emptyList()
+        suspend fun getOwnedGames(friendID: Long): List<OwnedGames> = instance?.libraryDomain?.getOwnedGames(friendID) ?: emptyList()
 
         // Add helper to detect if any downloads or cloud sync are in progress
         fun hasActiveOperations(): Boolean {
-            val anySyncInProgress = instance?.appSessionManager?.hasActiveSessionOperations() == true
+            val anySyncInProgress = instance?.sessionDomain?.hasActiveSessionOperations() == true
             return anySyncInProgress || downloadJobs.values.any { it.getProgress() < 1f }
         }
 
         // Should service auto-stop when idle (backgrounded)?
         var autoStopWhenIdle: Boolean
-            get() = instance?.appSessionManager?.autoStopWhenIdle ?: autoStopWhenIdleFallback
+            get() = instance?.sessionDomain?.getAutoStopWhenIdle() ?: autoStopWhenIdleFallback
             set(value) {
                 autoStopWhenIdleFallback = value
-                instance?.appSessionManager?.autoStopWhenIdle = value
+                instance?.sessionDomain?.setAutoStopWhenIdle(value)
             }
 
         suspend fun isUpdatePending(
@@ -1847,24 +1816,24 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         suspend fun generateAchievements(appId: Int, configDirectory: String) {
-            val mgr = requireInstance().achievementManager
+            val mgr = requireInstance().cloudStatsDomain.achievementManager
             mgr.generateAchievements(appId, configDirectory)
             cachedAchievements = mgr.cachedAchievements.value
             cachedAchievementsAppId = mgr.cachedAchievementsAppId.value
         }
 
         fun clearCachedAchievements() {
-            requireInstance().achievementManager.clearCachedAchievements()
+            requireInstance().cloudStatsDomain.achievementManager.clearCachedAchievements()
             cachedAchievements = null
             cachedAchievementsAppId = null
         }
 
         fun getGseSaveDirs(context: Context, appId: Int): List<File> {
-            return instance?.achievementManager?.getGseSaveDirs(context, appId) ?: emptyList()
+            return instance?.cloudStatsDomain?.achievementManager?.getGseSaveDirs(context, appId) ?: emptyList()
         }
 
         suspend fun syncAchievementsFromGoldberg(context: Context, appId: Int) {
-            instance?.achievementManager?.syncAchievementsFromGoldberg(context, appId)
+            instance?.cloudStatsDomain?.achievementManager?.syncAchievementsFromGoldberg(context, appId)
         }
 
         @Suppress("UNUSED")
@@ -1874,7 +1843,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             unlockedNames: Set<String>,
             gseStatsDir: File,
         ): Result<Unit> {
-            return instance?.achievementManager?.storeAchievementUnlocks(
+            return instance?.cloudStatsDomain?.achievementManager?.storeAchievementUnlocks(
                 appId = appId,
                 configDirectory = configDirectory,
                 unlockedNames = unlockedNames,
@@ -1888,8 +1857,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         instance = this
 
         // Apply pre-service companion state writes to the injected session manager instance.
-        appSessionManager.keepAlive = keepAliveFallback
-        appSessionManager.autoStopWhenIdle = autoStopWhenIdleFallback
+        sessionDomain.setKeepAlive(keepAliveFallback)
+        sessionDomain.setAutoStopWhenIdle(autoStopWhenIdleFallback)
 
         // JavaSteam logger CME hot-fix
         runCatching {
@@ -1905,9 +1874,9 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         // clear stale download records (completed games) but keep interrupted ones (preserves DLC selection)
         scope.launch {
-            for (record in downloadManager.getAllDownloadingApps()) {
+            for (record in libraryDomain.getDownloadManager().getAllDownloadingApps()) {
                 if (isAppInstalled(record.appId)) {
-                    downloadManager.deleteDownloadingApp(record.appId)
+                    libraryDomain.getDownloadManager().deleteDownloadingApp(record.appId)
                 }
             }
         }
@@ -2346,7 +2315,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
     private fun onPlayingSessionState(callback: PlayingSessionStateCallback) {
         Timber.d("onPlayingSessionState called with isPlayingBlocked = %s", callback.isPlayingBlocked)
-        appSessionManager.updatePlayingSessionState(callback.isPlayingBlocked)
+        sessionDomain.updatePlayingSessionState(callback.isPlayingBlocked)
     }
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -2387,12 +2356,12 @@ class SteamService : Service(), IChallengeUrlChanged {
                             name = playerName,
                             state = state,
                             gameAppID = callback.gamePlayedAppId,
-                            gameName = requireInstance().libraryManager.findApp(callback.gamePlayedAppId)?.name ?: callback.gameName,
+                            gameName = requireInstance().libraryDomain.findApp(callback.gamePlayedAppId)?.name ?: callback.gameName,
                         )
                     }
 
                     // Cache local persona via user manager ownership.
-                    userManager.cachePersona(name = playerName, avatarHash = avatarHash)
+                    accountDomain.userManager.cachePersona(name = playerName, avatarHash = avatarHash)
 
                     val event = SteamEvent.PersonaStateReceived(localPersona.value)
                     GameGrubApp.events.emit(event)
@@ -2414,7 +2383,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
             db.withTransaction {
                 licenses = callback.licenseList
-                val syncResult = libraryManager.syncLicensesForPics(
+                val syncResult = libraryDomain.syncLicensesForPics(
                     callbackLicenses = callback.licenseList,
                     preferredOwnerAccountId = userSteamId?.accountID?.toInt(),
                 )
@@ -2483,10 +2452,18 @@ class SteamService : Service(), IChallengeUrlChanged {
                 // Set our last change number
                 PrefManager.lastPICSChangeNumber = changesSince.currentChangeNumber
 
+                val picsChangesLogFormat = """
+                    picsGetChangesSince:
+                    	lastChangeNumber: %s
+                    	currentChangeNumber: %s
+                    	isRequiresFullUpdate: %s
+                    	isRequiresFullAppUpdate: %s
+                    	isRequiresFullPackageUpdate: %s
+                    	appChangesCount: %s
+                    	pkgChangesCount: %s
+                """.trimIndent()
                 Timber.d(
-                    "picsGetChangesSince:\n\tlastChangeNumber: %s\n\tcurrentChangeNumber: %s\n" +
-                        "\tisRequiresFullUpdate: %s\n\tisRequiresFullAppUpdate: %s\n" +
-                        "\tisRequiresFullPackageUpdate: %s\n\tappChangesCount: %s\n\tpkgChangesCount: %s",
+                    picsChangesLogFormat,
                     changesSince.lastChangeNumber,
                     changesSince.currentChangeNumber,
                     changesSince.isRequiresFullUpdate,
@@ -2500,7 +2477,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 launch {
                     changesSince.appChanges.values
                         .filter { changeData ->
-                            val app = libraryManager.findApp(changeData.id) ?: return@filter false
+                            val app = libraryDomain.findApp(changeData.id) ?: return@filter false
                             changeData.changeNumber != app.lastChangeNumber
                         }
                         .map { PICSRequest(id = it.id) }
@@ -2515,7 +2492,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 launch {
                     val pkgsWithChanges = changesSince.packageChanges.values
                         .filter { changeData ->
-                            val pkg = libraryManager.findLicense(changeData.id) ?: return@filter false
+                            val pkg = libraryDomain.findLicense(changeData.id) ?: return@filter false
                             changeData.changeNumber != pkg.lastChangeNumber
                         }
 
@@ -2576,9 +2553,9 @@ class SteamService : Service(), IChallengeUrlChanged {
 
                         ensureActive()
                         val steamAppsMap = picsCallback.apps.values.mapNotNull { app ->
-                            val appFromDb = libraryManager.findApp(app.id)
+                            val appFromDb = libraryDomain.findApp(app.id)
                             val packageId = appFromDb?.packageId ?: INVALID_PKG_ID
-                            val packageFromDb = if (packageId != INVALID_PKG_ID) libraryManager.findLicense(packageId) else null
+                            val packageFromDb = if (packageId != INVALID_PKG_ID) libraryDomain.findLicense(packageId) else null
                             val ownerAccountId = packageFromDb?.ownerAccountId ?: emptyList()
 
                             if (app.changeNumber != appFromDb?.lastChangeNumber) {
@@ -2599,7 +2576,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         if (steamAppsMap.isNotEmpty()) {
                             Timber.i("Inserting ${steamAppsMap.size} PICS apps to database")
                             db.withTransaction {
-                                libraryManager.insertAllApps(steamAppsMap)
+                                libraryDomain.insertAllApps(steamAppsMap)
                             }
                         }
                     }
@@ -2678,8 +2655,8 @@ class SteamService : Service(), IChallengeUrlChanged {
     }
 
     suspend fun getEncryptedAppTicket(appId: Int): ByteArray? =
-        requireInstance().ticketManager.getEncryptedAppTicket(appId)
+        requireInstance().sessionDomain.getEncryptedAppTicket(appId)
 
     suspend fun getEncryptedAppTicketBase64(appId: Int): String? =
-        requireInstance().ticketManager.getEncryptedAppTicketBase64(appId)
+        requireInstance().sessionDomain.getEncryptedAppTicketBase64(appId)
 }

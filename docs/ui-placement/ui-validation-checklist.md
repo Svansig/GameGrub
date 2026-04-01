@@ -74,3 +74,41 @@ Use additional module-specific commands as needed for touched area.
 - Residual risks:
   - Full `lintKotlin` and end-to-end auth device verification still pending.
 
+## Service-to-Domain Handoff Checklist
+
+Use this checklist when moving behavior from services to domains.
+
+### 1) Domain API Design
+
+- [ ] Domain exposes behavior-oriented methods, not manager getters
+- [ ] Domain methods have clear contracts (parameters, return types, exceptions)
+- [ ] Domain encapsulates internal manager/state access
+
+### 2) Migration Steps
+
+- [ ] Add domain method for behavior being migrated
+- [ ] Update service to delegate to domain instead of direct manager access
+- [ ] Update all call sites to use domain methods
+- [ ] Remove companion object wrapper methods after migration
+
+### 3) Validation
+
+- [ ] `./gradlew compileDebugKotlin` passes
+- [ ] `./gradlew testDebugUnitTest` passes
+- [ ] Manual verification of migrated behavior works
+
+### 4) Documentation
+
+- [ ] Domain method has KDoc describing behavior
+- [ ] ARCHITECTURE.md or domain package docs updated if significant API change
+
+### Example Migration Pattern
+
+```kotlin
+// Before: Service calls manager directly
+SteamService.downloadApp(appId, callback)
+
+// After: Service delegates to domain
+steamInstallDomain.downloadApp(appId, callback)
+```
+

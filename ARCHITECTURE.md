@@ -153,6 +153,12 @@ db/
 | **Auth** | `PlatformAuthUtils`, `PlayIntegrity` |
 | **General** | `DateTimeUtils`, `StringUtils`, `MathUtils` |
 
+**Dependency Guardrails:**
+- Utils packages should depend on service/domain layers, not vice versa
+- UI-layer utils (`ui/utils/`) should only depend on UI models, not service or domain
+- Business-logic utilities in `app.gamegrub.utils` can depend on service/domain but should not depend on UI
+- Platform-specific utils (Steam, GOG, etc.) should encapsulate platform adapters
+
 ### 6. Legacy Layer (`com.winlator`)
 
 Inherited from the Pluvia fork - the core XServer/Wine container implementation:

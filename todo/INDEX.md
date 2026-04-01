@@ -16,8 +16,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-002 | P1 | Remove unmanaged IO scopes from GOG UI paths | `ui/screen/library/appscreen` | `todo/UI-002.md` |
 | UI-003 | P1 | Remove unmanaged IO scopes from Steam UI paths | `ui/screen/library/appscreen` | `todo/UI-003.md` |
 | UI-005 | P1 | Decompose orchestration from `GameGrubMain` | `ui` | `todo/UI-005.md` |
-| UI-006 | P2 | Resolve lint blockers in `GameGrubMain` | `ui/GameGrubMain.kt` | `todo/UI-006.md` |
-| UI-007 | P2 | Align architecture doc path naming | `docs` | `todo/UI-007.md` |
 | UI-008 | P3 | Move preview fake data to safer location | `ui/internal` | `todo/UI-008.md` |
 | UI-009 | P3 | Define legacy UI seam guardrails | `com.winlator + res/layout` | `todo/UI-009.md` |
 | UI-010 | P2 | Move platform login-state derivation into ViewModel state | `ui/screen/library` | `todo/UI-010.md` |
@@ -249,6 +247,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-004 | P1 | Move library auth workflow out of composables | TBD | `todo/UI-004.md` |
 | UI-006 | P2 | Resolve lint blockers in `GameGrubMain` | TBD | `todo/UI-006.md` |
 | UI-007 | P2 | Align architecture doc path naming | TBD | `todo/UI-007.md` |
+| COH-001 | P1 | Define UI-to-ViewModel boundary contract | TBD | `todo/COH-001.md` |
 | SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
 | SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |

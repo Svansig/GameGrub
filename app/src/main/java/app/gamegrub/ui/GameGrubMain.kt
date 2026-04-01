@@ -386,7 +386,11 @@ fun GameGrubMain(
 
                     when (val resolution = resolveGameAppId(context, event.appId)) {
                         is GameResolutionResult.Success -> {
-                            Timber.i("[GameGrubMain]: Using appId: ${resolution.finalAppId} (original: ${event.appId}, isSteamInstalled: ${resolution.isSteamInstalled}, isCustomGame: ${resolution.isCustomGame})")
+                            Timber.i(
+                                "[GameGrubMain]: Using appId: ${resolution.finalAppId} " +
+                                    "(original: ${event.appId}, isSteamInstalled: ${resolution.isSteamInstalled}, " +
+                                    "isCustomGame: ${resolution.isCustomGame})",
+                            )
 
                             LaunchRequestManager.markAsExternalLaunch()
                             trackGameLaunched(resolution.finalAppId)

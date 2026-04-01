@@ -45,6 +45,13 @@ GameNative is an Android application that lets you play Windows games from Steam
 
 ### 1. Application Layer (`app.gamegrub`)
 
+**Dependency Flow:**
+```
+UI Layer → Service Layer → Data Layer
+     ↓            ↓            ↓
+  Utils Layer ← Utilizes ←  Utils Layer
+```
+
 **Entry Points:**
 - `GameGrubApp` - Application class, initializes Hilt, Timber, NetworkMonitor, CrashHandler, PrefManager, PostHog, PlayIntegrity
 - `MainActivity` - Main activity, handles deep links (`home://gamegrub`) and external game launch intents

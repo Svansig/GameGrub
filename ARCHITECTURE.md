@@ -199,16 +199,28 @@ The app uses Hilt throughout:
 
 Custom event dispatcher for app-wide events:
 
-| Event | Purpose |
-|-------|---------|
-| `AndroidEvent` | Activity lifecycle, system UI, key events |
-| `SteamEvent` | Steam-specific events |
+| Event | Purpose | Owner | Consumer |
+|-------|---------|-------|----------|
+| `AndroidEvent` | Activity lifecycle, system UI, key events | App Layer | ViewModels, UI screens |
+| `SteamEvent` | Steam connection, login, game events | SteamService | ViewModels, UI screens |
+
+**Subscription Lifecycle:**
+- UI subscriptions should use `DisposableEffect` for cleanup
+- ViewModel subscriptions use `viewModelScope` for automatic cleanup
+- Services emit events; UI subscribes to observe state changes
 
 **Usage:**
 ```kotlin
-// Subscribe
-GameGrubApp.events.on<AndroidEvent.BackPressed, Unit> {
-    // Handle back press
+// Subscribe (with cleanup)
+LaunchedEffect(Unit) {
+    GameGrubApp.events.on<AndroidEvent.BackPressed, Unit> {
+        // Handle back press
+    }
+}
+DisposableEffect(Unit) {
+    onDispose {
+        GameGrubApp.events.off<AndroidEvent.BackPressed, Unit>(handler)
+    }
 }
 
 // Emit

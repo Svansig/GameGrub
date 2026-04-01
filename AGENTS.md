@@ -171,6 +171,22 @@ import javax.inject.Inject
 - **Collections**: Use Kotlin collections (`List<T>`, `Map<K,V>`), not Java arrays/collections
 - **Coroutines**: Use `Dispatchers.IO` for blocking operations, `Dispatchers.Main` for UI
 
+### KDoc and Documentation
+
+- **Public APIs**: Add KDoc for public utility functions, ViewModels, and domain methods
+- **Required fields**: `@param`, `@return`, `@throws` for functions with parameters or exceptions
+- **Optional**: Brief one-liner description for straightforward methods
+- **Example**:
+```kotlin
+/**
+ * Parses a store release date string to epoch seconds.
+ * @param dateString ISO-8601 formatted date string (e.g., "2024-01-15T00:00:00Z")
+ * @return Epoch seconds, or 0 if parsing fails
+ * @throws IllegalArgumentException if dateString is null
+ */
+fun parseStoreReleaseDateToEpochSeconds(dateString: String?): Long
+```
+
 ### Error Handling
 
 - **Prefer `runCatching`**: For operations that may fail gracefully

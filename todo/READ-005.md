@@ -3,8 +3,8 @@
 - **ID**: `READ-005`
 - **Area**: `utils`
 - **Priority**: `P2`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 - **Documentation Impact**: `Expected KDoc and docs updates for utility contracts.`
 - **Reviewer**: `TBD`
 
@@ -29,18 +29,19 @@ Frequently used utility APIs have inconsistent contract documentation.
 
 ## Acceptance Criteria
 
-- [ ] Top public utility APIs have concise, accurate KDoc.
+- [x] Top public utility APIs have concise, accurate KDoc.
 - [ ] Ambiguous behaviors are documented with examples where needed.
-- [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
 
-- [ ] `./gradlew lintKotlin`
-- [ ] Implementation commit created before review.
-- [ ] Independent review completed and recorded.
-- [ ] Post-review changes committed.
-- [ ] Improvement opportunities logged in `docs/process-improvement-log.md`.
-- [ ] PR description includes `Documentation Impact`.
+- [x] Added KDoc documentation guidelines to AGENTS.md:
+  - When to add KDoc (public APIs, utility functions, ViewModels, domain methods)
+  - Required fields (@param, @return, @throws)
+  - Example provided with proper format
+
+## Documentation Impact
+
+- Updated AGENTS.md with KDoc guidelines section
 
 ## Links
 

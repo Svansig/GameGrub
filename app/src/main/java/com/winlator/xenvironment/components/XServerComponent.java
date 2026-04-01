@@ -9,6 +9,8 @@ import com.winlator.xserver.XClientConnectionHandler;
 import com.winlator.xserver.XClientRequestHandler;
 import com.winlator.xserver.XServer;
 
+import timber.log.Timber;
+
 public class XServerComponent extends EnvironmentComponent {
     private XConnectorEpoll connector;
     private final XServer xServer;

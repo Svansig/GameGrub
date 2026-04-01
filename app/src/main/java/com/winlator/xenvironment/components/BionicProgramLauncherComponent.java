@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Objects;
 
 import app.gamegrub.service.steam.SteamService;
+import timber.log.Timber;
 
 public class BionicProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;

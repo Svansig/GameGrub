@@ -16,6 +16,7 @@ import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.abs
 import kotlin.math.sqrt
+import timber.log.Timber
 
 /**
  * Standalone handler for physical controller input that works independently of view visibility.

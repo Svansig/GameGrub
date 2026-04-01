@@ -13,6 +13,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.Iterator;
 
+import timber.log.Timber;
+
 public class Shortcut {
     public final Container container;
     public final String name;

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,10 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import app.gamegrub.R
-import com.alorma.compose.settings.ui.base.internal.LocalSettingsGroupEnabled
-import com.alorma.compose.settings.ui.base.internal.SettingsTileColors
-import com.alorma.compose.settings.ui.base.internal.SettingsTileDefaults
-import com.alorma.compose.settings.ui.base.internal.SettingsTileScaffold
+import com.alorma.compose.settings.ui.SettingsTileDefaults
+import com.alorma.compose.settings.ui.SettingsTileScaffold
+import com.alorma.compose.settings.ui.core.LocalSettingsGroupEnabled
 
 @Composable
 fun SettingsCPUList(
@@ -25,14 +25,13 @@ fun SettingsCPUList(
     onValueChange: (String) -> Unit,
     title: @Composable () -> Unit,
     icon: (@Composable () -> Unit)? = null,
-    colors: SettingsTileColors = SettingsTileDefaults.colors(),
+    colors: ListItemColors = SettingsTileDefaults.colors(),
     tonalElevation: Dp = ListItemDefaults.Elevation,
     shadowElevation: Dp = ListItemDefaults.Elevation,
     action: @Composable (() -> Unit)? = null,
 ) {
     SettingsTileScaffold(
         modifier = modifier,
-        enabled = enabled,
         title = title,
         icon = icon,
         colors = colors,

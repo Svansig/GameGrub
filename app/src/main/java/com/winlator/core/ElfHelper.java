@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import timber.log.Timber;
+
 public abstract class ElfHelper {
     private static final byte ELF_CLASS_32 = 1;
     private static final byte ELF_CLASS_64 = 2;

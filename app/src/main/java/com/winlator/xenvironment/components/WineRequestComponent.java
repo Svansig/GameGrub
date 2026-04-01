@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import app.gamegrub.ui.screen.auth.EpicOAuthActivity;
+import timber.log.Timber;
 
 public class WineRequestComponent extends EnvironmentComponent {
     abstract static class RequestCodes {

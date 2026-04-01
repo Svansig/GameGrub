@@ -11,6 +11,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 
+import timber.log.Timber;
+
 public abstract class WineStartMenuCreator {
     private static int parseShowCommand(String value) {
         if (value.equals("SW_SHOWMAXIMIZED")) {

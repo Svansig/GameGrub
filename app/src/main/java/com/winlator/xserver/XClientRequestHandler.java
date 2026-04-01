@@ -24,6 +24,8 @@ import com.winlator.xserver.requests.WindowRequests;
 import java.io.IOException;
 import java.nio.ByteOrder;
 
+import timber.log.Timber;
+
 public class XClientRequestHandler implements RequestHandler {
     public static final byte RESPONSE_CODE_ERROR = 0;
     public static final byte RESPONSE_CODE_SUCCESS = 1;

@@ -14,6 +14,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -32,10 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.alorma.compose.settings.ui.base.internal.LocalSettingsGroupEnabled
-import com.alorma.compose.settings.ui.base.internal.SettingsTileColors
-import com.alorma.compose.settings.ui.base.internal.SettingsTileDefaults
-import com.alorma.compose.settings.ui.base.internal.SettingsTileScaffold
+import com.alorma.compose.settings.ui.SettingsTileDefaults
+import com.alorma.compose.settings.ui.SettingsTileScaffold
+import com.alorma.compose.settings.ui.core.LocalSettingsGroupEnabled
 
 @Composable
 fun SettingsMultiListDropdown(
@@ -48,7 +48,7 @@ fun SettingsMultiListDropdown(
     title: @Composable () -> Unit,
     subtitle: (@Composable () -> Unit)? = null,
     icon: (@Composable () -> Unit)? = null,
-    colors: SettingsTileColors = SettingsTileDefaults.colors(),
+    colors: ListItemColors = SettingsTileDefaults.colors(),
     tonalElevation: Dp = ListItemDefaults.Elevation,
     shadowElevation: Dp = ListItemDefaults.Elevation,
     action: @Composable (() -> Unit)? = null,
@@ -67,7 +67,6 @@ fun SettingsMultiListDropdown(
                 onClick = { isDropdownExpanded = true },
             )
             .then(modifier),
-        enabled = enabled,
         title = title,
         subtitle = {
             if (subtitle != null) {

@@ -3,6 +3,7 @@ package app.gamegrub.ui.component.settings
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -13,9 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import com.alorma.compose.settings.ui.base.internal.SettingsTileColors
-import com.alorma.compose.settings.ui.base.internal.SettingsTileDefaults
-import com.alorma.compose.settings.ui.base.internal.SettingsTileScaffold
+import com.alorma.compose.settings.ui.SettingsTileDefaults
+import com.alorma.compose.settings.ui.SettingsTileScaffold
 
 @Composable
 fun SettingsCenteredLabel(
@@ -24,7 +24,7 @@ fun SettingsCenteredLabel(
     subtitle: (@Composable () -> Unit)? = null,
     icon: (@Composable () -> Unit)? = null,
     action: @Composable (() -> Unit)? = null,
-    colors: SettingsTileColors = SettingsTileDefaults.colors(),
+    colors: ListItemColors = SettingsTileDefaults.colors(),
     tonalElevation: Dp = ListItemDefaults.Elevation,
     shadowElevation: Dp = ListItemDefaults.Elevation,
 ) {
@@ -49,7 +49,6 @@ fun SettingsCenteredLabel(
     SettingsTileScaffold(
         title = {},
         modifier = modifier,
-        enabled = false,
         colors = colors,
         tonalElevation = tonalElevation,
         shadowElevation = shadowElevation,

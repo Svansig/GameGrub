@@ -1,13 +1,13 @@
 plugins {
     alias(libs.plugins.android.dynamic.feature)
-    alias(libs.plugins.jetbrains.kotlin.android)
+//    alias(libs.plugins.jetbrains.kotlin.android)
 }
 android {
     namespace = "app.ubuntufs"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 29
+        minSdk = 33
         // testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -25,9 +25,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+//    kotlinOptions {
+//        jvmTarget = "17"
+//    }
 }
 
 dependencies {

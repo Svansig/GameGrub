@@ -1,10 +1,10 @@
 package app.gamegrub.ui.component.settings
 
+import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.alorma.compose.settings.ui.base.internal.LocalSettingsGroupEnabled
-import com.alorma.compose.settings.ui.base.internal.SettingsTileColors
-import com.alorma.compose.settings.ui.base.internal.SettingsTileDefaults
+import com.alorma.compose.settings.ui.SettingsTileDefaults
+import com.alorma.compose.settings.ui.core.LocalSettingsGroupEnabled
 import com.winlator.core.envvars.EnvVarInfo
 import com.winlator.core.envvars.EnvVarSelectionType
 import com.winlator.core.envvars.EnvVars
@@ -13,7 +13,7 @@ import com.winlator.core.envvars.EnvVars
 fun SettingsEnvVars(
     enabled: Boolean = LocalSettingsGroupEnabled.current,
     envVars: EnvVars,
-    colors: SettingsTileColors = SettingsTileDefaults.colors(),
+    colors: ListItemColors = SettingsTileDefaults.colors(),
     onEnvVarsChange: (EnvVars) -> Unit,
     knownEnvVars: Map<String, EnvVarInfo>,
     envVarAction: (@Composable (String) -> Unit)? = null,

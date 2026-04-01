@@ -26,6 +26,8 @@ import java.util.zip.ZipInputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import timber.log.Timber;
+
 public class AdrenotoolsManager {
 
     private final File adrenotoolsContentDir;

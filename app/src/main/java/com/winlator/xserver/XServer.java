@@ -18,6 +18,8 @@ import java.util.EnumMap;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
+import timber.log.Timber;
+
 public class XServer {
     public enum Lockable {WINDOW_MANAGER, PIXMAP_MANAGER, DRAWABLE_MANAGER, GRAPHIC_CONTEXT_MANAGER, INPUT_DEVICE, CURSOR_MANAGER, SHMSEGMENT_MANAGER}
     public static final short VERSION = 11;

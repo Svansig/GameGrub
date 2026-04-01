@@ -15,6 +15,8 @@ import com.winlator.xserver.XServer;
 
 import java.io.IOException;
 
+import timber.log.Timber;
+
 public class VirGLRendererComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     private final XServer xServer;
     private final UnixSocketConfig socketConfig;

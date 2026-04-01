@@ -1,6 +1,8 @@
 package app.gamegrub.ui.theme
 
 import android.app.Activity
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -11,8 +13,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.alorma.compose.settings.ui.base.internal.SettingsTileColors
-import com.alorma.compose.settings.ui.base.internal.SettingsTileDefaults
+import com.alorma.compose.settings.ui.SettingsTileDefaults
 import com.materialkolor.PaletteStyle
 
 /**
@@ -240,21 +241,21 @@ object DarkColors {
 
 // Settings tile color helpers
 @Composable
-fun settingsTileColors(): SettingsTileColors = SettingsTileDefaults.colors(
-    titleColor = GameGrubForeground,
-    subtitleColor = GameGrubForegroundMuted,
-    actionColor = GameGrubCyan,
+fun settingsTileColors(): ListItemColors = ListItemDefaults.colors(
+    headlineColor = GameGrubForeground,
+    supportingColor = GameGrubForegroundMuted,
+    trailingIconColor = GameGrubCyan,
 )
 
 @Composable
-fun settingsTileColorsAlt(): SettingsTileColors = SettingsTileDefaults.colors(
-    titleColor = GameGrubForeground,
-    subtitleColor = GameGrubForegroundMuted,
+fun settingsTileColorsAlt(): ListItemColors = ListItemDefaults.colors(
+    headlineColor = GameGrubForeground,
+    supportingColor = GameGrubForegroundMuted,
 )
 
 @Composable
-fun settingsTileColorsDebug(): SettingsTileColors = SettingsTileDefaults.colors(
-    titleColor = GameGrubDestructive,
-    subtitleColor = GameGrubForegroundMuted,
-    actionColor = GameGrubCyan,
+fun settingsTileColorsDebug(): ListItemColors = ListItemDefaults.colors(
+    headlineColor = GameGrubDestructive,
+    supportingColor = GameGrubForegroundMuted,
+    trailingIconColor = GameGrubCyan,
 )

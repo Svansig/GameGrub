@@ -3,9 +3,9 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
+//    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.dagger.hilt)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.serialization)
     alias(libs.plugins.kotlinter)
     alias(libs.plugins.ksp)
@@ -30,9 +30,9 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
-android {
+extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     namespace = "app.gamegrub"
-    compileSdk = 35
+    compileSdk = 36
 
     // https://developer.android.com/ndk/downloads
 //    ndkVersion = "22.1.7171670"
@@ -53,7 +53,7 @@ android {
         applicationId = "app.gamegrub"
 
         minSdk = 33
-        targetSdk = 35
+        targetSdk = 36
 
         versionCode = 1
         versionName = "0.8.1"
@@ -80,8 +80,21 @@ android {
             abiFilters.addAll(listOf("arm64-v8a"))
         }
 
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            // getDefaultProguardFile("proguard-android.txt"),
+            "proguard-rules.pro",
+        )
+    }
+
+    androidResources {
         // Localization support - specify which languages to include
-        resourceConfigurations += listOf(
+        localeFilters += listOf(
             "en", // English (default)
             "es", // Spanish
             "da", // Danish
@@ -97,17 +110,6 @@ android {
             "ru", // Russian
             "ko", // Korean
             // TODO: Add more languages here using the ISO 639-1 locale code with regional qualifiers (e.g., "pt-rPT" for European Portuguese)
-        )
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-
-        proguardFiles(
-            getDefaultProguardFile("proguard-android-optimize.txt"),
-            // getDefaultProguardFile("proguard-android.txt"),
-            "proguard-rules.pro",
         )
     }
 
@@ -150,10 +152,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     buildFeatures {
         compose = true
         buildConfig = true
@@ -179,10 +177,6 @@ android {
     }
     dynamicFeatures += setOf(":ubuntufs")
 
-    kotlinter {
-        ignoreFormatFailures = false
-    }
-
     // build extras needed in libwinlator_bionic.so
     // externalNativeBuild {
     //     cmake {
@@ -205,6 +199,16 @@ android {
     //         exclude(group = "junit", module = "junit")
     //     }
     // }
+}
+
+// kotlin {
+//    compilerOptions {
+//        jvmTarget = JvmTarget.JVM_17
+//    }
+// }
+
+kotlinter {
+    ignoreFormatFailures = false
 }
 
 dependencies {

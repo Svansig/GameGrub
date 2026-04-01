@@ -5,7 +5,10 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.SteamApp
+import app.gamegrub.data.SteamAppDepotsRow
+import app.gamegrub.data.SteamLibraryApp
 import app.gamegrub.service.steam.SteamService.Companion.INVALID_PKG_ID
 import kotlinx.coroutines.flow.Flow
 
@@ -37,6 +40,24 @@ interface SteamAppDao {
         invalidPkgId: Int = INVALID_PKG_ID,
     ): Flow<List<SteamApp>>
 
+    @Query(
+        "SELECT app.id, app.owner_account_id, app.name, app.type, " +
+            "app.client_icon_hash, app.library_assets, app.header_image, app.install_dir " +
+            "FROM steam_app AS app " +
+            "WHERE app.id != 480 " +
+            "AND app.package_id != :invalidPkgId " +
+            "AND app.type != 0 " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM steam_license AS license " +
+            "  WHERE license.packageId = app.package_id " +
+            "  AND (license.license_flags & 8 = 0) " +
+            ") " +
+            "ORDER BY LOWER(app.name)",
+    )
+    fun getAllOwnedLibraryApps(
+        invalidPkgId: Int = INVALID_PKG_ID,
+    ): Flow<List<SteamLibraryApp>>
+
     @Query("SELECT * FROM steam_app WHERE received_pics = 0 AND package_id != :invalidPkgId AND owner_account_id = :ownerId")
     fun getAllOwnedAppsWithoutPICS(
         ownerId: Int,
@@ -45,6 +66,11 @@ interface SteamAppDao {
 
     @Query("SELECT * FROM steam_app WHERE id = :appId")
     suspend fun findApp(appId: Int): SteamApp?
+
+    @Query("SELECT depots FROM steam_app WHERE id = :appId")
+    suspend fun getAppDepotsRow(appId: Int): SteamAppDepotsRow?
+
+    suspend fun getAppDepots(appId: Int): Map<Int, DepotInfo>? = getAppDepotsRow(appId)?.depots
 
     @Query(
         "SELECT * FROM steam_app AS app WHERE dlc_for_app_id = :appId AND depots <> '{}' AND " +

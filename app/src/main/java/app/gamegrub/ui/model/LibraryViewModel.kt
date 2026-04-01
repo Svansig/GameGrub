@@ -17,7 +17,7 @@ import app.gamegrub.data.GOGGame
 import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
-import app.gamegrub.data.SteamApp
+import app.gamegrub.data.SteamLibraryApp
 import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
@@ -96,7 +96,7 @@ class LibraryViewModel @Inject constructor(
     private var lastPageInCurrentFilter: Int = 0
 
     // Complete and unfiltered app list
-    private var appList: List<SteamApp> = emptyList()
+    private var appList: List<SteamLibraryApp> = emptyList()
     private var gogGameList: List<GOGGame> = emptyList()
     private var epicGameList: List<EpicGame> = emptyList()
     private var amazonGameList: List<AmazonGame> = emptyList()
@@ -129,12 +129,12 @@ class LibraryViewModel @Inject constructor(
         refreshPlatformAuthState()
 
         viewModelScope.launch(Dispatchers.IO) {
-            steamAppDao.getAllOwnedApps(
+            steamAppDao.getAllOwnedLibraryApps(
                 // ownerIds = SteamService.familyMembers.ifEmpty { listOf((SteamService.getSteam3AccountId() ?: 0L).toInt()) },
             ).collect { apps ->
-                Timber.tag("LibraryViewModel").d("Collecting ${apps.size} apps")
-                // Check if the list has actually changed before triggering a re-filter
-                if (appList.size != apps.size) {
+                // Room can emit frequently during sync; only react when payload actually changes.
+                if (appList != apps) {
+                    Timber.tag("LibraryViewModel").d("Collecting ${apps.size} apps")
                     appList = apps
                     onFilterApps(paginationCurrentPage)
                 }
@@ -546,7 +546,7 @@ class LibraryViewModel @Inject constructor(
                 return status == GameCompatibilityStatus.COMPATIBLE || status == GameCompatibilityStatus.GPU_COMPATIBLE
             }
 
-            val steamFilteredBeforeCompatibility: List<SteamApp> = appList
+            val steamFilteredBeforeCompatibility: List<SteamLibraryApp> = appList
                 .asSequence()
                 .filter { item ->
                     SteamService.familyMembers.ifEmpty {
@@ -582,7 +582,7 @@ class LibraryViewModel @Inject constructor(
                     val installedOnly = currentState.currentTab.installedOnly ||
                         currentState.appInfoSortType.contains(AppFilter.INSTALLED)
                     if (installedOnly) {
-                        downloadDirectorySet.contains(SteamService.getAppDirName(item))
+                        downloadDirectorySet.contains(item.installDir.ifBlank { item.name })
                     } else {
                         true
                     }
@@ -591,24 +591,35 @@ class LibraryViewModel @Inject constructor(
 
             // Filter Steam apps first (no pagination yet)
             // Note: Don't sort individual lists - we'll sort the combined list for consistent ordering
-            val filteredSteamApps: List<SteamApp> = steamFilteredBeforeCompatibility
+            val filteredSteamApps: List<SteamLibraryApp> = steamFilteredBeforeCompatibility
                 .asSequence()
                 .filter { item -> passesCompatibleFilter(item.name) }
                 .sortedWith(
-                    compareByDescending<SteamApp> {
-                        downloadDirectorySet.contains(SteamService.getAppDirName(it))
+                    compareByDescending<SteamLibraryApp> {
+                        downloadDirectorySet.contains(it.installDir.ifBlank { it.name })
                     }.thenBy { it.name.lowercase() },
                 )
                 .toList()
 
             // Map Steam apps to UI items
             data class LibraryEntry(val item: LibraryItem, val isInstalled: Boolean)
+            val shouldResolveSteamSize =
+                currentState.currentSortOption == SortOption.SIZE_SMALLEST ||
+                    currentState.currentSortOption == SortOption.SIZE_LARGEST
+            val steamSizeCache = mutableMapOf<Int, Long>()
 
             val steamEntries: List<LibraryEntry> = filteredSteamApps.map { item ->
-                val isInstalled = downloadDirectorySet.contains(SteamService.getAppDirName(item))
-                // Calculate total size from all depot manifests (use "public" branch as default)
-                val totalSizeBytes = item.depots.values.sumOf { depot ->
-                    depot.manifests["public"]?.size ?: depot.manifests.values.firstOrNull()?.size ?: 0L
+                val isInstalled = downloadDirectorySet.contains(item.installDir.ifBlank { item.name })
+                val totalSizeBytes = if (shouldResolveSteamSize) {
+                    steamSizeCache.getOrPut(item.id) {
+                        steamAppDao.getAppDepots(item.id)
+                            ?.values
+                            ?.sumOf { depot ->
+                                depot.manifests["public"]?.size ?: depot.manifests.values.firstOrNull()?.size ?: 0L
+                            } ?: 0L
+                    }
+                } else {
+                    0L
                 }
                 LibraryEntry(
                     item = LibraryItem(

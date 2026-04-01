@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.winlator.inputcontrols.Binding
+import timber.log.Timber
 
 /**
  * Dialog for selecting controller button bindings.

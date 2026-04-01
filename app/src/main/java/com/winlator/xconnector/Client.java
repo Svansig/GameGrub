@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import timber.log.Timber;
+
 public class Client {
     public final ClientSocket clientSocket;
     private final XConnectorEpoll connector;

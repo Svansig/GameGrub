@@ -23,7 +23,6 @@ import com.winlator.core.envvars.EnvVars
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xserver.ScreenInfo
 import java.io.File
-import java.util.Arrays
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -153,7 +152,7 @@ internal object WineSystemFilesCoordinator {
             FileUtils.delete(File(rootDir, "/opt/apps"))
             val downloaded = File(imageFs.filesDir, "imagefs_patches_gamenative.tzst")
             Timber.i("Extracting imagefs_patches_gamenative.tzst")
-            if (listOf(*context.assets.list("")).contains("imagefs_patches_gamenative.tzst") == true) {
+            if (context.assets.list("")?.contains("imagefs_patches_gamenative.tzst") ?: false) {
                 TarCompressorUtils.extract(
                     TarCompressorUtils.Type.ZSTD,
                     context.assets,

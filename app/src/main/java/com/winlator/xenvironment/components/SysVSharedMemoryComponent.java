@@ -11,6 +11,8 @@ import com.winlator.xenvironment.EnvironmentComponent;
 import com.winlator.xserver.SHMSegmentManager;
 import com.winlator.xserver.XServer;
 
+import timber.log.Timber;
+
 public class SysVSharedMemoryComponent extends EnvironmentComponent {
     private XConnectorEpoll connector;
     public final UnixSocketConfig socketConfig;

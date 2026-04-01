@@ -26,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import timber.log.Timber;
+
 public class GuestProgramLauncherComponent extends EnvironmentComponent {
     private String guestExecutable;
     private static int pid = -1;

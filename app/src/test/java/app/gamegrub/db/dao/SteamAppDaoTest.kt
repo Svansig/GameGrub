@@ -3,10 +3,14 @@ package app.gamegrub.db.dao
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.gamegrub.data.DepotInfo
+import app.gamegrub.data.ManifestInfo
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamLicense
 import app.gamegrub.db.GameGrubDatabase
 import app.gamegrub.enums.AppType
+import app.gamegrub.enums.OS
+import app.gamegrub.enums.OSArch
 import app.gamegrub.service.steam.SteamService.Companion.INVALID_PKG_ID
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.enums.ELicenseType
@@ -204,5 +208,67 @@ class SteamAppDaoTest {
 
         val apps = appDao.getAllOwnedApps().first()
         assertEquals(listOf("alpha", "Beta", "Zelda"), apps.map { it.name })
+    }
+
+    @Test
+    fun `library projection handles oversized app payload rows`() = runBlocking {
+        licenseDao.insertAll(listOf(makeLicense(packageId = 100, appIds = listOf(1, 2))))
+
+        val oversizedPayload = "x".repeat(3_000_000)
+        appDao.insert(
+            SteamApp(
+                id = 1,
+                packageId = 100,
+                type = AppType.game,
+                name = "Heavy App",
+                installScript = oversizedPayload,
+            ),
+        )
+        appDao.insert(
+            SteamApp(
+                id = 2,
+                packageId = 100,
+                type = AppType.game,
+                name = "Light App",
+            ),
+        )
+
+        val apps = appDao.getAllOwnedLibraryApps().first()
+
+        assertEquals(2, apps.size)
+        assertEquals(listOf("Heavy App", "Light App"), apps.map { it.name })
+    }
+
+    @Test
+    fun `getAppDepots reads serialized depots map`() = runBlocking {
+        val depots = mapOf(
+            10 to DepotInfo(
+                depotId = 10,
+                dlcAppId = -1,
+                depotFromApp = 1,
+                sharedInstall = false,
+                osList = EnumSet.of(OS.windows),
+                osArch = OSArch.Arch64,
+                manifests = mapOf(
+                    "public" to ManifestInfo(name = "public", gid = 100L, size = 1234L, download = 111L),
+                ),
+                encryptedManifests = emptyMap(),
+            ),
+        )
+
+        appDao.insert(
+            SteamApp(
+                id = 1,
+                packageId = 100,
+                type = AppType.game,
+                name = "Depot App",
+                depots = depots,
+            ),
+        )
+
+        val result = appDao.getAppDepots(1)
+
+        assertEquals(1, result?.size)
+        assertEquals(1234L, result?.get(10)?.manifests?.get("public")?.size)
     }
 }

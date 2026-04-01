@@ -961,7 +961,7 @@ fun XServerScreen(
                         GameGrubApp.touchpadView?.setMoveCursorToTouchpoint(PrefManager.getBoolean("move_cursor_to_touchpoint", false))
 
                         // Add invisible IME receiver to capture system keyboard input when keyboard is on external display
-                        val imeDisplayContext = context.display?.let { display ->
+                        val imeDisplayContext = context.display.let { display ->
                             context.createDisplayContext(display)
                         } ?: context
 

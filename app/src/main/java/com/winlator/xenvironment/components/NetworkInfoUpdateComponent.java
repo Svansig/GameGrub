@@ -14,6 +14,8 @@ import com.winlator.xenvironment.EnvironmentComponent;
 import java.io.File;
 import java.util.List;
 
+import timber.log.Timber;
+
 public class NetworkInfoUpdateComponent extends EnvironmentComponent {
     private BroadcastReceiver broadcastReceiver;
 

@@ -8,6 +8,8 @@ import com.winlator.xconnector.ConnectionHandler;
 import com.winlator.xconnector.RequestHandler;
 import com.winlator.xenvironment.EnvironmentComponent;
 
+import timber.log.Timber;
+
 public class SteamClientComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     // public abstract static class RequestCodes {
     //     public static final byte INIT = 0;

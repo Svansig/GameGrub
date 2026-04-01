@@ -10,6 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import timber.log.Timber;
+
 public abstract class GPUHelper {
     public static final int VK_API_VERSION_1_3 = vkMakeVersion(1, 3, 0);
 

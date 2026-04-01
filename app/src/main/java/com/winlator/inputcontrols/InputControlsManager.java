@@ -24,6 +24,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import timber.log.Timber;
+
 public class InputControlsManager {
     private final Context context;
     private ArrayList<ControlsProfile> profiles;

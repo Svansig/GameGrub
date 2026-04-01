@@ -3,6 +3,8 @@ package com.winlator.renderer;
 import android.opengl.GLES20;
 import android.util.Log;
 
+import timber.log.Timber;
+
 public class RenderTarget extends Texture {
     private static final String TAG = "RenderTarget";
     private int framebuffer = 0;

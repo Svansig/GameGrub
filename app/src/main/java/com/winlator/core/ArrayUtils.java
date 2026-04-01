@@ -7,6 +7,8 @@ import org.json.JSONException;
 
 import java.util.Arrays;
 
+import timber.log.Timber;
+
 public abstract class ArrayUtils {
     public static byte[] concat(byte[]... elements) {
         byte[] result = Arrays.copyOf(elements[0], elements[0].length);

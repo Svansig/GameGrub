@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import app.gamegrub.service.steam.SteamService;
+import timber.log.Timber;
 
 public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;

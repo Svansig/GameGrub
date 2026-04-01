@@ -11,6 +11,8 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import timber.log.Timber;
+
 public class SteamPipeServer {
     private static final int PORT = 34865;
     private ServerSocket serverSocket;

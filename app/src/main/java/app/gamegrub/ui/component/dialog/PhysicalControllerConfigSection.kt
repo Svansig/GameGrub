@@ -51,6 +51,7 @@ import com.winlator.core.FileUtils
 import com.winlator.inputcontrols.Binding
 import com.winlator.inputcontrols.ControlsProfile
 import com.winlator.inputcontrols.ExternalControllerBinding
+import timber.log.Timber
 
 /**
  * Data classes for controller configuration

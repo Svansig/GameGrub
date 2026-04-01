@@ -15,6 +15,15 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
+- **Date**: `2026-04-01`
+- **Ticket**: `N/A (Steam PICS sync stabilization)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Long-lived Steam sync jobs were started without stored Job references, making cancellation ineffective and allowing duplicate background loops after reconnects.
+- **Proposed Action**: Require every continuous domain worker to store/cancel its active `Job` in one place and add a reconnect regression test for duplicate workers.
+- **Owner**: `TBD`
+- **Status**: `Done`
+
 - **Date**: `2026-03-31`
 - **Ticket**: `N/A (compile stabilization pass)`
 - **PR/Commit**: `TBD`

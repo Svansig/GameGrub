@@ -16,6 +16,8 @@ import com.winlator.xenvironment.XEnvironment;
 
 import java.io.File;
 
+import timber.log.Timber;
+
 public class PulseAudioComponent extends EnvironmentComponent {
     private final UnixSocketConfig socketConfig;
     private static int pid = -1;

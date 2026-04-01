@@ -8,6 +8,8 @@ import com.winlator.xserver.XServer;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import timber.log.Timber;
+
 public class CursorLocker extends TimerTask {
     private final XServer xServer;
     private float damping = 0.25f;

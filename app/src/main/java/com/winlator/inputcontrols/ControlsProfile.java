@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import timber.log.Timber;
+
 public class ControlsProfile implements Comparable<ControlsProfile> {
     public final int id;
     private String name;

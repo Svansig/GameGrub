@@ -424,7 +424,7 @@ private fun InfoCard(
                     } else {
                         MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
                     },
-                    color = if (statusColor != null) statusColor else MaterialTheme.colorScheme.onSurface,
+                    color = statusColor ?: MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -454,12 +454,16 @@ fun AppScreen(
             val steamViewModel: SteamAppScreenViewModel = hiltViewModel()
             remember(steamViewModel) { SteamAppScreen(steamViewModel) }
         }
+
         app.gamegrub.data.GameSource.CUSTOM_GAME -> remember(steamGridDB) { CustomGameAppScreen(steamGridDB) }
+
         app.gamegrub.data.GameSource.GOG -> {
             val gogViewModel: GOGAppScreenViewModel = hiltViewModel()
             remember(gogViewModel) { GOGAppScreen(gogViewModel) }
         }
+
         app.gamegrub.data.GameSource.EPIC -> remember { EpicAppScreen() }
+
         app.gamegrub.data.GameSource.AMAZON -> remember { AmazonAppScreen() }
     }
 
@@ -535,7 +539,7 @@ internal fun AppScreenContent(
     val isInstall = !isInstalled
     val installEnabled = if (isInstall) downloadAllowed && hasInternet else true
     val buttonEnabled = if (isInstalled) {
-        installEnabled
+        true
     } else {
         installEnabled && isValidToDownload
     }
@@ -556,7 +560,7 @@ internal fun AppScreenContent(
     val downloadStatusMessageFlow = remember(downloadInfo) { downloadInfo?.getStatusMessageFlow() }
     val downloadStatusMessage by (
         downloadStatusMessageFlow?.collectAsState(initial = downloadStatusMessageFlow.value)
-            ?: remember { mutableStateOf<String?>(null) }
+            ?: remember { mutableStateOf(null) }
         )
     val downloadingLabel = stringResource(R.string.downloading)
     val downloadTimeLeftText = remember(displayInfo.appId, downloadProgress, downloadInfo, isDownloading, downloadStatusMessage) {

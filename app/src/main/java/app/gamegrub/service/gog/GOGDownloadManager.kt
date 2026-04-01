@@ -59,7 +59,7 @@ class GOGDownloadManager @Inject constructor(
     private val apiClient: GOGApiClient,
     private val parser: GOGManifestParser,
     private val gogManager: GOGManager,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private val WINDOWS_OS_VERSION = "windows"
     private val httpClient = Net.http
@@ -109,13 +109,9 @@ class GOGDownloadManager @Inject constructor(
             }
 
             // Get the actual game from database to check what ID we have stored
-            val dbGame = gogManager.getGameFromDbById(gameId)
-
-            if (dbGame == null) {
-                return@withContext Result.failure(
-                    Exception("Failed to fetch game from DB"),
-                )
-            }
+            val dbGame = gogManager.getGameFromDbById(gameId) ?: return@withContext Result.failure(
+                Exception("Failed to fetch game from DB"),
+            )
 
             Timber.tag("GOG").d("Database game ID: ${dbGame.id}, title: ${dbGame.title}")
 
@@ -158,8 +154,6 @@ class GOGDownloadManager @Inject constructor(
             Timber.tag("GOG").d("Build productId: ${selectedBuild.productId}, input gameId: $gameId")
             Timber.tag("GOG")
                 .d("Full build details: buildId=${selectedBuild.buildId}, productId=${selectedBuild.productId}, platform=${selectedBuild.platform}, gen=${selectedBuild.generation}, version=${selectedBuild.versionName}, branch=${selectedBuild.branch}, legacyBuildId=${selectedBuild.legacyBuildId}")
-
-            val realGameId = gameId
 
             downloadInfo.updateStatusMessage("Fetching manifest...")
 
@@ -310,7 +304,7 @@ class GOGDownloadManager @Inject constructor(
             val chunkToProductMap = mutableMapOf<String, String>()
 
             Timber.tag("GOG")
-                .d("Mapping chunks to products. gameId parameter: $gameId, realGameId: $realGameId, manifest baseProductId: ${gameManifest.baseProductId}")
+                .d("Mapping chunks to products. gameId parameter: $gameId, realGameId: $gameId, manifest baseProductId: ${gameManifest.baseProductId}")
 
             val filesToDownloadPaths = gameFiles.map { it.path }.toSet()
             // Map each chunk to its product ID using depot info
@@ -373,7 +367,7 @@ class GOGDownloadManager @Inject constructor(
 
             // Store context for refreshing secure links if they expire
             val secureLinkContext = SecureLinkContext(
-                gameId = realGameId,
+                gameId = gameId,
                 generation = selectedBuild.generation,
                 productIds = productIds,
                 chunkToProductMap = chunkToProductMap,
@@ -638,9 +632,7 @@ class GOGDownloadManager @Inject constructor(
                     ?: return Result.failure(Exception("No main.bin URL for product ${f.productId}"))
 
                 val offset = file.offset
-                if (offset == null) {
-                    return Result.failure(Exception("Gen 1 file ${file.path} has no offset (main.bin range request required)"))
-                }
+                    ?: return Result.failure(Exception("Gen 1 file ${file.path} has no offset (main.bin range request required)"))
 
                 val rangeHeader = "bytes=$offset-${offset + file.size - 1}"
                 val request = Request.Builder()

@@ -1117,7 +1117,7 @@
     <string name="cancel_import_confirm">Ja, abbrechen</string>
     <string name="cancel_import_keep">Nein, Import behalten</string>
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">Paket wird extrahiert und geprüft (kann bei großen Dateien 2-3 Minuten dauern)…</string>
+    <string name="wine_proton_extracting">Paket wird extrahiert und geprüft (kann bei großen Dateien 2–3 Minuten dauern)…</string>
     <string name="wine_proton_filename_error">Dateiname muss mit \'wine\' oder \'proton\' beginnen</string>
     <string name="wine_proton_file_empty">Datei ist leer oder kann nicht gelesen werden</string>
     <string name="wine_proton_cannot_open">Datei kann nicht geöffnet werden</string>

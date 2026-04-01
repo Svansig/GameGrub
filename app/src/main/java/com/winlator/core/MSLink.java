@@ -10,7 +10,7 @@ public abstract class MSLink {
     public static final byte SW_SHOWNORMAL = 1;
     public static final byte SW_SHOWMAXIMIZED = 3;
     public static final byte SW_SHOWMINNOACTIVE = 7;
-    private static final int HasLinkTargetIDList = 1<<0;
+    private static final int HasLinkTargetIDList = 1;
     private static final int HasArguments = 1<<5;
     private static final int HasIconLocation = 1<<6;
     private static final int ForceNoLinkInfo = 1<<8;

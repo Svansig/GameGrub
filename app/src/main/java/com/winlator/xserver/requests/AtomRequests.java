@@ -43,7 +43,7 @@ public abstract class AtomRequests {
             outputStream.writeByte((byte) 0);
             outputStream.writeShort(client.getSequenceNumber());
             outputStream.writeInt((((-length) & 3) + length) / 4);
-            outputStream.writeShort((short) length);
+            outputStream.writeShort(length);
             outputStream.writePad(22);
             outputStream.writeString8(name);
         }

@@ -341,7 +341,9 @@ public class XClientRequestHandler implements RequestHandler {
                         GraphicsContextRequests.copyGC(client, inputStream, outputStream);
                     }
                     break;
-                case ClientOpcodes.SET_CLIP_RECTANGLES:
+                case ClientOpcodes.SET_CLIP_RECTANGLES, ClientOpcodes.NO_OPERATION, ClientOpcodes.FORCE_SCREEN_SAVER,
+                     ClientOpcodes.SET_SCREEN_SAVER, ClientOpcodes.BELL, ClientOpcodes.CREATE_GLYPH_CURSOR, ClientOpcodes.FREE_COLORMAP,
+                     ClientOpcodes.CREATE_COLORMAP, ClientOpcodes.POLY_RECTANGLE, ClientOpcodes.POLY_SEGMENT:
                     client.skipRequest();
                     break;
                 case ClientOpcodes.FREE_GC:
@@ -359,12 +361,6 @@ public class XClientRequestHandler implements RequestHandler {
                         DrawRequests.polyLine(client, inputStream, outputStream);
                     }
                     break;
-                case ClientOpcodes.POLY_SEGMENT:
-                    client.skipRequest();
-                    break;
-                case ClientOpcodes.POLY_RECTANGLE:
-                    client.skipRequest();
-                    break;
                 case ClientOpcodes.POLY_FILL_RECTANGLE:
                     try (XLock lock = client.xServer.lock(XServer.Lockable.DRAWABLE_MANAGER, XServer.Lockable.GRAPHIC_CONTEXT_MANAGER)) {
                         DrawRequests.polyFillRectangle(client, inputStream, outputStream);
@@ -380,19 +376,10 @@ public class XClientRequestHandler implements RequestHandler {
                         DrawRequests.getImage(client, inputStream, outputStream);
                     }
                     break;
-                case ClientOpcodes.CREATE_COLORMAP:
-                    client.skipRequest();
-                    break;
-                case ClientOpcodes.FREE_COLORMAP:
-                    client.skipRequest();
-                    break;
                 case ClientOpcodes.CREATE_CURSOR:
                     try (XLock lock = client.xServer.lock(XServer.Lockable.PIXMAP_MANAGER, XServer.Lockable.DRAWABLE_MANAGER, XServer.Lockable.CURSOR_MANAGER)) {
                         CursorRequests.createCursor(client, inputStream, outputStream);
                     }
-                    break;
-                case ClientOpcodes.CREATE_GLYPH_CURSOR:
-                    client.skipRequest();
                     break;
                 case ClientOpcodes.FREE_CURSOR:
                     try (XLock lock = client.xServer.lock(XServer.Lockable.PIXMAP_MANAGER, XServer.Lockable.DRAWABLE_MANAGER, XServer.Lockable.CURSOR_MANAGER)) {
@@ -407,23 +394,11 @@ public class XClientRequestHandler implements RequestHandler {
                         KeyboardRequests.getKeyboardMapping(client, inputStream, outputStream);
                     }
                     break;
-                case ClientOpcodes.BELL:
-                    client.skipRequest();
-                    break;
-                case ClientOpcodes.SET_SCREEN_SAVER:
-                    client.skipRequest();
-                    break;
                 case ClientOpcodes.GET_SCREEN_SAVER:
                     WindowRequests.getScreenSaver(client, inputStream, outputStream);
                     break;
-                case ClientOpcodes.FORCE_SCREEN_SAVER:
-                    client.skipRequest();
-                    break;
                 case ClientOpcodes.GET_MODIFIER_MAPPING:
                     KeyboardRequests.getModifierMapping(client, inputStream, outputStream);
-                    break;
-                case ClientOpcodes.NO_OPERATION:
-                    client.skipRequest();
                     break;
                 case ClientOpcodes.GET_POINTER_MAPPING:
                     CursorRequests.getPointerMapping(client, inputStream, outputStream);
@@ -432,7 +407,7 @@ public class XClientRequestHandler implements RequestHandler {
                     try (XLock lock = client.xServer.lockAll()){
                         client.xServer.setGrabbed(true, client);
                         outputStream.writeSuccessReply(client.getSequenceNumber(), 0);
-                        Log.d("XClientRequestHandler", "X_GrabServer request handled successfully:" + outputStream.buffer.position());
+                        Timber.tag("XClientRequestHandler").d("X_GrabServer request handled successfully:" + outputStream.buffer.position());
                     }
                     break;
                 case ClientOpcodes.UNGRAB_SERVER:
@@ -441,21 +416,20 @@ public class XClientRequestHandler implements RequestHandler {
                             client.xServer.setGrabbed(false, null);
                         }
                         outputStream.writeSuccessReply(client.getSequenceNumber(), 0);
-                        Log.d("XClientRequestHandler", "X_UngrabServer request handled successfully:" + outputStream.buffer.position());
+                        Timber.tag("XClientRequestHandler").d("X_UngrabServer request handled successfully:" + outputStream.buffer.position());
                     }
                     break;
                 default:
                     if (opcode < 0) {
                         Extension extension = client.xServer.extensions.get(opcode);
                         if (extension != null) extension.handleRequest(client, inputStream, outputStream);
-                    }
-                    else Log.d("XClientRequestHandler", "Unsupported opcode " + opcode);
+                    } else Timber.tag("XClientRequestHandler").d("Unsupported opcode " + opcode);
                     break;
             }
         }
         catch (XRequestError e) {
             client.skipRequest();
-            Log.w("XClientRequestHandler", "handleNormalRequest error " + e);
+            Timber.tag("XClientRequestHandler").w("handleNormalRequest error " + e);
             e.sendError(client, opcode);
         }
 

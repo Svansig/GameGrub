@@ -285,7 +285,7 @@ object ContainerUtils {
             cpuList = container.cpuList,
             cpuListWoW64 = container.cpuListWoW64,
             wow64Mode = container.isWoW64Mode,
-            startupSelection = container.startupSelection.toByte(),
+            startupSelection = container.startupSelection,
             box86Version = container.box86Version,
             box64Version = container.box64Version,
             box86Preset = container.box86Preset,
@@ -716,7 +716,7 @@ object ContainerUtils {
                     null
                 }
 
-                if (installPath != null && installPath.isNotEmpty()) {
+                if (!installPath.isNullOrEmpty()) {
                     val drive: Char = if (defaultDrives.contains("A:")) {
                         Container.getNextAvailableDriveLetter(defaultDrives)
                     } else {
@@ -898,7 +898,7 @@ object ContainerUtils {
         }
 
         // Apply best config map to containerData if available (full validated config on first run when components exist)
-        containerData = if (bestConfigMap != null && bestConfigMap.isNotEmpty()) {
+        containerData = if (!bestConfigMap.isNullOrEmpty()) {
             applyBestConfigMapToContainerData(containerData, bestConfigMap)
         } else {
             containerData

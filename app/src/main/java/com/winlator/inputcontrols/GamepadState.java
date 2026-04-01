@@ -39,9 +39,9 @@ public class GamepadState {
     public void setPressed(int buttonIdx, boolean pressed) {
         int flag = 1<<buttonIdx;
         if (pressed) {
-            buttons |= flag;
+            buttons |= (short) flag;
         }
-        else buttons &= ~flag;
+        else buttons &= (short) ~flag;
     }
 
     public boolean isPressed(int buttonIdx) {

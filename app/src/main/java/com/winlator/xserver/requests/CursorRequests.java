@@ -49,11 +49,11 @@ public abstract class CursorRequests {
         client.registerAsOwnerOfResource(cursor);
     }
 
-    public static void freeCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+    public static void freeCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) {
         client.xServer.cursorManager.freeCursor(inputStream.readInt());
     }
 
-    public static void getPointerMapping(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError, IOException {
+    public static void getPointerMapping(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         try (XStreamLock lock = outputStream.lock()) {
             byte[] buttonsMap = {1, 2, 3};
             byte length = (byte) buttonsMap.length;

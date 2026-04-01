@@ -286,12 +286,12 @@ fun ControllerBindingDialog(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            if (isSearching) {
+                                            selectedCategory = if (isSearching) {
                                                 // In search mode: clicking filters to this category
-                                                selectedCategory = if (selectedCategory == categoryIndex) null else categoryIndex
+                                                if (selectedCategory == categoryIndex) null else categoryIndex
                                             } else {
                                                 // Normal mode: switch to this category
-                                                selectedCategory = categoryIndex
+                                                categoryIndex
                                             }
                                         },
                                     color = if (isSelected) {
@@ -362,7 +362,7 @@ fun ControllerBindingDialog(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            Log.d("ControllerBindingDialog", "Clearing binding for $buttonName")
+                                            Timber.tag("ControllerBindingDialog").d("Clearing binding for $buttonName")
                                             onBindingSelected(null)
                                         },
                                     color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
@@ -419,7 +419,7 @@ fun ControllerBindingDialog(
                                     binding = binding,
                                     isSelected = binding == currentBinding,
                                     onClick = {
-                                        Log.d("ControllerBindingDialog", "Binding selected for $buttonName: ${binding.name}")
+                                        Timber.tag("ControllerBindingDialog").d("Binding selected for $buttonName: ${binding.name}")
                                         onBindingSelected(binding)
                                     },
                                 )

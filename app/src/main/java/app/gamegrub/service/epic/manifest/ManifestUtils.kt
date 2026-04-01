@@ -48,7 +48,7 @@ object ManifestUtils {
     fun getRequiredInstallFiles(manifest: EpicManifest): List<FileManifest> {
         val all = manifest.fileManifestList?.elements ?: return emptyList()
         val required = all.filter { it.installTags.isEmpty() }
-        return if (required.isEmpty()) all else required
+        return required.ifEmpty { all }
     }
 
     /**
@@ -164,7 +164,7 @@ object ManifestUtils {
             file.installTags.isEmpty() || file.installTags.any { it in selectedTags }
         }
         // If selected language matched no files (e.g. manifest uses "de" not "German"), fall back to required-only
-        return if (withLanguage.isEmpty()) getRequiredInstallFiles(manifest) else withLanguage
+        return withLanguage.ifEmpty { getRequiredInstallFiles(manifest) }
     }
 
     /**

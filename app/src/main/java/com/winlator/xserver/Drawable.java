@@ -187,7 +187,7 @@ public class Drawable extends XResource {
 
     public void drawLines(int color, int lineWidth, short... points) {
         for (int i = 2; i < points.length; i += 2) {
-            drawLine(points[i-2], points[i-1], points[i+0], points[i+1], color, (short)lineWidth);
+            drawLine(points[i-2], points[i-1], points[i], points[i+1], color, (short)lineWidth);
         }
     }
 

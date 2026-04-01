@@ -110,7 +110,7 @@ public abstract class FEXCorePresetManager {
         final String customPresetsStr = PrefManager.getString("fexcore_custom_presets", "");
         final String[] customPresets = customPresetsStr.split(",");
         final int[] index = {0};
-        return () -> new Iterator<String[]>() {
+        return () -> new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return index[0] < customPresets.length && !customPresetsStr.isEmpty();
@@ -155,7 +155,7 @@ public abstract class FEXCorePresetManager {
         try {
             PrefManager.putString(key, customPresetsStr).get();
         } catch (Exception e) {
-            Timber.e("Failed to edit preset: " + e);
+            Timber.e("Failed to edit preset: %s", e);
         }
         return presetId;
     }
@@ -194,10 +194,10 @@ public abstract class FEXCorePresetManager {
         String newCustomPresetsStr = "";
 
         String[] customPresets = oldCustomPresetsStr.split(",");
-        for (int i = 0; i < customPresets.length; i++) {
-            String[] preset = customPresets[i].split("\\|");
+        for (String customPreset : customPresets) {
+            String[] preset = customPreset.split("\\|");
             if (!preset[0].equals(id))
-                newCustomPresetsStr += (!newCustomPresetsStr.isEmpty() ? "," : "") + customPresets[i];
+                newCustomPresetsStr += (!newCustomPresetsStr.isEmpty() ? "," : "") + customPreset;
         }
 
         PrefManager.putString(key, newCustomPresetsStr);

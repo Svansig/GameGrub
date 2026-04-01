@@ -44,7 +44,7 @@ public abstract class MSBitmap {
         }
 
         ByteBuffer pixels = ByteBuffer.allocate(width * height * 4);
-        byte r1 = 0, g1 = 0, b1 = 0, r2 = 0, g2 = 0, b2 = 0;
+        byte r1, g1, b1, r2 = 0, g2 = 0, b2 = 0;
         boolean started = false;
         boolean blank = true;
         for (int y = height - 1, i = data.position(), j, line; y >= 0; y--) {
@@ -57,7 +57,7 @@ public abstract class MSBitmap {
                 r1 = data.get(i++);
                 pixels.put(j+2, b1);
                 pixels.put(j+1, g1);
-                pixels.put(j+0, r1);
+                pixels.put(j, r1);
                 pixels.put(j+3, (byte)255);
 
                 if (!started) {
@@ -81,7 +81,7 @@ public abstract class MSBitmap {
         return bitmap;
     }
 
-    public static boolean create(Bitmap bitmap, File outputFile) {
+    public static void create(Bitmap bitmap, File outputFile) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
 
@@ -124,7 +124,7 @@ public abstract class MSBitmap {
             for (int x = 0; x < width; x++) {
                 j = dataOffset + y * rowBytes + x * 3;
                 int pixel = pixels[i++];
-                buffer.put(j+0, (byte)Color.blue(pixel));
+                buffer.put(j, (byte)Color.blue(pixel));
                 buffer.put(j+1, (byte)Color.green(pixel));
                 buffer.put(j+2, (byte)Color.red(pixel));
             }
@@ -137,10 +137,8 @@ public abstract class MSBitmap {
 
         try (FileOutputStream fos = new FileOutputStream(outputFile)) {
             fos.write(buffer.array());
-            return true;
         }
         catch (IOException e) {
-            return false;
         }
     }
 }

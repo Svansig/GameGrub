@@ -17,7 +17,7 @@ import timber.log.Timber
 
 @Singleton
 class BestConfigCache @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     companion object {
         private const val CACHE_TTL_MS = 24 * 60 * 60 * 1000L

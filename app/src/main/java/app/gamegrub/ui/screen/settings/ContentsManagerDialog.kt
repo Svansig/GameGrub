@@ -277,7 +277,7 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                             ContentProfile.ContentType.CONTENT_TYPE_WOWBOX64,
                             ContentProfile.ContentType.CONTENT_TYPE_FEXCORE,
                         )
-                        ContentProfile.ContentType.values().filter { it in allowed }.forEach { t ->
+                        ContentProfile.ContentType.entries.filter { it in allowed }.forEach { t ->
                             DropdownMenuItem(
                                 text = { Text(t.toString()) },
                                 onClick = {
@@ -339,7 +339,7 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
     if (showUntrustedConfirm && pendingProfile != null) {
         AlertDialog(
-            onDismissRequest = { showUntrustedConfirm = false },
+            onDismissRequest = { },
             title = { Text(stringResource(R.string.untrusted_files_detected)) },
             text = {
                 Column(
@@ -361,7 +361,6 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 TextButton(
                     onClick = {
                         val profile = pendingProfile ?: return@TextButton
-                        showUntrustedConfirm = false
                         isBusy = true
                         scope.launch {
                             performFinishInstall(ctx, mgr, profile) { _ ->
@@ -376,7 +375,7 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 ) { Text(stringResource(R.string.install_anyway)) }
             },
             dismissButton = {
-                TextButton(onClick = { showUntrustedConfirm = false }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -384,7 +383,7 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     // Delete confirmation
     deleteTarget?.let { target ->
         AlertDialog(
-            onDismissRequest = { deleteTarget = null },
+            onDismissRequest = { },
             title = { Text(stringResource(R.string.remove_content)) },
             text = { Text(stringResource(R.string.remove_content_confirmation, target.verName, target.verCode)) },
             confirmButton = {
@@ -394,12 +393,11 @@ fun ContentsManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                             withContext(Dispatchers.IO) { mgr.removeContent(target) }
                             refreshInstalled()
                             SnackbarManager.show("Removed ${target.verName}")
-                            deleteTarget = null
                         }
                     },
                 ) { Text(stringResource(R.string.remove)) }
             },
-            dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text(stringResource(R.string.cancel)) } },
+            dismissButton = { TextButton(onClick = { }) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }

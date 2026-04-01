@@ -4,10 +4,6 @@ import android.util.SparseArray;
 
 import com.winlator.core.Callback;
 import com.winlator.renderer.Texture;
-import com.winlator.widget.XServerView;
-import com.winlator.xenvironment.components.VortekRendererComponent;
-
-import java.util.Objects;
 
 public class DrawableManager extends XResourceManager implements XResourceManager.OnResourceLifecycleListener {
     private final XServer xServer;

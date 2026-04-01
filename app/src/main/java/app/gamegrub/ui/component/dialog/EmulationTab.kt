@@ -52,19 +52,19 @@ fun EmulationTabContent(state: ContainerConfigState) {
             SettingsListDropdown(
                 colors = settingsTileColors(),
                 title = { Text(text = stringResource(R.string.emulator_64bit)) },
-                value = state.emulator64Index.value,
+                value = state.emulator64Index.intValue,
                 items = state.emulatorEntries,
                 enabled = false,
                 onItemSelected = { },
             )
             LaunchedEffect(wineIsX8664, wineIsArm64Ec) {
-                state.emulator64Index.value = if (wineIsX8664) 1 else 0
+                state.emulator64Index.intValue = if (wineIsX8664) 1 else 0
             }
 
             SettingsListDropdown(
                 colors = settingsTileColors(),
                 title = { Text(text = stringResource(R.string.emulator_32bit)) },
-                value = state.emulator32Index.value,
+                value = state.emulator32Index.intValue,
                 items = state.emulatorEntries,
                 enabled = when {
                     wineIsX8664 -> false
@@ -72,13 +72,13 @@ fun EmulationTabContent(state: ContainerConfigState) {
                     else -> true
                 },
                 onItemSelected = { idx ->
-                    state.emulator32Index.value = idx
+                    state.emulator32Index.intValue = idx
                     state.config.value = config.copy(emulator = state.emulatorEntries[idx])
                 },
             )
             LaunchedEffect(wineIsX8664) {
                 if (wineIsX8664) {
-                    state.emulator32Index.value = 1
+                    state.emulator32Index.intValue = 1
                     if (config.emulator != state.emulatorEntries[1]) {
                         state.config.value = config.copy(emulator = state.emulatorEntries[1])
                     }
@@ -86,7 +86,7 @@ fun EmulationTabContent(state: ContainerConfigState) {
             }
             LaunchedEffect(wineIsArm64Ec) {
                 if (wineIsArm64Ec) {
-                    if (state.emulator32Index.value !in 0..1) state.emulator32Index.value = 0
+                    if (state.emulator32Index.intValue !in 0..1) state.emulator32Index.intValue = 0
                     if (config.emulator.isEmpty()) {
                         state.config.value = config.copy(emulator = state.emulatorEntries[0])
                     }

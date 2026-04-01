@@ -102,9 +102,7 @@ class GOGService : Service() {
         }
 
         fun stop() {
-            instance?.let { service ->
-                service.stopSelf()
-            }
+            instance?.stopSelf()
         }
 
         // ==========================================================================
@@ -433,7 +431,7 @@ class GOGService : Service() {
                     Timber.tag("GOG").d("[Cloud Saves] Resolving save directory paths for $appId")
                     val saveLocations = instance.gogManager.getSaveDirectoryPath(context, appId, game.title)
 
-                    if (saveLocations == null || saveLocations.isEmpty()) {
+                    if (saveLocations.isNullOrEmpty()) {
                         Timber.tag("GOG").w("[Cloud Saves] No save locations found for game $appId (cloud saves may not be enabled)")
                         return@withContext false
                     }

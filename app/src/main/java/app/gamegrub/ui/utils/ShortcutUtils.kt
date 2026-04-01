@@ -11,7 +11,8 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
-import android.os.Build
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.get
 import app.gamegrub.MainActivity
 import app.gamegrub.R
 import app.gamegrub.data.GameSource
@@ -25,7 +26,7 @@ import kotlinx.coroutines.withContext
 private fun createAdaptiveIconBitmap(context: Context, src: Bitmap): Bitmap {
     val density = context.resources.displayMetrics.density
     val targetSize = (108f * density).toInt().coerceAtLeast(108)
-    val outBmp = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888)
+    val outBmp = createBitmap(targetSize, targetSize)
     val canvas = Canvas(outBmp)
     val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
 
@@ -42,10 +43,10 @@ private fun createAdaptiveIconBitmap(context: Context, src: Bitmap): Bitmap {
         if (bmp.width <= 1 || bmp.height <= 1) return 0 // transparent fallback
         val midX = bmp.width / 2
         val midY = bmp.height / 2
-        val top = bmp.getPixel(midX.coerceIn(0, bmp.width - 1), 0)
-        val bottom = bmp.getPixel(midX.coerceIn(0, bmp.width - 1), bmp.height - 1)
-        val left = bmp.getPixel(0, midY.coerceIn(0, bmp.height - 1))
-        val right = bmp.getPixel(bmp.width - 1, midY.coerceIn(0, bmp.height - 1))
+        val top = bmp[midX.coerceIn(0, bmp.width - 1), 0]
+        val bottom = bmp[midX.coerceIn(0, bmp.width - 1), bmp.height - 1]
+        val left = bmp[0, midY.coerceIn(0, bmp.height - 1)]
+        val right = bmp[bmp.width - 1, midY.coerceIn(0, bmp.height - 1)]
 
         // If three or more of the four edge-center pixels are exactly the same color, use that color
         val counts = hashMapOf<Int, Int>()
@@ -72,8 +73,8 @@ private fun createAdaptiveIconBitmap(context: Context, src: Bitmap): Bitmap {
 
     // Center-fit scale to keep entire icon visible inside the padded area
     val scale = minOf(
-        availSize.toFloat() / src.width.coerceAtLeast(1),
-        availSize.toFloat() / src.height.coerceAtLeast(1),
+        availSize / src.width.coerceAtLeast(1),
+        availSize / src.height.coerceAtLeast(1),
     )
     val drawW = src.width * scale
     val drawH = src.height * scale
@@ -112,11 +113,7 @@ internal suspend fun createPinnedShortcut(context: Context, gameId: Int, label: 
 
                     else -> {
                         if (drawable != null) {
-                            val bmp = Bitmap.createBitmap(
-                                drawable.intrinsicWidth.coerceAtLeast(1),
-                                drawable.intrinsicHeight.coerceAtLeast(1),
-                                Bitmap.Config.ARGB_8888,
-                            )
+                            val bmp = createBitmap(drawable.intrinsicWidth.coerceAtLeast(1), drawable.intrinsicHeight.coerceAtLeast(1))
                             val canvas = Canvas(bmp)
                             drawable.setBounds(0, 0, canvas.width, canvas.height)
                             drawable.draw(canvas)
@@ -137,11 +134,7 @@ internal suspend fun createPinnedShortcut(context: Context, gameId: Int, label: 
 
     val finalIcon: Icon = if (bitmapIcon != null) {
         val adaptiveBmp = createAdaptiveIconBitmap(appContext, bitmapIcon)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Icon.createWithAdaptiveBitmap(adaptiveBmp)
-        } else {
-            Icon.createWithBitmap(adaptiveBmp)
-        }
+        Icon.createWithAdaptiveBitmap(adaptiveBmp)
     } else {
         Icon.createWithResource(appContext, R.mipmap.ic_shortcut_filter)
     }

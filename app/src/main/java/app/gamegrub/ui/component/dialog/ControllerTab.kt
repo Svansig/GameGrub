@@ -102,10 +102,10 @@ fun ControllerTabContent(state: ContainerConfigState, default: Boolean) {
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.external_display_input)) },
             subtitle = { Text(text = stringResource(R.string.external_display_input_subtitle)) },
-            value = state.externalDisplayModeIndex.value,
+            value = state.externalDisplayModeIndex.intValue,
             items = state.externalDisplayModes,
             onItemSelected = { index ->
-                state.externalDisplayModeIndex.value = index
+                state.externalDisplayModeIndex.intValue = index
                 state.config.value = config.copy(
                     externalDisplayMode = when (index) {
                         1 -> Container.EXTERNAL_DISPLAY_MODE_TOUCHPAD
@@ -132,12 +132,11 @@ fun ControllerTabContent(state: ContainerConfigState, default: Boolean) {
         }
         TouchGestureSettingsDialog(
             gestureConfig = gestureConfig,
-            onDismiss = { showGestureDialog = false },
+            onDismiss = { },
             onSave = { updatedGesture ->
                 // Read the latest config to avoid overwriting concurrent changes
                 val latest = state.config.value
                 state.config.value = latest.copy(gestureConfig = updatedGesture.toJson())
-                showGestureDialog = false
             },
         )
     }

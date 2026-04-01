@@ -19,7 +19,6 @@ public class XConnectorEpoll implements Runnable {
     private boolean running = false;
     private boolean multithreadedClients = false;
     private boolean canReceiveAncillaryMessages = false;
-    private boolean monitorClients = true;
     private int initialInputBufferCapacity = 128;
     private int initialOutputBufferCapacity = 128;
     private final SparseArray<Client> connectedClients = new SparseArray<>();
@@ -83,20 +82,20 @@ public class XConnectorEpoll implements Runnable {
         Thread thread;
         if (!this.running && (thread = this.epollThread) != null) {
             this.running = true;
-            Log.d(TAG, logPrefix() + " Starting connector thread (epollFd=" + this.epollFd + ", serverFd=" + this.serverFd + ", shutdownFd=" + this.shutdownFd + ")");
+            Timber.tag(TAG).d(logPrefix() + " Starting connector thread (epollFd=" + this.epollFd + ", serverFd=" + this.serverFd + ", shutdownFd=" + this.shutdownFd + ")");
             thread.start();
         }
     }
 
     public synchronized void stop() {
         if (this.running && this.epollThread != null) {
-            Log.d(TAG, logPrefix() + " Stopping connector thread (connectedClients=" + this.connectedClients.size() + ")");
+            Timber.tag(TAG).d(logPrefix() + " Stopping connector thread (connectedClients=" + this.connectedClients.size() + ")");
             this.running = false;
             requestShutdown();
             while (this.epollThread.isAlive()) {
                 try {
                     this.epollThread.join();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
             }
             this.epollThread = null;
@@ -106,9 +105,10 @@ public class XConnectorEpoll implements Runnable {
     @Override // java.lang.Runnable
     public void run() {
         while (this.running) {
-            if (!doEpollIndefinitely(this.epollFd, this.serverFd, !this.multithreadedClients && this.monitorClients)) {
+            boolean monitorClients = true;
+            if (!doEpollIndefinitely(this.epollFd, this.serverFd, !this.multithreadedClients && monitorClients)) {
                 if (this.running) {
-                    Log.e(TAG, logPrefix() + " epoll loop exited unexpectedly; shutting down all X clients (epollFd=" + this.epollFd + ", serverFd=" + this.serverFd + ", shutdownFd=" + this.shutdownFd + ", connectedClients=" + this.connectedClients.size() + ", multithreadedClients=" + this.multithreadedClients + ", monitorClients=" + this.monitorClients + ")");
+                    Timber.tag(TAG).e(logPrefix() + " epoll loop exited unexpectedly; shutting down all X clients (epollFd=" + this.epollFd + ", serverFd=" + this.serverFd + ", shutdownFd=" + this.shutdownFd + ", connectedClients=" + this.connectedClients.size() + ", multithreadedClients=" + this.multithreadedClients + ", monitorClients=" + monitorClients + ")");
                 }
                 break;
             }
@@ -173,7 +173,7 @@ public class XConnectorEpoll implements Runnable {
                 while (client.pollThread.isAlive()) {
                     try {
                         client.pollThread.join();
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
                 this.connectionHandler.handleConnectionShutdown(client);
@@ -240,7 +240,7 @@ public class XConnectorEpoll implements Runnable {
             ByteBuffer data = ByteBuffer.allocateDirect(8);
             data.asLongBuffer().put(1L);
             new ClientSocket(this.shutdownFd).write(data);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 }

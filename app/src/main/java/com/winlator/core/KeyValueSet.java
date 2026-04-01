@@ -17,7 +17,6 @@ public class KeyValueSet implements Iterable<String[]> {
 
     public KeyValueSet(String data) {
         String str = "";
-        this.data = "";
         if (data != null && !data.isEmpty()) {
             str = data;
         }
@@ -53,9 +52,7 @@ public class KeyValueSet implements Iterable<String[]> {
         if (this.data.isEmpty()) {
             return fallback;
         }
-        Iterator<String[]> it = iterator();
-        while (it.hasNext()) {
-            String[] keyValue = it.next();
+        for (String[] keyValue : this) {
             if (keyValue[0].equals(key)) {
                 return keyValue[1];
             }
@@ -93,7 +90,7 @@ public class KeyValueSet implements Iterable<String[]> {
         } catch (NumberFormatException e) {
             result = fallback;
         }
-        return "0x" + String.format("%08x", Integer.valueOf(result));
+        return "0x" + String.format("%08x", result);
     }
 
     public boolean getBoolean(String key) {
@@ -126,6 +123,7 @@ public class KeyValueSet implements Iterable<String[]> {
         return this;
     }
 
+    @NonNull
     @Override // java.lang.Iterable
     public Iterator<String[]> iterator() {
         int index = this.data.indexOf(",");
@@ -133,7 +131,7 @@ public class KeyValueSet implements Iterable<String[]> {
         final int[] end = new int[1];
         end[0] = index != -1 ? index : this.data.length();
         final String[] item = new String[2];
-        return new Iterator<String[]>() { // from class: com.winlator.core.KeyValueSet.1
+        return new Iterator<>() { // from class: com.winlator.core.KeyValueSet.1
             @Override // java.util.Iterator
             public boolean hasNext() {
                 return start[0] < end[0];
@@ -144,13 +142,10 @@ public class KeyValueSet implements Iterable<String[]> {
                 int index2 = KeyValueSet.this.data.indexOf("=", start[0]);
                 item[0] = KeyValueSet.this.data.substring(start[0], index2);
                 item[1] = KeyValueSet.this.data.substring(index2 + 1, end[0]);
-                int[] iArr = start;
-                int[] iArr2 = end;
-                iArr[0] = iArr2[0] + 1;
-                iArr2[0] = KeyValueSet.this.data.indexOf(",", start[0]);
-                int[] iArr3 = end;
-                if (iArr3[0] == -1) {
-                    iArr3[0] = KeyValueSet.this.data.length();
+                start[0] = end[0] + 1;
+                end[0] = KeyValueSet.this.data.indexOf(",", start[0]);
+                if (end[0] == -1) {
+                    end[0] = KeyValueSet.this.data.length();
                 }
                 return item;
             }

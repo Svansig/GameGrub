@@ -189,17 +189,16 @@ internal fun LibraryCarouselPane(
     val baseCardHeight = baseCardWidth / CAROUSEL_CARD_ASPECT_RATIO
     val cardVerticalOverflow = CAROUSEL_CARD_VERTICAL_OVERFLOW.dp
     val badgeReservedHeight = CAROUSEL_BADGE_RESERVED_HEIGHT.dp
-    val cardTopOverflow = cardVerticalOverflow
     val cardBottomOverflow = cardVerticalOverflow + badgeReservedHeight
     val availableCarouselHeight =
         (configuration.screenHeightDp.dp - topOverlayClearance - bottomOverlayClearance)
             .coerceAtLeast(220.dp)
     val maxCardHeight =
-        (availableCarouselHeight - cardTopOverflow - cardBottomOverflow)
+        (availableCarouselHeight - cardVerticalOverflow - cardBottomOverflow)
             .coerceAtLeast(180.dp)
     val cardHeight = minOf(baseCardHeight, maxCardHeight * CAROUSEL_CARD_SIZE_MULTIPLIER)
     val cardWidth = cardHeight * CAROUSEL_CARD_ASPECT_RATIO
-    val itemContainerHeight = cardHeight + cardTopOverflow + cardBottomOverflow
+    val itemContainerHeight = cardHeight + cardVerticalOverflow + cardBottomOverflow
     val cardWidthPx = with(density) { cardWidth.toPx() }
     // Keep lazy items composed slightly beyond the viewport because rotation/translation can leave
     // transformed pixels visible after the raw item slot has technically moved offscreen.
@@ -448,7 +447,7 @@ internal fun LibraryCarouselPane(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopCenter)
-                                        .padding(top = cardTopOverflow)
+                                        .padding(top = cardVerticalOverflow)
                                         .width(cardWidth)
                                         .height(cardHeight + badgeReservedHeight)
                                         .graphicsLayer {

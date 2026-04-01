@@ -187,7 +187,10 @@ internal fun LibraryListPane(
     }
 
     var targetOfScroll by remember { mutableIntStateOf(-1) }
-    val backdropItem by remember(state.appInfoList, listState.firstVisibleItemIndex, targetOfScroll, currentLayout) {
+    val backdropItem by remember(
+        state.appInfoList,
+        remember { derivedStateOf { listState.firstVisibleItemIndex } }, targetOfScroll, currentLayout,
+    ) {
         derivedStateOf {
             if (currentLayout == PaneType.LIST || state.appInfoList.isEmpty()) {
                 null
@@ -278,9 +281,9 @@ internal fun LibraryListPane(
                     }
                     val total = customCount + steamCount + gogInstalledCount + epicInstalledCount + amazonInstalledCount
                     Timber.tag("LibraryListPane").d(
+                        "%snull",
                         "Skeleton calculation - Custom: $customCount, Steam: $steamCount, " +
-                            "GOG installed: $gogInstalledCount, Epic installed: $epicInstalledCount, " +
-                            "Amazon installed: $amazonInstalledCount, Total: $total",
+                            "GOG installed: $gogInstalledCount, Epic installed: $epicInstalledCount, ",
                     )
                     if (total == 0) 6 else minOf(total, 20)
                 }

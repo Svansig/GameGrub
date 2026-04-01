@@ -1,14 +1,12 @@
 package com.winlator.core;
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,11 +24,9 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -94,12 +90,12 @@ public abstract class FileUtils {
         if (parentDir != null && !parentDir.exists()) {
             parentDir.mkdirs();
         }
-        
+
         // Create temporary file in same directory
-        File tempFile = createTempFile(parentDir != null ? parentDir : file.getAbsoluteFile().getParentFile(), 
+        File tempFile = createTempFile(parentDir != null ? parentDir : file.getAbsoluteFile().getParentFile(),
                                         getBasename(file.getPath()));
-        
-        boolean success = false;
+
+        boolean success;
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile))) {
             bw.write(data);
             bw.flush();
@@ -111,24 +107,20 @@ public abstract class FileUtils {
             tempFile.delete();
             return false;
         }
-        
+
         // Atomically replace original file with temp file
-        if (success) {
-            try {
-                // Atomic move - replaces target if it exists
-                Files.move(tempFile.toPath(), file.toPath(), 
-                          StandardCopyOption.ATOMIC_MOVE, 
-                          StandardCopyOption.REPLACE_EXISTING);
-                return true;
-            }
-            catch (IOException e) {
-                Log.e("FileUtils", "Failed to atomically move temp file: " + e);
-                tempFile.delete();
-                return false;
-            }
+        try {
+            // Atomic move - replaces target if it exists
+            Files.move(tempFile.toPath(), file.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+            return true;
+        } catch (IOException e) {
+            Timber.tag("FileUtils").e("Failed to atomically move temp file: " + e);
+            tempFile.delete();
+            return false;
         }
-        
-        return false;
+
     }
 
     public static void symlink(File linkTarget, File linkFile) {
@@ -141,7 +133,7 @@ public abstract class FileUtils {
             Os.symlink(linkTarget, linkFile);
         }
         catch (ErrnoException e) {
-            Log.e("FileUtils", "Failed to symlink: " + e);
+            Timber.tag("FileUtils").e("Failed to symlink: " + e);
         }
     }
 
@@ -224,7 +216,7 @@ public abstract class FileUtils {
             if (!dstFile.isDirectory()) dstFile.mkdirs();
             try {
                 String[] filenames = context.getAssets().list(assetFile);
-                for (String filename : filenames) {
+                for (String filename : Objects.requireNonNull(filenames)) {
                     String relativePath = StringUtils.addEndSlash(assetFile)+filename;
                     if (isDirectory(context, relativePath)) {
                         copy(context, relativePath, new File(dstFile, filename));
@@ -233,19 +225,19 @@ public abstract class FileUtils {
                 }
             }
             catch (IOException e) {
-                Log.e("FileUtils", "Failed to copy directory: " + e);
+                Timber.tag("FileUtils").e("Failed to copy directory: " + e);
             }
         }
         else {
             if (dstFile.isDirectory()) dstFile = new File(dstFile, FileUtils.getName(assetFile));
             File parent = dstFile.getParentFile();
-            if (!parent.isDirectory()) parent.mkdirs();
+            if (!Objects.requireNonNull(parent).isDirectory()) parent.mkdirs();
             try (InputStream inStream = context.getAssets().open(assetFile);
                  BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(dstFile), StreamUtils.BUFFER_SIZE)) {
                 StreamUtils.copy(inStream, outStream);
             }
             catch (IOException e) {
-                Log.e("FileUtils", "Failed to copy file: " + e);
+                Timber.tag("FileUtils").e("Failed to copy file: " + e);
             }
         }
     }
@@ -282,13 +274,12 @@ public abstract class FileUtils {
     }
 
     public static void chmod(File file, int mode) {
-        Log.d("FileUtils", "Attempting to chmod " + file.getAbsolutePath());
+        Timber.tag("FileUtils").d("Attempting to chmod " + file.getAbsolutePath());
         try {
             Os.chmod(file.getAbsolutePath(), mode);
-            Log.d("FileUtils", "Successfully chmod-ed " + file.getAbsolutePath());
-        }
-        catch (ErrnoException e) {
-            Log.e("FileUtils", "Failed to chmod " + file.getAbsolutePath() + ": " + e);
+            Timber.tag("FileUtils").d("Successfully chmod-ed " + file.getAbsolutePath());
+        } catch (ErrnoException e) {
+            Timber.tag("FileUtils").e("Failed to chmod " + file.getAbsolutePath() + ": " + e);
         }
     }
 
@@ -304,8 +295,8 @@ public abstract class FileUtils {
 
     public static String getFilePathFromUri(Uri uri) {
         String path = null;
-        if (uri.getAuthority().equals("com.android.externalstorage.documents")) {
-            String[] parts = uri.getLastPathSegment().split(":");
+        if (Objects.requireNonNull(uri.getAuthority()).equals("com.android.externalstorage.documents")) {
+            String[] parts = Objects.requireNonNull(uri.getLastPathSegment()).split(":");
             if (parts[0].equalsIgnoreCase("primary")) path = Environment.getExternalStorageDirectory() + "/" + parts[1];
         }
         return path;
@@ -405,9 +396,8 @@ public abstract class FileUtils {
                 String line = reader.readLine();
                 result = !line.isEmpty() ? Integer.parseInt(line) : 0;
             }
-        }
-        catch (Exception e) {
-            Log.e("FileUtils", "Failed to read int: " + e);
+        } catch (Exception e) {
+            Timber.tag("FileUtils").e("Failed to read int: " + e);
         }
         return result;
     }
@@ -439,7 +429,7 @@ public abstract class FileUtils {
                             fos.write(buffer, 0, len);
                         }
                     }
-                    chmod(outFile, 0771);
+                    chmod(outFile, 505);
                 }
                 zis.closeEntry();
                 entry = zis.getNextEntry();
@@ -474,14 +464,12 @@ public abstract class FileUtils {
         return null;
     }
 
-    public static boolean writeToBinaryFile(String filename, int position, int data) {
+    public static void writeToBinaryFile(String filename, int position, int data) {
         try (RandomAccessFile file = new RandomAccessFile(filename, "rw")) {
             file.seek(position);
             file.write(data);
-            return true;
         } catch (IOException e) {
-            Log.e("FileUtils", "Failed to write data " + data + " at " + position + " to " + filename);
-            return false;
+            Timber.tag("FileUtils").e("Failed to write data " + data + " at " + position + " to " + filename);
         }
     }
 }

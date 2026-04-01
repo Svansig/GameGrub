@@ -10,10 +10,6 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Looper;
-import android.text.Html;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -21,10 +17,7 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
-import android.widget.TextView;
 // import androidx.appcompat.app.AppCompatActivity;
 
 // import com.google.android.material.tabs.TabLayout;
@@ -63,6 +56,7 @@ public abstract class AppUtils {
 
     public static void restartApplication(Context context, int selectedMenuItemId) {
         Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+        assert intent != null;
         Intent mainIntent = Intent.makeRestartActivityTask(intent.getComponent());
         if (selectedMenuItemId > 0) mainIntent.putExtra("selected_menu_item_id", selectedMenuItemId);
         context.startActivity(mainIntent);
@@ -256,15 +250,14 @@ public abstract class AppUtils {
         });
     }
 
-    public static boolean setSpinnerSelectionFromValue(Spinner spinner, String value) {
+    public static void setSpinnerSelectionFromValue(Spinner spinner, String value) {
         spinner.setSelection(0, false);
         for (int i = 0; i < spinner.getCount(); i++) {
             if (spinner.getItemAtPosition(i).toString().equalsIgnoreCase(value)) {
                 spinner.setSelection(i, false);
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     public static boolean setSpinnerSelectionFromIdentifier(Spinner spinner, String identifier) {
@@ -318,7 +311,7 @@ public abstract class AppUtils {
     public static void findViewsWithClass(ViewGroup parent, Class viewClass, ArrayList<View> outViews) {
         for (int i = 0, childCount = parent.getChildCount(); i < childCount; i++) {
             View child = parent.getChildAt(i);
-            Class _class = child.getClass();
+            Class<? extends View> _class = child.getClass();
             if (_class == viewClass || _class.getSuperclass() == viewClass) {
                 outViews.add(child);
             }

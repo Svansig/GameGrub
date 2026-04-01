@@ -39,7 +39,7 @@ public abstract class GPUInformation {
                 }
             }
         }
-        catch (JSONException e) {
+        catch (JSONException ignored) {
         }
         return deviceId;
     }
@@ -56,7 +56,7 @@ public abstract class GPUInformation {
                 }
             }
         }
-        catch (JSONException e) {
+        catch (JSONException ignored) {
         }
         return vendorId;
     }
@@ -116,7 +116,7 @@ public abstract class GPUInformation {
             try {
                 thread.wait();
             } catch (InterruptedException e) {
-                Log.e("GPUInformation", "Failed to load gpu information: " + e);
+                Timber.tag("GPUInformation").e("Failed to load gpu information: " + e);
             }
         }
         return gpuInfo;

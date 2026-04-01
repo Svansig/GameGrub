@@ -782,20 +782,17 @@ private fun LibraryScreenContent(
                         LibraryTab.GOG -> Triple(
                             R.string.library_source_not_logged_in_gog,
                             R.string.gog_settings_login_title,
-                            { gogOAuthLauncher.launch(Intent(context, GOGOAuthActivity::class.java)) },
-                        )
+                        ) { gogOAuthLauncher.launch(Intent(context, GOGOAuthActivity::class.java)) }
 
                         LibraryTab.EPIC -> Triple(
                             R.string.library_source_not_logged_in_epic,
                             R.string.epic_settings_login_title,
-                            { epicOAuthLauncher.launch(Intent(context, EpicOAuthActivity::class.java)) },
-                        )
+                        ) { epicOAuthLauncher.launch(Intent(context, EpicOAuthActivity::class.java)) }
 
                         LibraryTab.AMAZON -> Triple(
                             R.string.library_source_not_logged_in_amazon,
                             R.string.amazon_settings_login_title,
-                            { amazonOAuthLauncher.launch(Intent(context, AmazonOAuthActivity::class.java)) },
-                        )
+                        ) { amazonOAuthLauncher.launch(Intent(context, AmazonOAuthActivity::class.java)) }
 
                         LibraryTab.LOCAL -> Triple(
                             R.string.library_source_no_custom_games,

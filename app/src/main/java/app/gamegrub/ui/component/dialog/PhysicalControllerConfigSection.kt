@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
+import com.winlator.core.FileUtils
 import com.winlator.inputcontrols.Binding
 import com.winlator.inputcontrols.ControlsProfile
 import com.winlator.inputcontrols.ExternalControllerBinding
@@ -76,22 +77,20 @@ internal fun PhysicalControllerConfigSection(
     val controller = remember {
         var ctrl = profile.getController("*")
         if (ctrl == null) {
-            Log.d(
-                "gncontrol",
-                "=== Physical Controller Init: Creating wildcard controller for profile: ${profile.name} (ID: ${profile.id}) ===",
-            )
+            Timber.tag("gncontrol")
+                .d("=== Physical Controller Init: Creating wildcard controller for profile: ${profile.name} (ID: ${profile.id}) ===")
             ctrl = profile.addController("*")
 
             // Copy default bindings from the Physical Controller Default profile (ID 0)
             val manager = com.winlator.inputcontrols.InputControlsManager(context)
             val defaultProfile = manager.getProfile(0)
             if (defaultProfile != null) {
-                Log.d("gncontrol", "Loading defaults from profile: ${defaultProfile.name} (ID: ${defaultProfile.id})")
+                Timber.tag("gncontrol").d("Loading defaults from profile: ${defaultProfile.name} (ID: ${defaultProfile.id})")
                 val defaultControllers = defaultProfile.getControllers()
                 if (defaultControllers.isNotEmpty()) {
                     val defaultController = defaultControllers[0]
                     val bindingCount = defaultController.controllerBindings.size
-                    Log.d("gncontrol", "Copying $bindingCount default controller bindings from ${defaultProfile.name}")
+                    Timber.tag("gncontrol").d("Copying $bindingCount default controller bindings from ${defaultProfile.name}")
                     for (binding in defaultController.controllerBindings) {
                         val newBinding = ExternalControllerBinding()
                         newBinding.setKeyCode(binding.keyCodeForAxis)
@@ -111,15 +110,15 @@ internal fun PhysicalControllerConfigSection(
                         ctrl.removeControllerBinding(existingHomeBinding)
                     }
                     ctrl.addControllerBinding(homeButtonBinding)
-                    Log.d("gncontrol", "Set Home button (KEYCODE_BUTTON_MODE) to OPEN_NAVIGATION_MENU")
+                    Timber.tag("gncontrol").d("Set Home button (KEYCODE_BUTTON_MODE) to OPEN_NAVIGATION_MENU")
                 } else {
-                    Log.w("gncontrol", "No controllers found in default profile ${defaultProfile.name}")
+                    Timber.tag("gncontrol").w("No controllers found in default profile ${defaultProfile.name}")
                 }
 
                 // Copy on-screen elements from default profile if current profile has empty/NONE elements
                 copyElementsIfNeeded(context, profile, defaultProfile)
             } else {
-                Log.w("gncontrol", "Default profile 0 not found, wildcard controller will be empty")
+                Timber.tag("gncontrol").w("Default profile 0 not found, wildcard controller will be empty")
             }
 
             profile.save()
@@ -129,9 +128,9 @@ internal fun PhysicalControllerConfigSection(
 
     // Create a snapshot of original bindings for cancel behavior
     val originalBindings = remember {
-        controller?.controllerBindings?.map {
+        controller?.controllerBindings?.associate {
             it.keyCodeForAxis to it.binding
-        }?.toMap() ?: emptyMap()
+        } ?: emptyMap()
     }
 
     // Working copy of bindings (memory only until Save is clicked)
@@ -145,7 +144,7 @@ internal fun PhysicalControllerConfigSection(
     }
 
     var selectedCategory by remember {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     } // 0 = Face, 1 = Shoulder, 2 = Menu, 3 = Thumbstick, 4 = Left Stick, 5 = Right Stick, 6 = D-Pad
     var showBindingDialog by remember { mutableStateOf<Pair<Int, String>?>(null) }
     var refreshKey by remember { mutableIntStateOf(0) }
@@ -278,7 +277,7 @@ internal fun PhysicalControllerConfigSection(
                         // Reset button
                         IconButton(
                             onClick = {
-                                Log.d("gncontrol", "=== Reset: Resetting controller bindings ===")
+                                Timber.tag("gncontrol").d("=== Reset: Resetting controller bindings ===")
                                 workingBindings.clear()
 
                                 val manager = com.winlator.inputcontrols.InputControlsManager(context)
@@ -295,7 +294,7 @@ internal fun PhysicalControllerConfigSection(
 
                                 // Ensure Home/Guide/PS button is always set to OPEN_NAVIGATION_MENU
                                 workingBindings[KeyEvent.KEYCODE_BUTTON_MODE] = Binding.OPEN_NAVIGATION_MENU
-                                Log.d("gncontrol", "Set Home button (KEYCODE_BUTTON_MODE) to OPEN_NAVIGATION_MENU")
+                                Timber.tag("gncontrol").d("Set Home button (KEYCODE_BUTTON_MODE) to OPEN_NAVIGATION_MENU")
 
                                 refreshKey++
                             },
@@ -306,7 +305,7 @@ internal fun PhysicalControllerConfigSection(
                         // Save button
                         IconButton(
                             onClick = {
-                                Log.d("gncontrol", "=== Save: Applying ${workingBindings.size} bindings ===")
+                                Timber.tag("gncontrol").d("=== Save: Applying ${workingBindings.size} bindings ===")
                                 controller?.let { ctrl ->
                                     val existingBindings = ctrl.controllerBindings.toList()
                                     for (binding in existingBindings) {
@@ -329,7 +328,7 @@ internal fun PhysicalControllerConfigSection(
                                     }
 
                                     profile.save()
-                                    Log.d("gncontrol", "Saved profile ${profile.name}")
+                                    Timber.tag("gncontrol").d("Saved profile ${profile.name}")
                                 }
                                 onSave()
                             },
@@ -580,18 +579,17 @@ internal fun PhysicalControllerConfigSection(
         ControllerBindingDialog(
             buttonName = label,
             currentBinding = currentBinding,
-            onDismiss = { showBindingDialog = null },
+            onDismiss = { },
             onBindingSelected = { binding ->
                 if (binding != null) {
                     workingBindings[keyCode] = binding
-                    Log.d("gncontrol", "Updated binding for keyCode $keyCode to $binding")
+                    Timber.tag("gncontrol").d("Updated binding for keyCode $keyCode to $binding")
                 } else {
                     workingBindings.remove(keyCode)
-                    Log.d("gncontrol", "Removed binding for keyCode $keyCode")
+                    Timber.tag("gncontrol").d("Removed binding for keyCode $keyCode")
                 }
 
                 refreshKey++
-                showBindingDialog = null
             },
         )
     }
@@ -931,13 +929,13 @@ private fun copyElementsIfNeeded(context: android.content.Context, destProfile: 
         val sourceFile = ControlsProfile.getProfileFile(context, sourceProfile.id)
 
         if (!sourceFile.isFile) {
-            Log.w("gncontrol", "copyElements: Source profile file not found")
+            Timber.tag("gncontrol").w("copyElements: Source profile file not found")
             return
         }
 
         val sourceJson = org.json.JSONObject(com.winlator.core.FileUtils.readString(sourceFile))
         if (!sourceJson.has("elements")) {
-            Log.w("gncontrol", "copyElements: Source profile has no elements")
+            Timber.tag("gncontrol").w("copyElements: Source profile has no elements")
             return
         }
         val sourceElements = sourceJson.getJSONArray("elements")
@@ -984,10 +982,10 @@ private fun copyElementsIfNeeded(context: android.content.Context, destProfile: 
             }
 
             destJson.put("elements", sourceElements)
-            com.winlator.core.FileUtils.writeString(destFile, destJson.toString())
-            Log.d("gncontrol", "Copied ${sourceElements.length()} elements")
+            FileUtils.writeString(destFile, destJson.toString())
+            Timber.tag("gncontrol").d("Copied ${sourceElements.length()} elements")
         }
     } catch (e: Exception) {
-        Log.e("gncontrol", "copyElements: Failed", e)
+        Timber.tag("gncontrol").e(e, "copyElements: Failed")
     }
 }

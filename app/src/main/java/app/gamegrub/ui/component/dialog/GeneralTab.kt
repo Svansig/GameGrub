@@ -133,10 +133,10 @@ fun GeneralTabContent(
             SettingsListDropdown(
                 colors = settingsTileColors(),
                 title = { Text(text = stringResource(R.string.container_variant)) },
-                value = variantIndex.value,
+                value = variantIndex.intValue,
                 items = state.containerVariants,
                 onItemSelected = { idx ->
-                    variantIndex.value = idx
+                    variantIndex.intValue = idx
                     val newVariant = state.containerVariants[idx]
                     if (newVariant.equals(Container.GLIBC, ignoreCase = true)) {
                         val defaultDriver = Container.DEFAULT_GRAPHICS_DRIVER
@@ -151,9 +151,9 @@ fun GeneralTabContent(
                             if (get("bcnEmulationCache").isEmpty()) put("bcnEmulationCache", "0")
                             put("adrenotoolsTurnip", "1")
                         }
-                        state.graphicsDriverIndex.value =
+                        state.graphicsDriverIndex.intValue =
                             graphicsDrivers.indexOfFirst { StringUtils.parseIdentifier(it) == defaultDriver }.coerceAtLeast(0)
-                        state.graphicsDriverVersionIndex.value = 0
+                        state.graphicsDriverVersionIndex.intValue = 0
                         state.syncEveryFrameChecked.value = false
                         state.disablePresentWaitChecked.value = newCfg.get("disablePresentWait", "0") == "1"
                         state.bcnEmulationCacheEnabled.value = newCfg.get("bcnEmulationCache", "0") == "1"
@@ -188,15 +188,15 @@ fun GeneralTabContent(
                             if (get("bcnEmulationType").isEmpty()) put("bcnEmulationType", "compute")
                             if (get("bcnEmulationCache").isEmpty()) put("bcnEmulationCache", "0")
                         }
-                        state.bionicDriverIndex.value = 0
-                        state.wrapperVersionIndex.value = state.wrapperOptions.ids
+                        state.bionicDriverIndex.intValue = 0
+                        state.wrapperVersionIndex.intValue = state.wrapperOptions.ids
                             .indexOfFirst { it.equals(DefaultVersion.WRAPPER, true) }
                             .let { if (it >= 0) it else 0 }
                         state.syncEveryFrameChecked.value = false
                         state.disablePresentWaitChecked.value = newCfg.get("disablePresentWait", "0") == "1"
                         state.bcnEmulationCacheEnabled.value = newCfg.get("bcnEmulationCache", "0") == "1"
                         state.adrenotoolsTurnipChecked.value = true
-                        state.maxDeviceMemoryIndex.value =
+                        state.maxDeviceMemoryIndex.intValue =
                             listOf("0", "512", "1024", "2048", "4096").indexOf("4096").coerceAtLeast(0)
 
                         val currentConfig = KeyValueSet(config.dxwrapperConfig)
@@ -274,11 +274,11 @@ fun GeneralTabContent(
         }
         SettingsListDropdown(
             enabled = true,
-            value = state.languageIndex.value,
+            value = state.languageIndex.intValue,
             items = state.languages.map(displayNameForLanguage),
             fallbackDisplay = displayNameForLanguage("english"),
             onItemSelected = { index ->
-                state.languageIndex.value = index
+                state.languageIndex.intValue = index
                 state.config.value = config.copy(language = state.languages[index])
             },
             title = { Text(text = stringResource(R.string.language)) },
@@ -287,10 +287,10 @@ fun GeneralTabContent(
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.screen_size)) },
-            value = state.screenSizeIndex.value,
+            value = state.screenSizeIndex.intValue,
             items = state.screenSizes,
             onItemSelected = {
-                state.screenSizeIndex.value = it
+                state.screenSizeIndex.intValue = it
                 if (it == 0) {
                     state.showCustomResolutionDialog.value = true
                 } else {
@@ -308,10 +308,10 @@ fun GeneralTabContent(
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.audio_driver)) },
-            value = state.audioDriverIndex.value,
+            value = state.audioDriverIndex.intValue,
             items = state.audioDrivers,
             onItemSelected = {
-                state.audioDriverIndex.value = it
+                state.audioDriverIndex.intValue = it
                 state.config.value = config.copy(audioDriver = StringUtils.parseIdentifier(state.audioDrivers[it]))
             },
         )

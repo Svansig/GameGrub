@@ -28,6 +28,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -45,6 +46,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.gamegrub.GameGrubApp
@@ -300,10 +302,10 @@ fun XServerScreen(
     var performanceHudHost by remember { mutableStateOf<FrameLayout?>(null) }
     var isDraggingPerformanceHud by remember { mutableStateOf(false) }
     var isTrackingPerformanceHudTouch by remember { mutableStateOf(false) }
-    var performanceHudTouchDownRawX by remember { mutableStateOf(0f) }
-    var performanceHudTouchDownRawY by remember { mutableStateOf(0f) }
-    var performanceHudDragOffsetX by remember { mutableStateOf(0f) }
-    var performanceHudDragOffsetY by remember { mutableStateOf(0f) }
+    var performanceHudTouchDownRawX by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var performanceHudTouchDownRawY by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var performanceHudDragOffsetX by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var performanceHudDragOffsetY by remember { mutableFloatStateOf(0f) }
     val performanceHudTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
 
     fun applyPerformanceHudConfig(config: PerformanceHudConfig) {
@@ -499,12 +501,7 @@ fun XServerScreen(
                     GameGrubApp.touchpadView?.postDelayed(
                         {
                             val view = GameGrubApp.touchpadView
-                            if (view != null) {
-                                // Delay technically not required for the function to work but this can
-                                // race against tryCapturePointer() and end up capturing after release
-                                // was already called
-                                view.releasePointerCapture()
-                            }
+                            view?.releasePointerCapture()
                         },
                         100,
                     )
@@ -608,7 +605,7 @@ fun XServerScreen(
             keepPausedForEditor = keepPausedForEditor,
             manualResumeMode = manualResumeMode,
             neverSuspend = neverSuspend,
-            onKeyboardRequestedFromOverlayChanged = { keyboardRequestedFromOverlay = it },
+            onKeyboardRequestedFromOverlayChanged = { },
             onShowQuickMenuChanged = { showQuickMenu = it },
         )
     }
@@ -905,7 +902,7 @@ fun XServerScreen(
                         }
 
                         val overlayHandled = swapInputOverlay
-                            ?.takeIf { it.visibility == View.VISIBLE }
+                            ?.takeIf { it.isVisible }
                             ?.dispatchTouchEvent(event) == true
                         if (overlayHandled) return@pointerInteropFilter true
 
@@ -947,7 +944,7 @@ fun XServerScreen(
                     val appId = appId
                     val existingXServer =
                         GameGrubApp.xEnvironment
-                            ?.getComponent<XServerComponent>(XServerComponent::class.java)
+                            ?.getComponent(XServerComponent::class.java)
                             ?.xServer
                     val xServerToUse = existingXServer ?: XServer(ScreenInfo(xServerState.value.screenSize))
                     val xServerView = XServerView(
@@ -1012,7 +1009,7 @@ fun XServerScreen(
                                         container.inputType = PreferredInputApi.BOTH.ordinal
                                         container.saveData()
                                     }
-                                    handler.setPreferredInputApi(PreferredInputApi.values()[container.inputType])
+                                    handler.setPreferredInputApi(PreferredInputApi.entries[container.inputType])
                                     handler.setDInputMapperType(container.dinputMapperType)
                                     if (container.isDisableMouseInput) {
                                         GameGrubApp.touchpadView?.setTouchscreenMouseDisabled(true)
@@ -1024,7 +1021,7 @@ fun XServerScreen(
                                     }
                                     Timber.d(
                                         "WinHandler configured: preferredInputApi=%s, dinputMapperType=0x%02x",
-                                        PreferredInputApi.values()[container.inputType],
+                                        PreferredInputApi.entries[container.inputType],
                                         container.dinputMapperType,
                                     )
                                     // Timber.d("1 Container drives: ${container.drives}")
@@ -1043,13 +1040,13 @@ fun XServerScreen(
                                     Timber.i("Wine version is: $wineVersion")
                                     val contentsManager = ContentsManager(context)
                                     contentsManager.syncContents()
-                                    Timber.i("Wine info is: " + WineInfo.fromIdentifier(context, contentsManager, wineVersion))
+                                    Timber.i("Wine info is: %s", WineInfo.fromIdentifier(context, contentsManager, wineVersion))
                                     xServerState.value = xServerState.value.copy(
                                         wineInfo = WineInfo.fromIdentifier(context, contentsManager, wineVersion),
                                     )
-                                    Timber.i("xServerState.value.wineInfo is: " + xServerState.value.wineInfo)
-                                    Timber.i("WineInfo.MAIN_WINE_VERSION is: " + WineInfo.MAIN_WINE_VERSION)
-                                    Timber.i("Wine path for wineinfo is " + xServerState.value.wineInfo.path)
+                                    Timber.i("xServerState.value.wineInfo is: %s", xServerState.value.wineInfo)
+                                    Timber.i("WineInfo.MAIN_WINE_VERSION is: %s", WineInfo.MAIN_WINE_VERSION)
+                                    Timber.i("Wine path for wineinfo is %s", xServerState.value.wineInfo.path)
 
                                     if (!xServerState.value.wineInfo.isMainWineVersion()) {
                                         Timber.i("Settings wine path to: ${xServerState.value.wineInfo.path}")
@@ -1059,14 +1056,12 @@ fun XServerScreen(
                                     }
 
                                     val onExtractFileListener = if (!xServerState.value.wineInfo.isWin64) {
-                                        object : OnExtractFileListener {
-                                            override fun onExtractFile(destination: File?, size: Long): File? {
-                                                return destination?.path?.let {
-                                                    if (it.contains("system32/")) {
-                                                        null
-                                                    } else {
-                                                        File(it.replace("syswow64/", "system32/"))
-                                                    }
+                                        OnExtractFileListener { destination, size ->
+                                            destination?.path?.let {
+                                                if (it.contains("system32/")) {
+                                                    null
+                                                } else {
+                                                    File(it.replace("syswow64/", "system32/"))
                                                 }
                                             }
                                         }
@@ -1548,7 +1543,6 @@ fun XServerScreen(
         if (profile != null) {
             androidx.compose.ui.window.Dialog(
                 onDismissRequest = {
-                    showPhysicalControllerDialog = false
                     keepPausedForEditor = false
                     resumeIfAllowedAfterOverlay()
                 },
@@ -1561,7 +1555,6 @@ fun XServerScreen(
                     app.gamegrub.ui.component.dialog.PhysicalControllerConfigSection(
                         profile = profile,
                         onDismiss = {
-                            showPhysicalControllerDialog = false
                             keepPausedForEditor = false
                             resumeIfAllowedAfterOverlay()
                         },
@@ -1578,7 +1571,6 @@ fun XServerScreen(
                                 xServer = xServerView?.getxServer(),
                                 onOpenNavigationMenu = gameBack,
                             )
-                            showPhysicalControllerDialog = false
                             keepPausedForEditor = false
                             resumeIfAllowedAfterOverlay()
                         },

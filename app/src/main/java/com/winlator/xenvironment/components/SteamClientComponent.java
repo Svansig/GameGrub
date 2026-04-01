@@ -2,19 +2,11 @@ package com.winlator.xenvironment.components;
 
 import android.util.Log;
 
-import com.winlator.core.FileUtils;
 import com.winlator.steampipeserver.SteamPipeServer;
 import com.winlator.xconnector.Client;
 import com.winlator.xconnector.ConnectionHandler;
 import com.winlator.xconnector.RequestHandler;
-import com.winlator.xconnector.UnixSocketConfig;
-import com.winlator.xconnector.XConnectorEpoll;
-import com.winlator.xconnector.XInputStream;
-import com.winlator.xconnector.XOutputStream;
 import com.winlator.xenvironment.EnvironmentComponent;
-import com.winlator.xenvironment.ImageFs;
-
-import java.io.File;
 
 public class SteamClientComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     // public abstract static class RequestCodes {
@@ -33,7 +25,7 @@ public class SteamClientComponent extends EnvironmentComponent implements Connec
 
     @Override
     public void start() {
-        Log.d("SteamClientComponent", "Starting...");
+        Timber.tag("SteamClientComponent").d("Starting...");
         stop();
         connector = new SteamPipeServer();
         connector.start();
@@ -41,7 +33,7 @@ public class SteamClientComponent extends EnvironmentComponent implements Connec
 
     @Override
     public void stop() {
-        Log.d("SteamClientComponent", "Stopping...");
+        Timber.tag("SteamClientComponent").d("Stopping...");
         if (connector != null) {
             connector.stop();
             connector = null;
@@ -50,14 +42,14 @@ public class SteamClientComponent extends EnvironmentComponent implements Connec
 
     @Override
     public void handleNewConnection(Client client) {
-        Log.d("SteamClientComponent", "New connection");
+        Timber.tag("SteamClientComponent").d("New connection");
         client.createIOStreams();
         // client.setTag(new ALSAClient());
     }
 
     @Override
     public void handleConnectionShutdown(Client client) {
-        Log.d("SteamClientComponent", "Connection shutdown");
+        Timber.tag("SteamClientComponent").d("Connection shutdown");
         // ((ALSAClient)client.getTag()).release();
     }
 

@@ -132,12 +132,10 @@ object GameMetadataManager {
 
         val updated = GameMetadata(
             appId = finalAppId,
-        ).let { base ->
-            base.copy(
-                steamgriddbFetched = steamgriddbFetched ?: existing?.steamgriddbFetched ?: false,
-                releaseDate = releaseDate ?: existing?.releaseDate,
-            )
-        }
+        ).copy(
+            steamgriddbFetched = steamgriddbFetched ?: existing?.steamgriddbFetched ?: false,
+            releaseDate = releaseDate ?: existing?.releaseDate,
+        )
         write(folder, updated)
     }
 

@@ -60,13 +60,13 @@ public class EnvVars implements Iterable<String> {
     }
 
     public String toEscapedString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (String key : data.keySet()) {
-            if (!result.isEmpty()) result += " ";
+            if (result.length() > 0) result.append(" ");
             String value = data.get(key);
-            result += key+"="+value.replace(" ", "\\ ");
+            result.append(key).append("=").append(value.replace(" ", "\\ "));
         }
-        return result;
+        return result.toString();
     }
 
     public String[] toStringArray() {

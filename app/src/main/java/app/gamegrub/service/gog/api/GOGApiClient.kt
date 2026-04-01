@@ -19,7 +19,7 @@ import timber.log.Timber
  */
 @Singleton
 class GOGApiClient @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val parser: GOGManifestParser,
 ) {
 
@@ -47,9 +47,7 @@ class GOGApiClient @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-                if (credentials == null) {
-                    return@withContext Result.failure(Exception("Not authenticated"))
-                }
+                    ?: return@withContext Result.failure(Exception("Not authenticated"))
 
                 val url = "$GOG_CONTENT_SYSTEM/products/$gameId/os/$platform/builds?generation=$generation"
 
@@ -85,10 +83,8 @@ class GOGApiClient @Inject constructor(
     suspend fun fetchDependencyRepository(url: String): Result<DependencyRepository> = withContext(Dispatchers.IO) {
         try {
             val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
+                ?: return@withContext Result.failure(Exception("Not authenticated"))
 
-            if (credentials == null) {
-                return@withContext Result.failure(Exception("Not authenticated"))
-            }
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer ${credentials.accessToken}")
@@ -123,9 +119,7 @@ class GOGApiClient @Inject constructor(
     suspend fun getDependencyOpenLink(): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
             val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-            if (credentials == null) {
-                return@withContext Result.failure(Exception("Not authenticated"))
-            }
+                ?: return@withContext Result.failure(Exception("Not authenticated"))
 
             val url = "$GOG_CONTENT_SYSTEM/open_link?generation=2&_version=2&path=/dependencies/store/"
 
@@ -186,9 +180,7 @@ class GOGApiClient @Inject constructor(
     suspend fun fetchDependencyManifest(manifestUrl: String): Result<GOGDependencyManifestMeta> = withContext(Dispatchers.IO) {
         try {
             val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-            if (credentials == null) {
-                return@withContext Result.failure(Exception("Not authenticated"))
-            }
+                ?: return@withContext Result.failure(Exception("Not authenticated"))
 
             val request = Request.Builder()
                 .url(manifestUrl)
@@ -230,9 +222,7 @@ class GOGApiClient @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-                if (credentials == null) {
-                    return@withContext Result.failure(Exception("Not authenticated"))
-                }
+                    ?: return@withContext Result.failure(Exception("Not authenticated"))
 
                 Timber.tag("GOG").d("Fetching manifest from: $manifestUrl")
 
@@ -282,9 +272,7 @@ class GOGApiClient @Inject constructor(
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
             val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-            if (credentials == null) {
-                return@withContext Result.failure(Exception("Not authenticated"))
-            }
+                ?: return@withContext Result.failure(Exception("Not authenticated"))
             val url = "$GOG_CDN/content-system/v1/manifests/$productId/$platform/$timestamp/$manifestHash"
             Timber.tag("GOG").d("Fetching Gen 1 depot manifest: $url")
             val request = Request.Builder()
@@ -313,9 +301,7 @@ class GOGApiClient @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-                if (credentials == null) {
-                    return@withContext Result.failure(Exception("Not authenticated"))
-                }
+                    ?: return@withContext Result.failure(Exception("Not authenticated"))
 
                 // Build depot manifest URL
                 val path = gogGalaxyPath(manifestHash)
@@ -429,9 +415,7 @@ class GOGApiClient @Inject constructor(
     ): Result<SecureLinksResponse> = withContext(Dispatchers.IO) {
         try {
             val credentials = GOGAuthManager.getStoredCredentials(context).getOrNull()
-            if (credentials == null) {
-                return@withContext Result.failure(Exception("Not authenticated"))
-            }
+                ?: return@withContext Result.failure(Exception("Not authenticated"))
 
             // Build secure link URL based on generation
             var url = if (generation == 2) {

@@ -11,7 +11,7 @@ import com.winlator.xserver.errors.XRequestError;
 import java.io.IOException;
 
 public abstract class FontRequests {
-    public static void openFont(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+    public static void openFont(XClient client, XInputStream inputStream, XOutputStream outputStream) {
         inputStream.skip(4);
         int length = inputStream.readShort();
         inputStream.skip(2);
@@ -19,7 +19,7 @@ public abstract class FontRequests {
         if (!name.equals("cursor")) throw new UnsupportedOperationException("OpenFont supports only name: cursor.");
     }
 
-    public static void listFonts(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    public static void listFonts(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         inputStream.skip(2);
         short patternLength = inputStream.readShort();
         inputStream.readString8(patternLength);

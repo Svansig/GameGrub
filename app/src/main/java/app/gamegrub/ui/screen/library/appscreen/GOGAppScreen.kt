@@ -7,6 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,7 +95,7 @@ class GOGAppScreen(
         val gameId = libraryItem.gameId.toString()
 
         // Add a refresh trigger to re-fetch game data when install status changes
-        var refreshTrigger by remember { mutableStateOf(0) }
+        var refreshTrigger by remember { mutableIntStateOf(0) }
 
         // Listen for install status changes to refresh game data
         LaunchedEffect(gameId) {
@@ -482,7 +483,6 @@ class GOGAppScreen(
                     currentProgressListener?.let { listener ->
                         val downloadInfo = getGOGInstallDomain(context).getDownloadInfo(libraryItem.gameId.toString())
                         downloadInfo?.removeProgressListener(listener)
-                        currentProgressListener = null
                     }
                     onHasPartialDownloadChanged?.invoke(false)
                 }

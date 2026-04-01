@@ -6,7 +6,7 @@ import java.util.TreeMap;
 public class RCItem implements Comparable<RCItem> {
     private String processName;
     private String itemDesc;
-    private Map<String, String> varMap;
+    private final Map<String, String> varMap;
 
     public RCItem() {
         this("", "", null);

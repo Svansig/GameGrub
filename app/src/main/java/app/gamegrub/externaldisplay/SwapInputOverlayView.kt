@@ -7,12 +7,13 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import app.gamegrub.R
 import com.winlator.xserver.XServer
 
 class SwapInputOverlayView(
     context: Context,
-    private val xServer: XServer,
+    xServer: XServer,
 ) : FrameLayout(context) {
 
     private var mode: ExternalDisplayInputController.Mode = ExternalDisplayInputController.Mode.OFF
@@ -105,12 +106,12 @@ class SwapInputOverlayView(
 
     private fun toggleKeyboard() {
         if (mode != ExternalDisplayInputController.Mode.HYBRID) return
-        keyboardView.visibility = if (keyboardView.visibility == VISIBLE) GONE else VISIBLE
+        keyboardView.visibility = if (keyboardView.isVisible) GONE else VISIBLE
         post { updateToggleButtonPosition() }
     }
 
     private fun updateToggleButtonPosition() {
-        keyboardToggleButton.translationY = if (keyboardView.visibility == VISIBLE) {
+        keyboardToggleButton.translationY = if (keyboardView.isVisible) {
             -keyboardView.height.toFloat()
         } else {
             0f

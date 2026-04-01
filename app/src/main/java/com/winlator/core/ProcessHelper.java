@@ -83,7 +83,7 @@ public abstract class ProcessHelper {
         int pid = -1;
         java.lang.Process process = null;
         try {
-            Log.d("ProcessHelper", "Executing: " + Arrays.toString(splitCommand(command)) + ", " + Arrays.toString(envp) + ", " + workingDir);
+            Timber.tag("ProcessHelper").d("Executing: " + Arrays.toString(splitCommand(command)) + ", " + Arrays.toString(envp) + ", " + workingDir);
             process = Runtime.getRuntime().exec(splitCommand(command), envp, workingDir);
 
             Field pidField = process.getClass().getDeclaredField("pid");
@@ -102,7 +102,7 @@ public abstract class ProcessHelper {
             if (terminationCallback != null) createWaitForThread(process, terminationCallback);
         }
         catch (Exception e) {
-            Log.e("ProcessHelper", "Failed to execute command: " + e);
+            Timber.tag("ProcessHelper").e("Failed to execute command: " + e);
             if (process != null) process.destroyForcibly();
             if (terminationCallback != null) terminationCallback.call(-1);
         }
@@ -118,7 +118,7 @@ public abstract class ProcessHelper {
             java.lang.Process idProcess = Runtime.getRuntime().exec("id");
             try (
                 InputStreamReader isr = new InputStreamReader(idProcess.getInputStream());
-                BufferedReader idReader = new BufferedReader(isr);
+                BufferedReader idReader = new BufferedReader(isr)
             ) {
                 String idOutput = idReader.readLine();
                 if (idOutput != null) {
@@ -131,7 +131,7 @@ public abstract class ProcessHelper {
                 }
             }
         } catch (IOException e) {
-            Log.e("ProcessHelper", "Failed to retrieve user id in order to list processes: " + e);
+            Timber.tag("ProcessHelper").e("Failed to retrieve user id in order to list processes: " + e);
             return processes;
         }
 
@@ -146,7 +146,7 @@ public abstract class ProcessHelper {
             java.lang.Process process = Runtime.getRuntime().exec("ps -A -o USER,PID,PPID,VSZ,RSS,WCHAN,ADDR,S,NAME");
             try (
                 InputStreamReader isr = new InputStreamReader(process.getInputStream());
-                BufferedReader reader = new BufferedReader(isr);
+                BufferedReader reader = new BufferedReader(isr)
             ) {
                 String line;
 
@@ -170,7 +170,7 @@ public abstract class ProcessHelper {
                 }
             }
         } catch (IOException e) {
-            Log.e("ProcessHelper", "Failed to list processes: " + e);
+            Timber.tag("ProcessHelper").e("Failed to list processes: " + e);
         }
 
         return processes;
@@ -190,7 +190,7 @@ public abstract class ProcessHelper {
                 }
             }
             catch (IOException e) {
-                Log.e("ProcessHelper", "Error on debug thread: " + e);
+                Timber.tag("ProcessHelper").e("Error on debug thread: " + e);
             }
         });
     }
@@ -202,10 +202,10 @@ public abstract class ProcessHelper {
                 while ((line = reader.readLine()) != null) {
                     // Always log to debug log
                     if (streamType != null && pid != -1) {
-                        Log.d("ProcessOutput", "[PID:" + pid + "][" + streamType + "] " + line);
+                        Timber.tag("ProcessOutput").d("[PID:" + pid + "][" + streamType + "] " + line);
                     } else {
                         // Always log even if streamType/pid not provided
-                        Log.d("ProcessOutput", line);
+                        Timber.tag("ProcessOutput").d(line);
                     }
 
                     if (PRINT_DEBUG) System.out.println(line);
@@ -216,22 +216,19 @@ public abstract class ProcessHelper {
                     }
                 }
             }
-            catch (IOException e) {}
+            catch (IOException ignored) {}
         });
     }
 
 
     private static void createWaitForThread(java.lang.Process process, final Callback<Integer> terminationCallback) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int status = process.waitFor();
-                    terminationCallback.call(status);
-                }
-                catch (InterruptedException e) {
-                    Log.e("ProcessHelper", "Error waiting for process termination", e);
-                }
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                int status = process.waitFor();
+                terminationCallback.call(status);
+            }
+            catch (InterruptedException e) {
+                Timber.tag("ProcessHelper").e(e, "Error waiting for process termination");
             }
         });
     }
@@ -257,7 +254,7 @@ public abstract class ProcessHelper {
     public static String[] splitCommand(String command) {
         ArrayList<String> result = new ArrayList<>();
         boolean startedQuotes = false;
-        String value = "";
+        StringBuilder value = new StringBuilder();
         char currChar, nextChar;
         for (int i = 0, count = command.length(); i < count; i++) {
             currChar = command.charAt(i);
@@ -266,36 +263,36 @@ public abstract class ProcessHelper {
             if (startedQuotes) {
                 if (currChar == quoteChar) {
                     startedQuotes = false;
-                    if (!value.isEmpty()) {
-                        value += quoteChar;
-                        result.add(value);
-                        value = "";
+                    if (value.length() > 0) {
+                        value.append(quoteChar);
+                        result.add(value.toString());
+                        value = new StringBuilder();
                     }
                 }
-                else value += currChar;
+                else value.append(currChar);
             }
             else if (currChar == '"' || currChar == '\'') {
                 if (currChar == '\'') quoteChar = '\'';
                 startedQuotes = true;
-                value += quoteChar;
+                value.append(quoteChar);
             }
             else {
                 nextChar = i < count-1 ? command.charAt(i+1) : '\0';
                 if (currChar == ' ' || (currChar == '\\' && nextChar == ' ')) {
                     if (currChar == '\\') {
-                        value += ' ';
+                        value.append(' ');
                         i++;
                     }
-                    else if (!value.isEmpty()) {
-                        result.add(value);
-                        value = "";
+                    else if (value.length() > 0) {
+                        result.add(value.toString());
+                        value = new StringBuilder();
                     }
                 }
                 else {
-                    value += currChar;
+                    value.append(currChar);
                     if (i == count-1) {
-                        result.add(value);
-                        value = "";
+                        result.add(value.toString());
+                        value = new StringBuilder();
                     }
                 }
             }
@@ -343,26 +340,22 @@ public abstract class ProcessHelper {
         File proc = new File("/proc");
         String[] filters = {"wine", "exe"};
         String[] allPids;
-        ArrayList<String> filteredPids = new ArrayList<String>();
-        List<String> filterList = Arrays.asList(filters);
-        allPids = proc.list(new FilenameFilter(){
-            public boolean accept(File proc, String filename){
-                return new File(proc, filename).isDirectory() && filename.matches("[0-9]+");
-            }
-        });
+        ArrayList<String> filteredPids = new ArrayList<>();
+        String[] filterList = filters;
+        allPids = proc.list((proc1, filename) -> new File(proc1, filename).isDirectory() && filename.matches("[0-9]+"));
 
-        for (int index = 0; index < allPids.length; index++){
+        for (String allPid : allPids) {
             String data = "";
             try (
-                FileInputStream fr = new FileInputStream(proc + "/" + allPids[index] + "/stat");
-                BufferedReader br = new BufferedReader(new InputStreamReader(fr));
+                    FileInputStream fr = new FileInputStream(proc + "/" + allPid + "/stat");
+                    BufferedReader br = new BufferedReader(new InputStreamReader(fr))
             ) {
                 data = br.readLine();
+            } catch (IOException ignored) {
             }
-            catch (IOException e) {}
             for (String filter : filterList) {
                 if (data.contains(filter))
-                    filteredPids.add(allPids[index]);
+                    filteredPids.add(allPid);
             }
         }
         return filteredPids;

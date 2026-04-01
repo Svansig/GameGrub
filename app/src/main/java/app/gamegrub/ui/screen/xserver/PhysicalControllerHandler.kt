@@ -14,6 +14,8 @@ import com.winlator.math.Mathf
 import com.winlator.xserver.XServer
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.math.abs
+import kotlin.math.sqrt
 
 /**
  * Standalone handler for physical controller input that works independently of view visibility.
@@ -30,7 +32,7 @@ class PhysicalControllerHandler(
 
     fun setProfile(profile: ControlsProfile?) {
         this.profile = profile
-        Log.d(TAG, "PhysicalControllerHandler: Profile set to ${profile?.name}")
+        Timber.tag(TAG).d("PhysicalControllerHandler: Profile set to ${profile?.name}")
 
         // Cancel mouse movement timer if profile is null
         if (profile == null) {
@@ -151,7 +153,7 @@ class PhysicalControllerHandler(
                     override fun run() {
                         // Skip injection if movement is below 8% deadzone to save CPU cycles
                         val magnitude =
-                            Math.sqrt((mouseMoveOffset.x * mouseMoveOffset.x + mouseMoveOffset.y * mouseMoveOffset.y).toDouble())
+                            sqrt((mouseMoveOffset.x * mouseMoveOffset.x + mouseMoveOffset.y * mouseMoveOffset.y).toDouble())
                         if (magnitude < 0.08) return
 
                         // Look up cursor speed dynamically so it updates when profile changes
@@ -195,7 +197,7 @@ class PhysicalControllerHandler(
 
         for (i in axes.indices) {
             var controllerBinding: ExternalControllerBinding?
-            if (Math.abs(values[i]) > ControlElement.STICK_DEAD_ZONE) {
+            if (abs(values[i]) > ControlElement.STICK_DEAD_ZONE) {
                 val keyCode = ExternalControllerBinding.getKeyCodeForAxis(axes[i], Mathf.sign(values[i]))
                 controllerBinding = controller.getControllerBinding(keyCode)
                 if (controllerBinding != null) {
@@ -311,7 +313,7 @@ class PhysicalControllerHandler(
             // Handle special bindings
             if (binding == Binding.OPEN_NAVIGATION_MENU) {
                 if (isActionDown) {
-                    Log.d(TAG, "Opening navigation menu from controller binding")
+                    Timber.tag(TAG).d("Opening navigation menu from controller binding")
                     onOpenNavigationMenu?.invoke()
                 }
             } else if (binding == Binding.MOUSE_MOVE_LEFT || binding == Binding.MOUSE_MOVE_RIGHT) {

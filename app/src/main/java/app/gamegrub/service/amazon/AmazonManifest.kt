@@ -21,6 +21,29 @@ object AmazonManifest {
     ) {
         /** Returns the path with backslashes replaced. */
         val unixPath: String get() = path.replace('\\', '/')
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as ManifestFile
+
+            if (size != other.size) return false
+            if (hashAlgorithm != other.hashAlgorithm) return false
+            if (path != other.path) return false
+            if (!hashBytes.contentEquals(other.hashBytes)) return false
+            if (unixPath != other.unixPath) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = size.hashCode()
+            result = 31 * result + hashAlgorithm
+            result = 31 * result + path.hashCode()
+            result = 31 * result + hashBytes.contentHashCode()
+            result = 31 * result + unixPath.hashCode()
+            return result
+        }
     }
 
     data class ManifestPackage(

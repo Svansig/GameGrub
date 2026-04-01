@@ -23,6 +23,7 @@
                 android:id="@+id/IVIcon"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
+                android:contentDescription="TODO"
                 app:tint="@color/colorPrimary"
                 android:layout_marginRight="8dp"
                 android:visibility="gone" />
@@ -52,7 +53,7 @@
         android:id="@+id/EditText"
         android:layout_width="280dp"
         android:layout_gravity="center_horizontal"
-        android:visibility="gone" />
+        android:autofillHints="" android:visibility="gone" />
 
     <ListView
         android:id="@+id/ListView"

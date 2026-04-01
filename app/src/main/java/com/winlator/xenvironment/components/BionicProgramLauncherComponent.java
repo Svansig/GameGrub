@@ -37,6 +37,7 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import app.gamegrub.service.steam.SteamService;
 
@@ -46,14 +47,13 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     private String[] bindingPaths;
     private EnvVars envVars;
     private WineInfo wineInfo;
-    private String box64Version = DefaultVersion.BOX64;
+    private final String box64Version = DefaultVersion.BOX64;
     private String box64Preset = Box86_64Preset.COMPATIBILITY;
     private String fexcorePreset = FEXCorePreset.INTERMEDIATE;
     private Callback<Integer> terminationCallback;
     private static final Object lock = new Object();
     private boolean wow64Mode = true;
     private final ContentsManager contentsManager;
-    private final ContentProfile wineProfile;
     private Container container;
     private File workingDir;
 
@@ -69,7 +69,6 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
     public BionicProgramLauncherComponent(ContentsManager contentsManager, ContentProfile wineProfile) {
         this.contentsManager = contentsManager;
-        this.wineProfile = wineProfile;
     }
 
     private Runnable preUnpack;
@@ -84,7 +83,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
                 extractBox64Files();
             if (preUnpack != null) preUnpack.run();
             pid = execGuestProgram();
-            Log.d("BionicProgramLauncherComponent", "Process " + pid + " started");
+            Timber.tag("BionicProgramLauncherComponent").d("Process " + pid + " started");
             SteamService.setKeepAlive(true);
         }
     }
@@ -94,7 +93,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         synchronized (lock) {
             if (pid != -1) {
                 Process.killProcess(pid);
-                Log.d("BionicProgramLauncherComponent", "Stopped process " + pid);
+                Timber.tag("BionicProgramLauncherComponent").d("Stopped process " + pid);
                 List<ProcessHelper.ProcessInfo> subProcesses = ProcessHelper.listSubProcesses();
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
                     Process.killProcess(subProcess.pid);
@@ -171,14 +170,13 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         ensureEvshimGamepadPathCompatibility(imageFs);
 
         // Get the number of enabled players directly from ControllerManager.
-        final int enabledPlayerCount = MAX_PLAYERS;
-        for (int i = 0; i < enabledPlayerCount; i++) {
+        for (int i = 0; i < MAX_PLAYERS; i++) {
             File memFile = imageFs.getGamepadMemFile(i);
-            memFile.getParentFile().mkdirs();
+            Objects.requireNonNull(memFile.getParentFile()).mkdirs();
             try (RandomAccessFile raf = new RandomAccessFile(memFile, "rw")) {
                 raf.setLength(64);
             } catch (IOException e) {
-                Log.e("EVSHIM_HOST", "Failed to create mem file for player index "+i, e);
+                Timber.tag("EVSHIM_HOST").e(e, "Failed to create mem file for player index "+i);
             }
         }
         File rootDir = imageFs.getRootDir();
@@ -203,10 +201,8 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         EnvVars envVars = new EnvVars();
 
         // Use the ControllerManager's dynamic count for the environment variable
-        envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(enabledPlayerCount));
-        if (true) {
-            envVars.put("EVSHIM_SHM_ID", 1);
-        }
+        envVars.put("EVSHIM_MAX_PLAYERS", String.valueOf(MAX_PLAYERS));
+        envVars.put("EVSHIM_SHM_ID", 1);
         addBox64EnvVars(envVars, enableBox86_64Logs);
         envVars.putAll(FEXCorePresetManager.getEnvVars(context, fexcorePreset));
 
@@ -226,7 +222,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         String winePath = imageFs.getWinePath() + "/bin";
 
-        Log.d("BionicProgramLauncherComponent", "WinePath is " + winePath);
+        Timber.tag("BionicProgramLauncherComponent").d("WinePath is " + winePath);
 
         envVars.put("PATH", winePath + ":" +
                 rootDir.getPath() + "/usr/bin");
@@ -256,7 +252,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         String primaryDNS = "8.8.4.4";
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Service.CONNECTIVITY_SERVICE);
         if (connectivityManager.getActiveNetwork() != null) {
-            ArrayList<InetAddress> dnsServers = new ArrayList<>(connectivityManager.getLinkProperties(connectivityManager.getActiveNetwork()).getDnsServers());
+            ArrayList<InetAddress> dnsServers = new ArrayList<>(Objects.requireNonNull(connectivityManager.getLinkProperties(connectivityManager.getActiveNetwork())).getDnsServers());
 
             // Check if the dnsServers list is not empty before getting an item
             if (!dnsServers.isEmpty()) {
@@ -292,30 +288,30 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         if (this.envVars != null) {
             envVars.putAll(this.envVars);
         }
-        Log.d("BionicProgramLauncherComponent", "env vars are " + envVars.toString());
+        Timber.tag("BionicProgramLauncherComponent").d("env vars are " + envVars);
 
         String emulator = container.getEmulator();
 
         // Construct the command without Box64 to the Wine executable
-        String command = "";
+        StringBuilder command = new StringBuilder();
         String overriddenCommand = envVars.get("GUEST_PROGRAM_LAUNCHER_COMMAND");
         if (!overriddenCommand.isEmpty()) {
             String[] parts = overriddenCommand.split(";");
             for (String part : parts)
-                command += part + " ";
-            command = command.trim();
+                command.append(part).append(" ");
+            command = new StringBuilder(command.toString().trim());
         }
         else {
-            command = getFinalCommand(winePath, emulator, envVars, imageFs.getBinDir(), guestExecutable);
+            command = new StringBuilder(getFinalCommand(winePath, emulator, envVars, imageFs.getBinDir(), guestExecutable));
         }
 
         // **Maybe remove this: Set execute permissions for box64 if necessary (Glibc/Proot artifact)
         File box64File = new File(rootDir, "/usr/bin/box64");
         if (box64File.exists()) {
-            FileUtils.chmod(box64File, 0755);
+            FileUtils.chmod(box64File, 493);
         }
 
-        return ProcessHelper.exec(command, envVars.toStringArray(), workingDir != null ? workingDir : rootDir, (status) -> {
+        return ProcessHelper.exec(command.toString(), envVars.toStringArray(), workingDir != null ? workingDir : rootDir, (status) -> {
             synchronized (lock) {
                 pid = -1;
             }
@@ -342,7 +338,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         byte[] legacyBytes = legacyPath.getBytes(StandardCharsets.UTF_8);
         byte[] currentBytes = currentPath.getBytes(StandardCharsets.UTF_8);
         if (currentBytes.length > legacyBytes.length) {
-            Log.w("EVSHIM_HOST", "Skipping evshim path patch because new path is longer: " + currentPath);
+            Timber.tag("EVSHIM_HOST").w("Skipping evshim path patch because new path is longer: " + currentPath);
             return;
         }
 
@@ -373,10 +369,10 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
             if (patched) {
                 raf.seek(0);
                 raf.write(data);
-                Log.i("EVSHIM_HOST", "Patched libevshim.so gamepad path to " + currentPath);
+                Timber.tag("EVSHIM_HOST").i("Patched libevshim.so gamepad path to " + currentPath);
             }
         } catch (IOException e) {
-            Log.e("EVSHIM_HOST", "Failed to patch libevshim.so gamepad path", e);
+            Timber.tag("EVSHIM_HOST").e(e, "Failed to patch libevshim.so gamepad path");
         }
     }
 
@@ -385,7 +381,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         String command;
         if (wineInfo.isArm64EC()) {
             command = winePath + "/" + guestExecutable;
-            if (emulator.toLowerCase().equals("fexcore"))
+            if (emulator.equalsIgnoreCase("fexcore"))
                 envVars.put("HODLL", "libwow64fex.dll");
             else
                 envVars.put("HODLL", "wowbox64.dll");
@@ -400,7 +396,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         Context context = environment.getContext();
         String box64Version = container.getBox64Version();
 
-        Log.i("Extraction", "Extracting required box64 version: " + box64Version);
+        Timber.tag("Extraction").i("Extracting required box64 version: " + box64Version);
         File rootDir = imageFs.getRootDir();
 
         // No more version check, just extract directly.
@@ -418,7 +414,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         // Set execute permissions.
         File box64File = new File(rootDir, "usr/bin/box64");
         if (box64File.exists()) {
-            FileUtils.chmod(box64File, 0755);
+            FileUtils.chmod(box64File, 493);
         }
     }
 
@@ -426,37 +422,35 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
         Context context = environment.getContext();
         File rootDir = environment.getImageFs().getRootDir();
         File system32dir = new File(rootDir + "/home/xuser/.wine/drive_c/windows/system32");
-        boolean containerDataChanged = false;
+        boolean containerDataChanged;
 
         ImageFs imageFs = ImageFs.find(context);
 
         String wowbox64Version = container.getBox64Version();
         String fexcoreVersion = container.getFEXCoreVersion();
 
-        Log.d("Extraction", "box64Version in use: " + wowbox64Version);
-        Log.d("Extraction", "fexcoreVersion in use: " + fexcoreVersion);
+        Timber.tag("Extraction").d("box64Version in use: " + wowbox64Version);
+        Timber.tag("Extraction").d("fexcoreVersion in use: " + fexcoreVersion);
 
         ContentProfile wowboxprofile = contentsManager.getProfileByEntryName("wowbox64-" + wowbox64Version);
         if (wowboxprofile != null) {
             contentsManager.applyContent(wowboxprofile);
         } else {
-            Log.d("Extraction", "Extracting box64Version: " + wowbox64Version);
+            Timber.tag("Extraction").d("Extracting box64Version: " + wowbox64Version);
             TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, environment.getContext(), "wowbox64/wowbox64-" + wowbox64Version + ".tzst", system32dir);
         }
         container.putExtra("box64Version", wowbox64Version);
-        containerDataChanged = true;
 
         ContentProfile fexprofile = contentsManager.getProfileByEntryName("fexcore-" + fexcoreVersion);
         if (fexprofile != null) {
             contentsManager.applyContent(fexprofile);
         } else {
-            Log.d("Extraction", "Extracting fexcoreVersion: " + fexcoreVersion);
+            Timber.tag("Extraction").d("Extracting fexcoreVersion: " + fexcoreVersion);
             TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, environment.getContext(), "fexcore/fexcore-" + fexcoreVersion + ".tzst", system32dir);
         }
         container.putExtra("fexcoreVersion", fexcoreVersion);
 
-        containerDataChanged = true;
-        if (containerDataChanged) container.saveData();
+        container.saveData();
     }
 
     private void addBox64EnvVars(EnvVars envVars, boolean enableLogs) {
@@ -495,7 +489,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         String winePath = imageFs.getWinePath() + "/bin";
 
-        Log.d("BionicProgramLauncherComponent", "WinePath is " + winePath);
+        Timber.tag("BionicProgramLauncherComponent").d("WinePath is " + winePath);
 
         envVars.put("PATH", winePath + ":" + rootDir.getPath() + "/usr/bin");
 
@@ -522,12 +516,12 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
 
         File box64File = new File(rootDir, "/usr/bin/box64");
         if (box64File.exists()) {
-            FileUtils.chmod(box64File, 0755);
+            FileUtils.chmod(box64File, 493);
         }
 
         // Execute the command and capture its output
         try {
-            Log.d("BionicProgramLauncherComponent", "Shell command is " + finalCommand);
+            Timber.tag("BionicProgramLauncherComponent").d("Shell command is " + finalCommand);
             java.lang.Process process = Runtime.getRuntime().exec(finalCommand, envVars.toStringArray(), workingDir != null ? workingDir : imageFs.getRootDir());
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -553,7 +547,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
     public void restartWineServer() {
         ProcessHelper.terminateAllWineProcesses();
         pid = execGuestProgram();
-        Log.d("BionicProgramLauncherComponent", "Wine restarted successfully");
+        Timber.tag("BionicProgramLauncherComponent").d("Wine restarted successfully");
 
     }
 }

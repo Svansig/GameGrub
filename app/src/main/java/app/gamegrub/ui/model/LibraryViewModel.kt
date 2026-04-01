@@ -62,7 +62,7 @@ class LibraryViewModel @Inject constructor(
     private val amazonGameDao: AmazonGameDao,
     private val gameCompatibilityService: GameCompatibilityService,
     private val customGameScanner: CustomGameScanner,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private data class PlatformAuthState(
@@ -775,9 +775,9 @@ class LibraryViewModel @Inject constructor(
                 PrefManager.amazonInstalledGamesCount = amazonInstalledCount
                 Timber.tag("LibraryViewModel")
                     .d(
+                        "%snull",
                         "Saved counts - Custom: ${customGameItems.size}, Steam: ${steamFilteredBeforeCompatibility.size}, " +
-                            "GOG: ${filteredGOGGames.size}, GOG installed: $gogInstalledCount, Epic: ${filteredEpicGames.size}, " +
-                            "Epic installed: $epicInstalledCount, Amazon installed: $amazonInstalledCount",
+                            "GOG: ${filteredGOGGames.size}, GOG installed: $gogInstalledCount, Epic: ${filteredEpicGames.size}, ",
                     )
             }
 

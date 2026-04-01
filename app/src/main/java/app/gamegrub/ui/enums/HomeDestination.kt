@@ -11,7 +11,7 @@ import app.gamegrub.R
 /**
  * Destinations for Home Screen
  */
-enum class HomeDestination(@StringRes val title: Int, val icon: ImageVector) {
+enum class HomeDestination(@param:StringRes val title: Int, val icon: ImageVector) {
     Library(R.string.destination_library, Icons.AutoMirrored.Filled.ViewList),
     Downloads(R.string.destination_downloads, Icons.Filled.Download),
     Friends(R.string.destination_friends, Icons.Filled.Groups),

@@ -28,7 +28,6 @@ public class VortekRendererComponent extends EnvironmentComponent implements Con
     private final Options options;
     private final UnixSocketConfig socketConfig;
     private final XServer xServer;
-    private Context context;
 
     private native long createVkContext(int i, Options options);
 
@@ -78,7 +77,6 @@ public class VortekRendererComponent extends EnvironmentComponent implements Con
         this.xServer = xServer;
         this.socketConfig = socketConfig;
         this.options = options;
-        this.context = context;
         String nativeLibraryDir = context.getApplicationInfo().nativeLibraryDir;
         initVulkanWrapper(nativeLibraryDir, options.libvulkanPath);
     }
@@ -153,7 +151,7 @@ public class VortekRendererComponent extends EnvironmentComponent implements Con
     @Override // com.winlator.xconnector.ConnectionHandler
     public void handleConnectionShutdown(Client client) {
         if (client.getTag() != null) {
-            long contextPtr = ((Long) client.getTag()).longValue();
+            long contextPtr = (Long) client.getTag();
             destroyVkContext(contextPtr);
         }
     }
@@ -174,13 +172,13 @@ public class VortekRendererComponent extends EnvironmentComponent implements Con
         if (requestCode == 1) {
             long contextPtr = createVkContext(client.clientSocket.fd, this.options);
             if (contextPtr > 0) {
-                client.setTag(Long.valueOf(contextPtr));
+                client.setTag(contextPtr);
             } else {
                 this.connector.killConnection(client);
             }
         } else if (requestCode > 32767 && (requestCode >> 16) == 2) {
             int requestId = 65535 & requestCode;
-            boolean success = handleExtraDataRequest(((Long) client.getTag()).longValue(), requestId, requestLength);
+            boolean success = handleExtraDataRequest((Long) client.getTag(), requestId, requestLength);
             if (!success) {
                 throw new IOException("Failed to handle extra data request.");
             }

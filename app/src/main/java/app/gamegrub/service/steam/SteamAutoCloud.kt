@@ -84,20 +84,18 @@ object SteamAutoCloud {
         Timber.i("Retrieving save files of ${appInfo.name}")
 
         val getPathTypePairs: (AppFileChangeList) -> List<Pair<String, String>> = { fileList ->
-            fileList.pathPrefixes
-                .map {
-                    var matchResults = findPlaceholderWithin(it).map { it.value }.toList()
-                    val bare = if (it.startsWith("ROOT_MOD")) listOf("ROOT_MOD") else emptyList()
+            fileList.pathPrefixes.flatMap {
+                var matchResults = findPlaceholderWithin(it).map { it.value }.toList()
+                val bare = if (it.startsWith("ROOT_MOD")) listOf("ROOT_MOD") else emptyList()
 
-                    Timber.i("Mapping prefix $it and found $matchResults")
+                Timber.i("Mapping prefix $it and found $matchResults")
 
-                    if (matchResults.isEmpty()) {
-                        matchResults = List(1) { PathType.DEFAULT.name }
-                    }
-
-                    matchResults + bare
+                if (matchResults.isEmpty()) {
+                    matchResults = List(1) { PathType.DEFAULT.name }
                 }
-                .flatten()
+
+                matchResults + bare
+            }
                 .distinct()
                 .map { it to prefixToPath(it) }
         }
@@ -336,9 +334,7 @@ object SteamAutoCloud {
                         Timber.i("Downloading $httpUrl")
 
                         val headers = Headers.headersOf(
-                            *fileDownloadInfo.requestHeaders
-                                .map { listOf(it.name, it.value) }
-                                .flatten()
+                            *fileDownloadInfo.requestHeaders.flatMap { listOf(it.name, it.value) }
                                 .toTypedArray(),
                         )
 
@@ -513,6 +509,7 @@ object SteamAutoCloud {
 
                                 Timber.i("Uploading to $httpUrl")
                                 Timber.i(
+                                    "%snull",
                                     "Block Request:" +
                                         "\n\tblockOffset: ${blockRequest.blockOffset}" +
                                         "\n\tblockLength: ${blockRequest.blockLength}" +
@@ -523,8 +520,7 @@ object SteamAutoCloud {
                                             blockRequest.explicitBodyData.joinToString(
                                                 ", ",
                                             )
-                                        }]" +
-                                        "\n\tmayParallelize: ${blockRequest.mayParallelize}",
+                                        }]",
                                 )
 
                                 val byteArray = ByteArray(blockRequest.blockLength)
@@ -548,9 +544,7 @@ object SteamAutoCloud {
                                 // val requestBody = byteArray.toRequestBody()
 
                                 val headers = Headers.headersOf(
-                                    *blockRequest.requestHeaders
-                                        .map { listOf(it.name, it.value) }
-                                        .flatten()
+                                    *blockRequest.requestHeaders.flatMap { listOf(it.name, it.value) }
                                         .toTypedArray(),
                                 )
 
@@ -836,10 +830,10 @@ object SteamAutoCloud {
                             SaveLocation.None -> {
                                 syncResult = SyncResult.Conflict
                                 remoteTimestamp =
-                                    appFileListChange.files.map { it.timestamp.time }.maxOrNull()
+                                    appFileListChange.files.maxOfOrNull { it.timestamp.time }
                                         ?: 0L
                                 localTimestamp =
-                                    allLocalUserFiles.map { it.timestamp }.maxOrNull() ?: 0L
+                                    allLocalUserFiles.maxOfOrNull { it.timestamp } ?: 0L
                             }
                         }
                     }
@@ -910,23 +904,24 @@ object SteamAutoCloud {
     private fun AppFileChangeList.printFileChangeList(appInfo: SteamApp) {
         with(this) {
             Timber.i(
+                "%s%s",
                 "GetAppFileListChange(${appInfo.id}):" +
                     "\n\tTotal Files: ${files.size}" +
                     "\n\tCurrent Change Number: $currentChangeNumber" +
                     "\n\tIs Only Delta: $isOnlyDelta" +
                     "\n\tApp BuildID Hwm: $appBuildIDHwm" +
                     "\n\tPath Prefixes: \n\t\t${pathPrefixes.joinToString("\n\t\t")}" +
-                    "\n\tMachine Names: \n\t\t${machineNames.joinToString("\n\t\t")}" +
-                    files.joinToString {
-                        "\n\t${it.filename}:" +
-                            "\n\t\tshaFile: ${it.shaFile}" +
-                            "\n\t\ttimestamp: ${it.timestamp}" +
-                            "\n\t\trawFileSize: ${it.rawFileSize}" +
-                            "\n\t\tpersistState: ${it.persistState}" +
-                            "\n\t\tplatformsToSync: ${it.platformsToSync}" +
-                            "\n\t\tpathPrefixIndex: ${it.pathPrefixIndex}" +
-                            "\n\t\tmachineNameIndex: ${it.machineNameIndex}"
-                    },
+                    "\n\tMachine Names: \n\t\t${machineNames.joinToString("\n\t\t")}",
+                files.joinToString {
+                    "\n\t${it.filename}:" +
+                        "\n\t\tshaFile: ${it.shaFile}" +
+                        "\n\t\ttimestamp: ${it.timestamp}" +
+                        "\n\t\trawFileSize: ${it.rawFileSize}" +
+                        "\n\t\tpersistState: ${it.persistState}" +
+                        "\n\t\tplatformsToSync: ${it.platformsToSync}" +
+                        "\n\t\tpathPrefixIndex: ${it.pathPrefixIndex}" +
+                        "\n\t\tmachineNameIndex: ${it.machineNameIndex}"
+                },
             )
         }
     }

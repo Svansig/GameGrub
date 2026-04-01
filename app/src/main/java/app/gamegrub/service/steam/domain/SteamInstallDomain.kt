@@ -49,7 +49,7 @@ import timber.log.Timber
 class SteamInstallDomain @Inject constructor(
     val inputManager: SteamInputManager,
     val libraryDomain: SteamLibraryDomain,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -88,13 +88,13 @@ class SteamInstallDomain @Inject constructor(
 
         // Otherwise it is verifying files
         val dlcAppIds = runBlocking {
-            libraryDomain.getInstalledApp(appId)?.downloadedDepots?.orEmpty()?.toMutableList()
+            libraryDomain.getInstalledApp(appId)?.downloadedDepots.orEmpty()?.toMutableList()
                 ?: mutableListOf()
         }
 
         runBlocking {
             libraryDomain.getDownloadableDlcAppsOf(appId)?.forEach { dlcApp ->
-                val installedDlcApp = runBlocking { libraryDomain.getAppInfoOf(dlcApp.id) }
+                val installedDlcApp = libraryDomain.getAppInfoOf(dlcApp.id)
                 if (installedDlcApp != null) {
                     dlcAppIds.add(installedDlcApp.id)
                 }
@@ -254,7 +254,7 @@ class SteamInstallDomain @Inject constructor(
 
         val downloadJob = scope.launch {
             try {
-                val licenses = runBlocking { libraryDomain.getLicensesFromDb() }
+                val licenses = libraryDomain.getLicensesFromDb()
                 if (licenses.isEmpty()) {
                     Timber.w("No licenses available for download")
                     return@launch
@@ -330,7 +330,7 @@ class SteamInstallDomain @Inject constructor(
                     depotDownloader.add(dlcAppItem)
                 }
 
-                val appConfig = runBlocking { libraryDomain.getAppInfoOf(appId) }?.config
+                val appConfig = libraryDomain.getAppInfoOf(appId)?.config
                 if (appConfig != null) {
                     tryDownloadWorkshopControllerConfig(
                         templateIndex = appConfig.steamControllerTemplateIndex,
@@ -390,7 +390,7 @@ class SteamInstallDomain @Inject constructor(
                 }
 
                 removeDownloadJob(appId)
-                runBlocking { libraryDomain.deleteDownloadingApp(appId) }
+                libraryDomain.deleteDownloadingApp(appId)
             } catch (e: Exception) {
                 Timber.e(e, "Download failed for app $appId")
                 info.persistProgressSnapshot()

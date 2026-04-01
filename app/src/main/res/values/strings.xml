@@ -87,7 +87,7 @@
     <string name="uninstall">Uninstall</string>
     <string name="run_app">Play</string>
     <string name="download_prompt_title">Install App</string>
-    <string name="calculating_space_requirements">Calculating space requirements...</string>
+    <string name="calculating_space_requirements">Calculating space requirements…</string>
     <string name="delete_prompt_title">Delete App</string>
     <string name="cancel_download_prompt_title">Cancel Download</string>
     <string name="acknowledge">OK</string>
@@ -173,7 +173,7 @@
     <string name="add">Add</string>
     <string name="delete">Delete</string>
     <string name="copy_from">Copy From</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="container_config_custom_resolution_title">Set Custom Resolution</string>
     <string name="container_config_custom_resolution_separator">x</string>
     <string name="container_config_custom_resolution_error_nonzero">Width and height must be greater than 0</string>
@@ -531,8 +531,8 @@
     <string name="need_internet_to_install">Need internet to install</string>
     <string name="install_wifi_only_enabled">Install over WiFi only enabled</string>
     <string name="installation_progress">Installation Progress</string>
-    <string name="downloading">Downloading...</string>
-    <string name="calculating_time">Calculating...</string>
+    <string name="downloading">Downloading…</string>
+    <string name="calculating_time">Calculating…</string>
     <string name="download_failed_try_again">Download failed. Please try again.</string>
     <string name="update_available">Update Available</string>
     <string name="game_information">Game Information</string>
@@ -778,7 +778,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">Contents Manager</string>
     <string name="import_wcp_from_device">Import .wcp from device</string>
-    <string name="working">Working...</string>
+    <string name="working">Working…</string>
     <string name="selected">Selected</string>
     <string name="selected_content">Selected content</string>
     <string name="installed_contents">Installed contents</string>
@@ -794,7 +794,7 @@
     <string name="settings_language_restart_title">Restart Required</string>
     <string name="settings_language_restart_message">Changing the language requires the app to restart. Do you want to continue?</string>
     <string name="settings_language_restart_confirm">Restart</string>
-    <string name="settings_language_changing">Changing language and restarting...</string>
+    <string name="settings_language_changing">Changing language and restarting…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">Emulation</string>
@@ -895,7 +895,7 @@
 
 
     <!-- Connecting to Servers Screen -->
-    <string name="connect_to_remote_server">Connecting to remote servers...</string>
+    <string name="connect_to_remote_server">Connecting to remote servers…</string>
 
     <!-- LibraryAppScreen: Dialogs -->
     <string name="library_not_enough_space_message">The app being installed needs %1$s of space but there is only %2$s left on this device</string>
@@ -959,11 +959,11 @@
 
     <!-- GameGrubMain: Game Launch -->
     <string name="main_downloading_entry">Downloading %s</string>
-    <string name="main_downloading_steam">Downloading Steam...</string>
+    <string name="main_downloading_steam">Downloading Steam…</string>
 
-    <string name="main_installing_glibc">Installing glibc components...</string>
-    <string name="main_installing_bionic">Installing Bionic components...</string>
-    <string name="main_loading">Loading...</string>
+    <string name="main_installing_glibc">Installing glibc components…</string>
+    <string name="main_installing_bionic">Installing Bionic components…</string>
+    <string name="main_loading">Loading…</string>
     <string name="download_failed_title">Download Failed</string>
     <string name="download_failed_message">A required file could not be downloaded. Please check your network connection and try again.</string>
     <string name="install_failed_title">Installation Failed</string>
@@ -1186,7 +1186,7 @@
     <string name="wine_proton_import_package">Import Wine/Proton Package</string>
     <string name="wine_proton_select_file_description">Select a .wcp file (with filename starting with \'wine\' or \'proton\')</string>
     <string name="wine_proton_import_wcp_button">Import .wcp Package</string>
-    <string name="wine_proton_processing">Processing...</string>
+    <string name="wine_proton_processing">Processing…</string>
     <string name="wine_proton_package_details">Package Details</string>
     <string name="wine_proton_type">Type</string>
     <string name="wine_proton_version">Version</string>
@@ -1211,7 +1211,7 @@
     <string name="cancel_import_keep">No, Keep Import</string>
 
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">Extracting and validating package (this may take 2-3 minutes for large files)...</string>
+    <string name="wine_proton_extracting">Extracting and validating package (this may take 2–3 minutes for large files)…</string>
     <string name="wine_proton_filename_error">Filename must begin with \'wine\' or \'proton\' (case-insensitive)</string>
     <string name="wine_proton_file_empty">File is empty or cannot be read</string>
     <string name="wine_proton_cannot_open">Cannot open file</string>
@@ -1282,7 +1282,7 @@
     <string name="amazon_logout_success">Logged out from Amazon Games successfully</string>
     <string name="amazon_logout_failed">Failed to logout: %s</string>
     <string name="amazon_logout_in_progress">Logging out from Amazon Games…</string>
-    <string name="manifest_downloading_item">Downloading %1$s...</string>
+    <string name="manifest_downloading_item">Downloading %1$s…</string>
     <string name="manifest_download_failed">Download failed: %1$s</string>
     <string name="manifest_install_failed">Failed to install %1$s</string>
     <string name="manifest_install_success">%1$s installed</string>

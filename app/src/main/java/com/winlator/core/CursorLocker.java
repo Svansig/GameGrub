@@ -19,7 +19,7 @@ public class CursorLocker extends TimerTask {
         this.xServer = xServer;
         maxDistance = (short)(xServer.screenInfo.width * 0.05f);
         Timer timer = new Timer();
-        timer.scheduleAtFixedRate(this, 0, 1000 / 60);
+        timer.schedule(this, 0, 1000 / 60);
     }
 
     public short getMaxDistance() {
@@ -49,7 +49,7 @@ public class CursorLocker extends TimerTask {
                 pauseLock.notifyAll();
             }
         }
-        else this.enabled = enabled;
+        else this.enabled = false;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CursorLocker extends TimerTask {
                     pauseLock.wait();
                 }
                 catch (InterruptedException e) {
-                    Log.e("CursorLocker", "Pause lock interrupted: " + e);
+                    Timber.tag("CursorLocker").e("Pause lock interrupted: " + e);
                 }
             }
         }

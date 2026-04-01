@@ -114,10 +114,7 @@ object EpicAuthManager {
                 return Result.failure(Exception("No stored credentials found"))
             }
 
-            val credentials = loadCredentials(context)
-            if (credentials == null) {
-                return Result.failure(Exception("Failed to load credentials"))
-            }
+            val credentials = loadCredentials(context) ?: return Result.failure(Exception("Failed to load credentials"))
 
             // Check if token is expired (with 5 minute buffer)
             val now = System.currentTimeMillis()
@@ -228,7 +225,7 @@ object EpicAuthManager {
         }
     }
 
-    suspend fun logout(context: Context): Result<Unit> {
+    fun logout(context: Context): Result<Unit> {
         return try {
             val credentialsFile = File(getCredentialsFilePath(context))
             if (credentialsFile.exists()) {

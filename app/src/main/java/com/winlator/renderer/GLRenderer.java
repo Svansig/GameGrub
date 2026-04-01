@@ -49,10 +49,9 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
     private boolean screenOffsetYRelativeToCursor = false;
     private String[] unviewableWMClasses = null;
     private float magnifierZoom = 1.0f;
-    private boolean magnifierEnabled = true;
     private int surfaceWidth;
     private int surfaceHeight;
-    private boolean sceneInitialized = false;
+    private final boolean sceneInitialized = false;
     private final EffectComposer effectComposer;
 
     public GLRenderer(XServerView xServerView, XServer xServer) {
@@ -137,6 +136,7 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         boolean xrFrame = false;
         // if (XrActivity.isSupported()) xrFrame = XrActivity.getInstance().beginFrame(XrActivity.getImmersive(), XrActivity.getSBS());
 
+        boolean magnifierEnabled = true;
         if (viewportNeedsUpdate && magnifierEnabled) {
             if (fullscreen) {
                 GLES20.glViewport(0, 0, surfaceWidth, surfaceHeight);
@@ -185,11 +185,6 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
 
         if (!magnifierEnabled && !fullscreen) GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
 
-        if (xrFrame) {
-            // XrActivity.getInstance().endFrame();
-            // XrActivity.updateControllers();
-            xServerView.requestRender();
-        }
     }
 
     @Override

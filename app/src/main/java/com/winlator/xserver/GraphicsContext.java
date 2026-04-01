@@ -1,7 +1,7 @@
 package com.winlator.xserver;
 
 public class GraphicsContext extends XResource {
-    public static final int FLAG_FUNCTION = 1<<0;
+    public static final int FLAG_FUNCTION = 1;
     public static final int FLAG_PLANE_MASK = 1<<1;
     public static final int FLAG_FOREGROUND = 1<<2;
     public static final int FLAG_BACKGROUND = 1<<3;

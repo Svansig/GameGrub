@@ -1199,7 +1199,7 @@
     <string name="cancel_import_keep">Seguir importando</string>
 
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">Extrayendo y validando el paquete (esto puede tardar 2-3 minutos para archivos grandes)…</string>
+    <string name="wine_proton_extracting">Extrayendo y validando el paquete (esto puede tardar 2–3 minutos para archivos grandes)…</string>
     <string name="wine_proton_filename_error">El nombre del archivo debe empezar con \'wine\' o \'proton\' (no distingue mayúsculas y minúsculas).</string>
     <string name="wine_proton_file_empty">El archivo está vacío o no se puede leer.</string>
     <string name="wine_proton_cannot_open">No se puede abrir el archivo.</string>

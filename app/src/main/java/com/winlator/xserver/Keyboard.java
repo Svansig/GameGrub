@@ -1,6 +1,5 @@
 package com.winlator.xserver;
 
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 
@@ -40,13 +39,13 @@ public class Keyboard {
 
     public void setKeysyms(byte keycode, int minKeysym, int majKeysym) {
         int index = keycode - 8;
-        keysyms[index*KEYSYMS_PER_KEYCODE+0] = minKeysym;
+        keysyms[index * KEYSYMS_PER_KEYCODE] = minKeysym;
         keysyms[index*KEYSYMS_PER_KEYCODE+1] = majKeysym;
     }
 
     public boolean hasKeysym(byte keycode, int keysym) {
         int index = keycode - 8;
-        return keysyms[index*KEYSYMS_PER_KEYCODE+0] == keysym || keysyms[index*KEYSYMS_PER_KEYCODE+1] == keysym;
+        return keysyms[index * KEYSYMS_PER_KEYCODE] == keysym || keysyms[index*KEYSYMS_PER_KEYCODE+1] == keysym;
     }
 
     public void setKeyPress(byte keycode, int keysym) {

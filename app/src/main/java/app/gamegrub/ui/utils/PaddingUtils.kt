@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.gamegrub.PrefManager
 
-object `PaddingUtils` {
+object PaddingUtils {
     /**
      * Creates padding values with conditional top padding based on status bar visibility.
      * When hideStatusBar is true, top padding is 0.dp, otherwise it uses defaultPadding.

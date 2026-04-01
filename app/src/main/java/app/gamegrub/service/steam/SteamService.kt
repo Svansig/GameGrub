@@ -409,7 +409,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun getAppDlc(appId: Int): Map<Int, DepotInfo> {
             return getAppInfoOf(appId)?.let {
-                it.depots.filter { it.value.dlcAppId != INVALID_APP_ID }
+                it.depots.filter { it -> it.value.dlcAppId != INVALID_APP_ID }
             }.orEmpty()
         }
 
@@ -423,8 +423,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                 appDlcDepots = getAppDlc(appId),
                 invalidAppId = INVALID_APP_ID,
                 ownedGameIds = ownedGameIds,
-                hasLicense = { dlcAppId -> runBlocking { instance?.libraryDomain?.findLicense(dlcAppId) } != null },
-                hasPicsApp = { dlcAppId -> runBlocking { instance?.libraryDomain?.findApp(dlcAppId) } != null },
+                hasLicense = { dlcAppId -> instance?.libraryDomain?.findLicense(dlcAppId) != null },
+                hasPicsApp = { dlcAppId -> instance?.libraryDomain?.findApp(dlcAppId) != null },
             )
         }
 
@@ -613,12 +613,12 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun isImageFsInstallable(context: Context, variant: String): Boolean {
             val imageFs = ImageFs.find(context)
-            if (variant.equals(Container.BIONIC)) {
-                return File(imageFs.filesDir, "imagefs_bionic.txz").exists() ||
+            return if (variant == Container.BIONIC) {
+                File(imageFs.filesDir, "imagefs_bionic.txz").exists() ||
                     context.assets.list("")
                         ?.contains("imagefs_bionic.txz") == true
             } else {
-                return File(imageFs.filesDir, "imagefs_gamenative.txz").exists() ||
+                File(imageFs.filesDir, "imagefs_gamenative.txz").exists() ||
                     context.assets.list("")
                         ?.contains("imagefs_gamenative.txz") == true
             }
@@ -1014,10 +1014,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             signalLaunchIntent = {
                 PrefManager.clientId?.let { clientId ->
                     instance?.let { steamInstance ->
-                        val steamCloud = steamInstance._steamCloud
-                        if (steamCloud == null) {
-                            return@let LaunchIntentResult()
-                        }
+                        val steamCloud = steamInstance._steamCloud ?: return@let LaunchIntentResult()
                         Timber.i(
                             "Signaling app launch:\n\tappId: %d\n\tclientId: %s\n\tosType: %s",
                             appId,
@@ -1676,7 +1673,6 @@ class SteamService : Service(), IChallengeUrlChanged {
     }
 
     // region [REGION] callbacks
-    @Suppress("UNUSED_PARAMETER", "unused")
     private fun onConnected(callback: ConnectedCallback) {
         Timber.i("Connected to Steam")
 

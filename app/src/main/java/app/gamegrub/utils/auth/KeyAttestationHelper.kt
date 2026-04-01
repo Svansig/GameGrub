@@ -2,7 +2,6 @@ package app.gamegrub.utils.auth
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -147,10 +146,6 @@ object KeyAttestationHelper {
     }
 
     private fun isStrongBoxAdvertised(context: Context): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            return false
-        }
-
         return context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
     }
 }

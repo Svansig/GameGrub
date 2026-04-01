@@ -116,7 +116,7 @@ internal object UnpackExecutionCoordinator {
                 val exePaths = if (container.isUnpackFiles) {
                     val scanned = ContainerUtils.scanExecutablesInADrive(container.drives)
                     val filtered = ContainerUtils.filterExesForUnpacking(scanned)
-                    if (filtered.isEmpty()) listOf(container.executablePath).filter { it.isNotEmpty() } else filtered
+                    filtered.ifEmpty { listOf(container.executablePath).filter { it.isNotEmpty() } }
                 } else {
                     listOf(container.executablePath).filter { it.isNotEmpty() }
                 }

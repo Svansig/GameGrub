@@ -86,7 +86,7 @@ class EpicDownloadManager @Inject constructor(
             )
 
             // Check for DLCs early to calculate total download size
-            val dlcsToDownload = if (dlcIds.size > 0) {
+            val dlcsToDownload = if (dlcIds.isNotEmpty()) {
                 try {
                     Timber.tag("Epic").d("User has opted to download ${dlcIds.size} DLC titles for game: ${game.title}")
                     val dlcs = epicManager.getGamesById(dlcIds)
@@ -706,7 +706,7 @@ class EpicDownloadManager @Inject constructor(
 
             // Epic chunks can have different header sizes (62 or 66 bytes)
             // Minimum viable header is 62 bytes
-            if (headerSize < 62 || headerSize > 66) {
+            if (headerSize !in 62..66) {
                 throw Exception("Invalid header size: $headerSize (expected 62-66 bytes)")
             }
 
@@ -789,8 +789,7 @@ class EpicDownloadManager @Inject constructor(
                                     Timber.tag("Epic").d("Unexpected end of stream: read=$totalBytesWritten, expected=$uncompressedSize")
                                 } else {
                                     if (firstRead) {
-                                        Log.d(
-                                            "Epic",
+                                        Timber.tag("Epic").d(
                                             "First compressed data bytes: ${
                                                 inputBuffer.take(16).joinToString(" ") {
                                                     "%02x".format(it)

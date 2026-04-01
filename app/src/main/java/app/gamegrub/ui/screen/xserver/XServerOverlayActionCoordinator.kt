@@ -198,9 +198,7 @@ internal object XServerOverlayActionCoordinator {
         GameGrubApp.touchpadView?.postDelayed(
             {
                 val touchpadView = GameGrubApp.touchpadView
-                if (touchpadView != null) {
-                    touchpadView.releasePointerCapture()
-                }
+                touchpadView?.releasePointerCapture()
             },
             100,
         )

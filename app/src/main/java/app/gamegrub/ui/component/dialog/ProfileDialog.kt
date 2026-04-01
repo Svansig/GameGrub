@@ -240,7 +240,7 @@ fun ProfileDialog(
         },
     )
 
-    SupportersDialog(visible = showSupporters, onDismiss = { showSupporters = false })
+    SupportersDialog(visible = showSupporters, onDismiss = { })
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL)

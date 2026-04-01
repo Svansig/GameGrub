@@ -58,7 +58,7 @@ fun SettingsMultiListDropdown(
     }
 
     var isDropdownExpanded by remember { mutableStateOf(false) }
-    val selectedText = if (values.isNotEmpty()) values.map { items[it] }.joinToString(", ") else fallbackDisplay
+    val selectedText = if (values.isNotEmpty()) values.joinToString(", ") { items[it] } else fallbackDisplay
 
     SettingsTileScaffold(
         modifier = Modifier

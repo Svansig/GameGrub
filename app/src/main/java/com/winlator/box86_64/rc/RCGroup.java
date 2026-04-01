@@ -6,7 +6,7 @@ import java.util.List;
 public class RCGroup implements Comparable<RCGroup> {
     private String groupName;
     private String groupDesc;
-    private List<RCItem> items;
+    private final List<RCItem> items;
     private boolean enabled;
 
     public RCGroup() {

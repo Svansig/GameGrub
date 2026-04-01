@@ -12,7 +12,7 @@ import com.winlator.xserver.extensions.Extension;
 import java.io.IOException;
 
 public abstract class ExtensionRequests {
-    public static void queryExtension(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    public static void queryExtension(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         short length = inputStream.readShort();
         inputStream.skip(2);
         String name = inputStream.readString8(length);

@@ -52,7 +52,7 @@ public class Bitmask implements Iterable<Integer> {
     @Override
     public Iterator<Integer> iterator() {
         final int[] bits = {this.bits};
-        return new Iterator<Integer>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return bits[0] != 0;

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
+import androidx.core.net.toUri
 import app.gamegrub.PrefManager
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
@@ -423,7 +424,7 @@ class CustomGameScanner @Inject constructor(
     fun requestManageExternalStoragePermission(context: Context): Boolean {
         try {
             val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
-            intent.data = Uri.parse("package:${context.packageName}")
+            intent.data = "package:${context.packageName}".toUri()
             context.startActivity(intent)
             return true
         } catch (e: Exception) {
@@ -431,7 +432,7 @@ class CustomGameScanner @Inject constructor(
             // Fallback: try generic app settings
             try {
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                intent.data = Uri.parse("package:${context.packageName}")
+                intent.data = "package:${context.packageName}".toUri()
                 context.startActivity(intent)
                 return true
             } catch (e2: Exception) {
@@ -540,13 +541,9 @@ class CustomGameScanner @Inject constructor(
     private fun writeGameIdToFile(folder: File, gameId: Int) {
         // Read existing metadata to preserve other fields
         val existing = GameMetadataManager.read(folder)
-        val metadata = if (existing != null) {
-            // Preserve existing metadata fields, only update appId
-            existing.copy(appId = gameId)
-        } else {
-            // Create new metadata with just the appId
+        val metadata = existing // Preserve existing metadata fields, only update appId
+            ?.copy(appId = gameId) ?: // Create new metadata with just the appId
             GameMetadata(appId = gameId)
-        }
         GameMetadataManager.write(folder, metadata)
     }
 
@@ -611,7 +608,7 @@ class CustomGameScanner @Inject constructor(
             while (candidateId + counter in existingIds) {
                 counter++
             }
-            candidateId = candidateId + counter
+            candidateId += counter
             Timber.tag("CustomGameScanner").d("Generated unique ID: $candidateId (base was ${candidateId - counter})")
         }
 

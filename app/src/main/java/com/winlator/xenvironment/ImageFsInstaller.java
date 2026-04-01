@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
@@ -99,10 +100,10 @@ public abstract class ImageFsInstaller {
 
             boolean success = false;
 
-            if (Arrays.asList(context.getAssets().list("")).contains(imagefsFile) == true){
+            if (Arrays.asList(Objects.requireNonNull(context.getAssets().list(""))).contains(imagefsFile)){
                 final long contentLength = (long) (FileUtils.getSize(assetManager, imagefsFile) * (100.0f / compressionRatio));
                 AtomicLong totalSizeRef = new AtomicLong();
-                Log.d("Extraction", "extracting " + imagefsFile);
+                Timber.tag("Extraction").d("extracting " + imagefsFile);
 
                 success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, assetManager, imagefsFile, rootDir, (file, size) -> {
                     if (size > 0) {
@@ -119,7 +120,7 @@ public abstract class ImageFsInstaller {
             else if (downloaded.exists()){
                 final long contentLength = (long) (FileUtils.getSize(downloaded) * (100.0f / compressionRatio));
                 AtomicLong totalSizeRef = new AtomicLong();
-                Log.d("Extraction", "extracting " + imagefsFile);
+                Timber.tag("Extraction").d("extracting " + imagefsFile);
                 success = TarCompressorUtils.extract(TarCompressorUtils.Type.XZ, downloaded, rootDir, (file, size) -> {
                     if (size > 0) {
                         long totalSize = totalSizeRef.addAndGet(size);
@@ -133,7 +134,7 @@ public abstract class ImageFsInstaller {
             }
 
             if (success) {
-                Log.d("ImageFsInstaller", "Successfully installed system files");
+                Timber.tag("ImageFsInstaller").d("Successfully installed system files");
                 ContainerManager containerManager = new ContainerManager(context);
 
                 installWineFromDownloads(context);
@@ -145,9 +146,9 @@ public abstract class ImageFsInstaller {
                 clearSteamDllMarkers(context, containerManager);
             }
             else {
-                Log.e("ImageFsInstaller", "Failed to install system files");
+                Timber.tag("ImageFsInstaller").e("Failed to install system files");
                 if (downloaded.exists()) {
-                    Log.w("ImageFsInstaller", "Deleting corrupt archive so next attempt re-downloads: " + downloaded.getPath());
+                    Timber.tag("ImageFsInstaller").w("Deleting corrupt archive so next attempt re-downloads: " + downloaded.getPath());
                     downloaded.delete();
                 }
             }
@@ -165,7 +166,7 @@ public abstract class ImageFsInstaller {
                     TarCompressorUtils.Type.ZSTD,      // you said .tzst
                     in, imagefs);                      // helper already exists in the project
         } catch (IOException e) {
-            Log.e("ImageFsInstaller", "redirect deploy failed", e);
+            Timber.tag("ImageFsInstaller").e(e, "redirect deploy failed");
             return;
         }
 
@@ -180,7 +181,7 @@ public abstract class ImageFsInstaller {
                     TarCompressorUtils.Type.ZSTD,      // you said .tzst
                     in, imagefs);                      // helper already exists in the project
         } catch (IOException e) {
-            Log.e("ImageFsInstaller", "extras deploy failed", e);
+            Timber.tag("ImageFsInstaller").e(e, "extras deploy failed");
             return;
         }
 
@@ -190,7 +191,7 @@ public abstract class ImageFsInstaller {
         chmod(new File(imagefs, "opt/mono-gecko-offline/wine-mono-9.0.0-x86.msi"));
     }
 
-    private static void chmod(File f) { if (f.exists()) FileUtils.chmod(f, 0755);}
+    private static void chmod(File f) { if (f.exists()) FileUtils.chmod(f, 493);}
 
     public static Future<Boolean> installIfNeededFuture(final Context context, AssetManager assetManager) {
         return installIfNeededFuture(context, assetManager, null, null);
@@ -198,10 +199,10 @@ public abstract class ImageFsInstaller {
     public static Future<Boolean> installIfNeededFuture(final Context context, AssetManager assetManager, Container container, Callback<Integer> onProgress) {
         ImageFs imageFs = ImageFs.find(context);
         if (!imageFs.isValid() || imageFs.getVersion() < LATEST_VERSION || !imageFs.getVariant().equals(container.getContainerVariant())) {
-            Log.d("ImageFsInstaller", "Installing image from assets");
+            Timber.tag("ImageFsInstaller").d("Installing image from assets");
             return installFromAssetsFuture(context, assetManager, container.getContainerVariant(), onProgress);
         } else {
-            Log.d("ImageFsInstaller", "Image FS already valid and at latest version");
+            Timber.tag("ImageFsInstaller").d("Image FS already valid and at latest version");
             return Executors.newSingleThreadExecutor().submit(() -> true);
         }
     }
@@ -241,7 +242,7 @@ public abstract class ImageFsInstaller {
 
             // Keep imported Wine/Proton installations
             if (isImportedWineProton(context, fileName)) {
-                Log.d("ImageFsInstaller", "Preserving imported installation: " + fileName);
+                Timber.tag("ImageFsInstaller").d("Preserving imported installation: " + fileName);
                 continue;
             }
 
@@ -262,7 +263,7 @@ public abstract class ImageFsInstaller {
                         }
                         // Preserve imported Wine/Proton installations in opt/
                         if (name.equals("opt")) {
-                            Log.d("ImageFsInstaller", "Clearing opt directory while preserving imported Wine/Proton installations");
+                            Timber.tag("ImageFsInstaller").d("Clearing opt directory while preserving imported Wine/Proton installations");
                             clearOptDir(context, file);
                             continue;
                         }
@@ -297,8 +298,8 @@ public abstract class ImageFsInstaller {
             ArrayList<String> system32Files = new ArrayList<>();
             ArrayList<String> syswow64Files = new ArrayList<>();
 
-            for (File dstFile : dstFiles) {
-                for (File srcFile : srcFiles) {
+            for (File dstFile : Objects.requireNonNull(dstFiles)) {
+                for (File srcFile : Objects.requireNonNull(srcFiles)) {
                     if (dstFile.getName().equals(srcFile.getName())) {
                         if (FileUtils.contentEquals(srcFile, dstFile)) system32Files.add(srcFile.getName());
                         break;
@@ -309,8 +310,8 @@ public abstract class ImageFsInstaller {
             dstFiles = containerSysWoW64Dir.listFiles();
             srcFiles = wineSysWoW64Dir.listFiles();
 
-            for (File dstFile : dstFiles) {
-                for (File srcFile : srcFiles) {
+            for (File dstFile : Objects.requireNonNull(dstFiles)) {
+                for (File srcFile : Objects.requireNonNull(srcFiles)) {
                     if (dstFile.getName().equals(srcFile.getName())) {
                         if (FileUtils.contentEquals(srcFile, dstFile)) syswow64Files.add(srcFile.getName());
                         break;
@@ -343,9 +344,8 @@ public abstract class ImageFsInstaller {
 
                 FileUtils.delete(containerPatternDir);
                 // preloaderDialog.closeOnUiThread();
-            }
-            catch (JSONException e) {
-                Log.e("ImageFsInstaller", "Failed to read JSON data: " + e);
+            } catch (JSONException e) {
+                Timber.tag("ImageFsInstaller").e("Failed to read JSON data: " + e);
             }
         });
     }
@@ -363,14 +363,14 @@ public abstract class ImageFsInstaller {
                     MarkerUtils.INSTANCE.removeMarker(mappedPath, Marker.STEAM_DLL_REPLACED);
                     MarkerUtils.INSTANCE.removeMarker(mappedPath, Marker.STEAM_DLL_RESTORED);
                     MarkerUtils.INSTANCE.removeMarker(mappedPath, Marker.STEAM_COLDCLIENT_USED);
-                    Log.i("ImageFsInstaller", "Cleared markers for container: " + container.getName() + " (ID: " + container.id + ")");
+                    Timber.tag("ImageFsInstaller").i("Cleared markers for container: " + container.getName() + " (ID: " + container.id + ")");
                 } catch (Exception e) {
-                    Log.w("ImageFsInstaller", "Failed to clear markers for container ID " + container.id + ": " + e.getMessage());
+                    Timber.tag("ImageFsInstaller").w("Failed to clear markers for container ID " + container.id + ": " + e.getMessage());
                 }
             }
-            Log.i("ImageFsInstaller", "Finished clearing Steam DLL markers for all containers");
+            Timber.tag("ImageFsInstaller").i("Finished clearing Steam DLL markers for all containers");
         } catch (Exception e) {
-            Log.e("ImageFsInstaller", "Error clearing Steam DLL markers: " + e.getMessage());
+            Timber.tag("ImageFsInstaller").e("Error clearing Steam DLL markers: " + e.getMessage());
         }
     }
 }

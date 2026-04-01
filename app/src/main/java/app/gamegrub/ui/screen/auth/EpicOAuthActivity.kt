@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.net.toUri
 import app.gamegrub.service.epic.EpicConstants
 import app.gamegrub.ui.component.dialog.AuthWebViewDialog
 import app.gamegrub.ui.theme.GameGrubTheme
@@ -109,8 +110,8 @@ class EpicOAuthActivity : ComponentActivity() {
 
     private fun isValidRedirectUrl(url: String): Boolean {
         return try {
-            val parsed = Uri.parse(url)
-            val expected = Uri.parse(EpicConstants.EPIC_REDIRECT_URI)
+            val parsed = url.toUri()
+            val expected = EpicConstants.EPIC_REDIRECT_URI.toUri()
             parsed.scheme.equals(expected.scheme, ignoreCase = true) &&
                 parsed.host.equals(expected.host, ignoreCase = true) &&
                 parsed.path == expected.path
@@ -122,7 +123,7 @@ class EpicOAuthActivity : ComponentActivity() {
 
     private fun extractState(url: String): String? {
         return try {
-            Uri.parse(url).getQueryParameter("state")
+            url.toUri().getQueryParameter("state")
         } catch (e: Exception) {
             Timber.w(e, "Failed to extract state from URL: %s", redactUrlForLogging(url))
             null
@@ -131,7 +132,7 @@ class EpicOAuthActivity : ComponentActivity() {
 
     private fun extractAuthCode(url: String): String? {
         return try {
-            Uri.parse(url).getQueryParameter("code")
+            url.toUri().getQueryParameter("code")
         } catch (e: Exception) {
             Timber.w(e, "Failed to extract auth code from URL: %s", redactUrlForLogging(url))
             null

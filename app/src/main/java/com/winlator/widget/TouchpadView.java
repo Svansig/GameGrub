@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import app.gamegrub.R;
 import app.gamegrub.data.TouchGestureConfig;
 import com.winlator.core.AppUtils;
 import com.winlator.math.Mathf;
@@ -43,21 +42,18 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
     private float sensitivity;
     private final XServer xServer;
     private final float[] xform;
-    private boolean simTouchScreen = false;
-    private boolean continueClick = true;
+    private boolean simTouchScreen;
+    private boolean continueClick;
     private int lastTouchedPosX;
     private int lastTouchedPosY;
     private static final Byte CLICK_DELAYED_TIME = 50;
     private static final Byte EFFECTIVE_TOUCH_DISTANCE = 20;
     private float resolutionScale;
     private static final int UPDATE_FORM_DELAYED_TIME = 50;
-    private boolean touchscreenMouseDisabled = false;
-    private boolean isTouchscreenMode = false;
-    private Runnable delayedPress;
+    private boolean touchscreenMouseDisabled;
+    private boolean isTouchscreenMode;
 
     private boolean pressExecuted;
-    private final boolean capturePointerOnExternalMouse;
-    private boolean pointerCaptureRequested;
 
     // ── Gesture configuration ────────────────────────────────────────
     private TouchGestureConfig gestureConfig = new TouchGestureConfig();
@@ -105,7 +101,6 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
 
     public TouchpadView(Context context, XServer xServer, boolean capturePointerOnExternalMouse) {
         super(context);
-        this.capturePointerOnExternalMouse = capturePointerOnExternalMouse;
         this.fingers = new Finger[4];
         this.numFingers = (byte) 0;
         this.sensitivity = 1.0f;
@@ -139,6 +134,7 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         // allow re-capture after app returns from background
+        boolean pointerCaptureRequested;
         if (hasFocus) pointerCaptureRequested = false;
     }
 
@@ -237,15 +233,15 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
 
         switch (action) {
             case MotionEvent.ACTION_HOVER_ENTER:
-                Log.d("StylusEvent", "Hover Enter");
+                Timber.tag("StylusEvent").d("Hover Enter");
                 break;
             case MotionEvent.ACTION_HOVER_MOVE:
-                Log.d("StylusEvent", "Hover Move: (" + event.getX() + ", " + event.getY() + ")");
+                Timber.tag("StylusEvent").d("Hover Move: (" + event.getX() + ", " + event.getY() + ")");
                 float[] transformedPoint = XForm.transformPoint(xform, event.getX(), event.getY());
                 xServer.injectPointerMove((int) transformedPoint[0], (int) transformedPoint[1]);
                 break;
             case MotionEvent.ACTION_HOVER_EXIT:
-                Log.d("StylusEvent", "Hover Exit");
+                Timber.tag("StylusEvent").d("Hover Exit");
                 break;
             default:
                 return false;
@@ -438,7 +434,7 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
                 xServer.getWinHandler().mouseEvent(MouseEventFlags.LEFTDOWN, 0, 0, 0);
             else {
                 pressExecuted = false;
-                delayedPress = () -> {
+                Runnable delayedPress = () -> {
                     pressExecuted = true;
                     xServer.injectPointerButtonPress(Pointer.Button.BUTTON_LEFT);
                 };
@@ -998,7 +994,7 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
             Finger finger2 = this.numFingers == 2 ? findSecondFinger(finger1) : null;
             if (finger2 != null) {
                 ScreenInfo screenInfo = this.xServer.screenInfo;
-                float resolutionScale = 1000.0f / Math.min((int) screenInfo.width, (int) screenInfo.height);
+                float resolutionScale = 1000.0f / Math.min(screenInfo.width, screenInfo.height);
                 float currDistance = ((float) Math.hypot(finger1.x - finger2.x, finger1.y - finger2.y)) * resolutionScale;
                 if (currDistance < MAX_TWO_FINGERS_SCROLL_DISTANCE) {
                     float f = this.scrollAccumY + (((finger1.y + finger2.y) * 0.5f) - ((finger1.lastY + finger2.lastY) * 0.5f));
@@ -1010,9 +1006,8 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
                         this.xServer.injectPointerButtonRelease(button);
                         this.scrollAccumY = 0.0f;
                     } else if (f > 100.0f) {
-                        XServer xServer2 = this.xServer;
                         Pointer.Button button2 = Pointer.Button.BUTTON_SCROLL_UP;
-                        xServer2.injectPointerButtonPress(button2);
+                        this.xServer.injectPointerButtonPress(button2);
                         this.xServer.injectPointerButtonRelease(button2);
                         this.scrollAccumY = 0.0f;
                     }
@@ -1029,11 +1024,10 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
                     WinHandler winHandler = this.xServer.getWinHandler();
                     if (this.xServer.isRelativeMouseMovement()) {
                         winHandler.mouseEvent(MouseEventFlags.MOVE, dx, dy, 0);
-                        return;
                     } else {
                         this.xServer.injectPointerMoveDelta(dx, dy);
-                        return;
                     }
+                    return;
                 }
                 this.xServer.injectPointerMove(finger1.x, finger1.y);
             }
@@ -1253,7 +1247,7 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
     }
 
     public void setTouchscreenMode(boolean isTouchscreenMode) {
-        Log.d("TouchpadView", "Setting touchscreen mode to " + isTouchscreenMode);
+        Timber.tag("TouchpadView").d("Setting touchscreen mode to " + isTouchscreenMode);
         this.isTouchscreenMode = isTouchscreenMode;
     }
 

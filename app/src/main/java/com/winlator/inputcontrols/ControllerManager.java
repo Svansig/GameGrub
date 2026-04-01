@@ -28,8 +28,6 @@ public class ControllerManager {
         // Private constructor to prevent direct instantiation.
     }
 
-    // --- Core Properties ---
-    private Context context;
     private SharedPreferences preferences;
     private InputManager inputManager;
 
@@ -52,9 +50,10 @@ public class ControllerManager {
      * @param context The application context.
      */
     public void init(Context context) {
-        this.context = context.getApplicationContext();
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(this.context);
-        this.inputManager = (InputManager) this.context.getSystemService(Context.INPUT_SERVICE);
+        // --- Core Properties ---
+        Context context1 = context.getApplicationContext();
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context1);
+        this.inputManager = (InputManager) context1.getSystemService(Context.INPUT_SERVICE);
 
         // On startup, we load saved settings and scan for connected devices.
         loadAssignments();
@@ -151,11 +150,7 @@ public class ControllerManager {
     public static String getDeviceIdentifier(InputDevice device) {
         if (device == null) return null;
         // The descriptor is the most reliable unique ID for a device.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            return device.getDescriptor();
-        }
-        // Fallback for older Android versions
-        return "vendor_" + device.getVendorId() + "_product_" + device.getProductId();
+        return device.getDescriptor();
     }
 
     /**

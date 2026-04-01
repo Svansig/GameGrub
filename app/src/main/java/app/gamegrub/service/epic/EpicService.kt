@@ -8,7 +8,6 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.EpicCredentials
 import app.gamegrub.data.EpicGame
-import app.gamegrub.data.EpicGameToken
 import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
@@ -93,9 +92,7 @@ class EpicService : Service() {
         }
 
         fun stop() {
-            instance?.let { service ->
-                service.stopSelf()
-            }
+            instance?.stopSelf()
         }
 
         // ==========================================================================
@@ -163,8 +160,6 @@ class EpicService : Service() {
             syncInProgress = inProgress
         }
 
-        fun isSyncInProgress(): Boolean = syncInProgress
-
         fun getInstance(): EpicService? = instance
 
         // ==========================================================================
@@ -175,28 +170,18 @@ class EpicService : Service() {
             return getInstance()?.activeDownloads?.isNotEmpty() ?: false
         }
 
-        fun getCurrentlyDownloadingGame(): Int? {
-            return getInstance()?.activeDownloads?.keys?.firstOrNull()
-        }
-
         fun getDownloadInfo(appId: Int): DownloadInfo? {
             return getInstance()?.activeDownloads?.get(appId)
         }
 
         suspend fun deleteGame(context: Context, appId: Int): Result<Unit> {
-            val instance = getInstance()
-            if (instance == null) {
-                return Result.failure(Exception("Service not available"))
-            }
+            val instance = getInstance() ?: return Result.failure(Exception("Service not available"))
 
             return try {
                 // Get the game to find its install path
-                val game = instance.epicManager.getGameById(appId)
-                if (game == null) {
-                    return Result.failure(Exception("Game not found: $appId"))
-                }
+                val game = instance.epicManager.getGameById(appId) ?: return Result.failure(Exception("Game not found: $appId"))
 
-                val path = if (game.installPath.isNotEmpty()) game.installPath else EpicConstants.getGameInstallPath(context, game.appName)
+                val path = game.installPath.ifEmpty { EpicConstants.getGameInstallPath(context, game.appName) }
                 if (File(path).exists()) {
                     Timber.tag("Epic").i("Deleting installation folder: $path")
                     val deleted = File(path).deleteRecursively()
@@ -244,22 +229,6 @@ class EpicService : Service() {
             getInstance()?.activeDownloads?.remove(appId)
         }
 
-        fun cancelDownload(appId: Int): Boolean {
-            val instance = getInstance()
-            val downloadInfo = instance?.activeDownloads?.get(appId)
-
-            return if (downloadInfo != null) {
-                Timber.tag("EPIC").i("Cancelling download for Epic game: $appId")
-                downloadInfo.cancel()
-                instance.activeDownloads.remove(appId)
-                Timber.tag("EPIC").d("Download cancelled for Epic game: $appId")
-                true
-            } else {
-                Timber.w("No active download found for Epic game: $appId")
-                false
-            }
-        }
-
         // ==========================================================================
         // GAME & LIBRARY OPERATIONS
         // ==========================================================================
@@ -267,12 +236,6 @@ class EpicService : Service() {
         fun getEpicGameOf(appId: Int): EpicGame? {
             return runBlocking(Dispatchers.IO) {
                 getInstance()?.epicManager?.getGameById(appId)
-            }
-        }
-
-        fun getEpicGameByAppName(appName: String): EpicGame? {
-            return runBlocking(Dispatchers.IO) {
-                getInstance()?.epicManager?.getGameByAppName(appName)
             }
         }
 
@@ -324,10 +287,6 @@ class EpicService : Service() {
             }
         }
 
-        suspend fun getInstalledExe(appId: Int): String {
-            return getInstance()?.epicManager?.getInstalledExe(appId) ?: ""
-        }
-
         /**
          * Resolves the effective launch executable for an Epic game.
          * Container id is expected to be "EPIC_&lt;numericId&gt;" (from library). Returns empty if
@@ -341,11 +300,6 @@ class EpicService : Service() {
                 return ""
             }
             return getInstance()?.epicManager?.getLaunchExecutable(gameId) ?: ""
-        }
-
-        suspend fun refreshLibrary(context: Context): Result<Int> {
-            return getInstance()?.epicManager?.refreshLibrary(context)
-                ?: Result.failure(Exception("Service not available"))
         }
 
         suspend fun fetchManifestSizes(context: Context, appId: Int): EpicManager.ManifestSizes {
@@ -432,29 +386,9 @@ class EpicService : Service() {
             return Result.success(downloadInfo)
         }
 
-        suspend fun refreshSingleGame(appId: Int, context: Context): Result<EpicGame?> {
-            // For now, just get from database
-            val game = getInstance()?.epicManager?.getGameById(appId)
-            // TODO: Fix this up.
-            return if (game != null) {
-                Result.success(game)
-            } else {
-                Result.failure(Exception("Game not found: $appId"))
-            }
-        }
-
         // ==========================================================================
         // Game Launcher Helpers
         // ==========================================================================
-
-        suspend fun getGameLaunchToken(
-            context: Context,
-            namespace: String? = null,
-            catalogItemId: String? = null,
-            requiresOwnershipToken: Boolean = false,
-        ): Result<EpicGameToken> {
-            return EpicAuthManager.getGameLaunchToken(context, namespace, catalogItemId, requiresOwnershipToken)
-        }
 
         suspend fun buildLaunchParameters(
             context: Context,
@@ -472,22 +406,6 @@ class EpicService : Service() {
         // ==========================================================================
         // CLOUD SAVES HELPERS
         // ==========================================================================
-
-        /**
-         * Get the Epic account ID from stored credentials
-         */
-        fun getAccountId(): String? {
-            return try {
-                val context = getInstance()?.applicationContext ?: return null
-                val credentialsResult = runBlocking(Dispatchers.IO) {
-                    EpicAuthManager.getStoredCredentials(context)
-                }
-                credentialsResult.getOrNull()?.accountId
-            } catch (e: Exception) {
-                Timber.tag("Epic").e(e, "Failed to get account ID")
-                null
-            }
-        }
     }
 
     private lateinit var notificationHelper: NotificationHelper

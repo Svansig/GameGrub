@@ -12,12 +12,11 @@ public class VortekConfigDialog extends ContentDialog {
     public static final String DEFAULT_VK_MAX_VERSION;
 
     static {
-        StringBuilder sb = new StringBuilder();
         int i = VortekRendererComponent.VK_MAX_VERSION;
-        sb.append(GPUHelper.vkVersionMajor(i));
-        sb.append(".");
-        sb.append(GPUHelper.vkVersionMinor(i));
-        DEFAULT_VK_MAX_VERSION = sb.toString();
+        String sb = GPUHelper.vkVersionMajor(i) +
+                "." +
+                GPUHelper.vkVersionMinor(i);
+        DEFAULT_VK_MAX_VERSION = sb;
     }
 
     public VortekConfigDialog(final View anchor) {

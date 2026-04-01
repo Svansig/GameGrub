@@ -19,7 +19,7 @@ import java.util.TreeMap;
 public class RCFile implements Comparable<RCFile> {
     public final int id;
     private String name = "";
-    private ArrayList<RCGroup> groups = new ArrayList<>();
+    private final ArrayList<RCGroup> groups = new ArrayList<>();
     private final Context context;
 
     public RCFile(Context context, int id) {
@@ -98,6 +98,7 @@ public class RCFile implements Comparable<RCFile> {
                     varMap = new TreeMap<>();
                     rcMap.put(processName, varMap);
                 }
+                assert varMap != null;
                 varMap.putAll(item.getVarMap());
             }
         }
@@ -106,6 +107,7 @@ public class RCFile implements Comparable<RCFile> {
         for (String processName : rcMap.keySet()) {
             Map<String, String> varMap = rcMap.get(processName);
             strBuilder.append('[').append(processName).append(']').append('\n');
+            assert varMap != null;
             for (String varName : varMap.keySet())
                 strBuilder.append(varName).append('=').append(varMap.get(varName)).append('\n');
             strBuilder.append('\n');

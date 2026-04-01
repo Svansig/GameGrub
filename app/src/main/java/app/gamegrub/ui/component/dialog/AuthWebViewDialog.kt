@@ -145,8 +145,7 @@ fun AuthWebViewDialog(
                                     ) {
                                         super.onReceivedError(view, request, error)
                                         Timber.e(
-                                            "Auth WebView error: ${error?.errorCode} - ${error?.description} for URL: " +
-                                                redactUrlForLogging(request?.url?.toString()),
+                                            "null%s", redactUrlForLogging(request?.url?.toString()),
                                         )
                                     }
                                 }
@@ -171,11 +170,9 @@ fun AuthWebViewDialog(
                                     Timber.d("Loading Auth WebView URL: ${redactUrlForLogging(startingUrl)}")
                                     loadUrl(startingUrl)
                                 }
-                                webView = this
                             }
                         },
                         update = {
-                            webView = it
                         },
                         onRelease = { view ->
                             view.saveState(webViewState)

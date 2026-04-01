@@ -1,6 +1,7 @@
 package app.gamegrub.utils.auth
 
 import android.net.Uri
+import androidx.core.net.toUri
 
 /**
  * Redacts query parameters and fragment from a URL for safe logging (e.g. OAuth
@@ -10,6 +11,6 @@ import android.net.Uri
 fun redactUrlForLogging(url: String?): String =
     url?.let {
         runCatching {
-            Uri.parse(it).buildUpon().clearQuery().fragment(null).build().toString()
+            it.toUri().buildUpon().clearQuery().fragment(null).build().toString()
         }.getOrDefault("<invalid-url>")
     } ?: "null"

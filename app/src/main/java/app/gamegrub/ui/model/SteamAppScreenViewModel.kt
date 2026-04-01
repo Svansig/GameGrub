@@ -22,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
 /**
  * ViewModel for Steam game screen operations.
  * Replaces unmanaged IO scopes with lifecycle-aware coroutine handling.
@@ -168,7 +167,7 @@ class SteamAppScreenViewModel @Inject constructor(
      */
     fun deleteApp(appId: Int, onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            app.gamegrub.service.steam.SteamService.deleteApp(appId)
+            SteamService.deleteApp(appId)
             app.gamegrub.GameGrubApp.events.emit(
                 app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
             )

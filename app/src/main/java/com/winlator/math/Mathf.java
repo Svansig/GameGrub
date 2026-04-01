@@ -2,11 +2,11 @@ package com.winlator.math;
 
 public abstract class Mathf {
     public static float clamp(float x, float min, float max) {
-        return (x < min) ? min : ((x > max) ? max : x);
+        return (x < min) ? min : (Math.min(x, max));
     }
 
     public static int clamp(int x, int min, int max) {
-        return (x < min) ? min : (x > max ? max : x);
+        return (x < min) ? min : (Math.min(x, max));
     }
 
     public static float roundTo(float x, float step) {

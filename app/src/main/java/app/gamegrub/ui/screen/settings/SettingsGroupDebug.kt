@@ -74,9 +74,8 @@ fun SettingsGroupDebug() {
             if (!isPreview) {
                 PrefManager.wineDebugChannels = newSelection.joinToString(",")
             }
-            showChannelsDialog = false
         },
-        onDismiss = { showChannelsDialog = false },
+        onDismiss = { },
     )
 
     /* Crash Log stuff */
@@ -140,7 +139,7 @@ fun SettingsGroupDebug() {
             fileName = latestCrashFile?.name ?: "No Filename",
             fileText = crashText,
             onSave = { latestCrashFile?.let { file -> saveResultContract.launch(file.name) } },
-            onDismissRequest = { showLogcatDialog = false },
+            onDismissRequest = { },
         )
     }
 
@@ -176,7 +175,7 @@ fun SettingsGroupDebug() {
             fileName = latestWineLogFile?.name ?: "wine_debug.log",
             fileText = wineText,
             onSave = { latestWineLogFile?.let { file -> saveWineLogContract.launch(file.name) } },
-            onDismissRequest = { showWineLogDialog = false },
+            onDismissRequest = { },
         )
     }
 
@@ -200,7 +199,7 @@ fun SettingsGroupDebug() {
                     },
                 )
             },
-            onClick = { showChannelsDialog = true },
+            onClick = { },
         )
         SettingsSwitch(
             colors = settingsTileColorsAlt(),
@@ -239,7 +238,7 @@ fun SettingsGroupDebug() {
                 )
             },
             enabled = latestCrashFile != null,
-            onClick = { showLogcatDialog = true },
+            onClick = { },
         )
 
         SettingsMenuLink(
@@ -255,7 +254,7 @@ fun SettingsGroupDebug() {
                 )
             },
             enabled = latestWineLogFile != null,
-            onClick = { showWineLogDialog = true },
+            onClick = { },
         )
 
         SettingsMenuLink(

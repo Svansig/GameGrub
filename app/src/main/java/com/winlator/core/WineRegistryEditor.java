@@ -1,6 +1,6 @@
 package com.winlator.core;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import com.winlator.math.Mathf;
 
@@ -43,6 +43,7 @@ public class WineRegistryEditor implements Closeable {
             return this.end - this.start;
         }
 
+        @NonNull
         public String toString() {
             return this.offset + "," + this.start + "," + this.end;
         }
@@ -68,7 +69,7 @@ public class WineRegistryEditor implements Closeable {
                 cloneFile.createNewFile();
             }
             catch (IOException e) {
-                Log.e("WineRegistryEditor", "Failed to set up editor: " + e);
+                Timber.tag("WineRegistryEditor").e("Failed to set up editor: " + e);
             }
         }
         else FileUtils.copy(file, cloneFile);
@@ -86,7 +87,7 @@ public class WineRegistryEditor implements Closeable {
         int index;
         return (index = line.indexOf('"')) != -1 &&
                 (index = line.indexOf('"', index)) != -1 &&
-                (index = line.indexOf('=', index)) != -1;
+                line.indexOf('=', index) != -1;
     }
 
     @Override
@@ -147,7 +148,7 @@ public class WineRegistryEditor implements Closeable {
             success = true;
         }
         catch (IOException e) {
-            Log.e("WineRegistryEditor", "Failed to create key: " + e);
+            Timber.tag("WineRegistryEditor").e("Failed to create key: " + e);
         }
 
         if (success) {
@@ -239,7 +240,7 @@ public class WineRegistryEditor implements Closeable {
             success = reader.read(buffer) == buffer.length;
         }
         catch (IOException e) {
-            Log.e("WineRegistryEditor", "Failed to get raw value: " + e);
+            Timber.tag("WineRegistryEditor").e("Failed to get raw value: " + e);
         }
         return success ? unescape(new String(buffer)) : null;
     }
@@ -255,6 +256,7 @@ public class WineRegistryEditor implements Closeable {
             else return;
         }
 
+        assert keyLocation != null;
         Location valueLocation = getValueLocation(keyLocation, name);
         char[] buffer = new char[StreamUtils.BUFFER_SIZE];
         boolean success = false;
@@ -283,7 +285,7 @@ public class WineRegistryEditor implements Closeable {
             success = true;
         }
         catch (IOException e) {
-            Log.e("WineRegistryEditor", "Failed to set raw value: " + e);
+            Timber.tag("WineRegistryEditor").e("Failed to set raw value: " + e);
         }
 
         if (success) {
@@ -311,6 +313,7 @@ public class WineRegistryEditor implements Closeable {
             if (i2 >= items.length) {
                 break;
             }
+            assert keyLocation != null;
             Location valueLocation = getValueLocation(keyLocation, items[i2][0]);
             if (valueLocation == null) {
                 valueLocation = new Location(0, (Integer.MAX_VALUE - items.length) + i2, -1);
@@ -319,88 +322,80 @@ public class WineRegistryEditor implements Closeable {
             valueLocations.add(valueLocation);
             i2++;
         }
-        valueLocations.sort(Comparator.comparingInt(new ToIntFunction() {
-            @Override
-            public final int applyAsInt(Object obj) {
-                return ((WineRegistryEditor.Location) obj).start;
-            }
-        }));
+        valueLocations.sort(Comparator.comparingInt((ToIntFunction) obj -> ((Location) obj).start));
         char[] buffer = new char[65536];
         boolean success = false;
         File tempFile = FileUtils.createTempFile(this.file.getParentFile(), FileUtils.getBasename(this.file.getPath()));
         try {
             BufferedReader reader = new BufferedReader(new FileReader(this.cloneFile), 65536);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile), 65536);
+            int position = 0;
             try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile), 65536);
-                int position = 0;
-                try {
-                    Iterator<Location> it = valueLocations.iterator();
-                    while (it.hasNext()) {
-                        Location valueLocation2 = it.next();
-                        if (valueLocation2.end != i) {
-                            int i3 = position;
-                            while (true) {
-                                int i4 = valueLocation2.start;
-                                if (i3 >= i4) {
-                                    break;
-                                }
-                                int length = Math.min(buffer.length, i4 - i3);
-                                reader.read(buffer, 0, length);
-                                writer.write(buffer, 0, length);
-                                position += length;
-                                i3 += length;
+                Iterator<Location> it = valueLocations.iterator();
+                while (it.hasNext()) {
+                    Location valueLocation2 = it.next();
+                    if (valueLocation2.end != i) {
+                        int i3 = position;
+                        while (true) {
+                            int i4 = valueLocation2.start;
+                            if (i3 >= i4) {
+                                break;
                             }
-                            writer.write(((String[]) valueLocation2.tag)[1]);
-                            reader.skip(valueLocation2.length());
-                            position += valueLocation2.length();
-                            i = -1;
+                            int length = Math.min(buffer.length, i4 - i3);
+                            reader.read(buffer, 0, length);
+                            writer.write(buffer, 0, length);
+                            position += length;
+                            i3 += length;
                         }
+                        writer.write(((String[]) valueLocation2.tag)[1]);
+                        reader.skip(valueLocation2.length());
+                        position += valueLocation2.length();
+                        i = -1;
                     }
-                    int i5 = position;
-                    while (true) {
-                        int i6 = keyLocation.end;
-                        if (i5 >= i6) {
-                            break;
-                        }
-                        int length2 = Math.min(buffer.length, i6 - i5);
-                        reader.read(buffer, 0, length2);
-                        writer.write(buffer, 0, length2);
-                        i5 += length2;
-                    }
-                    Iterator<Location> it2 = valueLocations.iterator();
-                    while (it2.hasNext()) {
-                        Location valueLocation3 = it2.next();
-                        if (valueLocation3.end == -1) {
-                            String[] item = (String[]) valueLocation3.tag;
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("\n");
-                            if (item[0] != null) {
-                                str = "\"" + escape(item[0]) + "\"";
-                            } else {
-                                str = "@";
-                            }
-                            sb.append(str);
-                            sb.append("=");
-                            sb.append(item[1]);
-                            writer.write(sb.toString());
-                        }
-                    }
-                    while (true) {
-                        int length3 = reader.read(buffer);
-                        if (length3 == -1) {
-                            break;
-                        } else {
-                            writer.write(buffer, 0, length3);
-                        }
-                    }
-                    success = true;
-                    writer.close();
-                    reader.close();
-                } finally {
                 }
+                int i5 = position;
+                while (true) {
+                    int i6 = keyLocation.end;
+                    if (i5 >= i6) {
+                        break;
+                    }
+                    int length2 = Math.min(buffer.length, i6 - i5);
+                    reader.read(buffer, 0, length2);
+                    writer.write(buffer, 0, length2);
+                    i5 += length2;
+                }
+                Iterator<Location> it2 = valueLocations.iterator();
+                while (it2.hasNext()) {
+                    Location valueLocation3 = it2.next();
+                    if (valueLocation3.end == -1) {
+                        String[] item = (String[]) valueLocation3.tag;
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("\n");
+                        if (item[0] != null) {
+                            str = "\"" + escape(item[0]) + "\"";
+                        } else {
+                            str = "@";
+                        }
+                        sb.append(str);
+                        sb.append("=");
+                        sb.append(item[1]);
+                        writer.write(sb.toString());
+                    }
+                }
+                while (true) {
+                    int length3 = reader.read(buffer);
+                    if (length3 == -1) {
+                        break;
+                    } else {
+                        writer.write(buffer, 0, length3);
+                    }
+                }
+                success = true;
+                writer.close();
+                reader.close();
             } finally {
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         if (success) {
             this.modified = true;
@@ -420,8 +415,8 @@ public class WineRegistryEditor implements Closeable {
         removeRegion(valueLocation);
     }
 
-    public boolean removeKey(String key) {
-        return removeKey(key, false);
+    public void removeKey(String key) {
+        removeKey(key, false);
     }
 
     public boolean removeKey(String key, boolean removeTree) {
@@ -462,7 +457,7 @@ public class WineRegistryEditor implements Closeable {
             success = true;
         }
         catch (IOException e) {
-            Log.e("WineRegistryEditor", "Failed to remove region: " + e);
+            Timber.tag("WineRegistryEditor").e("Failed to remove region: " + e);
         }
 
         if (success) {

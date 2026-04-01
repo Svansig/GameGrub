@@ -207,7 +207,7 @@ fun ElementEditorDialog(
     val originalToggleSwitch by remember { mutableStateOf(element.isToggleSwitch) }
 
     // Get types array for saving
-    val types = remember { ControlElement.Type.values() }
+    val types = remember { ControlElement.Type.entries.toTypedArray() }
 
     // Apply changes to element for live preview
     LaunchedEffect(currentScale) {
@@ -311,7 +311,7 @@ fun ElementEditorDialog(
                                     element.setScale(currentScale)
                                     // If currentText is empty string, set to null to use binding-based text
                                     // Otherwise use the current text value
-                                    element.text = if (currentText.isEmpty()) null else currentText
+                                    element.text = currentText.ifEmpty { null }
                                     // Change type without resetting bindings
                                     if (element.type != types[currentTypeIndex]) {
                                         element.setTypeWithoutReset(types[currentTypeIndex])
@@ -404,7 +404,7 @@ fun ElementEditorDialog(
                         }
 
                         // Element Type
-                        val types = ControlElement.Type.values()
+                        val types = ControlElement.Type.entries.toTypedArray()
                         val typeNames = types.map {
                             if (it == ControlElement.Type.SHOOTER_MODE) {
                                 "DYNAMIC JOYSTICKS"
@@ -461,10 +461,10 @@ fun ElementEditorDialog(
 
                             ControlElement.Type.BUTTON -> {
                                 // Buttons fully support all shapes
-                                ControlElement.Shape.values().toList()
+                                ControlElement.Shape.entries
                             }
 
-                            else -> ControlElement.Shape.values().toList()
+                            else -> ControlElement.Shape.entries
                         }
 
                         if (availableShapes.size > 1) {
@@ -822,7 +822,7 @@ fun ElementEditorDialog(
         ControllerBindingDialog(
             buttonName = slotLabel,
             currentBinding = currentBinding,
-            onDismiss = { bindingSlotToEdit = null },
+            onDismiss = { },
             onBindingSelected = { binding ->
 
                 // Update binding in memory only (not saved to disk yet)
@@ -866,7 +866,6 @@ fun ElementEditorDialog(
                 view.invalidate()
 
                 // Close binding selector
-                bindingSlotToEdit = null
 
                 // Force UI refresh to show updated binding in list
                 bindingsRefreshKey++
@@ -877,7 +876,7 @@ fun ElementEditorDialog(
     // Show exit confirmation dialog if there are unsaved changes
     if (showExitConfirmation) {
         AlertDialog(
-            onDismissRequest = { showExitConfirmation = false },
+            onDismissRequest = { },
             title = { Text(stringResource(R.string.unsaved_changes)) },
             text = { Text(stringResource(R.string.unsaved_changes_message)) },
             confirmButton = {
@@ -885,7 +884,7 @@ fun ElementEditorDialog(
                     onClick = {
                         // Save and close
                         element.setScale(currentScale)
-                        element.text = if (currentText.isEmpty()) null else currentText
+                        element.text = currentText.ifEmpty { null }
                         // Change type without resetting bindings
                         if (element.type != types[currentTypeIndex]) {
                             element.setTypeWithoutReset(types[currentTypeIndex])
@@ -910,7 +909,6 @@ fun ElementEditorDialog(
                         }
                         view.profile?.save()
                         view.invalidate()
-                        showExitConfirmation = false
                         onDismiss()
                     },
                 ) {
@@ -944,7 +942,6 @@ fun ElementEditorDialog(
                         // Restore original button properties
                         element.isToggleSwitch = originalToggleSwitch
                         view.invalidate()
-                        showExitConfirmation = false
                         onDismiss()
                     },
                 ) {

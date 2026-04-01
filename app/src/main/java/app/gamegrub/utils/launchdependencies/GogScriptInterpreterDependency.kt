@@ -55,8 +55,7 @@ object GogScriptInterpreterDependency : LaunchDependency {
 
     /** True if GOG redist (ISI/scriptinterpreter.exe) is present in the game's _CommonRedist. */
     private fun isRedistInstalled(gameId: String): Boolean {
-        val installPath = GOGService.getInstallPath(gameId)
-        if (installPath == null) return false
+        val installPath = GOGService.getInstallPath(gameId) ?: return false
         val redistDir = File(installPath, "_CommonRedist")
         return File(redistDir, "ISI/scriptinterpreter.exe").exists()
     }

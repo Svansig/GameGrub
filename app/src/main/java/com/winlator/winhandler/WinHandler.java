@@ -1,11 +1,8 @@
 package com.winlator.winhandler;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -16,17 +13,12 @@ import com.winlator.inputcontrols.ControllerManager;
 import com.winlator.inputcontrols.ControlsProfile;
 import com.winlator.inputcontrols.ExternalController;
 import com.winlator.inputcontrols.GamepadState;
-import com.winlator.inputcontrols.TouchMouse;
-import com.winlator.math.XForm;
 import com.winlator.widget.InputControlsView;
 import com.winlator.widget.XServerView;
 import com.winlator.xenvironment.ImageFs;
-import com.winlator.xserver.Pointer;
-import com.winlator.xserver.XKeycode;
 import com.winlator.xserver.XServer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
@@ -41,8 +33,10 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
@@ -77,12 +71,11 @@ public class WinHandler {
     private final XServerView xServerView;
 
     private InputControlsView inputControlsView;
-    private Thread rumblePollerThread;
     private short lastLowFreq = 0;  // Use 'short' instead of uint16_t
     private short lastHighFreq = 0; // Use 'short' instead of uint16_t
     private boolean isRumbling = false;
-    private boolean isShowingAssignDialog = false;
-    private Context activity;
+    private final boolean isShowingAssignDialog = false;
+    private final Context activity;
     private final java.util.Set<Integer> ignoredDeviceIds = new java.util.HashSet<>();
 
     // Add method to set InputControlsView
@@ -111,7 +104,7 @@ public class WinHandler {
         this.running = false;
         this.dinputMapperType = (byte) 1;
         this.preferredInputApi = PreferredInputApi.BOTH;
-        this.gamepadClients = new CopyOnWriteArrayList();
+        this.gamepadClients = new CopyOnWriteArrayList<>();
         this.xinputProcesses = new ArrayList<>();
         this.xServer = xServer;
         this.xServerView = xServerView;
@@ -120,18 +113,16 @@ public class WinHandler {
     }
 
     public void refreshControllerMappings() {
-        Log.d(TAG, "Refreshing controller assignments from settings...");
+        Timber.tag(TAG).d("Refreshing controller assignments from settings...");
         currentController = null;
-        for (int i = 0; i < extraControllers.length; i++) {
-            extraControllers[i] = null;
-        }
+        Arrays.fill(extraControllers, null);
         controllerManager.scanForDevices();
         InputDevice p1Device = controllerManager.getAssignedDeviceForSlot(0);
         if (p1Device != null) {
             currentController = ExternalController.getController(p1Device.getId());
             if (currentController != null) {
                 currentController.setContext(activity);
-                Log.i(TAG, "Initialized Player 1 with: " + p1Device.getName());
+                Timber.tag(TAG).i("Initialized Player 1 with: " + p1Device.getName());
             }
         }
         // Initialize Extra Players (2, 3, 4)
@@ -140,7 +131,7 @@ public class WinHandler {
             InputDevice extraDevice = controllerManager.getAssignedDeviceForSlot(i + 1);
             if (extraDevice != null) {
                 extraControllers[i] = ExternalController.getController(extraDevice.getId());
-                Log.i(TAG, "Initialized Player " + (i + 2) + " with: " + extraDevice.getName());
+                Timber.tag(TAG).i("Initialized Player " + (i + 2) + " with: " + extraDevice.getName());
             }
         }
     }
@@ -160,15 +151,13 @@ public class WinHandler {
         }
     }
 
-    private boolean sendPacket(int port, byte[] data) {
+    private void sendPacket(byte[] data) {
         try {
             DatagramPacket sendPacket = new DatagramPacket(data, data.length);
             sendPacket.setAddress(this.localhost);
-            sendPacket.setPort(port);
+            sendPacket.setPort(7946);
             this.socket.send(sendPacket);
-            return true;
         } catch (IOException e) {
-            return false;
         }
     }
 
@@ -304,7 +293,7 @@ public class WinHandler {
             this.sendData.put((byte) 14);
             this.sendData.putInt(bytes.length);
             if (sendPacket(7946)) {
-                sendPacket(7946, bytes);
+                sendPacket(bytes);
             }
         });
     }
@@ -331,11 +320,11 @@ public class WinHandler {
             while (this.running) {
                 synchronized (this.actions) {
                     while (this.initReceived && !this.actions.isEmpty()) {
-                        this.actions.poll().run();
+                        Objects.requireNonNull(this.actions.poll()).run();
                     }
                     try {
                         this.actions.wait();
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignored) {
                     }
                 }
             }
@@ -394,8 +383,8 @@ public class WinHandler {
 
                 // Maintain subscription state independently from temporary controller availability.
                 if (notify) {
-                    if (!this.gamepadClients.contains(Integer.valueOf(port))) {
-                        this.gamepadClients.add(Integer.valueOf(port));
+                    if (!this.gamepadClients.contains(port)) {
+                        this.gamepadClients.add(port);
                     }
                 } else {
                     this.gamepadClients.remove(Integer.valueOf(port));
@@ -404,10 +393,10 @@ public class WinHandler {
                 if (enabled2) {
                     switch (this.preferredInputApi) {
                         case DINPUT:
-                            boolean hasXInputProcess = this.xinputProcesses.contains(Integer.valueOf(processId));
+                            boolean hasXInputProcess = this.xinputProcesses.contains(processId);
                             if (isXInput) {
                                 if (!hasXInputProcess) {
-                                    this.xinputProcesses.add(Integer.valueOf(processId));
+                                    this.xinputProcesses.add(processId);
                                     break;
                                 }
                             } else if (hasXInputProcess) {
@@ -428,7 +417,7 @@ public class WinHandler {
                     final boolean finalEnabled = enabled;
                     addAction(() -> {
                         this.sendData.rewind();
-                        this.sendData.put((byte) RequestCodes.GET_GAMEPAD);
+                        this.sendData.put(RequestCodes.GET_GAMEPAD);
                         if (finalEnabled) {
                             this.sendData.putInt(!useVirtualGamepad ? this.currentController.getDeviceId() : profile.id);
                             this.sendData.put(this.dinputMapperType);
@@ -437,7 +426,7 @@ public class WinHandler {
                             final int MAX_NAME_LENGTH = 54;
                             byte[] bytesToWrite;
                             if (originalBytes.length > MAX_NAME_LENGTH) {
-                                Log.w("WinHandler", "Controller name is too long ("+originalBytes.length+" bytes), truncating: "+originalName);
+                                Timber.tag("WinHandler").w("Controller name is too long (" + originalBytes.length + " bytes), truncating: "+originalName);
                                 bytesToWrite = new byte[MAX_NAME_LENGTH];
                                 System.arraycopy(originalBytes, 0, bytesToWrite, 0, MAX_NAME_LENGTH);
                             } else {
@@ -454,22 +443,14 @@ public class WinHandler {
                     });
                     return;
                 }
-                enabled = enabled2;
-                final boolean finalEnabled2 = enabled;
+                enabled = false;
+                final boolean finalEnabled2 = false;
                 addAction(() -> {
                     this.sendData.rewind();
                     this.sendData.put((byte) 8);
-                    if (finalEnabled2) {
-                        this.sendData.putInt(!useVirtualGamepad ? this.currentController.getDeviceId() : profile.id);
-                        this.sendData.put(this.dinputMapperType);
-                        byte[] bytes2 = (useVirtualGamepad ? profile.getName() : this.currentController.getName()).getBytes();
-                        this.sendData.putInt(bytes2.length);
-                        this.sendData.put(bytes2);
-                    } else {
-                        this.sendData.putInt(0);
-                        this.sendData.put((byte) 0);
-                        this.sendData.putInt(0);
-                    }
+                    this.sendData.putInt(0);
+                    this.sendData.put((byte) 0);
+                    this.sendData.putInt(0);
                     sendPacket(port);
                 });
                 return;
@@ -510,7 +491,6 @@ public class WinHandler {
                 xServerView.requestRender();
                 return;
             default:
-                return;
         }
     }
 
@@ -520,12 +500,12 @@ public class WinHandler {
             ImageFs imageFs = ImageFs.find(activity);
             // Player 1 (currentController) gets the original non-numbered file
             File p1_memFile = imageFs.getGamepadMemFile(0);
-            p1_memFile.getParentFile().mkdirs();
+            Objects.requireNonNull(p1_memFile.getParentFile()).mkdirs();
             try (RandomAccessFile raf = new RandomAccessFile(p1_memFile, "rw")) {
                 raf.setLength(64);
                 gamepadBuffer = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 64);
                 gamepadBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                Log.i(TAG, "Successfully created and mapped gamepad file for Player 1");
+                Timber.tag(TAG).i("Successfully created and mapped gamepad file for Player 1");
             }
             for (int i = 0; i < extraGamepadBuffers.length; i++) {
                 File extra_memFile = imageFs.getGamepadMemFile(i + 1);
@@ -533,21 +513,21 @@ public class WinHandler {
                     raf.setLength(64);
                     extraGamepadBuffers[i] = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 64);
                     extraGamepadBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
-                    Log.i(TAG, "Successfully created and mapped gamepad file for Player " + (i + 2));
+                    Timber.tag(TAG).i("Successfully created and mapped gamepad file for Player " + (i + 2));
                 }
             }
         } catch (IOException e) {
-            Log.e("EVSHIM_HOST", "FATAL: Failed to create memory-mapped file(s).", e);
+            Timber.tag("EVSHIM_HOST").e(e, "FATAL: Failed to create memory-mapped file(s).");
             try {
                 this.localhost = InetAddress.getByName("127.0.0.1");
-            } catch (UnknownHostException e2) {
+            } catch (UnknownHostException ignored) {
             }
         }
         this.running = true;
         startSendThread();
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                DatagramSocket datagramSocket = new DatagramSocket((SocketAddress) null);
+                DatagramSocket datagramSocket = new DatagramSocket(null);
                 this.socket = datagramSocket;
                 datagramSocket.setReuseAddress(true);
                 this.socket.bind(new InetSocketAddress((InetAddress) null, 7947));
@@ -559,7 +539,7 @@ public class WinHandler {
                         handleRequest(requestCode, this.receivePacket.getPort());
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         });
 
@@ -569,7 +549,14 @@ public class WinHandler {
     }
 
     private void startRumblePoller() {
-        rumblePollerThread = new Thread(() -> {
+        // --- MODIFIED: Get the current profile state on EVERY loop iteration ---
+        // Always poll for rumble if gamepad buffer exists, regardless of controller state
+        // This ensures vibration works with built-in controllers (like Ayn Odin 2)
+        // even when virtual gamepad mode is disabled
+        // Read the rumble values from the shared memory file.
+        // Check if the rumble state has changed
+        // Poll for new commands 50 times per second
+        Thread rumblePollerThread = new Thread(() -> {
             while (running) {
                 // --- MODIFIED: Get the current profile state on EVERY loop iteration ---
                 try {
@@ -631,7 +618,7 @@ public class WinHandler {
             }
         }
         // --- Step 3: Fallback to phone vibration if physical controller fails or doesn't exist ---
-        Log.w("WinHandler", "No physical controller vibrator found, falling back to device vibration.");
+        Timber.tag("WinHandler").w("No physical controller vibrator found, falling back to device vibration.");
         Vibrator phoneVibrator = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
         if (phoneVibrator != null && phoneVibrator.hasVibrator()) {
             // --- HAPTIC CURVE LOGIC to make phone vibration feel better ---
@@ -672,13 +659,11 @@ public class WinHandler {
         final ControlsProfile profile = inputControlsView.getProfile();
         final boolean useVirtualGamepad = profile != null && profile.isVirtualGamepad();
         final boolean enabled = this.currentController != null || useVirtualGamepad;
-        Iterator<Integer> it = this.gamepadClients.iterator();
-        while (it.hasNext()) {
-            final int port = it.next().intValue();
+        for (int port : this.gamepadClients) {
             addAction(() -> {
                 this.sendData.rewind();
                 sendData.put(RequestCodes.GET_GAMEPAD_STATE);
-                sendData.put((byte)(enabled ? 1 : 0));
+                sendData.put((byte) (enabled ? 1 : 0));
                 if (enabled) {
                     this.sendData.putInt(!useVirtualGamepad ? this.currentController.getDeviceId() : inputControlsView.getProfile().id);
                     if (useVirtualGamepad) {
@@ -733,23 +718,21 @@ public class WinHandler {
         }
 
         if (externalController != null && externalController.getDeviceId() == event.getDeviceId() && (handled = this.currentController.updateStateFromMotionEvent(event))) {
-            if (handled) {
-                sendGamepadState();
-                sendMemoryFileState();
-            }
+            sendGamepadState();
+            sendMemoryFileState();
         }
         return handled;
     }
 
     public boolean onKeyEvent(KeyEvent event) {
-        MappedByteBuffer buffer = null;
+        MappedByteBuffer buffer;
         boolean handled = false;
         ExternalController externalController = this.currentController;
         buffer = gamepadBuffer;
         // If this is a gamepad event but our controller is null or mismatched, adopt it
         InputDevice device = event.getDevice();
         if ((externalController == null || externalController.getDeviceId() != event.getDeviceId())
-                && device != null && ExternalController.isGameController(device)
+                && ExternalController.isGameController(device)
                 && event.getRepeatCount() == 0) {
             ExternalController adopted = resolveControllerForDevice(event.getDeviceId());
             if (adopted != null) {
@@ -882,20 +865,13 @@ public class WinHandler {
     }
 
     private void initializeAssignedControllers() {
-        Log.d(TAG, "Initializing controller assignments from saved settings...");
+        Timber.tag(TAG).d("Initializing controller assignments from saved settings...");
         for (int i = 0; i < MAX_PLAYERS; i++) {
             InputDevice device = controllerManager.getAssignedDeviceForSlot(i);
             if (device != null) {
                 ExternalController controller = ExternalController.getController(device.getId());
-                if (i == 0) {
-                    currentController = controller;
-                    Log.d(TAG, "Assigned '" + device.getName() + "' to Player 1 at startup.");
-                } else {
-                    // Remember that extraControllers is 0-indexed for players 2-4
-                    // So Player 2 (slot index 1) goes into extraControllers[0]
-                    extraControllers[i - 1] = controller;
-                    Log.d(TAG, "Assigned '" + device.getName() + "' to Player " + (i + 1) + " at startup.");
-                }
+                currentController = controller;
+                Timber.tag(TAG).d("Assigned '" + device.getName() + "' to Player 1 at startup.");
             }
         }
         // This ensures P1-specific settings (like trigger type) are applied from preferences.

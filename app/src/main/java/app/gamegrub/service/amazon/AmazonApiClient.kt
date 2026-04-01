@@ -88,7 +88,7 @@ object AmazonApiClient {
             put("Operation", "GetEntitlements")
             put("clientId", "Sonic")
             put("syncPoint", JSONObject.NULL)
-            put("nextToken", if (nextToken != null) nextToken else JSONObject.NULL)
+            put("nextToken", nextToken ?: JSONObject.NULL)
             put("maxResults", 50)
             put("productIdFilter", JSONObject.NULL)
             put("keyId", AmazonConstants.GAMING_KEY_ID)

@@ -4,13 +4,11 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
 import com.winlator.container.Container;
 import com.winlator.core.KeyValueSet;
 import com.winlator.math.Mathf;
 import com.winlator.sysvshm.SysVSharedMemory;
-import com.winlator.xenvironment.ImageFs;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,7 +27,7 @@ public class ALSAClient {
     private byte channels = 2;
     private int sampleRate = 0;
     private short previousUnderrunCount = 0;
-    private String containerVariant = null;
+    private String containerVariant;
 
     public enum DataType {
         U8(1),
@@ -175,13 +173,13 @@ public class ALSAClient {
             data.position(0);
             do {
                 try {
-                    int bytesWritten = this.audioTrack.write(data, data.remaining(), 0);
+                    int bytesWritten = this.audioTrack.write(data, data.remaining(), AudioTrack.WRITE_BLOCKING);
                     if (bytesWritten < 0) {
                         break;
                     } else {
                         increaseBufferSizeIfUnderrunOccurs();
                     }
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             } while (data.position() != data.limit());
             this.position += data.position();
@@ -272,7 +270,7 @@ public class ALSAClient {
 
     public static void assignFramesPerBuffer(Context context) {
         try {
-            AudioManager am = (AudioManager) context.getSystemService("audio");
+            AudioManager am = (AudioManager) context.getSystemService(android.content.Context.AUDIO_SERVICE);
             String framesPerBufferStr = am.getProperty("android.media.property.OUTPUT_FRAMES_PER_BUFFER");
             short parseShort = Short.parseShort(framesPerBufferStr);
             framesPerBuffer = parseShort;

@@ -1,7 +1,6 @@
 package com.winlator.inputcontrols;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
@@ -77,6 +76,7 @@ public class InputControlsManager {
                 if (p != null) nextNewId = Math.max(nextNewId, p.id + 1);
             }
 
+            assert assetFiles != null;
             for (String assetFile : assetFiles) {
                 String assetPath = "inputcontrols/profiles/"+assetFile;
                 ControlsProfile originProfile = loadProfile(context, assetManager.open(assetPath));
@@ -118,7 +118,7 @@ public class InputControlsManager {
                                 data.put("id", newId);
                                 FileUtils.writeString(freeFile, data.toString());
                             } catch (Exception e) {
-                                Log.w("InputControlsManager", "Failed to create profile '" + originProfile.getName() + "' (newId=" + newId + ", file=" + freeFile + ")", e);
+                                Timber.tag("InputControlsManager").w(e, "Failed to create profile '" + originProfile.getName() + "' (newId=" + newId + ", file=" + freeFile + ")");
                             }
                         }
                     }
@@ -131,7 +131,7 @@ public class InputControlsManager {
                 FileUtils.copy(context, "inputcontrols/profiles/controls-0.icp", file);
             }
         }
-        catch (IOException e) {}
+        catch (IOException ignored) {}
     }
 
     public void loadProfiles(boolean ignoreTemplates) {
@@ -186,7 +186,7 @@ public class InputControlsManager {
             if (data.has("template")) data.remove("template");
             FileUtils.writeString(newFile, data.toString());
         }
-        catch (JSONException e) {}
+        catch (JSONException ignored) {}
 
         ControlsProfile profile = loadProfile(context, newFile);
         profiles.add(profile);
@@ -210,6 +210,7 @@ public class InputControlsManager {
             int foundIndex = -1;
             for (int i = 0; i < profiles.size(); i++) {
                 ControlsProfile profile = profiles.get(i);
+                assert newProfile != null;
                 if (profile.getName().equals(newProfile.getName())) {
                     foundIndex = i;
                     break;
@@ -252,24 +253,27 @@ public class InputControlsManager {
             int fieldsRead = 0;
 
             reader.beginObject();
+            label:
             while (reader.hasNext()) {
                 String name = reader.nextName();
 
-                if (name.equals("id")) {
-                    profileId = reader.nextInt();
-                    fieldsRead++;
-                }
-                else if (name.equals("name")) {
-                    profileName = reader.nextString();
-                    fieldsRead++;
-                }
-                else if (name.equals("cursorSpeed")) {
-                    cursorSpeed = (float) reader.nextDouble();
-                    fieldsRead++;
-                }
-                else {
-                    if (fieldsRead == 3) break;
-                    reader.skipValue();
+                switch (name) {
+                    case "id" -> {
+                        profileId = reader.nextInt();
+                        fieldsRead++;
+                    }
+                    case "name" -> {
+                        profileName = reader.nextString();
+                        fieldsRead++;
+                    }
+                    case "cursorSpeed" -> {
+                        cursorSpeed = (float) reader.nextDouble();
+                        fieldsRead++;
+                    }
+                    default -> {
+                        if (fieldsRead == 3) break label;
+                        reader.skipValue();
+                    }
                 }
             }
 

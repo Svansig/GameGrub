@@ -64,7 +64,7 @@ object SteamInstalledExeManager {
         val best = choosePrimary(
             flagged.map { it.first }.let { pool ->
                 val noStubs = pool.filterNot { it.isStub }
-                if (noStubs.isNotEmpty()) noStubs else pool
+                noStubs.ifEmpty { pool }
             },
             installDir.lowercase(),
         )

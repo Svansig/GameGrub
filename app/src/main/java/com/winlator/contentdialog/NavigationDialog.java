@@ -52,16 +52,16 @@ public class NavigationDialog extends ContentDialog {
         controllerManager.scanForDevices();
         boolean hasPhysicalController = !controllerManager.getDetectedDevices().isEmpty();
 
-        addMenuItem(context, grid, R.drawable.icon_keyboard, R.string.keyboard, ACTION_KEYBOARD, listener, 1.0f);
-        addMenuItem(context, grid, R.drawable.icon_input_controls, R.string.input_controls, ACTION_INPUT_CONTROLS, listener,1.0f);
-        addMenuItem(context, grid, R.drawable.icon_popup_menu_edit, R.string.edit_controls, ACTION_EDIT_CONTROLS, listener, 1.0f);
+        addMenuItem(context, grid, R.drawable.icon_keyboard, R.string.keyboard, ACTION_KEYBOARD, listener);
+        addMenuItem(context, grid, R.drawable.icon_input_controls, R.string.input_controls, ACTION_INPUT_CONTROLS, listener);
+        addMenuItem(context, grid, R.drawable.icon_popup_menu_edit, R.string.edit_controls, ACTION_EDIT_CONTROLS, listener);
         if (hasPhysicalController) {
-            addMenuItem(context, grid, R.drawable.icon_gamepad, R.string.edit_physical_controller, ACTION_EDIT_PHYSICAL_CONTROLLER, listener, 1.0f);
+            addMenuItem(context, grid, R.drawable.icon_gamepad, R.string.edit_physical_controller, ACTION_EDIT_PHYSICAL_CONTROLLER, listener);
         }
-        addMenuItem(context, grid, R.drawable.icon_exit, R.string.exit_game, ACTION_EXIT_GAME, listener, 1.0f);
+        addMenuItem(context, grid, R.drawable.icon_exit, R.string.exit_game, ACTION_EXIT_GAME, listener);
     }
 
-    private void addMenuItem(Context context, GridLayout grid, int iconRes, int titleRes, int itemId, NavigationListener listener, float alpha) {
+    private void addMenuItem(Context context, GridLayout grid, int iconRes, int titleRes, int itemId, NavigationListener listener) {
         int padding = dpToPx(5, context);
         LinearLayout layout = new LinearLayout(context);
         layout.setPadding(padding, padding, padding, padding);
@@ -77,7 +77,7 @@ public class NavigationDialog extends ContentDialog {
         if (icon.getBackground() != null) {
             icon.getBackground().setTint(context.getColor(R.color.navigation_dialog_item_color));
         }
-        icon.setAlpha(alpha); // Apply alpha for greying out
+        icon.setAlpha((float) 1.0); // Apply alpha for greying out
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
         lp.gravity = Gravity.CENTER_HORIZONTAL;
         icon.setLayoutParams(lp);
@@ -90,7 +90,7 @@ public class NavigationDialog extends ContentDialog {
         text.setGravity(Gravity.CENTER);
         text.setLines(2);
         text.setTextColor(context.getColor(R.color.navigation_dialog_item_color));
-        text.setAlpha(alpha); // Apply alpha for greying out
+        text.setAlpha((float) 1.0); // Apply alpha for greying out
         Typeface tf = ResourcesCompat.getFont(context, R.font.bricolage_grotesque_regular);
         if (tf != null) {
             text.setTypeface(tf);

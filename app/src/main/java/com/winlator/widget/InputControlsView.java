@@ -19,9 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.core.graphics.ColorUtils;
 
-import app.gamegrub.R;
 import com.winlator.inputcontrols.Binding;
 import com.winlator.inputcontrols.ControlElement;
 import com.winlator.inputcontrols.ControlsProfile;
@@ -121,7 +121,7 @@ public class InputControlsView extends View {
     }
 
     @Override
-    protected synchronized void onDraw(Canvas canvas) {
+    protected synchronized void onDraw(@NonNull Canvas canvas) {
         int width = getWidth();
         int height = getHeight();
 
@@ -866,9 +866,9 @@ public class InputControlsView extends View {
                             int pid = event.getPointerId(i);
                             if (handleShooterTouchMovePointer(pid, x, y)) continue;
                             // Non-intercepted pointer in shooter mode: try elements with correct ID
-                            handled = false;
                             for (ControlElement element : profile.getElements()) {
-                                if (element.handleTouchMove(pid, x, y)) handled = true;
+                                if (element.handleTouchMove(pid, x, y)) {
+                                }
                             }
                             continue;
                         }
@@ -1005,7 +1005,7 @@ public class InputControlsView extends View {
             try (InputStream is = context.getAssets().open("inputcontrols/icons/"+id+".png")) {
                 icons[id] = BitmapFactory.decodeStream(is);
             }
-            catch (IOException e) {}
+            catch (IOException ignored) {}
         }
         return icons[id];
     }

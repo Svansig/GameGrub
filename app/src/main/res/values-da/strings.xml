@@ -346,8 +346,8 @@
     <string name="need_internet_to_install">Internet kræves for installation</string>
     <string name="install_wifi_only_enabled">Installation kun via WiFi er aktiveret</string>
     <string name="installation_progress">Installationsstatus</string>
-    <string name="downloading">Downloader...</string>
-    <string name="calculating_time">Beregner...</string>
+    <string name="downloading">Downloader…</string>
+    <string name="calculating_time">Beregner…</string>
     <string name="update_available">Opdatering tilgængelig</string>
     <string name="game_information">Spilinformation</string>
     <string name="status">Status</string>
@@ -586,7 +586,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">Indholdshåndtering</string>
     <string name="import_wcp_from_device">Importér .wcp fra enhed</string>
-    <string name="working">Arbejder...</string>
+    <string name="working">Arbejder…</string>
     <string name="selected">Valgt</string>
     <string name="selected_content">Valgt indhold</string>
     <string name="installed_contents">Installeret indhold</string>
@@ -602,7 +602,7 @@
     <string name="settings_language_restart_title">Genstart påkrævet</string>
     <string name="settings_language_restart_message">Ændring af sprog kræver, at appen genstartes. Vil du fortsætte?</string>
     <string name="settings_language_restart_confirm">Genstart</string>
-    <string name="settings_language_changing">Ændrer sprog og genstarter...</string>
+    <string name="settings_language_changing">Ændrer sprog og genstarter…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">Emulering</string>
@@ -700,7 +700,7 @@
     <string name="install">Installér</string>
 
     <!-- TODO: Manual review - Connecting to Servers Screen -->
-    <string name="connect_to_remote_server">Forbinder til fjernservere...</string>
+    <string name="connect_to_remote_server">Forbinder til fjernservere…</string>
 
     <!-- TODO: Manual review - LibraryAppScreen: Dialogs -->
     <string name="download_failed_try_again">Download fejlede. Prøv venligst igen.</string>
@@ -760,10 +760,10 @@
     <string name="main_open_discord">Åbn Discord</string>
 
     <!-- TODO: Manual review - PluviaMain: Game Launch -->
-    <string name="main_downloading_steam">Downloader Steam...</string>
-    <string name="main_installing_glibc">Installerer glibc-komponenter...</string>
-    <string name="main_installing_bionic">Installerer Bionic-komponenter...</string>
-    <string name="main_loading">Indlæser...</string>
+    <string name="main_downloading_steam">Downloader Steam…</string>
+    <string name="main_installing_glibc">Installerer glibc-komponenter…</string>
+    <string name="main_installing_bionic">Installerer Bionic-komponenter…</string>
+    <string name="main_loading">Indlæser…</string>
 
     <!-- TODO: Manual review - PluviaMain: Session Conflicts -->
     <string name="main_app_running_title">App kører</string>
@@ -819,7 +819,7 @@
     <string name="supporters_art_credits">Kunstnerkreditter</string>
     <string name="supporters_app_icon">App-ikon: Hachi</string>
     <string name="supporters_alt_icon">Alternativt app-ikon: rhapsody_mdr</string>
-    <string name="supporters_loading">Indlæser støtter...</string>
+    <string name="supporters_loading">Indlæser støtter…</string>
     <string name="supporters_error">Kunne ikke indlæse støtter</string>
     <string name="supporters_members">Medlemmer</string>
     <string name="supporters_supporters">Støtter</string>
@@ -869,7 +869,7 @@
     <string name="library_layout_capsule">Kapsel</string>
     <string name="library_layout_hero">Helt</string>
     <string name="library_layout_carousel">Karrusel</string>
-    <string name="library_search_placeholder">Søg i dine spil...</string>
+    <string name="library_search_placeholder">Søg i dine spil…</string>
     <string name="library_search_description">Søg</string>
     <string name="library_search_clear">Ryd søgning</string>
     <string name="library_no_items">Ingen elementer vist med markeringen</string>
@@ -925,7 +925,7 @@
     <string name="two_factor_enter_code">Indtast 5-tegns kode</string>
 
     <!-- TODO: Manual review - Contents Manager -->
-    <string name="contents_validating">Validerer indhold...</string>
+    <string name="contents_validating">Validerer indhold…</string>
     <string name="contents_error_badtar">Filen kan ikke genkendes</string>
     <string name="contents_error_noprofile">Profil ikke fundet i indhold</string>
     <string name="contents_error_badprofile">Profil kan ikke genkendes</string>
@@ -962,7 +962,7 @@
     <string name="settings_download_speed">Download-hastighed</string>
     <string name="settings_download_heat_warning">Højere hastigheder kan forårsage øget varme på enheden under downloads</string>
     <string name="settings_region_default">Standard</string>
-    <string name="settings_saving_restarting">Gemmer indstillinger og genstarter...</string>
+    <string name="settings_saving_restarting">Gemmer indstillinger og genstarter…</string>
 
     <!-- TODO: Manual review - Settings Screen -->
     <string name="settings_title">Indstillinger</string>
@@ -1065,7 +1065,7 @@
     <string name="settings_save_logcat_title">Gem logcat</string>
 
     <!-- Misc additions -->
-    <string name="calculating_space_requirements">Beregner pladskrav...</string>
+    <string name="calculating_space_requirements">Beregner pladskrav…</string>
     <string name="add_custom_game_content_desc">Tilføj tilpasset spil</string>
     <string name="add_custom_game_dialog_title">Tilføj tilpasset spil</string>
     <string name="add_custom_game_dialog_message">Vælg venligst mappen der indeholder spilfilerne du vil tilføje som et tilpasset spil.</string>
@@ -1135,7 +1135,7 @@
     <string name="epic_starting_download_with_dlcs">Starter download: %1$s + DLC</string>
     <string name="epic_download_failed">Kunne ikke starte download: %1$s</string>
     <string name="epic_download_error">Download-fejl: %1$s</string>
-    <string name="manifest_downloading_item">Henter %1$s...</string>
+    <string name="manifest_downloading_item">Henter %1$s…</string>
     <string name="manifest_download_failed">Download mislykkedes: %1$s</string>
     <string name="manifest_install_failed">Kunne ikke installere %1$s</string>
     <string name="manifest_install_success">%1$s installeret</string>

@@ -47,4 +47,34 @@ data class UserFileInfo(
     fun getAbsPath(prefixToPath: (String) -> String): Path {
         return Paths.get(prefixToPath(root.toString()), substitutedPath, filename)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserFileInfo
+
+        if (timestamp != other.timestamp) return false
+        if (root != other.root) return false
+        if (path != other.path) return false
+        if (filename != other.filename) return false
+        if (!sha.contentEquals(other.sha)) return false
+        if (prefix != other.prefix) return false
+        if (prefixPath != other.prefixPath) return false
+        if (substitutedPath != other.substitutedPath) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = timestamp.hashCode()
+        result = 31 * result + root.hashCode()
+        result = 31 * result + path.hashCode()
+        result = 31 * result + filename.hashCode()
+        result = 31 * result + sha.contentHashCode()
+        result = 31 * result + prefix.hashCode()
+        result = 31 * result + prefixPath.hashCode()
+        result = 31 * result + substitutedPath.hashCode()
+        return result
+    }
 }

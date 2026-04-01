@@ -49,7 +49,7 @@ class SteamAccountDomain @Inject constructor(
     }
 
     fun addFamilyGroupMember(accountId: Int) {
-        _familyGroupMembers.value = _familyGroupMembers.value + accountId
+        _familyGroupMembers.value += accountId
     }
 
     fun updateLocalPersona(update: (SteamFriend) -> SteamFriend) {

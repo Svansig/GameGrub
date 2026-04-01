@@ -24,6 +24,7 @@ import com.winlator.xenvironment.XEnvironment;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class GuestProgramLauncherComponent extends EnvironmentComponent {
     private String guestExecutable;
@@ -41,7 +42,6 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
     private WineInfo wineInfo;
     private Container container;
 
-    private Runnable preUnpack;
     private String steamType;
 
     public void setWineInfo(WineInfo wineInfo) {
@@ -54,7 +54,8 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
     public Container getContainer() { return this.container; }
     public void setContainer(Container container) { this.container = container; }
 
-    public void setPreUnpack(Runnable r) { this.preUnpack = r; }
+    public void setPreUnpack(Runnable r) {
+    }
     @Override
     public void start() {
         // Log.d("GuestProgramLauncherComponent", "Starting...");
@@ -62,7 +63,7 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
             stop();
             extractBox86_64Files();
             pid = execGuestProgram();
-            Log.d("GuestProgramLauncherComponent", "Process " + pid + " started");
+            Timber.tag("GuestProgramLauncherComponent").d("Process " + pid + " started");
         }
     }
 
@@ -72,16 +73,14 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
         synchronized (lock) {
             if (pid != -1) {
                 Process.killProcess(pid);
-                Log.d("GuestProgramLauncherComponent", "Stopped process " + pid);
+                Timber.tag("GuestProgramLauncherComponent").d("Stopped process " + pid);
                 pid = -1;
                 List<ProcessHelper.ProcessInfo> subProcesses = ProcessHelper.listSubProcesses();
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
-                    Log.d("GuestProgramLauncherComponent",
-                            "Sub-process still running: "
-                                    + subProcess.name + " | "
-                                    + subProcess.pid + " | "
-                                    + subProcess.ppid + ", stopping..."
-                    );
+                    Timber.tag("GuestProgramLauncherComponent").d("Sub-process still running: "
+                            + subProcess.name + " | "
+                            + subProcess.pid + " | "
+                            + subProcess.ppid + ", stopping...");
                     Process.killProcess(subProcess.pid);
                 }
             }
@@ -196,7 +195,7 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
         return exec(context, false, new String[0], null, null, prootCmd, null);
     }
     public static int exec(Context context, boolean proot32, String[] bindingPaths, EnvVars extraVars, Callback<Integer> terminationCallback, String prootCmd, File workingDir) {
-        Log.d("GuestProgramLauncherComponent", "Executing guest program");
+        Timber.tag("GuestProgramLauncherComponent").d("Executing guest program");
         // Context context = environment.getContext();
         // ImageFs imageFs = environment.getImageFs();
         ImageFs imageFs = ImageFs.find(context);
@@ -206,7 +205,7 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
         File nativeLibs = new File(nativeLibraryDir);
         // Log.d("GuestProgramLauncherComponent", nativeLibraryDir + " exists: " + nativeLibs.exists());
         // Log.d("GuestProgramLauncherComponent", nativeLibraryDir + " is directory: " + nativeLibs.isDirectory());
-        Log.d("GuestProgramLauncherComponent", nativeLibraryDir + " contains: " + Arrays.toString(Arrays.stream(nativeLibs.listFiles()).map(File::getName).toArray()));
+        Timber.tag("GuestProgramLauncherComponent").d(nativeLibraryDir + " contains: " + Arrays.toString(Arrays.stream(Objects.requireNonNull(nativeLibs.listFiles())).map(File::getName).toArray()));
         // nativeLibraryDir = nativeLibraryDir.replace("arm64", "arm64-v8a");
         // Log.d("GuestProgramLauncherComponent", nativeLibraryDir + " exists: " + (new File(nativeLibraryDir)).exists());
         // Log.d("GuestProgramLauncherComponent", steamApiPath + " exists: " + new File(steamApiPath).exists());
@@ -254,32 +253,32 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
 
         boolean bindSHM = envVars.get("WINEESYNC").equals("1");
 
-        String command = nativeLibraryDir + "/libproot.so";
+        StringBuilder command = new StringBuilder(nativeLibraryDir + "/libproot.so");
         // Log.d("GuestProgramLauncherComponent", nativeLibraryDir + "/libproot.so exists: " + (new File(nativeLibraryDir + "/libproot.so")).exists());
-        command += " --kill-on-exit";
-        command += " --rootfs=" + rootDir;
-        command += " --cwd=" + ImageFs.HOME_PATH;
-        command += " --bind=/dev";
+        command.append(" --kill-on-exit");
+        command.append(" --rootfs=").append(rootDir);
+        command.append(" --cwd=" + ImageFs.HOME_PATH);
+        command.append(" --bind=/dev");
 
         if (bindSHM) {
             File shmDir = new File(rootDir, "/tmp/shm");
             shmDir.mkdirs();
-            command += " --bind=" + shmDir.getAbsolutePath() + ":/dev/shm";
+            command.append(" --bind=").append(shmDir.getAbsolutePath()).append(":/dev/shm");
         }
 
-        command += " --bind=/proc";
-        command += " --bind=/sys";
+        command.append(" --bind=/proc");
+        command.append(" --bind=/sys");
 
         if (bindingPaths != null) {
             for (String path : bindingPaths)
-                command += " --bind=\"" + (new File(path)).getAbsolutePath() + "\"";
+                command.append(" --bind=\"").append((new File(path)).getAbsolutePath()).append("\"");
         }
 
         // envVars.put("WINEDLLPATH", dllsDir.toString());
         // envVars.put("WINEDLLOVERRIDES", "\"steam_api=n\"");
         envVars.put("WINEESYNC", "0");
 
-        command += " /usr/bin/env " + envVars.toEscapedString() + " " + prootCmd;
+        command.append(" /usr/bin/env ").append(envVars.toEscapedString()).append(" ").append(prootCmd);
 
         envVars.clear();
         envVars.put("PROOT_TMP_DIR", tmpDir);
@@ -287,8 +286,8 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
         if (proot32) envVars.put("PROOT_LOADER_32", nativeLibraryDir + "/libproot-loader32.so");
 
         // ProcessHelper.exec(nativeLibraryDir+"/libproot.so ulimit -a", envVars.toStringArray(), rootDir);
-        return ProcessHelper.exec(command, envVars.toStringArray(), workingDir != null ? workingDir : rootDir, (status) -> {
-            Log.d("GuestProgramLauncherComponent", "Process terminated " + pid + " with status " + status);
+        return ProcessHelper.exec(command.toString(), envVars.toStringArray(), workingDir != null ? workingDir : rootDir, (status) -> {
+            Timber.tag("GuestProgramLauncherComponent").d("Process terminated " + pid + " with status " + status);
             synchronized (lock) {
                 pid = -1;
             }

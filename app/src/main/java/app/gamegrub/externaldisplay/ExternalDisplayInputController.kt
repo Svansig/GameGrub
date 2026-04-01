@@ -14,6 +14,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import app.gamegrub.R
 import com.winlator.container.Container
 import com.winlator.widget.TouchpadView
@@ -273,7 +274,7 @@ private class HybridInputLayout(
     }
 
     private fun updateToggleButtonPosition() {
-        keyboardToggleButton.translationY = if (keyboardView.visibility == VISIBLE) {
+        keyboardToggleButton.translationY = if (keyboardView.isVisible) {
             -keyboardView.height.toFloat()
         } else {
             0f

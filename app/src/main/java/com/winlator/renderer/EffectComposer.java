@@ -55,7 +55,7 @@ public class EffectComposer {
     }
 
     public synchronized void clearEffects() {
-        setEffects(new ArrayList<Effect>());
+        setEffects(new ArrayList<>());
     }
 
     public synchronized void render() {

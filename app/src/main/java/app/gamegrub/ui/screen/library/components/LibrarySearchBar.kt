@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.widget.doAfterTextChanged
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -231,7 +232,7 @@ private fun SearchBarInput(
                     inputType = android.text.InputType.TYPE_CLASS_TEXT
                     isSingleLine = true
                     hint = placeholderText
-                    background = ColorDrawable(android.graphics.Color.TRANSPARENT)
+                    background = android.graphics.Color.TRANSPARENT.toDrawable()
                     setPadding(0, 0, 0, 0)
 
                     // Set colors

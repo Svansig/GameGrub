@@ -6,15 +6,14 @@ import androidx.lifecycle.viewModelScope
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.domain.GOGInstallDomain
 import app.gamegrub.utils.storage.StorageUtils
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-
 
 /**
  * ViewModel for GOG game screen operations.
@@ -23,7 +22,7 @@ import timber.log.Timber
 @HiltViewModel
 class GOGAppScreenViewModel @Inject constructor(
     private val gogInstallDomain: GOGInstallDomain,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
     private val TAG = "GOGAppScreenViewModel"
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO

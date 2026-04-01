@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ContentsManager {
     public static final String PROFILE_NAME = "profile.json";
@@ -60,7 +61,7 @@ public class ContentsManager {
         CONTENT_VKD3D_DIR_NAME("vkd3d"),
         CONTENT_BOX64_DIR_NAME("box64");
 
-        private String name;
+        private final String name;
 
         ContentDirName(String name) {
             this.name = name;
@@ -135,7 +136,7 @@ public class ContentsManager {
                     }
                 }
             } else {
-                Log.d("ContentsManager", "   No directories found (or directory doesn't exist)");
+                Timber.tag("ContentsManager").d("   No directories found (or directory doesn't exist)");
             }
 
             if (remoteProfiles != null) {
@@ -154,7 +155,7 @@ public class ContentsManager {
                     }
                 }
             }
-            Log.d("ContentsManager", "   Total profiles for type " + type + ": " + profiles.size());
+            Timber.tag("ContentsManager").d("   Total profiles for type " + type + ": " + profiles.size());
         }
     }
 
@@ -174,14 +175,14 @@ public class ContentsManager {
 
         File proFile = new File(file, PROFILE_NAME);
         if (!proFile.exists()) {
-            Log.e("ContentsManager", "profile.json not found");
+            Timber.tag("ContentsManager").e("profile.json not found");
             callback.onFailed(InstallFailedReason.ERROR_NOPROFILE, null);
             return;
         }
 
         ContentProfile profile = readProfile(proFile);
         if (profile == null) {
-            Log.e("ContentsManager", "Failed to parse profile.json");
+            Timber.tag("ContentsManager").e("Failed to parse profile.json");
             callback.onFailed(InstallFailedReason.ERROR_BADPROFILE, null);
             return;
         }
@@ -240,7 +241,7 @@ public class ContentsManager {
 
             File binDir = new File(installPath, profile.wineBinPath);
             if (binDir.exists() && binDir.isDirectory()) {
-                Log.d("ContentsManager", "Setting executable permissions for Wine/Proton binaries in: " + binDir.getPath());
+                Timber.tag("ContentsManager").d("Setting executable permissions for Wine/Proton binaries in: " + binDir.getPath());
                 setExecutablePermissionsRecursive(binDir);
             }
         }
@@ -347,7 +348,7 @@ public class ContentsManager {
      * Normalizes Wine/Proton library structure to ensure consistent layout.
      * All Wine/Proton installations should have lib/wine/ subdirectory structure
      * regardless of what the profile.json specifies.
-     *
+     * <p>
      * Expected structure after normalization:
      * - bin/ (executables)
      * - lib/ (shared libraries)
@@ -369,22 +370,22 @@ public class ContentsManager {
             if (actualLibDir.exists()) {
                 // Check if temp dir already exists (shouldn't happen with timestamp)
                 if (tempWineDir.exists()) {
-                    Log.w("ContentsManager", "Temp directory already exists, cleaning it up");
+                    Timber.tag("ContentsManager").w("Temp directory already exists, cleaning it up");
                     FileUtils.delete(tempWineDir);
                 }
 
                 // Move lib/wine -> wine_temp
                 if (!actualLibDir.renameTo(tempWineDir)) {
-                    Log.e("ContentsManager", "Failed to rename lib/wine to temp, aborting normalization");
+                    Timber.tag("ContentsManager").e("Failed to rename lib/wine to temp, aborting normalization");
                     return;
                 }
 
                 // Recreate lib/wine and move contents back
                 if (!expectedWineLibDir.mkdirs()) {
-                    Log.e("ContentsManager", "Failed to create lib/wine directory, attempting rollback");
+                    Timber.tag("ContentsManager").e("Failed to create lib/wine directory, attempting rollback");
                     // Try to restore original state
                     if (!tempWineDir.renameTo(actualLibDir)) {
-                        Log.e("ContentsManager", "CRITICAL: Failed to rollback, manual intervention may be needed");
+                        Timber.tag("ContentsManager").e("CRITICAL: Failed to rollback, manual intervention may be needed");
                     }
                     return;
                 }
@@ -395,12 +396,12 @@ public class ContentsManager {
                     for (File item : wineContents) {
                         File dest = new File(expectedWineLibDir, item.getName());
                         if (!item.renameTo(dest)) {
-                            Log.e("ContentsManager", "Failed to move " + item.getName());
+                            Timber.tag("ContentsManager").e("Failed to move " + item.getName());
                             allMoved = false;
                         }
                     }
                     if (!allMoved) {
-                        Log.w("ContentsManager", "Some files failed to move during restructuring");
+                        Timber.tag("ContentsManager").w("Some files failed to move during restructuring");
                     }
                 }
                 if (tempWineDir.exists()) {
@@ -411,7 +412,7 @@ public class ContentsManager {
         // If libPath is "lib" and wine subdirs exist directly in lib/, move them
         else if (libPath.equals("lib")) {
             if (!actualLibDir.exists()) {
-                Log.w("ContentsManager", "lib directory does not exist");
+                Timber.tag("ContentsManager").w("lib directory does not exist");
                 return;
             }
 
@@ -428,11 +429,11 @@ public class ContentsManager {
             );
 
             if (archDirs != null && archDirs.length > 0) {
-                Log.d("ContentsManager", "Found " + archDirs.length + " architecture directories in lib/, moving to lib/wine/");
+                Timber.tag("ContentsManager").d("Found " + archDirs.length + " architecture directories in lib/, moving to lib/wine/");
 
                 // Create lib/wine subdirectory
                 if (!expectedWineLibDir.exists() && !expectedWineLibDir.mkdirs()) {
-                    Log.e("ContentsManager", "Failed to create lib/wine directory");
+                    Timber.tag("ContentsManager").e("Failed to create lib/wine directory");
                     return;
                 }
 
@@ -440,17 +441,17 @@ public class ContentsManager {
                 for (File archDir : archDirs) {
                     File dest = new File(expectedWineLibDir, archDir.getName());
                     if (archDir.renameTo(dest)) {
-                        Log.d("ContentsManager", "Moved " + archDir.getName() + " to lib/wine/");
+                        Timber.tag("ContentsManager").d("Moved " + archDir.getName() + " to lib/wine/");
                     } else {
-                        Log.e("ContentsManager", "Failed to move " + archDir.getName());
+                        Timber.tag("ContentsManager").e("Failed to move " + archDir.getName());
                     }
                 }
             } else {
-                Log.d("ContentsManager", "No architecture directories found in lib/, structure already normalized or using different layout");
+                Timber.tag("ContentsManager").d("No architecture directories found in lib/, structure already normalized or using different layout");
             }
         }
 
-        Log.d("ContentsManager", "Wine library structure normalization complete");
+        Timber.tag("ContentsManager").d("Wine library structure normalization complete");
     }
 
     /**
@@ -472,8 +473,8 @@ public class ContentsManager {
                 setExecutablePermissionsRecursive(file);
             } else if (file.isFile()) {
                 // Set executable permissions on all files in bin/ directory
-                FileUtils.chmod(file, 0755);
-                Log.d("ContentsManager", "Set chmod 0755 on: " + file.getName());
+                FileUtils.chmod(file, 493);
+                Timber.tag("ContentsManager").d("Set chmod 0755 on: " + file.getName());
             }
         }
     }
@@ -482,7 +483,7 @@ public class ContentsManager {
         createTrustedFilesMap();
         List<ContentProfile.ContentFile> files = new ArrayList<>();
         for (ContentProfile.ContentFile contentFile : profile.fileList) {
-            if (!trustedFilesMap.get(profile.type).contains(
+            if (!Objects.requireNonNull(trustedFilesMap.get(profile.type)).contains(
                     Paths.get(getPathFromTemplate(contentFile.target)).toAbsolutePath().normalize().toString()))
                 files.add(contentFile);
         }
@@ -535,7 +536,7 @@ public class ContentsManager {
         createDirTemplateMap();
         String realPath = path;
         for (String key : dirTemplateMap.keySet()) {
-            realPath = realPath.replace(key, dirTemplateMap.get(key));
+            realPath = realPath.replace(key, Objects.requireNonNull(dirTemplateMap.get(key)));
         }
         return realPath;
     }
@@ -566,11 +567,11 @@ public class ContentsManager {
     }
 
     public ContentProfile getProfileByEntryName(String entryName) {
-        Log.d("ContentsManager", "🔍 getProfileByEntryName called with: '" + entryName + "'");
+        Timber.tag("ContentsManager").d("🔍 getProfileByEntryName called with: '" + entryName + "'");
 
         // Initialize profilesMap if needed (first call before syncContents)
         if (profilesMap == null) {
-            Log.d("ContentsManager", "   profilesMap is null, calling syncContents()");
+            Timber.tag("ContentsManager").d("   profilesMap is null, calling syncContents()");
             syncContents();
         }
 
@@ -590,42 +591,37 @@ public class ContentsManager {
             }
         }
 
-        Log.d("ContentsManager", "   Detected ContentType: " + type);
+        Timber.tag("ContentsManager").d("   Detected ContentType: " + type);
 
         if (type != null && profilesMap.get(type) != null) {
             List<ContentProfile> profiles = profilesMap.get(type);
-            Log.d("ContentsManager", "   Found " + profiles.size() + " profiles of type " + type);
-    
-            String keyLower = lowerVersionName;
-    
+            Timber.tag("ContentsManager").d("   Found " + Objects.requireNonNull(profiles).size() + " profiles of type " + type);
+
             for (ContentProfile profile : profiles) {
                 String verName = (profile.verName != null) ? profile.verName : "";
                 String verLower = verName.toLowerCase();
-    
+
                 String typeAndVer = profile.type.toString() + "-" + verName;
                 String typeAndVerLower = typeAndVer.toLowerCase();
-    
+
                 String fullEntry = ContentsManager.getEntryName(profile);
                 String fullEntryLower = fullEntry.toLowerCase();
-    
-                Log.d(
-                    "ContentsManager",
-                    "   Checking profile: verName='" + profile.verName +
+
+                Timber.tag("ContentsManager").d("   Checking profile: verName='" + profile.verName +
                             "', typeAndVer='" + typeAndVer +
-                            "', fullEntry='" + fullEntry + "'"
-                );
-    
-                if (keyLower.equals(verLower) ||
-                    keyLower.equals(typeAndVerLower) ||
-                    keyLower.equals(fullEntryLower)) {
-                    Log.d("ContentsManager", "   ✅ MATCH FOUND!");
+                            "', fullEntry='" + fullEntry + "'");
+
+                if (lowerVersionName.equals(verLower) ||
+                    lowerVersionName.equals(typeAndVerLower) ||
+                        lowerVersionName.equals(fullEntryLower)) {
+                    Timber.tag("ContentsManager").d("   ✅ MATCH FOUND!");
                     return profile;
                 }
             }
-    
-            Log.d("ContentsManager", "   ❌ No matching profile found in primary lookup");
+
+            Timber.tag("ContentsManager").d("   ❌ No matching profile found in primary lookup");
         } else {
-            Log.d("ContentsManager", "   ❌ Type is null or no profiles for this type");
+            Timber.tag("ContentsManager").d("   ❌ Type is null or no profiles for this type");
         }
 
         // Fallback: Try Wine and Proton lists if entry name doesn't have type prefix
@@ -639,7 +635,7 @@ public class ContentsManager {
 
                 // Check Wine list
                 if (profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_WINE) != null) {
-                    for (ContentProfile profile : profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_WINE)) {
+                    for (ContentProfile profile : Objects.requireNonNull(profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_WINE))) {
                         if (verName.equals(profile.verName) && verCode == profile.verCode) {
                             return profile;
                         }
@@ -648,14 +644,14 @@ public class ContentsManager {
 
                 // Check Proton list
                 if (profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_PROTON) != null) {
-                    for (ContentProfile profile : profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_PROTON)) {
+                    for (ContentProfile profile : Objects.requireNonNull(profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_PROTON))) {
                         if (verName.equals(profile.verName) && verCode == profile.verCode) {
                             return profile;
                         }
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         return null;
@@ -663,7 +659,7 @@ public class ContentsManager {
 
     public boolean applyContent(ContentProfile profile) {
         if (profile.type != ContentProfile.ContentType.CONTENT_TYPE_WINE && profile.type != ContentProfile.ContentType.CONTENT_TYPE_PROTON) {
-            Log.d("ContentsManager", "if condition");
+            Timber.tag("ContentsManager").d("if condition");
             for (ContentProfile.ContentFile contentFile : profile.fileList) {
                 File targetFile = new File(getPathFromTemplate(contentFile.target));
                 File sourceFile = new File(getInstallDir(context, profile), contentFile.source);
@@ -672,12 +668,12 @@ public class ContentsManager {
                 FileUtils.copy(sourceFile, targetFile);
 
                 if (profile.type == ContentProfile.ContentType.CONTENT_TYPE_BOX64) {
-                    Log.d("ContentsManager", "found box64 profile type - running chmod on " + targetFile);
-                    FileUtils.chmod(targetFile, 0755);
+                    Timber.tag("ContentsManager").d("found box64 profile type - running chmod on " + targetFile);
+                    FileUtils.chmod(targetFile, 493);
                 }
             }
         } else {
-            Log.d("ContentsManager", "else condition - doing nothing");
+            Timber.tag("ContentsManager").d("else condition - doing nothing");
             // TODO: do nothing?
         }
         return true;

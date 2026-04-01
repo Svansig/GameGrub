@@ -3,7 +3,7 @@ package com.winlator.xserver;
 import com.winlator.xconnector.XInputStream;
 
 public class WindowAttributes {
-    public static final int FLAG_BACKGROUND_PIXMAP = 1<<0;
+    public static final int FLAG_BACKGROUND_PIXMAP = 1;
     public static final int FLAG_BACKGROUND_PIXEL = 1<<1;
     public static final int FLAG_BORDER_PIXMAP = 1<<2;
     public static final int FLAG_BORDER_PIXEL = 1<<3;

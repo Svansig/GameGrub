@@ -2,7 +2,6 @@ package com.winlator.xserver.requests;
 
 import static com.winlator.xserver.XClientRequestHandler.RESPONSE_CODE_SUCCESS;
 
-import com.winlator.core.CursorLocker;
 import com.winlator.xconnector.XInputStream;
 import com.winlator.xconnector.XOutputStream;
 import com.winlator.xconnector.XStreamLock;
@@ -316,7 +315,7 @@ public abstract class WindowRequests {
         }
     }
 
-    public static void warpPointer(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    public static void warpPointer(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         if (client.xServer.isRelativeMouseMovement()) {
             client.skipRequest();
             return;
@@ -371,7 +370,7 @@ public abstract class WindowRequests {
         }
     }
 
-    public static void getInputFocus(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    public static void getInputFocus(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         Window focusedWindow = client.xServer.windowManager.getFocusedWindow();
 
         try (XStreamLock lock = outputStream.lock()) {
@@ -461,7 +460,7 @@ public abstract class WindowRequests {
         else destination.sendEvent(eventMask, event);
     }
 
-    public static void getScreenSaver(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    public static void getScreenSaver(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         try (XStreamLock lock = outputStream.lock()) {
             outputStream.writeByte(RESPONSE_CODE_SUCCESS);
             outputStream.writeByte((byte)0);

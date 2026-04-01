@@ -10,12 +10,8 @@ import java.nio.ByteBuffer;
 
 public class Texture {
     protected int textureId = 0;
-    private int wrapS = GLES20.GL_CLAMP_TO_EDGE;
-    private int wrapT = GLES20.GL_CLAMP_TO_EDGE;
-    private int magFilter = GLES20.GL_LINEAR;
-    private int minFilter = GLES20.GL_LINEAR;
     protected int format = GLES11Ext.GL_BGRA;
-    protected byte unpackAlignment = 4;
+    protected final byte unpackAlignment = 4;
     protected boolean needsUpdate = true;
 
     protected void generateTextureId() {
@@ -25,10 +21,14 @@ public class Texture {
     }
 
     protected void setTextureParameters() {
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, this.wrapS);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, this.wrapT);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, this.magFilter);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, this.minFilter);
+        int wrapS = GLES20.GL_CLAMP_TO_EDGE;
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, wrapS);
+        int wrapT = GLES20.GL_CLAMP_TO_EDGE;
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, wrapT);
+        int magFilter = GLES20.GL_LINEAR;
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, magFilter);
+        int minFilter = GLES20.GL_LINEAR;
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, minFilter);
     }
 
     public void allocateTexture(short width, short height, ByteBuffer data) {

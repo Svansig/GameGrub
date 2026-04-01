@@ -74,7 +74,7 @@ interface AmazonGameDao {
                     installPath = existing.installPath,
                     installSize = existing.installSize,
                     versionId = existing.versionId,
-                    productSku = if (newGame.productSku.isNotEmpty()) newGame.productSku else existing.productSku,
+                    productSku = newGame.productSku.ifEmpty { existing.productSku },
                     lastPlayed = existing.lastPlayed,
                     playTimeMinutes = existing.playTimeMinutes,
                 )

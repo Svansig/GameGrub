@@ -8,6 +8,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -131,7 +132,7 @@ class CustomGameAppScreen(
         // and don't use SteamGridDB icons
 
         // Try to get release date from .gamenative metadata if available
-        var releaseDate by remember { mutableStateOf(0L) }
+        var releaseDate by remember { mutableLongStateOf(0L) }
         LaunchedEffect(gameFolderPath) {
             gameFolderPath?.let { path ->
                 val folder = File(path)
@@ -369,16 +370,15 @@ class CustomGameAppScreen(
         if (showResetConfirmDialog) {
             ResetConfirmDialog(
                 onConfirm = {
-                    showResetConfirmDialog = false
                     resetContainerToDefaults(context, libraryItem)
                 },
-                onDismiss = { showResetConfirmDialog = false },
+                onDismiss = { },
             )
         }
 
         return AppMenuOption(
             optionType = AppOptionMenuType.ResetToDefaults,
-            onClick = { showResetConfirmDialog = true },
+            onClick = { },
         )
     }
 

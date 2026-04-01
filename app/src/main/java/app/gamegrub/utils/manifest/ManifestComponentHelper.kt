@@ -46,7 +46,7 @@ object ManifestComponentHelper {
     )
 
     fun filterManifestByVariant(entries: List<ManifestEntry>, variant: String?): List<ManifestEntry> {
-        return entries.filter { entry -> entry.variant?.lowercase(Locale.ENGLISH) == variant?.lowercase(Locale.ENGLISH) }
+        return entries.filter { entry -> entry.variant.equals(variant, ignoreCase = true) }
     }
 
     suspend fun loadInstalledContentLists(

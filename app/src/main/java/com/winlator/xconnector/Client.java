@@ -52,7 +52,7 @@ public class Client {
             (new ClientSocket(shutdownFd)).write(data);
         }
         catch (IOException e) {
-            Log.e("Client", "Failed to shutdown: " + e);
+            Timber.tag("Client").e("Failed to shutdown: " + e);
         }
     }
 }

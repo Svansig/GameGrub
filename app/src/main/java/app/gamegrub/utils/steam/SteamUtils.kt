@@ -27,7 +27,9 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.name
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 object SteamUtils {
@@ -61,7 +63,7 @@ object SteamUtils {
         fun flush() {
             if (sb.length >= 10) { // only consider reasonably long strings
                 val candidate = sb.toString()
-                if (candidate.matches(Regex("^Steam[A-Za-z]+[0-9]{3}\$", RegexOption.IGNORE_CASE))) {
+                if (candidate.matches(Regex("^Steam[A-Za-z]+[0-9]{3}$", RegexOption.IGNORE_CASE))) {
                     strings += candidate
                 }
             }
@@ -166,12 +168,14 @@ object SteamUtils {
         // Write all collected backup paths to orig_dll_path.txt
         if (backupPaths.isNotEmpty()) {
             try {
-                Files.write(
-                    Paths.get(appDirPath).resolve("orig_dll_path.txt"),
-                    backupPaths.sorted(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                )
+                withContext(Dispatchers.IO) {
+                    Files.write(
+                        Paths.get(appDirPath).resolve("orig_dll_path.txt"),
+                        backupPaths.sorted(),
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                    )
+                }
                 Timber.i("Wrote ${backupPaths.size} DLL backup paths to orig_dll_path.txt")
             } catch (e: IOException) {
                 Timber.w(e, "Failed to write orig_dll_path.txt")

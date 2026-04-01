@@ -20,7 +20,7 @@ internal class XServerExitRequestCoordinator(
     private val navigateBack: () -> Unit,
 ) {
     fun requestExit() {
-        val winHandler = requireNotNull(winHandlerProvider())
+        val winHandler = winHandlerProvider()
         XServerExitCoordinator.requestExit(
             winHandler = winHandler,
             environment = environmentProvider(),

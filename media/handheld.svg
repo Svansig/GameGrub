@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<svg
-   version="1.1"
-   id="svg1"
-   width="3265.3989"
-   height="1480"
-   viewBox="0 0 3265.3989 1480.0001"
-   sodipodi:docname="handheld.svg"
-   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
-   inkscape:export-filename="fake_odin_mini/background_land.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
-   xml:space="preserve"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg"><defs
+<svg version="1.1" id="svg1" width="3265.3989" height="1480" viewBox="0 0 3265.3989 1480.0001"
+    sodipodi:docname="handheld.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+    inkscape:export-filename="fake_odin_mini/background_land.png" inkscape:export-xdpi="96"
+    inkscape:export-ydpi="96" xml:space="preserve" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns="http://www.w3.org/2000/svg"><defs
      id="defs1"><linearGradient
        id="linearGradient54"
        inkscape:collect="always"><stop

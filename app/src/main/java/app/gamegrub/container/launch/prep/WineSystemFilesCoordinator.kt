@@ -117,9 +117,9 @@ internal object WineSystemFilesCoordinator {
         }
 
         val desktopTheme = container.desktopTheme
-        if ((desktopTheme + "," + screenInfo) != container.getExtra("desktopTheme")) {
+        if (("$desktopTheme,$screenInfo") != container.getExtra("desktopTheme")) {
             WineThemeManager.apply(context, WineThemeManager.ThemeInfo(desktopTheme), screenInfo)
-            container.putExtra("desktopTheme", desktopTheme + "," + screenInfo)
+            container.putExtra("desktopTheme", "$desktopTheme,$screenInfo")
             containerDataChanged = true
         }
 
@@ -153,7 +153,7 @@ internal object WineSystemFilesCoordinator {
             FileUtils.delete(File(rootDir, "/opt/apps"))
             val downloaded = File(imageFs.filesDir, "imagefs_patches_gamenative.tzst")
             Timber.i("Extracting imagefs_patches_gamenative.tzst")
-            if (Arrays.asList<String?>(*context.assets.list("")).contains("imagefs_patches_gamenative.tzst") == true) {
+            if (listOf(*context.assets.list("")).contains("imagefs_patches_gamenative.tzst") == true) {
                 TarCompressorUtils.extract(
                     TarCompressorUtils.Type.ZSTD,
                     context.assets,

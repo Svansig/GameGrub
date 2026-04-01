@@ -48,7 +48,7 @@ public abstract class GraphicsContextRequests {
         if (!valueMask.isEmpty()) client.xServer.graphicsContextManager.updateGraphicsContext(graphicsContext, valueMask, inputStream);
     }
 
-    public static void freeGC(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+    public static void freeGC(XClient client, XInputStream inputStream, XOutputStream outputStream) {
         client.xServer.graphicsContextManager.freeGraphicsContext(inputStream.readInt());
     }
 }

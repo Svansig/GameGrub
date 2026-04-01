@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.room)
 }
 
-val keystorePropertiesFile = rootProject.file("app/keystores/keystore.properties")
+val keystorePropertiesFile: File = rootProject.file("app/keystores/keystore.properties")!!
 val keystoreProperties: Properties? = if (keystorePropertiesFile.exists()) {
     Properties().apply {
         load(FileInputStream(keystorePropertiesFile))
@@ -211,7 +211,7 @@ dependencies {
     implementation(libs.material)
 
     // Chrome Custom Tabs for GOG OAuth
-    implementation("androidx.browser:browser:1.8.0")
+    implementation(libs.androidx.browser)
 
     // JavaSteam
     val localBuild = false // Change to 'true' needed when building JavaSteam manually
@@ -287,7 +287,7 @@ dependencies {
     testImplementation(libs.mockwebserver)
 
     // Add PostHog Android SDK dependency
-    implementation("com.posthog:posthog-android:3.8.0")
+    implementation(libs.posthog.android)
 
-    implementation("com.auth0.android:jwtdecode:2.0.2")
+    implementation(libs.jwtdecode)
 }

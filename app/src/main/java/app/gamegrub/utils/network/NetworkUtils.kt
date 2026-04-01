@@ -48,14 +48,12 @@ object Net {
         )
         .build()
 
-    val fallbackDns: Dns = object : Dns {
-        override fun lookup(hostname: String): List<InetAddress> {
-            return try {
-                doh.lookup(hostname)
-            } catch (e: Exception) {
-                Timber.w(e, "DoH lookup failed for $hostname, falling back to system DNS")
-                Dns.SYSTEM.lookup(hostname)
-            }
+    val fallbackDns: Dns = Dns { hostname ->
+        try {
+            doh.lookup(hostname)
+        } catch (e: Exception) {
+            Timber.w(e, "DoH lookup failed for $hostname, falling back to system DNS")
+            Dns.SYSTEM.lookup(hostname)
         }
     }
 

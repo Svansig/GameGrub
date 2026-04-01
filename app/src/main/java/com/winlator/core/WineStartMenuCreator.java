@@ -88,7 +88,7 @@ public abstract class WineStartMenuCreator {
             for (int i = 0; i < data.length(); i++) createMenuEntry(data.getJSONObject(i), startMenuDir);
         }
         catch (JSONException e) {
-            Log.e("WineStartMenuCreator", "Failed to create: " + e);
+            Timber.tag("WineStartMenuCreator").e("Failed to create: " + e);
         }
     }
 }

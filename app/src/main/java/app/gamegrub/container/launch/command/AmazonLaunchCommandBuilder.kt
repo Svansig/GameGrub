@@ -143,7 +143,7 @@ internal object AmazonLaunchCommandBuilder : StoreLaunchCommandBuilder {
         }
 
         val exeDir = resolvedRelativePath.substringBeforeLast("/", "")
-        return if (exeDir.isNotEmpty()) installPath + "/" + exeDir else installPath
+        return if (exeDir.isNotEmpty()) "$installPath/$exeDir" else installPath
     }
 
     private fun applyFuelEnvironmentVariables(envVars: EnvVars, appIdInt: Int, productId: String?) {

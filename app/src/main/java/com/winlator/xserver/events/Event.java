@@ -5,7 +5,7 @@ import com.winlator.xconnector.XOutputStream;
 import java.io.IOException;
 
 public abstract class Event {
-    public static final int KEY_PRESS = 1<<0;
+    public static final int KEY_PRESS = 1;
     public static final int KEY_RELEASE = 1<<1;
     public static final int BUTTON_PRESS = 1<<2;
     public static final int BUTTON_RELEASE = 1<<3;

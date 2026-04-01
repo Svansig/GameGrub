@@ -2,21 +2,17 @@ package com.winlator.core;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.DhcpInfo;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 import android.system.OsConstants;
+
+import androidx.annotation.NonNull;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,13 +20,14 @@ public class NetworkHelper {
     private final ConnectivityManager connectivityManager;
 
     public static class IFAddress {
-        public String name = "eth0";
+        public final String name = "eth0";
         public int flags = 0;
         public int family = OsConstants.AF_INET;
         public int scopeId = 0;
         public String address = "0";
         public String netmask = "0";
 
+        @NonNull
         public String toString() {
             return this.name + "," + this.flags + "," + this.family + "," + this.scopeId + "," + this.address + "," + this.netmask;
         }

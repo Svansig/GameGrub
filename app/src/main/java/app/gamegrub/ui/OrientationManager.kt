@@ -89,10 +89,10 @@ class OrientationManager(private val activity: Activity) {
             currentOrientationDist > nearest.second
         ) {
             Timber.d(
+                "%snull",
                 "$adjustedOrientation => currentOrientation(" +
                     "${Orientation.fromActivityInfoValue(activity.requestedOrientation)}) " +
-                    "!= nearestOrientation(${nearest.first}) && " +
-                    "currentDistance($currentOrientationDist) > nearestDistance(${nearest.second})",
+                    "!= nearestOrientation(${nearest.first}) && ",
             )
 
             activity.requestedOrientation = nearest.first.activityInfoValue

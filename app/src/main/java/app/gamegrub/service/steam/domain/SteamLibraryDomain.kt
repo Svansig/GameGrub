@@ -62,8 +62,8 @@ class SteamLibraryDomain @Inject constructor(
     suspend fun updateApp(app: SteamApp) = appDao.update(app)
 
     suspend fun getAppInfoOf(appId: Int): SteamApp? = findApp(appId)
-    suspend fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? = appDao.findDownloadableDLCApps(appId)
-    suspend fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? = appDao.findHiddenDLCApps(appId)
+    suspend fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp> = appDao.findDownloadableDLCApps(appId)
+    suspend fun getHiddenDlcAppsOf(appId: Int): List<SteamApp> = appDao.findHiddenDLCApps(appId)
 
     // License DAO operations
     suspend fun deleteAllLicenses() = licenseDao.deleteAll()

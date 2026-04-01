@@ -66,7 +66,7 @@
     <string name="gog_install_game_title">Завантажити гру</string>
     <string name="gog_install_confirmation_message">Гра має наступні вимоги до простору. Бажаєте продовжити?\n\n\tРозмір завантаження: %1$s\n\tДоступний простір: %2$s</string>
     <string name="download_prompt_title">Інсталювати застосунок</string>
-    <string name="calculating_space_requirements">Розрахунок необхідного місця...</string>
+    <string name="calculating_space_requirements">Розрахунок необхідного місця…</string>
     <string name="delete_prompt_title">Деінсталювати застосунок</string>
     <string name="cancel_download_prompt_title">Скасувати завантаження</string>
     <string name="acknowledge">ОК</string>
@@ -475,8 +475,8 @@
     <string name="need_internet_to_install">Потрібне інтернет-з\'єднання для інсталяції</string>
     <string name="install_wifi_only_enabled">Увімкнено інсталяцію лише через Wi-Fi</string>
     <string name="installation_progress">Прогрес інсталювання</string>
-    <string name="downloading">Завантаження...</string>
-    <string name="calculating_time">Розрахунок...</string>
+    <string name="downloading">Завантаження…</string>
+    <string name="calculating_time">Розрахунок…</string>
     <string name="download_failed_try_again">Помилка завантаження. Спробуйте знову.</string>
     <string name="update_available">Доступне оновлення</string>
     <string name="game_information">Інформація про гру</string>
@@ -758,7 +758,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">Менеджер вмісту</string>
     <string name="import_wcp_from_device">Імпортувати .wcp з пристрою</string>
-    <string name="working">Виконання...</string>
+    <string name="working">Виконання…</string>
     <string name="selected">Обраний</string>
     <string name="selected_content">Обраний вміст</string>
     <string name="installed_contents">Інстальований вміст</string>
@@ -774,7 +774,7 @@
     <string name="settings_language_restart_title">Необхідний перезапуск</string>
     <string name="settings_language_restart_message">Зміна мови потребує перезапуску. Продовжити?</string>
     <string name="settings_language_restart_confirm">Перезапустити</string>
-    <string name="settings_language_changing">Зміна мови та перезапуск...</string>
+    <string name="settings_language_changing">Зміна мови та перезапуск…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">Емуляція</string>
@@ -873,7 +873,7 @@
 
 
     <!-- Connecting to Servers Screen -->
-    <string name="connect_to_remote_server">Підключення до віддалених серверів...</string>
+    <string name="connect_to_remote_server">Підключення до віддалених серверів…</string>
 
     <!-- LibraryAppScreen: Dialogs -->
     <string name="library_not_enough_space_message">Для інсталяції застосунку потрібно %1$s пам\'яті, але на пристрої доступно лише %2$s.</string>
@@ -932,10 +932,10 @@
     <string name="main_open_discord">Відкрити Discord</string>
 
     <!-- GameGrubMain: Game Launch -->
-    <string name="main_downloading_steam">Завантаження Steam...</string>
-    <string name="main_installing_glibc">Інсталяція компонентів glibc...</string>
-    <string name="main_installing_bionic">Інсталяція компонентів Bionic...</string>
-    <string name="main_loading">Завантаження...</string>
+    <string name="main_downloading_steam">Завантаження Steam…</string>
+    <string name="main_installing_glibc">Інсталяція компонентів glibc…</string>
+    <string name="main_installing_bionic">Інсталяція компонентів Bionic…</string>
+    <string name="main_loading">Завантаження…</string>
 
     <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">Застосунок працює</string>
@@ -1154,7 +1154,7 @@
     <string name="wine_proton_import_package">Імпортувати пакет Wine/Proton</string>
     <string name="wine_proton_select_file_description">Виберіть файл .wcp (ім\'я файлу має починатися з \'wine\' або \'proton\')</string>
     <string name="wine_proton_import_wcp_button">Імпортувати пакет .wcp</string>
-    <string name="wine_proton_processing">Обробка...</string>
+    <string name="wine_proton_processing">Обробка…</string>
     <string name="wine_proton_package_details">Деталі пакета</string>
     <string name="wine_proton_type">Тип</string>
     <string name="wine_proton_version">Версія</string>
@@ -1179,7 +1179,7 @@
     <string name="cancel_import_keep">Ні, продовжити імпорт</string>
 
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">Розпакування та перевірка пакета (це може зайняти 2-3 хвилини для великих файлів)...</string>
+    <string name="wine_proton_extracting">Розпакування та перевірка пакета (це може зайняти 2–3 хвилини для великих файлів)…</string>
     <string name="wine_proton_filename_error">Ім\'я файлу має починатися з \'wine\' або \'proton\' (без урахування регістру)</string>
     <string name="wine_proton_file_empty">Файл порожній або його неможливо прочитати</string>
     <string name="wine_proton_cannot_open">Не вдалося відкрити файл</string>
@@ -1261,7 +1261,7 @@
     <string name="epic_starting_download_with_dlcs">Початок завантаження: %1$s + DLC</string>
     <string name="epic_download_failed">Не вдалося розпочати завантаження: %1$s</string>
     <string name="epic_download_error">Помилка завантаження: %1$s</string>
-    <string name="manifest_downloading_item">Завантаження %1$s...</string>
+    <string name="manifest_downloading_item">Завантаження %1$s…</string>
     <string name="manifest_download_failed">Помилка завантаження: %1$s</string>
     <string name="manifest_install_failed">Не вдалося інсталювати %1$s</string>
     <string name="manifest_install_success">%1$s інстальовано</string>

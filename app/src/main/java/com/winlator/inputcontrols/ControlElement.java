@@ -311,7 +311,7 @@ public class ControlElement {
         return boundingBox;
     }
 
-    private Rect computeBoundingBox() {
+    private void computeBoundingBox() {
         int snappingSize = inputControlsView.getSnappingSize();
         int halfWidth = 0;
         int halfHeight = 0;
@@ -363,11 +363,10 @@ public class ControlElement {
             }
         }
 
-        halfWidth *= scale;
-        halfHeight *= scale;
+        halfWidth *= (int) scale;
+        halfHeight *= (int) scale;
         boundingBox.set(x - halfWidth, y - halfHeight, x + halfWidth, y + halfHeight);
         boundingBoxNeedsUpdate = false;
-        return boundingBox;
     }
 
     private String getDisplayText() {

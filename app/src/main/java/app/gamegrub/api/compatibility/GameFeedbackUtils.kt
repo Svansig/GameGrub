@@ -33,7 +33,7 @@ object GameFeedbackUtils {
             val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
             val container = ContainerUtils.getContainer(context, appId)
             val configJson = JSONObject(container.containerJson)
-            Timber.d("config string is: " + container.containerJson)
+            Timber.d("config string is: %s", container.containerJson)
             Timber.d("configJson: $configJson")
 
             // Get the game name from container or use a fallback

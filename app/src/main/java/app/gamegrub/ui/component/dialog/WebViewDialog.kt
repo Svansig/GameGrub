@@ -99,11 +99,9 @@ fun WebViewDialog(
                                 } else {
                                     loadUrl(startingUrl)
                                 }
-                                webView = this
                             }
                         },
                         update = {
-                            webView = it
                         },
                         onRelease = { view ->
                             view.saveState(webViewState)

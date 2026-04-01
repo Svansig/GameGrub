@@ -1,5 +1,7 @@
 package com.winlator.xserver;
 
+import androidx.annotation.NonNull;
+
 public class ScreenInfo {
     public final short width;
     public final short height;
@@ -23,6 +25,7 @@ public class ScreenInfo {
         return (short)(height / 10);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return width+"x"+height;

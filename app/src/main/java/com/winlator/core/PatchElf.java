@@ -33,11 +33,8 @@ public class PatchElf {
     }
 
     public boolean saveElf(@NonNull File file) {
-        if (file != elfFile && !file.exists()) {
-            // TODO: save elf file
-            return true;
-        }
-        return false;
+        // TODO: save elf file
+        return file != elfFile && !file.exists();
     }
 
     public boolean saveElf() {

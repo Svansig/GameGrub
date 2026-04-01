@@ -11,7 +11,7 @@ enum class PerformanceHudSize(val prefValue: String) {
 
     companion object {
         fun fromPrefValue(value: String?): PerformanceHudSize {
-            return values().firstOrNull { it.prefValue == value } ?: MEDIUM
+            return entries.firstOrNull { it.prefValue == value } ?: MEDIUM
         }
     }
 }

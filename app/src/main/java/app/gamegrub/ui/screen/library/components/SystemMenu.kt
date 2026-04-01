@@ -300,7 +300,7 @@ fun SystemMenu(
         onDismiss()
     }
 
-    SupportersDialog(visible = showSupporters, onDismiss = { showSupporters = false })
+    SupportersDialog(visible = showSupporters, onDismiss = { })
 
     val colorOnline = GameGrubTheme.colors.statusInstalled
     val colorAway = GameGrubTheme.colors.statusAway
@@ -594,7 +594,7 @@ fun SystemMenu(
                         SystemMenuItem(
                             text = stringResource(R.string.hall_of_fame),
                             icon = Icons.AutoMirrored.Filled.StarHalf,
-                            onClick = { showSupporters = true },
+                            onClick = { },
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))

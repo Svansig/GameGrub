@@ -21,7 +21,7 @@ import timber.log.Timber
 @Singleton
 class GameCompatibilityService @Inject constructor(
     private val cache: GameCompatibilityCache,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private val httpClient = Net.http
 

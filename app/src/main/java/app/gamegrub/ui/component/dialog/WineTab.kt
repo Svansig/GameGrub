@@ -19,10 +19,10 @@ fun WineTabContent(state: ContainerConfigState) {
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.renderer)) },
-            value = state.gpuNameIndex.value,
+            value = state.gpuNameIndex.intValue,
             items = state.gpuCards.values.map { it.name },
             onItemSelected = {
-                state.gpuNameIndex.value = it
+                state.gpuNameIndex.intValue = it
                 val cfg = com.winlator.core.KeyValueSet(config.graphicsDriverConfig)
                 cfg.put("gpuName", gpuCardsValues[it].deviceId)
                 state.config.value = config.copy(
@@ -34,30 +34,30 @@ fun WineTabContent(state: ContainerConfigState) {
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.gpu_name)) },
-            value = state.gpuNameIndex.value,
+            value = state.gpuNameIndex.intValue,
             items = state.gpuCards.values.map { it.name },
             onItemSelected = {
-                state.gpuNameIndex.value = it
+                state.gpuNameIndex.intValue = it
                 state.config.value = config.copy(videoPciDeviceID = gpuCardsValues[it].deviceId)
             },
         )
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.offscreen_rendering_mode)) },
-            value = state.renderingModeIndex.value,
+            value = state.renderingModeIndex.intValue,
             items = state.renderingModes,
             onItemSelected = {
-                state.renderingModeIndex.value = it
+                state.renderingModeIndex.intValue = it
                 state.config.value = config.copy(offScreenRenderingMode = state.renderingModes[it].lowercase())
             },
         )
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.video_memory_size)) },
-            value = state.videoMemIndex.value,
+            value = state.videoMemIndex.intValue,
             items = state.videoMemSizes,
             onItemSelected = {
-                state.videoMemIndex.value = it
+                state.videoMemIndex.intValue = it
                 state.config.value = config.copy(videoMemorySize = StringUtils.parseNumber(state.videoMemSizes[it]))
             },
         )
@@ -76,10 +76,10 @@ fun WineTabContent(state: ContainerConfigState) {
         SettingsListDropdown(
             colors = settingsTileColors(),
             title = { Text(text = stringResource(R.string.mouse_warp_override)) },
-            value = state.mouseWarpIndex.value,
+            value = state.mouseWarpIndex.intValue,
             items = state.mouseWarps,
             onItemSelected = {
-                state.mouseWarpIndex.value = it
+                state.mouseWarpIndex.intValue = it
                 state.config.value = config.copy(mouseWarpOverride = state.mouseWarps[it].lowercase())
             },
         )

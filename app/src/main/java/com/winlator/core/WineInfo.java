@@ -91,8 +91,8 @@ public class WineInfo implements Parcelable {
             File winePreloaderBinFile = new File(wineBinDir, "wine-preloader");
             FileUtils.copy(new File(wineBinDir, wow64Mode ? "wine-wow64" : "wine32"), wineBinFile);
             FileUtils.copy(new File(wineBinDir, wow64Mode ? "wine-preloader-wow64" : "wine32-preloader"), winePreloaderBinFile);
-            FileUtils.chmod(wineBinFile, 0771);
-            FileUtils.chmod(winePreloaderBinFile, 0771);
+            FileUtils.chmod(wineBinFile, 505);
+            FileUtils.chmod(winePreloaderBinFile, 505);
             return wow64Mode ? "wine" : "wine64";
         }
         else return (new File(path, "/bin/wine64")).isFile() ? "wine64" : "wine";
@@ -123,7 +123,7 @@ public class WineInfo implements Parcelable {
         return 0;
     }
 
-    public static final Parcelable.Creator<WineInfo> CREATOR = new Parcelable.Creator<WineInfo>() {
+    public static final Parcelable.Creator<WineInfo> CREATOR = new Parcelable.Creator<>() {
         public WineInfo createFromParcel(Parcel in) {
             return new WineInfo(in);
         }
@@ -147,7 +147,7 @@ public class WineInfo implements Parcelable {
         ImageFs imageFs = ImageFs.find(context);
         String path = "";
 
-        Log.d("WineInfo", "Creating WineInfo from identifier " + identifier);
+        Timber.tag("WineInfo").d("Creating WineInfo from identifier " + identifier);
 
         if (identifier.equals(MAIN_WINE_VERSION.identifier())) return new WineInfo(MAIN_WINE_VERSION.type, MAIN_WINE_VERSION.version, MAIN_WINE_VERSION.arch, null);
 
@@ -169,7 +169,7 @@ public class WineInfo implements Parcelable {
             }
 
             if (wineProfile != null && (wineProfile.type == ContentProfile.ContentType.CONTENT_TYPE_WINE || wineProfile.type == ContentProfile.ContentType.CONTENT_TYPE_PROTON))
-                path = contentsManager.getInstallDir(context, wineProfile).getPath();
+                path = ContentsManager.getInstallDir(context, wineProfile).getPath();
 
             return new WineInfo(matcher.group(1), matcher.group(2), matcher.group(4), path);
         }

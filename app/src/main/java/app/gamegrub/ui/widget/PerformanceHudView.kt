@@ -20,6 +20,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.isGone
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.PerformanceHudSize
 import app.gamegrub.utils.general.DateTimeUtils.formatRuntimeHours
@@ -880,7 +881,7 @@ class PerformanceHudView(
 
             for (index in 0 until childCount) {
                 val child = getChildAt(index)
-                if (child.visibility == GONE) continue
+                if (child.isGone) continue
 
                 measureChild(child, widthMeasureSpec, heightMeasureSpec)
                 val childWidth = child.measuredWidth
@@ -921,7 +922,7 @@ class PerformanceHudView(
 
             for (index in 0 until childCount) {
                 val child = getChildAt(index)
-                if (child.visibility == GONE) continue
+                if (child.isGone) continue
 
                 val childWidth = child.measuredWidth
                 val childHeight = child.measuredHeight

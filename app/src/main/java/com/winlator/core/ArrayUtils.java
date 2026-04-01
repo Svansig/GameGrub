@@ -36,7 +36,7 @@ public abstract class ArrayUtils {
                 stringArray[i] = data.getString(i);
             }
             catch (JSONException e) {
-                Log.e("ArrayUtils", "Failed to create string array from json data: " + e);
+                Timber.tag("ArrayUtils").e("Failed to create string array from json data: " + e);
             }
         }
         return stringArray;

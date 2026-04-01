@@ -755,9 +755,9 @@ class AmazonService : Service() {
                         Timber.tag("Amazon").i("Verification PASSED: ${result.verifiedOk}/${result.totalFiles} files OK")
                     } else {
                         Timber.tag("Amazon").w(
+                            "%snull",
                             "Verification FAILED: ${result.verifiedOk}/${result.totalFiles} OK, " +
-                                "${result.missingFiles} missing, ${result.sizeMismatch} size mismatch, " +
-                                "${result.hashMismatch} hash mismatch",
+                                "${result.missingFiles} missing, ${result.sizeMismatch} size mismatch, ",
                         )
                     }
 

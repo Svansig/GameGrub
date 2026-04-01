@@ -282,7 +282,6 @@ private fun DelayTextField(
         onValueChange = { newText ->
             // Allow only digits
             val filtered = newText.filter { it.isDigit() }
-            text = filtered
             filtered.toIntOrNull()?.let { onValueChange(it) }
         },
         label = { Text(label) },

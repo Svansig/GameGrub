@@ -10,7 +10,7 @@ data class AppInfo(
     @ColumnInfo("is_downloaded")
     val isDownloaded: Boolean = false,
     @ColumnInfo("downloaded_depots")
-    val downloadedDepots: List<Int> = emptyList<Int>(),
+    val downloadedDepots: List<Int> = emptyList(),
     @ColumnInfo("dlc_depots")
-    val dlcDepots: List<Int> = emptyList<Int>(),
+    val dlcDepots: List<Int> = emptyList(),
 )

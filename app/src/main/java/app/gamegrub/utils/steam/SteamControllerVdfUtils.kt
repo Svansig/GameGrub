@@ -263,14 +263,13 @@ private class VdfParser(text: String) {
         while (true) {
             val token = nextToken() ?: break
             if (token == "}") break
-            val key = token
             val valueToken = nextToken() ?: break
             if (valueToken == "{") {
-                obj.add(key, parseObject())
+                obj.add(token, parseObject())
             } else if (valueToken == "}") {
                 break
             } else {
-                obj.add(key, VdfString(valueToken))
+                obj.add(token, VdfString(valueToken))
             }
         }
         return obj

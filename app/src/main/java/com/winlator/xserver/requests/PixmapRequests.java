@@ -29,7 +29,7 @@ public abstract class PixmapRequests {
         client.registerAsOwnerOfResource(pixmap);
     }
 
-    public static void freePixmap(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+    public static void freePixmap(XClient client, XInputStream inputStream, XOutputStream outputStream) {
         client.xServer.pixmapManager.freePixmap(inputStream.readInt());
     }
 }

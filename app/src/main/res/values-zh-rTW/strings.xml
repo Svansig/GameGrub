@@ -156,7 +156,7 @@
     <string name="remove">刪除</string>
     <string name="add">添加</string>
     <string name="delete">刪除</string>
-    <string name="copy_from">從...複製</string>
+    <string name="copy_from">從…複製</string>
     <string name="ok">確認</string>
     <string name="storage_info">存儲信息</string>
     <string name="duplicate">複製</string>
@@ -477,8 +477,8 @@
     <string name="need_internet_to_install">需要網絡連線才能安裝</string>
     <string name="install_wifi_only_enabled">僅啟用通過 WiFi 安裝</string>
     <string name="installation_progress">安裝進度</string>
-    <string name="downloading">下載中...</string>
-    <string name="calculating_time">計算中...</string>
+    <string name="downloading">下載中…</string>
+    <string name="calculating_time">計算中…</string>
     <string name="download_failed_try_again">下載失敗, 請再試一次</string>
     <string name="update_available">可用更新</string>
     <string name="game_information">遊戲資訊</string>
@@ -760,7 +760,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">內容管理</string>
     <string name="import_wcp_from_device">從裝置匯入 .wcp</string>
-    <string name="working">正在處理...</string>
+    <string name="working">正在處理…</string>
     <string name="selected">已選取</string>
     <string name="selected_content">選定的內容</string>
     <string name="installed_contents">已安裝的內容</string>
@@ -776,7 +776,7 @@
     <string name="settings_language_restart_title">需要重新啟動</string>
     <string name="settings_language_restart_message">更改語言需要重新啟動應用程式. 是否繼續?</string>
     <string name="settings_language_restart_confirm">重新啟動</string>
-    <string name="settings_language_changing">切換語言並重新啟動中...</string>
+    <string name="settings_language_changing">切換語言並重新啟動中…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">模擬設定</string>
@@ -874,7 +874,7 @@
 
 
     <!-- Connecting to Servers Screen -->
-    <string name="connect_to_remote_server">正在連接至遠端伺服器...</string>
+    <string name="connect_to_remote_server">正在連接至遠端伺服器…</string>
 
     <!-- LibraryAppScreen: Dialogs -->
     <string name="library_not_enough_space_message">正在安裝的應用程式需要 %1$s 的空間, 但此裝置僅剩 %2$s 可用空間</string>
@@ -933,10 +933,10 @@
     <string name="main_open_discord">開啟 Discord</string>
 
     <!-- GameGrubMain: Game Launch -->
-    <string name="main_downloading_steam">正在下載 Steam...</string>
-    <string name="main_installing_glibc">安裝 glibc 組件...</string>
-    <string name="main_installing_bionic">安裝Bionic元件中...</string>
-    <string name="main_loading">載入中...</string>
+    <string name="main_downloading_steam">正在下載 Steam…</string>
+    <string name="main_installing_glibc">安裝 glibc 組件…</string>
+    <string name="main_installing_bionic">安裝Bionic元件中…</string>
+    <string name="main_loading">載入中…</string>
 
     <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">應用程式運行中</string>
@@ -1040,7 +1040,7 @@
     <string name="library_layout_capsule">膠囊</string>
     <string name="library_layout_hero">Hero</string>
     <string name="library_layout_carousel">輪播</string>
-    <string name="library_search_placeholder">搜尋您的遊戲...</string>
+    <string name="library_search_placeholder">搜尋您的遊戲…</string>
     <string name="library_search_description">搜尋</string>
     <string name="library_search_clear">清除搜尋</string>
     <string name="library_no_items">沒有符合選擇條件的項目</string>
@@ -1096,7 +1096,7 @@
     <string name="two_factor_enter_code">輸入5位數驗證碼</string>
 
     <!-- Contents Manager -->
-    <string name="contents_validating">驗證內容中...</string>
+    <string name="contents_validating">驗證內容中…</string>
     <string name="contents_error_badtar">無法識別檔案</string>
     <string name="contents_error_noprofile">內容中未找到Profile</string>
     <string name="contents_error_badprofile">無法識別Profile</string>
@@ -1133,7 +1133,7 @@
     <string name="settings_download_speed">下載速度</string>
     <string name="settings_download_heat_warning">較高的下載速度可能會導致裝置發熱</string>
     <string name="settings_region_default">預設</string>
-    <string name="settings_saving_restarting">儲存設定並重新啟動中...</string>
+    <string name="settings_saving_restarting">儲存設定並重新啟動中…</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">設定</string>
@@ -1154,7 +1154,7 @@
     <string name="wine_proton_import_package">匯入 Wine/Proton 套件</string>
     <string name="wine_proton_select_file_description">請選擇一個 .wcp 檔案 (檔案名稱需以 wine 或 proton 開頭)</string>
     <string name="wine_proton_import_wcp_button">匯入 .wcp 套件</string>
-    <string name="wine_proton_processing">處理中...</string>
+    <string name="wine_proton_processing">處理中…</string>
     <string name="wine_proton_package_details">套件詳情</string>
     <string name="wine_proton_type">類型</string>
     <string name="wine_proton_version">版本</string>
@@ -1179,7 +1179,7 @@
     <string name="cancel_import_keep">不, 保留匯入</string>
 
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">正在解壓縮及驗證套件 (大型檔案可能需要 2 至 3 分鐘)...</string>
+    <string name="wine_proton_extracting">正在解壓縮及驗證套件 (大型檔案可能需要 2 至 3 分鐘)…</string>
     <string name="wine_proton_filename_error">檔案名稱必須以 wine 或 proton 開頭 (不區分大小寫)</string>
     <string name="wine_proton_file_empty">檔案為空或無法讀取</string>
     <string name="wine_proton_cannot_open">無法開啟檔案</string>
@@ -1262,7 +1262,7 @@
     <string name="epic_starting_download_with_dlcs">開始下載: %1$s + DLC</string>
     <string name="epic_download_failed">無法開始下載: %1$s</string>
     <string name="epic_download_error">下載錯誤: %1$s</string>
-    <string name="manifest_downloading_item">正在下載 %1$s...</string>
+    <string name="manifest_downloading_item">正在下載 %1$s…</string>
     <string name="manifest_download_failed">下載失敗: %1$s</string>
     <string name="manifest_install_failed">安裝 %1$s 失敗</string>
     <string name="manifest_install_success">%1$s 已安裝</string>

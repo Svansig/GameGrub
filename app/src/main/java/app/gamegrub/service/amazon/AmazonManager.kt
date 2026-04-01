@@ -14,7 +14,7 @@ import timber.log.Timber
 @Singleton
 class AmazonManager @Inject constructor(
     private val amazonGameDao: AmazonGameDao,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
 
     /** Refresh the Amazon library from API and persist it in DB. */

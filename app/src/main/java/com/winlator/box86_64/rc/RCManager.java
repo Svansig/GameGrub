@@ -61,7 +61,7 @@ public class RCManager {
             data.put("id", newId);
             data.put("name", newName);
             FileUtils.writeString(newFile, data.toString());
-        } catch (JSONException e) {}
+        } catch (JSONException ignored) {}
 
         RCFile rcfile = loadRCFile(context, newFile);
         rcfiles.add(rcfile);
@@ -104,6 +104,7 @@ public class RCManager {
                 if (file.getPath().endsWith(".rcp")) {
                     try {
                         RCFile rcfile = loadRCFile(context, file);
+                        assert rcfile != null;
                         maxRCFileId = Math.max(maxRCFileId, rcfile.id);
                         rcfiles.add(rcfile);
                     } catch (Exception e) {
@@ -133,11 +134,10 @@ public class RCManager {
 
     public static RCFile loadRCFile(Context context, JSONObject obj) {
         try {
-            JSONObject rcfileJSONObject = obj;
-            int rcfileId = rcfileJSONObject.getInt("id");
-            String rcfileName = rcfileJSONObject.getString("name");
+            int rcfileId = obj.getInt("id");
+            String rcfileName = obj.getString("name");
             LinkedList<RCGroup> groups = new LinkedList<>();
-            JSONArray groupsJSONArray = rcfileJSONObject.getJSONArray("groups");
+            JSONArray groupsJSONArray = obj.getJSONArray("groups");
 
             for (int i = 0; i < groupsJSONArray.length(); i++) {
                 JSONObject groupJSONObject = groupsJSONArray.getJSONObject(i);

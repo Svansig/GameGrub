@@ -74,7 +74,7 @@
     <string name="uninstall">Disinstalla</string>
     <string name="run_app">Gioca</string>
     <string name="download_prompt_title">Installa App</string>
-    <string name="calculating_space_requirements">Calcolo requisiti di spazio...</string>
+    <string name="calculating_space_requirements">Calcolo requisiti di spazio…</string>
     <string name="delete_prompt_title">Elimina App</string>
     <string name="cancel_download_prompt_title">Annulla Download</string>
     <string name="acknowledge">OK</string>
@@ -483,8 +483,8 @@
     <string name="need_internet_to_install">Serve internet per installare</string>
     <string name="install_wifi_only_enabled">Installa solo tramite Wi-Fi abilitato</string>
     <string name="installation_progress">Progresso Installazione</string>
-    <string name="downloading">Scaricamento...</string>
-    <string name="calculating_time">Calcolo...</string>
+    <string name="downloading">Scaricamento…</string>
+    <string name="calculating_time">Calcolo…</string>
     <string name="download_failed_try_again">Download fallito. Riprova.</string>
     <string name="update_available">Aggiornamento Disponibile</string>
     <string name="game_information">Informazioni Gioco</string>
@@ -758,7 +758,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">Gestione Contenuti</string>
     <string name="import_wcp_from_device">Importa .wcp dal dispositivo</string>
-    <string name="working">Elaborazione...</string>
+    <string name="working">Elaborazione…</string>
     <string name="selected">Selezionato</string>
     <string name="selected_content">Contenuto selezionato</string>
     <string name="installed_contents">Contenuti installati</string>
@@ -774,7 +774,7 @@
     <string name="settings_language_restart_title">Riavvio Richiesto</string>
     <string name="settings_language_restart_message">Cambiare la lingua richiede il riavvio dell\'app. Vuoi continuare?</string>
     <string name="settings_language_restart_confirm">Riavvia</string>
-    <string name="settings_language_changing">Cambio lingua e riavvio...</string>
+    <string name="settings_language_changing">Cambio lingua e riavvio…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">Emulazione</string>
@@ -873,7 +873,7 @@
 
 
     <!-- Connecting to Servers Screen -->
-    <string name="connect_to_remote_server">Connessione ai server remoti...</string>
+    <string name="connect_to_remote_server">Connessione ai server remoti…</string>
 
     <!-- LibraryAppScreen: Dialogs -->
     <string name="library_not_enough_space_message">L\'app che stai installando richiede %1$s di spazio ma sono rimasti solo %2$s su questo dispositivo</string>
@@ -932,10 +932,10 @@
     <string name="main_open_discord">Apri Discord</string>
 
     <!-- PluviaMain: Game Launch -->
-    <string name="main_downloading_steam">Scaricamento Steam...</string>
-    <string name="main_installing_glibc">Installazione componenti glibc...</string>
-    <string name="main_installing_bionic">Installazione componenti Bionic...</string>
-    <string name="main_loading">Caricamento...</string>
+    <string name="main_downloading_steam">Scaricamento Steam…</string>
+    <string name="main_installing_glibc">Installazione componenti glibc…</string>
+    <string name="main_installing_bionic">Installazione componenti Bionic…</string>
+    <string name="main_loading">Caricamento…</string>
 
     <!-- PluviaMain: Session Conflicts -->
     <string name="main_app_running_title">App in Esecuzione</string>
@@ -1154,7 +1154,7 @@
     <string name="wine_proton_import_package">Importa Pacchetto Wine/Proton</string>
     <string name="wine_proton_select_file_description">Seleziona un file .wcp (con nome file che inizia con \'wine\' o \'proton\')</string>
     <string name="wine_proton_import_wcp_button">Importa Pacchetto .wcp</string>
-    <string name="wine_proton_processing">Elaborazione...</string>
+    <string name="wine_proton_processing">Elaborazione…</string>
     <string name="wine_proton_package_details">Dettagli Pacchetto</string>
     <string name="wine_proton_type">Tipo</string>
     <string name="wine_proton_version">Versione</string>
@@ -1179,7 +1179,7 @@
     <string name="cancel_import_keep">No, Mantieni Importazione</string>
 
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">Estrazione e convalida pacchetto (potrebbe richiedere 2-3 minuti per file grandi)...</string>
+    <string name="wine_proton_extracting">Estrazione e convalida pacchetto (potrebbe richiedere 2–3 minuti per file grandi)…</string>
     <string name="wine_proton_filename_error">Il nome del file deve iniziare con \'wine\' o \'proton\' (non case-sensitive)</string>
     <string name="wine_proton_file_empty">Il file è vuoto o non può essere letto</string>
     <string name="wine_proton_cannot_open">Impossibile aprire il file</string>

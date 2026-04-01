@@ -2,8 +2,6 @@ package com.winlator.core;
 
 import android.content.Context;
 
-import app.gamegrub.R;
-
 import com.winlator.xenvironment.ImageFs;
 import java.io.File;
 import java.util.ArrayList;

@@ -2,7 +2,6 @@ package com.winlator.sysvshm;
 
 import android.os.SharedMemory;
 import android.system.ErrnoException;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.winlator.xconnector.XConnectorEpoll;
@@ -32,27 +31,24 @@ public class SysVSharedMemory {
             return shMemory.fd;
         }
 
-        static int access$002(SHMemory shMemory, int fd) {
+        static void access$002(SHMemory shMemory, int fd) {
             shMemory.fd = fd;
-            return fd;
         }
 
         static long access$200(SHMemory shMemory) {
             return shMemory.size;
         }
 
-        static long access$202(SHMemory shMemory, long size) {
+        static void access$202(SHMemory shMemory, long size) {
             shMemory.size = size;
-            return size;
         }
 
         static ByteBuffer access$300(SHMemory shMemory) {
             return shMemory.data;
         }
 
-        static ByteBuffer access$302(SHMemory shMemory, ByteBuffer data) {
+        static void access$302(SHMemory shMemory, ByteBuffer data) {
             shMemory.data = data;
-            return data;
         }
     }
 
@@ -128,12 +124,10 @@ public class SysVSharedMemory {
 
     private static int createSharedMemory(String name, int size) {
         try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
-                SharedMemory sharedMemory = SharedMemory.create(name, size);
-                Method getFdMethod = sharedMemory.getClass().getMethod("getFd");
-                Integer fd = (Integer) getFdMethod.invoke(sharedMemory);
-                return fd != null ? fd : -1;
-                }
+            SharedMemory sharedMemory = SharedMemory.create(name, size);
+            Method getFdMethod = sharedMemory.getClass().getMethod("getFd");
+            Integer fd = (Integer) getFdMethod.invoke(sharedMemory);
+            return fd != null ? fd : -1;
         } catch (ErrnoException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }

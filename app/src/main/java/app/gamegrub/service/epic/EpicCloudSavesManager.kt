@@ -1,6 +1,7 @@
 package app.gamegrub.service.epic
 
 import android.content.Context
+import androidx.core.content.edit
 import app.gamegrub.data.EpicGame
 import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.utils.container.ContainerUtils
@@ -38,7 +39,7 @@ object EpicCloudSavesManager {
         val files: Map<String, CloudFileInfo>,
     )
 
-    private val baseCloudSyncUrl = "https://datastorage-public-service-liveegs.live.use1a.on.epicgames.com"
+    private const val baseCloudSyncUrl = "https://datastorage-public-service-liveegs.live.use1a.on.epicgames.com"
 
     private val httpClient = Net.http
 
@@ -488,8 +489,8 @@ object EpicCloudSavesManager {
                                         downloadSuccess = false
                                     } else {
                                         val partData = chunkData.copyOfRange(
-                                            chunkPart.offset.toInt(),
-                                            (chunkPart.offset + chunkPart.size).toInt(),
+                                            chunkPart.offset,
+                                            (chunkPart.offset + chunkPart.size),
                                         )
                                         output.write(partData)
                                     }
@@ -654,8 +655,8 @@ object EpicCloudSavesManager {
                             } else {
                                 // Extract the specific part of the chunk for this file
                                 val partData = chunkData.copyOfRange(
-                                    chunkPart.offset.toInt(),
-                                    (chunkPart.offset + chunkPart.size).toInt(),
+                                    chunkPart.offset,
+                                    (chunkPart.offset + chunkPart.size),
                                 )
                                 output.write(partData)
                             }
@@ -926,7 +927,7 @@ object EpicCloudSavesManager {
             val fileManifests = mutableListOf<app.gamegrub.service.epic.manifest.FileManifest>()
 
             var chunkNum = 0
-            var currentChunkData = mutableListOf<Byte>()
+            val currentChunkData = mutableListOf<Byte>()
             // currentChunkGuid tracks the single GUID shared by the current in-flight chunk's
             // ChunkParts AND the ChunkInfo/chunk-file header — all three must be identical.
             var currentChunkGuid = generateGuid()
@@ -970,7 +971,6 @@ object EpicCloudSavesManager {
                         val partFileOffset = fileOffset
 
                         val remainingInChunk = (chunkSize - currentChunkData.size).coerceAtMost((fileData.size - fileOffset).toInt())
-                        val size = remainingInChunk
 
                         // Add data to current chunk
                         currentChunkData.addAll(
@@ -982,7 +982,7 @@ object EpicCloudSavesManager {
                         val chunkPart = app.gamegrub.service.epic.manifest.ChunkPart(
                             guid = currentChunkGuid,
                             offset = offset,
-                            size = size,
+                            size = remainingInChunk,
                             fileOffset = partFileOffset,
                         )
 
@@ -1192,7 +1192,7 @@ object EpicCloudSavesManager {
         Timber.tag("Epic").d("[Cloud Saves] Using Wine prefix: $winePrefix")
 
         // Resolve path variables used by Epic Games (case-insensitive)
-        val pathVars = mutableMapOf<String, String>(
+        val pathVars = mutableMapOf(
             "{epicid}" to accountId,
             "{installdir}" to (game.installPath.ifEmpty { EpicConstants.getGameInstallPath(context, game.appName) }),
             "{appname}" to game.appName,
@@ -1312,7 +1312,7 @@ object EpicCloudSavesManager {
 
     private fun setSyncTimestamp(context: Context, appId: Int, timestamp: String) {
         val prefs = context.getSharedPreferences("epic_cloud_saves", Context.MODE_PRIVATE)
-        prefs.edit().putString("sync_timestamp_$appId", timestamp).apply()
+        prefs.edit { putString("sync_timestamp_$appId", timestamp) }
     }
 
     /**

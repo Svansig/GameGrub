@@ -9,7 +9,7 @@ import androidx.room.Update
 import app.gamegrub.data.SteamLicense
 import kotlin.math.min
 
-val SQLITE_MAX_VARS = 999
+const val SQLITE_MAX_VARS = 999
 
 @Dao
 interface SteamLicenseDao {

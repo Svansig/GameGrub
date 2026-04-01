@@ -114,13 +114,13 @@ class SteamAchievementManager @Inject constructor(
     }
 
     private fun findSteamSettingsDir(context: Context, appId: Int): String? {
-        val appDir: File = File(SteamService.getAppDirPath(appId), "steam_settings")
-        val appMapping: File = File(appDir, "achievement_name_to_block.json")
+        val appDir = File(SteamService.getAppDirPath(appId), "steam_settings")
+        val appMapping = File(appDir, "achievement_name_to_block.json")
         if (appMapping.isFile) {
             return appDir.path
         }
         val container = ContainerUtils.getContainer(context, "STEAM_$appId")
-        val coldClient: File = File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steam_settings")
+        val coldClient = File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steam_settings")
         if (File(coldClient, "achievement_name_to_block.json").isFile) {
             return coldClient.path
         }

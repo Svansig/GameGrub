@@ -2,7 +2,6 @@ package app.gamegrub.ui.screen.library.appscreen
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Environment
 import android.os.storage.StorageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -33,14 +33,12 @@ import app.gamegrub.api.compatibility.GameCompatibilityService
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.enums.Marker
-import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
-import app.gamegrub.ui.model.SteamAppScreenViewModel
 import app.gamegrub.ui.component.dialog.GameManagerDialog
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
@@ -50,6 +48,7 @@ import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
+import app.gamegrub.ui.model.SteamAppScreenViewModel
 import app.gamegrub.ui.screen.library.GameMigrationDialog
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.StoragePermissionGate
@@ -59,12 +58,9 @@ import app.gamegrub.utils.manifest.ManifestInstaller
 import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.storage.MarkerUtils
 import app.gamegrub.utils.storage.StorageUtils
-import com.google.android.play.core.splitcompat.SplitCompat
 import com.posthog.PostHog
 import com.winlator.container.ContainerData
-import com.winlator.container.ContainerManager
 import com.winlator.core.GPUInformation
-import com.winlator.xenvironment.ImageFsInstaller
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -777,16 +773,15 @@ class SteamAppScreen(
         if (showResetConfirmDialog) {
             ResetConfirmDialog(
                 onConfirm = {
-                    showResetConfirmDialog = false
                     resetContainerToDefaults(context, libraryItem)
                 },
-                onDismiss = { showResetConfirmDialog = false },
+                onDismiss = { },
             )
         }
 
         return AppMenuOption(
             AppOptionMenuType.ResetToDefaults,
-            onClick = { showResetConfirmDialog = true },
+            onClick = { },
         )
     }
 
@@ -805,13 +800,13 @@ class SteamAppScreen(
         val isDownloadInProgress = SteamService.getDownloadingAppInfoOf(gameId) != null
         val scope = rememberCoroutineScope()
 
-        val options = mutableListOf<AppMenuOption>(
+        val options = mutableListOf(
             AppMenuOption(
                 AppOptionMenuType.BrowseOnlineSaves,
                 onClick = {
                     val browserIntent = Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("https://store.steampowered.com/account/remotestorageapp/?appid=$gameId"),
+                        "https://store.steampowered.com/account/remotestorageapp/?appid=$gameId".toUri(),
                     )
                     context.startActivity(browserIntent)
                 },
@@ -896,9 +891,11 @@ class SteamAppScreen(
                             SyncResult.Success -> {
                                 SnackbarManager.show(context.getString(R.string.steam_cloud_sync_success))
                             }
+
                             SyncResult.UpToDate -> {
                                 SnackbarManager.show(context.getString(R.string.steam_cloud_sync_up_to_date))
                             }
+
                             else -> {
                                 SnackbarManager.show(
                                     context.getString(
@@ -1048,7 +1045,7 @@ class SteamAppScreen(
             Paths.get(SteamPaths.defaultAppInstallPath).pathString
         }
         var hasStoragePermission by remember {
-            mutableStateOf<Boolean>(StoragePermissionGate.hasStorageAccess(context, SteamPaths.defaultStoragePath))
+            mutableStateOf(StoragePermissionGate.hasStorageAccess(context, SteamPaths.defaultStoragePath))
         }
         var installSizeInfo by remember(gameId) { mutableStateOf<InstallSizeInfo?>(null) }
         fun launchPendingInstall(selectedDlcIds: List<Int>) {
@@ -1263,7 +1260,7 @@ class SteamAppScreen(
                                 event = "game_install_started",
                                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
                             )
-            viewModel.downloadApp(gameId) { result -> /* fire and forget */ }
+                            viewModel.downloadApp(gameId) { result -> /* fire and forget */ }
                         }
                     }
                 }
@@ -1401,7 +1398,6 @@ class SteamAppScreen(
         if (showStorageLocationDialog) {
             AlertDialog(
                 onDismissRequest = {
-                    showStorageLocationDialog = false
                     storageLocationConfirmedForInstall = false
                     pendingInstallDlcIds = null
                 },
@@ -1412,7 +1408,6 @@ class SteamAppScreen(
                         onClick = {
                             PrefManager.useExternalStorage = false
                             storageLocationConfirmedForInstall = true
-                            showStorageLocationDialog = false
                             if (pendingInstallDlcIds == null) {
                                 showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
                             } else {
@@ -1438,7 +1433,6 @@ class SteamAppScreen(
                             }
 
                             storageLocationConfirmedForInstall = true
-                            showStorageLocationDialog = false
                             if (pendingInstallDlcIds == null) {
                                 showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
                             } else {
@@ -1465,7 +1459,6 @@ class SteamAppScreen(
                     if (storageLocationConfirmedForInstall) {
                         showPendingInstallDialog()
                     } else if (externalStorageDirs.isNotEmpty()) {
-                        showStorageLocationDialog = true
                     } else {
                         PrefManager.useExternalStorage = false
                         showPendingInstallDialog()

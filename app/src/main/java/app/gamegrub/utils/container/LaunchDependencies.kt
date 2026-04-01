@@ -8,8 +8,6 @@ import app.gamegrub.utils.launchdependencies.LaunchDependency
 import app.gamegrub.utils.launchdependencies.LaunchDependencyCallbacks
 import com.winlator.container.Container
 
-const val LOADING_PROGRESS_UNKNOWN: Float = -1f
-
 /**
  * Ensures all dependencies required to launch a container are downloaded and installed.
  * Reports progress via the given callbacks.

@@ -1,10 +1,7 @@
 package com.winlator.core;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import androidx.collection.ArrayMap;
 import android.util.Log;
-import java.util.Locale;
+
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -12,15 +9,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
-import javax.microedition.khronos.opengles.GL10;
 
 public abstract class GPUHelper {
-    public static int VK_API_VERSION_1_3 = vkMakeVersion(1, 3, 0);
+    public static final int VK_API_VERSION_1_3 = vkMakeVersion(1, 3, 0);
 
     static {
         System.loadLibrary("winlator_11");
@@ -42,7 +33,7 @@ public abstract class GPUHelper {
         try {
             return apiVersionFuture.getNow(VK_API_VERSION_1_3);
         } catch (CompletionException ex) {
-            Log.e("GPUHelper", "Failed to get Vulkan API version", ex);
+            Timber.tag("GPUHelper").e(ex, "Failed to get Vulkan API version");
             return VK_API_VERSION_1_3;
         }
     }
@@ -53,10 +44,10 @@ public abstract class GPUHelper {
         try {
             return vkGetApiVersionSafe() & 0xFFF;
         } catch (UnsatisfiedLinkError e) {
-            Log.e("GPUHelper", "Failed to load Vulkan library", e);
+            Timber.tag("GPUHelper").e(e, "Failed to load Vulkan library");
             return 0; // Fallback if library not loaded
         } catch (Exception e) {
-            Log.e("GPUHelper", "Failed to get Vulkan version patch", e);
+            Timber.tag("GPUHelper").e(e, "Failed to get Vulkan version patch");
             return 0; // Fallback for any other error
         }
     }
@@ -68,9 +59,9 @@ public abstract class GPUHelper {
             return 0;
         }
         try {
-            int major = matcher.group(1) != null ? Integer.parseInt(matcher.group(1)) : 0;
-            int minor = matcher.group(2) != null ? Integer.parseInt(matcher.group(2)) : 0;
-            int patch = matcher.group(3) != null ? Integer.parseInt(matcher.group(3)) : 0;
+            int major = matcher.group(1) != null ? Integer.parseInt(Objects.requireNonNull(matcher.group(1))) : 0;
+            int minor = matcher.group(2) != null ? Integer.parseInt(Objects.requireNonNull(matcher.group(2))) : 0;
+            int patch = matcher.group(3) != null ? Integer.parseInt(Objects.requireNonNull(matcher.group(3))) : 0;
             if (matcher.group(1) == null && patch == 0) {
                 patch = minor;
             }

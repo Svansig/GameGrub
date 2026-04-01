@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -190,7 +191,7 @@ fun ContainerConfigDialog(
         var componentAvailability by componentAvailabilityRef
         var manifestInstallInProgress by remember { mutableStateOf(false) }
         var showManifestDownloadDialog by remember { mutableStateOf(false) }
-        var manifestDownloadProgress by remember { mutableStateOf(-1f) }
+        var manifestDownloadProgress by remember { mutableFloatStateOf(-1f) }
         var manifestDownloadLabel by remember { mutableStateOf("") }
         var versionsLoaded by remember { mutableStateOf(false) }
         val showCustomResolutionDialogRef = remember { mutableStateOf(false) }
@@ -200,8 +201,6 @@ fun ContainerConfigDialog(
 
         LaunchedEffect(visible) {
             if (visible) {
-                showCustomResolutionDialog = false
-                customResolutionValidationError = null
             }
         }
 
@@ -329,13 +328,11 @@ fun ContainerConfigDialog(
 
         suspend fun refreshInstalledLists() {
             val availabilityUpdated = ManifestComponentHelper.loadComponentAvailability(context)
-            componentAvailability = availabilityUpdated
 
             val installed = availabilityUpdated.installed
 
             wrapperVersions = (baseWrapperVersions + availabilityUpdated.installedDrivers).distinct()
             bionicWineEntries = (bionicWineEntriesBase + installed.proton + installed.wine).distinct()
-            glibcWineEntries = glibcWineEntriesBase
         }
 
         LaunchedEffect(Unit) {
@@ -354,7 +351,6 @@ fun ContainerConfigDialog(
             manifestInstallInProgress = true
             showManifestDownloadDialog = true
             manifestDownloadProgress = -1f
-            manifestDownloadLabel = label
             SnackbarManager.show(context.getString(R.string.manifest_downloading_item, label))
             installScope.launch {
                 try {
@@ -379,7 +375,6 @@ fun ContainerConfigDialog(
                     manifestInstallInProgress = false
                     showManifestDownloadDialog = false
                     manifestDownloadProgress = -1f
-                    manifestDownloadLabel = ""
                 }
             }
         }
@@ -466,11 +461,11 @@ fun ContainerConfigDialog(
         // Keep emulator defaults in sync when wineVersion changes
         LaunchedEffect(config.wineVersion) {
             if (config.wineVersion.contains("x86_64", true)) {
-                emulator64Index = 1 // Box64
+                // Box64
                 emulator32Index = 1 // Box64
                 // lock both later via enabled flags
             } else if (config.wineVersion.contains("arm64ec", true)) {
-                emulator64Index = 0 // FEXCore
+                // FEXCore
                 if (emulator32Index !in 0..1) emulator32Index = 0
                 // Leave 32-bit editable between FEXCore(0) and Box64(1)
             }
@@ -540,7 +535,6 @@ fun ContainerConfigDialog(
 
             val bcnType = cfg.get("bcnEmulationType", bcnEmulationTypeEntries.firstOrNull().orEmpty())
             val defaultBcnTypeIdx = bcnEmulationTypeEntries.indexOfFirst { it.equals(bcnType, true) }.takeIf { it >= 0 } ?: 0
-            bcnEmulationTypeIndex = defaultBcnTypeIdx
 
             bcnEmulationCacheEnabled = cfg.get("bcnEmulationCache", "0") == "1"
             disablePresentWaitChecked = cfg.get("disablePresentWait", "0") == "1"
@@ -616,10 +610,10 @@ fun ContainerConfigDialog(
         }
 
         fun getStartupSelectionOptions(): List<String> {
-            if (config.containerVariant.equals(Container.GLIBC)) {
-                return startupSelectionEntries
+            return if (config.containerVariant == Container.GLIBC) {
+                startupSelectionEntries
             } else {
-                return startupSelectionEntries.subList(0, 2)
+                startupSelectionEntries.subList(0, 2)
             }
         }
 
@@ -636,7 +630,7 @@ fun ContainerConfigDialog(
         fun vkd3dForcedVersion(): String {
             val driverType = StringUtils.parseIdentifier(graphicsDrivers[graphicsDriverIndex])
             val isVortekLike =
-                config.containerVariant.equals(Container.GLIBC) &&
+                config.containerVariant == Container.GLIBC &&
                     driverType == "vortek" ||
                     driverType == "adreno" ||
                     driverType == "sd-8-elite"
@@ -707,10 +701,8 @@ fun ContainerConfigDialog(
 
             // Ensure index within range or default
             val selectedVersion = context.ids.getOrNull(dxvkVersionIndex).orEmpty()
-            val version = if (selectedVersion.isEmpty()) {
+            val version = selectedVersion.ifEmpty {
                 if (context.isVortekLike) "async-1.10.3" else DefaultVersion.DXVK
-            } else {
-                selectedVersion
             }
             val envSet = EnvVars(config.envVars)
             // Update dxwrapperConfig version only when DXVK wrapper selected
@@ -1015,8 +1007,8 @@ fun ContainerConfigDialog(
             message = dismissDialogState.message,
             confirmBtnText = dismissDialogState.confirmBtnText,
             dismissBtnText = dismissDialogState.dismissBtnText,
-            onDismissRequest = { dismissDialogState = MessageDialogState(visible = false) },
-            onDismissClick = { dismissDialogState = MessageDialogState(visible = false) },
+            onDismissRequest = { MessageDialogState(visible = false) },
+            onDismissClick = { MessageDialogState(visible = false) },
             onConfirmClick = onDismissRequest,
         )
 
@@ -1189,7 +1181,7 @@ internal fun ExecutablePathDropdown(
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it },
+        onExpandedChange = { },
         modifier = modifier,
     ) {
         OutlinedTextField(

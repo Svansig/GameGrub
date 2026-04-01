@@ -74,7 +74,7 @@
     <string name="uninstall">Dezinstalează</string>
     <string name="run_app">Pornește</string>
     <string name="download_prompt_title">Instalare aplicație</string>
-    <string name="calculating_space_requirements">Se calculează cerințele de spațiu...</string>
+    <string name="calculating_space_requirements">Se calculează cerințele de spațiu…</string>
     <string name="delete_prompt_title">Ștergere aplicație</string>
     <string name="cancel_download_prompt_title">Anulare descărcare</string>
     <string name="acknowledge">OK</string>
@@ -484,8 +484,8 @@
     <string name="need_internet_to_install">Este necesară conexiune la internet pentru instalare</string>
     <string name="install_wifi_only_enabled">Instalarea doar prin WiFi este activată</string>
     <string name="installation_progress">Progres instalare</string>
-    <string name="downloading">Se descarcă...</string>
-    <string name="calculating_time">Se calculează...</string>
+    <string name="downloading">Se descarcă…</string>
+    <string name="calculating_time">Se calculează…</string>
     <string name="download_failed_try_again">Descărcarea a eșuat. Încearcă din nou.</string>
     <string name="update_available">Actualizare disponibilă</string>
     <string name="game_information">Informații joc</string>
@@ -767,7 +767,7 @@
 	<!-- Contents Manager -->
 	<string name="contents_manager">Manager conținut</string>
 	<string name="import_wcp_from_device">Importă .wcp de pe dispozitiv</string>
-	<string name="working">Se lucrează...</string>
+	<string name="working">Se lucrează…</string>
 	<string name="selected">Selectat</string>
 	<string name="selected_content">Conținut selectat</string>
 	<string name="installed_contents">Conținut instalat</string>
@@ -783,7 +783,7 @@
 	<string name="settings_language_restart_title">Este necesară repornirea</string>
 	<string name="settings_language_restart_message">Schimbarea limbii necesită repornirea aplicației. Vrei să continui?</string>
 	<string name="settings_language_restart_confirm">Repornește</string>
-	<string name="settings_language_changing">Se schimbă limba și se repornește...</string>
+	<string name="settings_language_changing">Se schimbă limba și se repornește…</string>
 
 	<!-- Settings: Emulation Group -->
 	<string name="settings_emulation_title">Emulare</string>
@@ -881,7 +881,7 @@
 	<string name="settings_text">Setări</string>
 
 	<!-- Connecting to Servers Screen -->
-	<string name="connect_to_remote_server">Se conectează la serverele remote...</string>
+	<string name="connect_to_remote_server">Se conectează la serverele remote…</string>
 
 	<!-- LibraryAppScreen: Dialogs -->
 	<string name="library_not_enough_space_message">Aplicația care se instalează necesită %1$s spațiu, dar doar %2$s sunt disponibili pe acest dispozitiv</string>
@@ -940,10 +940,10 @@
 	<string name="main_open_discord">Deschide Discord</string>
 
 	<!-- PluviaMain: Game Launch -->
-	<string name="main_downloading_steam">Se descarcă Steam...</string>
-	<string name="main_installing_glibc">Se instalează componente glibc...</string>
-	<string name="main_installing_bionic">Se instalează componente Bionic...</string>
-	<string name="main_loading">Se încarcă...</string>
+	<string name="main_downloading_steam">Se descarcă Steam…</string>
+	<string name="main_installing_glibc">Se instalează componente glibc…</string>
+	<string name="main_installing_bionic">Se instalează componente Bionic…</string>
+	<string name="main_loading">Se încarcă…</string>
 
 	<!-- PluviaMain: Session Conflicts -->
 	<string name="main_app_running_title">Aplicația rulează</string>
@@ -1163,7 +1163,7 @@
 	<string name="wine_proton_import_package">Importă pachet Wine/Proton</string>
 	<string name="wine_proton_select_file_description">Selectează un fișier .wcp (cu numele începând cu „wine” sau „proton”)</string>
 	<string name="wine_proton_import_wcp_button">Importă pachet .wcp</string>
-	<string name="wine_proton_processing">Se procesează...</string>
+	<string name="wine_proton_processing">Se procesează…</string>
 	<string name="wine_proton_package_details">Detalii pachet</string>
 	<string name="wine_proton_type">Tip</string>
 	<string name="wine_proton_version">Versiune</string>
@@ -1188,7 +1188,7 @@
 	<string name="cancel_import_keep">Nu, păstrează importul</string>
 
 	<!-- Wine/Proton Manager - Status Messages -->
-	<string name="wine_proton_extracting">Se extrage și validează pachetul (poate dura 2-3 minute pentru fișiere mari)...</string>
+	<string name="wine_proton_extracting">Se extrage și validează pachetul (poate dura 2–3 minute pentru fișiere mari)…</string>
 	<string name="wine_proton_filename_error">Numele fișierului trebuie să înceapă cu „wine” sau „proton” (fără diferență între majuscule/minuscule)</string>
 	<string name="wine_proton_file_empty">Fișierul este gol sau nu poate fi citit</string>
 	<string name="wine_proton_cannot_open">Nu se poate deschide fișierul</string>

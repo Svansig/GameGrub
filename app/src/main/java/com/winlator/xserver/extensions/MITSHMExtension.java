@@ -49,7 +49,7 @@ public class MITSHMExtension implements Extension {
         return 64;
     }
 
-    private static void queryVersion(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    private static void queryVersion(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         try (XStreamLock lock = outputStream.lock()) {
             outputStream.writeByte(RESPONSE_CODE_SUCCESS);
             outputStream.writeByte((byte)0);
@@ -63,14 +63,14 @@ public class MITSHMExtension implements Extension {
         }
     }
 
-    private static void attach(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    private static void attach(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         int xid = inputStream.readInt();
         int shmid = inputStream.readInt();
         inputStream.skip(4);
         client.xServer.getSHMSegmentManager().attach(xid, shmid);
     }
 
-    private static void detach(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    private static void detach(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         client.xServer.getSHMSegmentManager().detach(inputStream.readInt());
     }
 

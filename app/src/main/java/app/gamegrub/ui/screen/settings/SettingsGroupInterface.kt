@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -100,7 +101,7 @@ fun SettingsGroupInterface(
     val languageCodes = remember { LocaleHelper.getSupportedLanguageCodes() }
     val languageNames = remember { LocaleHelper.getSupportedLanguageNames() }
     var selectedLanguageIndex by rememberSaveable {
-        mutableStateOf(
+        mutableIntStateOf(
             languageCodes.indexOf(PrefManager.appLanguage).takeIf { it >= 0 } ?: 0,
         )
     }
@@ -118,7 +119,7 @@ fun SettingsGroupInterface(
     }
     var openRegionDialog by rememberSaveable { mutableStateOf(false) }
     var selectedRegionIndex by rememberSaveable {
-        mutableStateOf(
+        androidx.compose.runtime.mutableIntStateOf(
             steamRegionsList.indexOfFirst { it.first == PrefManager.cellId }.takeIf { it >= 0 } ?: 0,
         )
     }
@@ -127,7 +128,7 @@ fun SettingsGroupInterface(
     var gogLoginLoading by rememberSaveable { mutableStateOf(false) }
 
     // GOG library sync state
-    var gogLibraryGameCount by rememberSaveable { mutableStateOf(0) }
+    var gogLibraryGameCount by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) }
 
     // Epic login state
 
@@ -155,14 +156,13 @@ fun SettingsGroupInterface(
                     context = context,
                     authCode = event.authCode,
                     coroutineScope = coroutineScope,
-                    onLoadingChange = { gogLoginLoading = it },
+                    onLoadingChange = { },
                     onError = { msg ->
                         if (msg != null) {
                             SnackbarManager.show(msg)
                         }
                     },
                     onSuccess = { count ->
-                        gogLibraryGameCount = count
                         SnackbarManager.show(context.getString(R.string.gog_login_success_title))
                     },
                     onDialogClose = { },
@@ -215,7 +215,7 @@ fun SettingsGroupInterface(
 
         // Unified visual icon picker (affects app and notification icons)
         var selectedVariant by rememberSaveable {
-            mutableStateOf(
+            androidx.compose.runtime.mutableIntStateOf(
                 if (PrefManager.useAltLauncherIcon ||
                     PrefManager.useAltNotificationIcon
                 ) {
@@ -290,7 +290,7 @@ fun SettingsGroupInterface(
         )
         val downloadSpeedValues = remember { listOf(8, 16, 24, 32) }
         var downloadSpeedValue by rememberSaveable {
-            mutableStateOf(
+            androidx.compose.runtime.mutableFloatStateOf(
                 downloadSpeedValues.indexOf(PrefManager.downloadSpeed).takeIf { it >= 0 }?.toFloat() ?: 2f,
             )
         }
@@ -377,7 +377,7 @@ fun SettingsGroupInterface(
         if (useExternalStorage) {
             // Currently selected item
             var selectedIndex by rememberSaveable {
-                mutableStateOf(
+                androidx.compose.runtime.mutableIntStateOf(
                     dirs.indexOfFirst { it.absolutePath == PrefManager.externalStoragePath }
                         .takeIf { it >= 0 } ?: 0,
                 )
@@ -418,7 +418,7 @@ fun SettingsGroupInterface(
             PrefManager.cellId = selectedId
             PrefManager.cellIdManuallySet = selectedId != 0
         },
-        onDismiss = { openRegionDialog = false },
+        onDismiss = { },
     )
 
     // Status bar restart confirmation dialog
@@ -429,7 +429,6 @@ fun SettingsGroupInterface(
         confirmBtnText = stringResource(R.string.settings_language_restart_confirm),
         dismissBtnText = stringResource(R.string.cancel),
         onConfirmClick = {
-            showStatusBarRestartDialog = false
             val newValue = pendingStatusBarValue ?: return@MessageDialog
             // Save preference and show loading dialog
             PrefManager.hideStatusBarWhenNotInGame = newValue
@@ -437,16 +436,12 @@ fun SettingsGroupInterface(
             pendingStatusBarValue = null
         },
         onDismissRequest = {
-            showStatusBarRestartDialog = false
             // Revert toggle to original value
             hideStatusBar = PrefManager.hideStatusBarWhenNotInGame
-            pendingStatusBarValue = null
         },
         onDismissClick = {
-            showStatusBarRestartDialog = false
             // Revert toggle to original value
             hideStatusBar = PrefManager.hideStatusBarWhenNotInGame
-            pendingStatusBarValue = null
         },
     )
 
@@ -480,16 +475,14 @@ fun SettingsGroupInterface(
         items = languageNames,
         currentItem = selectedLanguageIndex,
         onSelected = { index ->
-            selectedLanguageIndex = index
             val selectedCode = languageCodes[index]
             // Check if language actually changed
             if (selectedCode != PrefManager.appLanguage) {
                 pendingLanguageCode = selectedCode
                 showLanguageRestartDialog = true
             }
-            openLanguageDialog = false
         },
-        onDismiss = { openLanguageDialog = false },
+        onDismiss = { },
     )
 
     // Language change restart confirmation dialog
@@ -500,7 +493,6 @@ fun SettingsGroupInterface(
         confirmBtnText = stringResource(R.string.settings_language_restart_confirm),
         dismissBtnText = stringResource(R.string.cancel),
         onConfirmClick = {
-            showLanguageRestartDialog = false
             val newLanguage = pendingLanguageCode ?: return@MessageDialog
             // Save preference and show loading dialog
             PrefManager.appLanguage = newLanguage
@@ -508,16 +500,12 @@ fun SettingsGroupInterface(
             pendingLanguageCode = null
         },
         onDismissRequest = {
-            showLanguageRestartDialog = false
             // Revert selection to original value
             selectedLanguageIndex = languageCodes.indexOf(PrefManager.appLanguage).takeIf { it >= 0 } ?: 0
-            pendingLanguageCode = null
         },
         onDismissClick = {
-            showLanguageRestartDialog = false
             // Revert selection to original value
             selectedLanguageIndex = languageCodes.indexOf(PrefManager.appLanguage).takeIf { it >= 0 } ?: 0
-            pendingLanguageCode = null
         },
     )
 

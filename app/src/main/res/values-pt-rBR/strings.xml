@@ -9,7 +9,7 @@
     <string name="app_downloads">Downloads</string>
     <string name="unknown_app">App Desconhecido</string>
     <string name="steam_2fa_incorrect">O Código anterior está incorreto, por favor tente denovo.</string>
-    <string name="steam_2fa_confirmation">Use o Aplicativo do Steam Mobile para logar-se...</string>
+    <string name="steam_2fa_confirmation">Use o Aplicativo do Steam Mobile para logar-se…</string>
     <string name="steam_2fa_device">Por favor entre com o código de 2 Fatores do seu aplicativo autenticador.</string>
     <string name="steam_2fa_email">Por favor entre com o código de autenticação enviado para o email em %s</string>
     <string name="header_img_desc">Imagem de cabeçalho do App</string>
@@ -346,8 +346,8 @@
     <string name="need_internet_to_install">É necessário conexão com a internet para instalar</string>
     <string name="install_wifi_only_enabled">Instalação somente via Wi-Fi habilitada</string>
     <string name="installation_progress">Progresso da instalação</string>
-    <string name="downloading">Baixando...</string>
-    <string name="calculating_time">Calculando...</string>
+    <string name="downloading">Baixando…</string>
+    <string name="calculating_time">Calculando…</string>
     <string name="update_available">Atualização disponível</string>
     <string name="game_information">Informações do jogo</string>
     <string name="status">Status</string>
@@ -586,7 +586,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">Gerenciador de Conteúdos</string>
     <string name="import_wcp_from_device">Importar .wcp do dispositivo</string>
-    <string name="working">Processando...</string>
+    <string name="working">Processando…</string>
     <string name="selected">Selecionado</string>
     <string name="selected_content">Conteúdo selecionado</string>
     <string name="installed_contents">Conteúdos instalados</string>
@@ -602,7 +602,7 @@
     <string name="settings_language_restart_title">Reinicialização necessária</string>
     <string name="settings_language_restart_message">Alterar o idioma requer que o aplicativo seja reiniciado. Deseja continuar?</string>
     <string name="settings_language_restart_confirm">Reiniciar</string>
-    <string name="settings_language_changing">Alterando idioma e reiniciando...</string>
+    <string name="settings_language_changing">Alterando idioma e reiniciando…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">Emulação</string>
@@ -700,7 +700,7 @@
     <string name="install">Instalar</string>
 
     <!-- TODO: Revisão manual - Tela de conexão aos servidores -->
-    <string name="connect_to_remote_server">Conectando aos servidores remotos...</string>
+    <string name="connect_to_remote_server">Conectando aos servidores remotos…</string>
 
     <!-- TODO: Revisão manual - LibraryAppScreen: Diálogos -->
     <string name="download_failed_try_again">O download falhou. Por favor, tente novamente.</string>
@@ -760,10 +760,10 @@
     <string name="main_open_discord">Abrir Discord</string>
 
     <!-- TODO: Revisão manual - GameGrubMain: Inicialização do jogo -->
-    <string name="main_downloading_steam">Baixando Steam...</string>
-    <string name="main_installing_glibc">Instalando componentes glibc...</string>
-    <string name="main_installing_bionic">Instalando componentes Bionic...</string>
-    <string name="main_loading">Carregando...</string>
+    <string name="main_downloading_steam">Baixando Steam…</string>
+    <string name="main_installing_glibc">Instalando componentes glibc…</string>
+    <string name="main_installing_bionic">Instalando componentes Bionic…</string>
+    <string name="main_loading">Carregando…</string>
 
     <!-- TODO: Revisão manual - GameGrubMain: Conflitos de sessão -->
     <string name="main_app_running_title">App em execução</string>
@@ -819,7 +819,7 @@
     <string name="supporters_art_credits">Créditos de arte</string>
     <string name="supporters_app_icon">Ícone do app: Hachi</string>
     <string name="supporters_alt_icon">Ícone alternativo do app: rhapsody_mdr</string>
-    <string name="supporters_loading">Carregando apoiadores...</string>
+    <string name="supporters_loading">Carregando apoiadores…</string>
     <string name="supporters_error">Não foi possível carregar os apoiadores</string>
     <string name="supporters_members">Membros</string>
     <string name="supporters_supporters">Apoiadores</string>
@@ -869,7 +869,7 @@
     <string name="library_layout_capsule">Cápsula</string>
     <string name="library_layout_hero">Herói</string>
     <string name="library_layout_carousel">Carrossel</string>
-    <string name="library_search_placeholder">Pesquisar seus jogos...</string>
+    <string name="library_search_placeholder">Pesquisar seus jogos…</string>
     <string name="library_search_description">Pesquisar</string>
     <string name="library_search_clear">Limpar pesquisa</string>
     <string name="library_no_items">Nenhum item listado com a seleção</string>
@@ -925,7 +925,7 @@
     <string name="two_factor_enter_code">Digite o código de 5 caracteres</string>
 
     <!-- TODO: Revisão manual - Gerenciador de conteúdos -->
-    <string name="contents_validating">Validando conteúdo...</string>
+    <string name="contents_validating">Validando conteúdo…</string>
     <string name="contents_error_badtar">O arquivo não pode ser reconhecido</string>
     <string name="contents_error_noprofile">Perfil não encontrado no conteúdo</string>
     <string name="contents_error_badprofile">O perfil não pode ser reconhecido</string>
@@ -962,7 +962,7 @@
     <string name="settings_download_speed">Velocidade de download</string>
     <string name="settings_download_heat_warning">Velocidades mais altas podem causar aumento de calor no dispositivo durante downloads</string>
     <string name="settings_region_default">Padrão</string>
-    <string name="settings_saving_restarting">Salvando configurações e reiniciando...</string>
+    <string name="settings_saving_restarting">Salvando configurações e reiniciando…</string>
 
     <!-- TODO: Revisão manual - Tela de configurações -->
     <string name="settings_title">Configurações</string>
@@ -1065,7 +1065,7 @@
     <string name="settings_save_logcat_title">Salvar logcat</string>
 
     <!-- Adições diversas -->
-    <string name="calculating_space_requirements">Calculando requisitos de espaço...</string>
+    <string name="calculating_space_requirements">Calculando requisitos de espaço…</string>
     <string name="add_custom_game_content_desc">Adicionar jogo personalizado</string>
     <string name="add_custom_game_dialog_title">Adicionar jogo personalizado</string>
     <string name="add_custom_game_dialog_message">Por favor, selecione a pasta contendo os arquivos do jogo que você deseja adicionar como um jogo personalizado.</string>
@@ -1135,7 +1135,7 @@
     <string name="epic_starting_download_with_dlcs">Iniciando download: %1$s + DLCs</string>
     <string name="epic_download_failed">Falha ao iniciar o download: %1$s</string>
     <string name="epic_download_error">Erro no download: %1$s</string>
-    <string name="manifest_downloading_item">Baixando %1$s...</string>
+    <string name="manifest_downloading_item">Baixando %1$s…</string>
     <string name="manifest_download_failed">Falha no download: %1$s</string>
     <string name="manifest_install_failed">Falha ao instalar %1$s</string>
     <string name="manifest_install_success">%1$s instalado</string>

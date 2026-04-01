@@ -145,57 +145,6 @@ class SteamGridDB @Inject constructor() {
         }
 
     /**
-     * Download and save an image from a URL
-     * @return Pair of (file path, isHorizontal) or null if failed
-     */
-    private suspend fun downloadAndSaveImage(
-        imageUrl: String,
-        gameFolder: File,
-        fileName: String,
-    ): Pair<String, Boolean?>? = withContext(Dispatchers.IO) {
-        try {
-            // Download the image
-            val imageRequest = Request.Builder()
-                .url(imageUrl)
-                .build()
-
-            val imageResponse = httpClient.newCall(imageRequest).execute()
-
-            if (!imageResponse.isSuccessful) {
-                Timber.tag("SteamGridDB")
-                    .w("Failed to download image from $imageUrl - HTTP ${imageResponse.code}")
-                return@withContext null
-            }
-
-            val imageBytes = imageResponse.body?.bytes() ?: return@withContext null
-
-            // Determine orientation
-            val isHorizontal = isImageHorizontal(imageBytes)
-
-            // Determine file extension from URL
-            val extension = when {
-                imageUrl.contains(".png", ignoreCase = true) -> ".png"
-                imageUrl.contains(".jpg", ignoreCase = true) -> ".jpg"
-                imageUrl.contains(".jpeg", ignoreCase = true) -> ".jpg"
-                imageUrl.contains(".webp", ignoreCase = true) -> ".webp"
-                else -> ".png" // Default to PNG
-            }
-
-            val outputFile = File(gameFolder, "$fileName$extension")
-
-            // Save to file
-            FileOutputStream(outputFile).use { it.write(imageBytes) }
-
-            Timber.tag("SteamGridDB")
-                .i("Saved image to ${outputFile.absolutePath} (horizontal: $isHorizontal)")
-            return@withContext Pair(outputFile.absolutePath, isHorizontal)
-        } catch (e: Exception) {
-            Timber.tag("SteamGridDB").e(e, "Error downloading image from $imageUrl")
-            return@withContext null
-        }
-    }
-
-    /**
      * Fetch grids for a game, find horizontal and vertical images, and save them separately.
      * @param gameId The SteamGridDB game ID
      * @param gameFolder The folder where images should be saved

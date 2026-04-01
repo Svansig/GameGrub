@@ -25,9 +25,7 @@ internal object EpicLaunchCommandBuilder : StoreLaunchCommandBuilder {
             return "\"explorer.exe\""
         }
 
-        val exePath = if (context.container.executablePath.isNotEmpty()) {
-            context.container.executablePath
-        } else {
+        val exePath = context.container.executablePath.ifEmpty {
             val detectedPath = runBlocking {
                 EpicService.getInstance()?.epicManager?.getInstalledExe(game.id) ?: ""
             }

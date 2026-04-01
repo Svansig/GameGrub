@@ -106,7 +106,7 @@ object ExeIconExtractor {
             // use Long to avoid Int overflow on large VAs
             val sectionStart = va.toLong()
             val sectionEnd = sectionStart + maxOf(rawSize, virtualSize).toLong()
-            if (resourceDirRva.toLong() >= sectionStart && resourceDirRva.toLong() < sectionEnd && rawPtr > 0) {
+            if (resourceDirRva.toLong() in sectionStart..<sectionEnd && rawPtr > 0) {
                 rsrcVA = va
                 rsrcRawPtr = rawPtr
                 rsrcRawSize = rawSize
@@ -126,7 +126,7 @@ object ExeIconExtractor {
         // convert RVA to offset within rsrc buffer
         fun rvaToRsrc(rva: Int): Int {
             val off = rva - rsrcVA
-            return if (off in 0 until rsrcRawSize) off else -1
+            return if (off in 0..rsrcRawSize) off else -1
         }
 
         val resRootOff = rvaToRsrc(resourceDirRva)
@@ -156,7 +156,7 @@ object ExeIconExtractor {
         // subdirectory offsets are relative to resource root
         fun subdirOffset(dirRva: Int): Int {
             val off = resRootOff + dirRva
-            return if (off in 0 until rsrcRawSize) off else -1
+            return if (off in 0..rsrcRawSize) off else -1
         }
 
         // locate RT_GROUP_ICON: Type(14) -> first ID -> first LANG
@@ -236,7 +236,7 @@ object ExeIconExtractor {
             if (dataEntryOff < 0 || dataEntryOff + 16 > rsrcRawSize) return null
             val dataRva = bb.getInt(dataEntryOff)
             val dataSize = bb.getInt(dataEntryOff + 4)
-            if (dataSize <= 0 || dataSize > rsrcRawSize) return null
+            if (dataSize !in 1..rsrcRawSize) return null
             val dataOff = rvaToRsrc(dataRva)
             if (dataOff < 0 || dataOff + dataSize > rsrcRawSize) return null
             val bytes = ByteArray(dataSize)
@@ -245,7 +245,25 @@ object ExeIconExtractor {
         }
 
         // collect valid icon data, skipping entries where data lookup fails
-        data class IconEntry(val ge: GroupEntry, val data: ByteArray)
+        data class IconEntry(val ge: GroupEntry, val data: ByteArray) {
+            override fun equals(other: Any?): Boolean {
+                if (this === other) return true
+                if (javaClass != other?.javaClass) return false
+
+                other as IconEntry
+
+                if (ge != other.ge) return false
+                if (!data.contentEquals(other.data)) return false
+
+                return true
+            }
+
+            override fun hashCode(): Int {
+                var result = ge.hashCode()
+                result = 31 * result + data.contentHashCode()
+                return result
+            }
+        }
 
         val entries = ArrayList<IconEntry>(groupEntries.size)
         var totalDataSize = 0L

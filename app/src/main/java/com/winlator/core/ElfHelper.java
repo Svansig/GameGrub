@@ -20,7 +20,7 @@ public abstract class ElfHelper {
             }
         }
         catch (IOException e) {
-            Log.e("ElfHelper", "Failed to get EI class: " + e);
+            Timber.tag("ElfHelper").e("Failed to get EI class: " + e);
         }
         return 0;
     }

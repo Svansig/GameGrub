@@ -56,7 +56,7 @@ data class GameSizeInfo(
 @Singleton
 class GOGManager @Inject constructor(
     private val gogGameDao: GOGGameDao,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
 
     // Thread-safe cache for download sizes
@@ -163,7 +163,7 @@ class GOGManager @Inject constructor(
 
             // Fetch games from GOG via GOGDL Python backend
 
-            var gameIdList = GOGApiClient.getGameIds(context)
+            val gameIdList = GOGApiClient.getGameIds(context)
 
             if (!gameIdList.isSuccess) {
                 val error = gameIdList.exceptionOrNull()
@@ -875,7 +875,7 @@ class GOGManager @Inject constructor(
                 path = game?.installPath
             }
 
-            if (path == null || path.isEmpty()) {
+            if (path.isNullOrEmpty()) {
                 Timber.w("No install path found for game $gameId")
                 return@withContext null
             }

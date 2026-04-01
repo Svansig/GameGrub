@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.winlator.box86_64.Box86_64Preset;
 import com.winlator.core.DefaultVersion;
-import com.winlator.core.envvars.EnvVars;
 import com.winlator.core.FileUtils;
 import com.winlator.core.KeyValueSet;
 import com.winlator.core.WineInfo;
@@ -41,7 +40,7 @@ public class Container {
     public static final String DEFAULT_EMULATOR = "FEXCore";
     public static final String DEFAULT_DXWRAPPER = "dxvk";
     public static final String DEFAULT_DDRAWRAPPER = "none";
-    public static final String DEFAULT_DXWRAPPERCONFIG = "version=" + DefaultVersion.DXVK + ",framerate=0,maxDeviceMemory=0,async=" + DefaultVersion.ASYNC + ",asyncCache=" + DefaultVersion.ASYNC_CACHE + ",vkd3dVersion=" + DefaultVersion.VKD3D + ",vkd3dLevel=12_1" + ",ddrawrapper=" + Container.DEFAULT_DDRAWRAPPER + ",csmt=3" + ",gpuName=NVIDIA GeForce GTX 480" + ",videoMemorySize=2048" + ",strict_shader_math=1" + ",OffscreenRenderingMode=fbo" + ",renderer=gl";;
+    public static final String DEFAULT_DXWRAPPERCONFIG = "version=" + DefaultVersion.DXVK + ",framerate=0,maxDeviceMemory=0,async=" + DefaultVersion.ASYNC + ",asyncCache=" + DefaultVersion.ASYNC_CACHE + ",vkd3dVersion=" + DefaultVersion.VKD3D + ",vkd3dLevel=12_1" + ",ddrawrapper=" + Container.DEFAULT_DDRAWRAPPER + ",csmt=3" + ",gpuName=NVIDIA GeForce GTX 480" + ",videoMemorySize=2048" + ",strict_shader_math=1" + ",OffscreenRenderingMode=fbo" + ",renderer=gl";
     public static final String DEFAULT_GRAPHICSDRIVERCONFIG = "vulkanVersion=1.3" + ",version=" + DefaultVersion.WRAPPER + ",blacklistedExtensions=" + ",maxDeviceMemory=0" + ",presentMode=mailbox" + ",syncFrame=0" + ",disablePresentWait=0" + ",resourceType=auto" + ",bcnEmulation=auto" + ",bcnEmulationType=compute" + ",bcnEmulationCache=0" + ",gpuName=Device";
     public static final String DEFAULT_WINCOMPONENTS = "direct3d=1,directsound=1,directmusic=0,directshow=0,directplay=0,vcrun2010=1,wmdecoder=1,opengl=0";
     public static final String FALLBACK_WINCOMPONENTS = "direct3d=1,directsound=1,directmusic=1,directshow=1,directplay=1,vcrun2010=1,wmdecoder=1,opengl=0";
@@ -493,7 +492,7 @@ public class Container {
             else extraData.remove(name);
         }
         catch (JSONException e) {
-            Log.e("Container", "Failed to put extra: " + e);
+            Timber.tag("Container").e("Failed to put extra: " + e);
         }
     }
 
@@ -519,7 +518,7 @@ public class Container {
             else sessionMetadata.remove(name);
         }
         catch (JSONException e) {
-            Log.e("Container", "Failed to put session metadata: " + e);
+            Timber.tag("Container").e("Failed to put session metadata: " + e);
         }
     }
 
@@ -614,7 +613,7 @@ public class Container {
     public static Iterable<String[]> drivesIterator(final String drives) {
         final int[] index = {drives.indexOf(":")};
         final String[] item = new String[2];
-        return () -> new Iterator<String[]>() {
+        return () -> new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return index[0] != -1;
@@ -622,9 +621,9 @@ public class Container {
 
             @Override
             public String[] next() {
-                item[0] = String.valueOf(drives.charAt(index[0]-1));
-                int nextIndex = drives.indexOf(":", index[0]+1);
-                item[1] = drives.substring(index[0]+1, nextIndex != -1 ? nextIndex-1 : drives.length());
+                item[0] = String.valueOf(drives.charAt(index[0] - 1));
+                int nextIndex = drives.indexOf(":", index[0] + 1);
+                item[1] = drives.substring(index[0] + 1, nextIndex != -1 ? nextIndex - 1 : drives.length());
                 index[0] = nextIndex;
                 return item;
             }
@@ -712,7 +711,7 @@ public class Container {
             FileUtils.writeString(getConfigFile(), data.toString());
         }
         catch (JSONException e) {
-            Log.e("Container", "Failed to save data: " + e);
+            Timber.tag("Container").e("Failed to save data: " + e);
         }
     }
 
@@ -797,8 +796,7 @@ public class Container {
                 }
                 case "sessionMetadata" : {
                     try {
-                        JSONObject sessionMetadata = data.getJSONObject(key);
-                        this.sessionMetadata = sessionMetadata;
+                        this.sessionMetadata = data.getJSONObject(key);
                     } catch (JSONException e) {
                         this.sessionMetadata = null;
                     }
@@ -936,7 +934,7 @@ public class Container {
 
             KeyValueSet wincomponents1 = new KeyValueSet(DEFAULT_WINCOMPONENTS);
             KeyValueSet wincomponents2 = new KeyValueSet(data.getString("wincomponents"));
-            String result = "";
+            StringBuilder result = new StringBuilder();
 
             for (String[] wincomponent1 : wincomponents1) {
                 String value = wincomponent1[1];
@@ -948,13 +946,13 @@ public class Container {
                     }
                 }
 
-                result += (!result.isEmpty() ? "," : "")+wincomponent1[0]+"="+value;
+                result.append((result.length() > 0) ? "," : "").append(wincomponent1[0]).append("=").append(value);
             }
 
-            data.put("wincomponents", result);
+            data.put("wincomponents", result.toString());
         }
         catch (JSONException e) {
-            Log.e("Container", "Failed to check obsolete or missing properties: " + e);
+            Timber.tag("Container").e("Failed to check obsolete or missing properties: " + e);
         }
     }
 
@@ -1021,25 +1019,21 @@ public class Container {
 
     public String getContainerJson() {
         String content = FileUtils.readString(getConfigFile());
-        if (content == null) {
-            Log.e("Container", "Failed to read container config file");
-            return "{}";
-            }
         return content.replace("\\u0000", "").replace("\u0000", "");
     }
 
     public static String getFallbackCPUList() {
-        String cpuList = "";
+        StringBuilder cpuList = new StringBuilder();
         int numProcessors = Runtime.getRuntime().availableProcessors();
-        for (int i = 0; i < numProcessors; i++) cpuList += (!cpuList.isEmpty() ? "," : "")+i;
-        return cpuList;
+        for (int i = 0; i < numProcessors; i++) cpuList.append((cpuList.length() > 0) ? "," : "").append(i);
+        return cpuList.toString();
     }
 
     public static String getFallbackCPUListWoW64() {
-        String cpuList = "";
+        StringBuilder cpuList = new StringBuilder();
         int numProcessors = Runtime.getRuntime().availableProcessors();
-        for (int i = numProcessors / 2; i < numProcessors; i++) cpuList += (!cpuList.isEmpty() ? "," : "")+i;
-        return cpuList;
+        for (int i = numProcessors / 2; i < numProcessors; i++) cpuList.append((cpuList.length() > 0) ? "," : "").append(i);
+        return cpuList.toString();
     }
 
     // Disable external mouse input

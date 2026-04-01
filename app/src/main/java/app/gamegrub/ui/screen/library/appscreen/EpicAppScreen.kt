@@ -195,7 +195,6 @@ class EpicAppScreen : BaseAppScreen() {
                 Timber.tag(TAG).i("========================")
 
                 val fetchedDlcTitles = EpicService.getDLCForGame(game.id)
-                dlcTitles = fetchedDlcTitles
                 if (fetchedDlcTitles.isNotEmpty()) {
                     Timber.tag(TAG).i("DLC Count: ${fetchedDlcTitles.size}")
                     for (title in fetchedDlcTitles) {

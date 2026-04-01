@@ -83,18 +83,18 @@ public class PresentExtension implements Extension {
         }
     }
 
-    private void sendCompleteNotify(Window window, int serial, Kind kind, Mode mode, long ust, long msc) {
+    private void sendCompleteNotify(Window window, int serial, long ust, long msc) {
         synchronized (events) {
             for (int i = 0; i < events.size(); i++) {
                 Event event = events.valueAt(i);
                 if (event.window == window && event.mask.isSet(PresentCompleteNotify.getEventMask())) {
-                    event.client.sendEvent(new PresentCompleteNotify(event.id, window, serial, kind, mode, ust, msc));
+                    event.client.sendEvent(new PresentCompleteNotify(event.id, window, serial, Kind.PIXMAP, Mode.COPY, ust, msc));
                 }
             }
         }
     }
 
-    private static void queryVersion(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+    private static void queryVersion(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         inputStream.skip(8);
 
         try (XStreamLock lock = outputStream.lock()) {
@@ -134,7 +134,7 @@ public class PresentExtension implements Extension {
         synchronized (content.renderLock) {
             content.copyArea((short)0, (short)0, xOff, yOff, pixmap.drawable.width, pixmap.drawable.height, pixmap.drawable);
             sendIdleNotify(window, pixmap, serial, idleFence);
-            sendCompleteNotify(window, serial, Kind.PIXMAP, Mode.COPY, ust, msc);
+            sendCompleteNotify(window, serial, ust, msc);
         }
     }
 

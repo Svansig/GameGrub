@@ -477,8 +477,8 @@
     <string name="need_internet_to_install">需要网络连接才能安装</string>
     <string name="install_wifi_only_enabled">仅启用通过 WiFi 安装</string>
     <string name="installation_progress">安装进度</string>
-    <string name="downloading">下载中...</string>
-    <string name="calculating_time">计算中...</string>
+    <string name="downloading">下载中…</string>
+    <string name="calculating_time">计算中…</string>
     <string name="download_failed_try_again">下载失败，请重试</string>
     <string name="update_available">有可用更新</string>
     <string name="game_information">游戏信息</string>
@@ -758,7 +758,7 @@
     <!-- 内容管理器 -->
     <string name="contents_manager">内容管理</string>
     <string name="import_wcp_from_device">从设备导入 .wcp</string>
-    <string name="working">正在处理...</string>
+    <string name="working">正在处理…</string>
     <string name="selected">已选择</string>
     <string name="selected_content">选定的内容</string>
     <string name="installed_contents">已安装的内容</string>
@@ -774,7 +774,7 @@
     <string name="settings_language_restart_title">需要重新启动</string>
     <string name="settings_language_restart_message">更改语言需要重新启动应用程序。是否继续？</string>
     <string name="settings_language_restart_confirm">重新启动</string>
-    <string name="settings_language_changing">切换语言并重新启动中...</string>
+    <string name="settings_language_changing">切换语言并重新启动中…</string>
 
     <!-- 设置：模拟组 -->
     <string name="settings_emulation_title">模拟设置</string>
@@ -871,7 +871,7 @@
     <string name="settings_text">设置</string>
 
     <!-- 连接至服务器界面 -->
-    <string name="connect_to_remote_server">正在连接到远程服务器...</string>
+    <string name="connect_to_remote_server">正在连接到远程服务器…</string>
 
     <!-- 库应用界面：对话框 -->
     <string name="library_not_enough_space_message">要安装的应用程序需要 %1$s 的空间，但此设备仅剩 %2$s 可用空间</string>
@@ -930,10 +930,10 @@
     <string name="main_open_discord">打开 Discord</string>
 
     <!-- 主界面：游戏启动 -->
-    <string name="main_downloading_steam">正在下载 Steam...</string>
-    <string name="main_installing_glibc">安装 glibc 组件...</string>
-    <string name="main_installing_bionic">安装Bionic组件中...</string>
-    <string name="main_loading">加载中...</string>
+    <string name="main_downloading_steam">正在下载 Steam…</string>
+    <string name="main_installing_glibc">安装 glibc 组件…</string>
+    <string name="main_installing_bionic">安装Bionic组件中…</string>
+    <string name="main_loading">加载中…</string>
 
     <!-- 主界面：会话冲突 -->
     <string name="main_app_running_title">应用程序运行中</string>
@@ -1037,7 +1037,7 @@
     <string name="library_layout_capsule">胶囊</string>
     <string name="library_layout_hero">英雄</string>
     <string name="library_layout_carousel">轮播</string>
-    <string name="library_search_placeholder">搜索您的游戏...</string>
+    <string name="library_search_placeholder">搜索您的游戏…</string>
     <string name="library_search_description">搜索</string>
     <string name="library_search_clear">清除搜索</string>
     <string name="library_no_items">没有符合选择条件的项目</string>
@@ -1093,7 +1093,7 @@
     <string name="two_factor_enter_code">输入5位数验证码</string>
 
     <!-- 内容管理器 -->
-    <string name="contents_validating">正在验证内容...</string>
+    <string name="contents_validating">正在验证内容…</string>
     <string name="contents_error_badtar">无法识别文件</string>
     <string name="contents_error_noprofile">内容中未找到配置文件</string>
     <string name="contents_error_badprofile">无法识别配置文件</string>
@@ -1130,7 +1130,7 @@
     <string name="settings_download_speed">下载速度</string>
     <string name="settings_download_heat_warning">较高的下载速度可能会导致设备发热</string>
     <string name="settings_region_default">默认</string>
-    <string name="settings_saving_restarting">正在保存设置并重新启动...</string>
+    <string name="settings_saving_restarting">正在保存设置并重新启动…</string>
 
     <!-- 设置界面 -->
     <string name="settings_title">设置</string>
@@ -1152,7 +1152,7 @@
     <string name="wine_proton_import_package">导入 Wine/Proton 包</string>
     <string name="wine_proton_select_file_description">请选择一个 .wcp 文件（文件名称需以 wine 或 proton 开头）</string>
     <string name="wine_proton_import_wcp_button">导入 .wcp 包</string>
-    <string name="wine_proton_processing">处理中...</string>
+    <string name="wine_proton_processing">处理中…</string>
     <string name="wine_proton_package_details">包详情</string>
     <string name="wine_proton_type">类型</string>
     <string name="wine_proton_version">版本</string>
@@ -1177,7 +1177,7 @@
     <string name="cancel_import_keep">不，保留导入</string>
 
     <!-- Wine/Proton 管理器 - 状态消息 -->
-    <string name="wine_proton_extracting">正在解压缩及验证包（大型文件可能需要 2 至 3 分钟）...</string>
+    <string name="wine_proton_extracting">正在解压缩及验证包（大型文件可能需要 2 至 3 分钟）…</string>
     <string name="wine_proton_filename_error">文件名称必须以 wine 或 proton 开头（不区分大小写）</string>
     <string name="wine_proton_file_empty">文件为空或无法读取</string>
     <string name="wine_proton_cannot_open">无法打开文件</string>

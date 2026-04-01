@@ -66,24 +66,20 @@ fun AccountButton(
         },
         onNavigateRoute = {
             onNavigateRoute(it)
-            showDialog = false
         },
         onLogout = {
             onLogout()
-            showDialog = false
         },
         onGoOnline = {
             onGoOnline()
-            showDialog = false
         },
         onDismiss = {
-            showDialog = false
         },
         isOffline = isOffline,
     )
 
     IconButton(
-        onClick = { showDialog = true },
+        onClick = { },
         content = {
             SteamIconImage(
                 image = { persona?.avatarHash?.getAvatarURL() },

@@ -36,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,7 +82,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     // Online download state
     var isDownloading by remember { mutableStateOf(false) }
     var isInstalling by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableStateOf(0f) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
 
     // Wine/Proton manifest handling
     var wineProtonManifest by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
@@ -359,7 +360,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
                 // Use shared downloader with automatic domain fallback
                 SteamService.fetchFileWithFallback(
-                    fileName = "$wineFileName",
+                    fileName = wineFileName,
                     dest = destFile,
                 ) { progress ->
                     val now = System.currentTimeMillis()
@@ -906,7 +907,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     // Untrusted files confirmation
     if (showUntrustedConfirm && pendingProfile != null) {
         AlertDialog(
-            onDismissRequest = { showUntrustedConfirm = false },
+            onDismissRequest = { },
             title = { Text(stringResource(R.string.untrusted_files_detected)) },
             text = {
                 Column(
@@ -933,7 +934,6 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 TextButton(
                     onClick = {
                         pendingProfile ?: return@TextButton
-                        showUntrustedConfirm = false
                         isBusy = true
                         scope.launch {
                             performFinishInstall(ctx, mgr, pendingProfile!!) { msg, success ->
@@ -950,7 +950,6 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             dismissButton = {
                 TextButton(
                     onClick = {
-                        showUntrustedConfirm = false
                         pendingProfile = null
                         statusMessage = null
                         isStatusSuccess = false
@@ -963,7 +962,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     // Delete confirmation
     deleteTarget?.let { target ->
         AlertDialog(
-            onDismissRequest = { deleteTarget = null },
+            onDismissRequest = { },
             title = { Text(stringResource(R.string.wine_proton_remove_title)) },
             text = {
                 Text(
@@ -988,13 +987,12 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                                 Timber.tag("WineProtonManagerDialog").e(e, "Delete failed")
                                 SnackbarManager.show(ctx.getString(R.string.wine_proton_remove_failed, e.message ?: ""))
                             }
-                            deleteTarget = null
                         }
                     },
                 ) { Text(stringResource(R.string.remove)) }
             },
             dismissButton = {
-                TextButton(onClick = { deleteTarget = null }) { Text(stringResource(R.string.cancel)) }
+                TextButton(onClick = { }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -1158,7 +1156,7 @@ private fun detectBinaryVariant(installDir: File): String {
             else -> "unknown"
         }
     } catch (e: Exception) {
-        Timber.e("Error detecting binary variant: " + e)
+        Timber.e("Error detecting binary variant: %s", e)
         return "unknown"
     }
 }

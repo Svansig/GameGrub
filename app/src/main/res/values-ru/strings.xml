@@ -203,7 +203,7 @@
     <string name="common_google_play_services_unknown_issue">%1$s испытывает проблемы с сервисами Google Play. Пожалуйста, попробуйте снова.</string>
     <string name="compatibility">Совместимость</string>
     <string name="confirm_delete">Подтвердить удаление</string>
-    <string name="connect_to_remote_server">Подключение к удалённым серверам...</string>
+    <string name="connect_to_remote_server">Подключение к удалённым серверам…</string>
     <string name="connecting_to_steam">Подключение к Steam…</string>
     <string name="connection_disconnected">Отключено от Steam</string>
     <string name="connection_disconnected_servers">Отключено от серверов Steam</string>
@@ -309,7 +309,7 @@
     <string name="download_failed_try_again">Ошибка загрузки. Пожалуйста, попробуйте снова.</string>
     <string name="download_file">Загрузить файл</string>
     <string name="download_prompt_title">Установить приложение</string>
-    <string name="downloading">Загрузка...</string>
+    <string name="downloading">Загрузка…</string>
     <string name="dpad_category">D-Pad</string>
     <string name="dpad_down">D-Pad вниз</string>
     <string name="dpad_left">D-Pad влево</string>
@@ -654,15 +654,15 @@ Ubuntu RootFs - releases.ubuntu.com/focal</string>
     <string name="main_discord_support_message">Присоединитесь к Discord, чтобы получить поддержку для исправления вашей игры или улучшения производительности.</string>
     <string name="main_discord_support_title">Игра работала?</string>
     <string name="main_downloading_entry">Загрузка %s</string>
-    <string name="main_downloading_steam">Загрузка Steam...</string>
-    <string name="main_installing_bionic">Установка компонентов Bionic...</string>
-    <string name="main_installing_glibc">Установка компонентов glibc...</string>
+    <string name="main_downloading_steam">Загрузка Steam…</string>
+    <string name="main_installing_bionic">Установка компонентов Bionic…</string>
+    <string name="main_installing_glibc">Установка компонентов glibc…</string>
     <string name="main_join_kofi">Присоединиться на Ko-fi</string>
     <string name="main_keep_local">Сохранить локальное</string>
     <string name="main_keep_remote">Сохранить удалённое</string>
     <string name="main_later_button">Позже</string>
     <string name="main_launch_anyway">Запустить в любом случае</string>
-    <string name="main_loading">Загрузка...</string>
+    <string name="main_loading">Загрузка…</string>
     <string name="main_multiple_pending_operations">Несколько ожидающих удалённых операций, попробуйте позже. Пожалуйста, перезапустите приложение.</string>
     <string name="main_open_discord">Открыть Discord</string>
     <string name="main_pending_operation_none">Получены ожидающие удалённые операции, операция которых была \'none\'. Пожалуйста, перезапустите приложение.</string>
@@ -703,7 +703,7 @@ https://gamenative.app
     <string name="main_wait">Ждать</string>
     <string name="manifest_content_untrusted">Контент не является доверенным и не был установлен.</string>
     <string name="manifest_download_failed">Ошибка загрузки: %1$s</string>
-    <string name="manifest_downloading_item">Загрузка %1$s...</string>
+    <string name="manifest_downloading_item">Загрузка %1$s…</string>
     <string name="manifest_glibc_not_supported">Сборки GLIBC не поддерживаются.</string>
     <string name="manifest_install_failed">Ошибка установки %1$s</string>
     <string name="manifest_install_success">%1$s установлен</string>
@@ -991,7 +991,7 @@ https://gamenative.app
     <string name="settings_interface_wifi_only_subtitle">Предотвратить загрузки по сотовым данным</string>
     <string name="settings_interface_wifi_only_title">Загружать только через Wi-Fi/LAN</string>
     <string name="settings_language">Язык</string>
-    <string name="settings_language_changing">Изменение языка и перезагрузка...</string>
+    <string name="settings_language_changing">Изменение языка и перезагрузка…</string>
     <string name="settings_language_restart_confirm">Перезагрузить</string>
     <string name="settings_language_restart_message">Изменение языка требует перезагрузки приложения. Вы хотите продолжить?</string>
     <string name="settings_language_restart_title">Требуется перезагрузка</string>
@@ -1174,7 +1174,7 @@ https://gamenative.app
     <string name="wine_proton_error_unable_install">Не удалось установить пакет Wine/Proton</string>
     <string name="wine_proton_error_unknown">Произошла неизвестная ошибка</string>
     <string name="wine_proton_error_untrustprofile">Этому пакету нельзя доверять</string>
-    <string name="wine_proton_extracting">Извлечение и проверка пакета (это может занять 2-3 минуты для больших файлов)...</string>
+    <string name="wine_proton_extracting">Извлечение и проверка пакета (это может занять 2–3 минуты для больших файлов)…</string>
     <string name="wine_proton_failed_file_picker">Ошибка открытия выбора файла: %s</string>
     <string name="wine_proton_file_empty">Файл пуст или не может быть прочитан</string>
     <string name="wine_proton_filename_error">Имя файла должно начинаться с \'wine\' или \'proton\' (без учёта регистра)</string>
@@ -1193,7 +1193,7 @@ https://gamenative.app
     <string name="wine_proton_no_versions_found">Не найдено установленных версий Wine или Proton.</string>
     <string name="wine_proton_not_wine_or_proton">Пакет не Wine или Proton (тип: %s)</string>
     <string name="wine_proton_package_details">Подробности пакета</string>
-    <string name="wine_proton_processing">Обработка...</string>
+    <string name="wine_proton_processing">Обработка…</string>
     <string name="wine_proton_remove_failed">Ошибка удаления: %s</string>
     <string name="wine_proton_remove_message">Вы уверены, что хотите удалить %1$s %2$s (%3$d)? Контейнеры, использующие эту версию, больше не будут работать.</string>
     <string name="wine_proton_remove_title">Удалить версию Wine/Proton</string>
@@ -1209,7 +1209,7 @@ https://gamenative.app
     <string name="wine_proton_version_code">Код версии</string>
     <string name="wine_version">Версия Wine</string>
     <string name="wmdecoder">Декодер Windows Media</string>
-    <string name="working">Работа...</string>
+    <string name="working">Работа…</string>
     <string name="achievement_unlocked">Достижение разблокировано</string>
     <string name="yes">Да</string>
     <string name="download_failed_title">Ошибка загрузки</string>

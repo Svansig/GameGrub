@@ -1,5 +1,7 @@
 package app.gamegrub.ui.screen.library.components
 
+import Amazon
+import Steam
 import android.content.res.Configuration
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -39,8 +41,6 @@ import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.ui.enums.PaneType
-import app.gamegrub.ui.icons.Amazon
-import app.gamegrub.ui.icons.Steam
 import app.gamegrub.ui.internal.fakeAppInfo
 import app.gamegrub.ui.theme.GameGrubTheme
 
@@ -109,7 +109,7 @@ internal fun AppItem(
             onClick = onClick,
             onFocus = onFocus,
             isFocused = isFocused,
-            onFocusChanged = { isFocused = it },
+            onFocusChanged = { },
             isRefreshing = isRefreshing,
             compatibilityStatus = compatibilityStatus,
             context = context,
@@ -121,15 +121,13 @@ internal fun AppItem(
             onClick = onClick,
             onFocus = onFocus,
             isFocused = isFocused,
-            onFocusChanged = { isFocused = it },
+            onFocusChanged = { },
             scale = scale,
             paneType = paneType,
             imageRefreshCounter = imageRefreshCounter,
             hideText = hideText,
             imageAlpha = alpha,
             onImageLoadFailed = {
-                hideText = false
-                alpha = 0.1f
             },
             compatibilityStatus = compatibilityStatus,
             showFocusGlow = showFocusGlow,
@@ -151,7 +149,7 @@ fun GameSourceIcon(
     ) {
         when (gameSource) {
             GameSource.STEAM -> Icon(
-                imageVector = Icons.Filled.Steam,
+                imageVector = Steam,
                 contentDescription = "Steam",
                 modifier = Modifier
                     .size(iconSize.dp)
@@ -183,7 +181,7 @@ fun GameSourceIcon(
             )
 
             GameSource.AMAZON -> Icon(
-                imageVector = Icons.Filled.Amazon,
+                imageVector = Amazon,
                 contentDescription = "Amazon",
                 modifier = Modifier
                     .size(iconSize.dp)

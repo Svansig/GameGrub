@@ -20,10 +20,10 @@ public class ImageFs {
     public static final String WINEPREFIX = HOME_PATH+"/.wine";
     private final File rootDir;
     public String winePath;
-    public String home_path;
-    public String cache_path;
-    public String config_path;
-    public String wineprefix;
+    public final String home_path;
+    public final String cache_path;
+    public final String config_path;
+    public final String wineprefix;
 
     private ImageFs(File rootDir) {
         this.rootDir = rootDir;

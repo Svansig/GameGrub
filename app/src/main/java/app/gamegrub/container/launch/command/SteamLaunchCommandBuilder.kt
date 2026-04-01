@@ -46,9 +46,7 @@ internal object SteamLaunchCommandBuilder : StoreLaunchCommandBuilder {
                 "-nobigpicture -nofriendsui -nochatui -nointro -applaunch ${context.gameId}"
         }
 
-        val executablePath = if (context.container.executablePath.isNotEmpty()) {
-            context.container.executablePath
-        } else {
+        val executablePath = context.container.executablePath.ifEmpty {
             val detected = SteamService.getInstalledExe(context.gameId)
             context.container.executablePath = detected
             context.container.saveData()

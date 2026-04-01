@@ -35,7 +35,7 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
     private String box64Version = DefaultVersion.BOX64;
     private String box86Preset = Box86_64Preset.COMPATIBILITY;
     private String box64Preset = Box86_64Preset.COMPATIBILITY;
-    private String steamType = DefaultVersion.STEAM_TYPE;
+    private final String steamType = DefaultVersion.STEAM_TYPE;
     private Callback<Integer> terminationCallback;
     private static final Object lock = new Object();
     private boolean wow64Mode = true;
@@ -56,25 +56,25 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
     public void setPreUnpack(Runnable r) { this.preUnpack = r; }
     @Override
     public void start() {
-        Log.d("GlibcProgramLauncherComponent", "Starting...");
+        Timber.tag("GlibcProgramLauncherComponent").d("Starting...");
         synchronized (lock) {
             stop();
             extractBox64Files();
             copyDefaultBox64RCFile();
             if (preUnpack != null) preUnpack.run();
             pid = execGuestProgram();
-            Log.d("GlibcProgramLauncherComponent", "Process " + pid + " started");
+            Timber.tag("GlibcProgramLauncherComponent").d("Process " + pid + " started");
             SteamService.setKeepAlive(true);
         }
     }
 
     @Override
     public void stop() {
-        Log.d("GlibcProgramLauncherComponent", "Stopping...");
+        Timber.tag("GlibcProgramLauncherComponent").d("Stopping...");
         synchronized (lock) {
             if (pid != -1) {
                 Process.killProcess(pid);
-                Log.d("GlibcProgramLauncherComponent", "Stopped process " + pid);
+                Timber.tag("GlibcProgramLauncherComponent").d("Stopped process " + pid);
                 pid = -1;
                 List<ProcessHelper.ProcessInfo> subProcesses = ProcessHelper.listSubProcesses();
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
@@ -198,13 +198,13 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
             StringBuilder ldPreload = new StringBuilder();
             if (libredirect64.exists()) ldPreload.append(libredirect64.getPath());
             if (sysvshm64.exists()) {
-                if (ldPreload.length() > 0) ldPreload.append(" ");
+                if (!ldPreload.isEmpty()) ldPreload.append(" ");
                 ldPreload.append(sysvshm64.getPath());
             }
-            Log.d("GlibcProgramLauncherComponent", "Setting LD_PRELOAD=" + ldPreload);
+            Timber.tag("GlibcProgramLauncherComponent").d("Setting LD_PRELOAD=" + ldPreload);
             envVars.put("LD_PRELOAD", ldPreload.toString());
         } else {
-            Log.w("GlibcProgramLauncherComponent", "Neither libredirect.so nor libandroid-sysvshm.so found in " + glibc64Dir.getPath());
+            Timber.tag("GlibcProgramLauncherComponent").w("Neither libredirect.so nor libandroid-sysvshm.so found in " + glibc64Dir.getPath());
         }
         envVars.put("WINEESYNC_WINLATOR", "1");
         if (this.envVars != null) envVars.putAll(this.envVars);
@@ -213,13 +213,13 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
 
         // Check if box64 exists and log its details before executing
         File box64File = new File(box64Path);
-        Log.d("GlibcProgramLauncherComponent", "About to execute box64 from: " + box64Path);
+        Timber.tag("GlibcProgramLauncherComponent").d("About to execute box64 from: " + box64Path);
 
         String command = box64Path + " " + guestExecutable;
-        Log.d("GlibcProgramLauncherComponent", "Final command: " + command);
+        Timber.tag("GlibcProgramLauncherComponent").d("Final command: " + command);
 
         return ProcessHelper.exec(command, envVars.toStringArray(), workingDir != null ? workingDir : rootDir, (status) -> {
-            Log.d("GlibcProgramLauncherComponent", "Process terminated " + pid + " with status " + status);
+            Timber.tag("GlibcProgramLauncherComponent").d("Process terminated " + pid + " with status " + status);
             synchronized (lock) {
                 pid = -1;
             }
@@ -239,9 +239,8 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
         ContentProfile profile = contentsManager.getProfileByEntryName("box64-" + box64Version);
         if (profile != null) {
             contentsManager.applyContent(profile);
-        }
-        else {
-            Log.d("Extraction", "exctracting box64 with box64Version " + box64Version);
+        } else {
+            Timber.tag("Extraction").d("exctracting box64 with box64Version " + box64Version);
             TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, context.getAssets(), "box86_64/box64-" + box64Version + ".tzst", rootDir);
         }
         PrefManager.putString("current_box64_version", box64Version);
@@ -305,13 +304,13 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
             StringBuilder ldPreload = new StringBuilder();
             if (libredirect64.exists()) ldPreload.append(libredirect64.getPath());
             if (sysvshm64.exists()) {
-                if (ldPreload.length() > 0) ldPreload.append(" ");
+                if (!ldPreload.isEmpty()) ldPreload.append(" ");
                 ldPreload.append(sysvshm64.getPath());
             }
-            Log.d("GlibcProgramLauncherComponent", "Shell LD_PRELOAD=" + ldPreload);
+            Timber.tag("GlibcProgramLauncherComponent").d("Shell LD_PRELOAD=" + ldPreload);
             envVars.put("LD_PRELOAD", ldPreload.toString());
         } else {
-            Log.w("GlibcProgramLauncherComponent", "Shell: neither libredirect.so nor libandroid-sysvshm.so found in " + glibc64Dir.getPath());
+            Timber.tag("GlibcProgramLauncherComponent").w("Shell: neither libredirect.so nor libandroid-sysvshm.so found in " + glibc64Dir.getPath());
         }
         envVars.put("WINEESYNC_WINLATOR", "1");
         if (this.envVars != null) envVars.putAll(this.envVars);
@@ -322,7 +321,7 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
 
         // Execute the command and capture its output
         try {
-            Log.d("GlibcProgramLauncherComponent", "Shell command is " + finalCommand);
+            Timber.tag("GlibcProgramLauncherComponent").d("Shell command is " + finalCommand);
             java.lang.Process process = Runtime.getRuntime().exec(finalCommand, envVars.toStringArray(), workingDir != null ? workingDir : imageFs.getRootDir());
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));

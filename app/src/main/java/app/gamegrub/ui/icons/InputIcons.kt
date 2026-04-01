@@ -362,15 +362,6 @@ object InputIcons {
         @DrawableRes
         val key6 = R.drawable.ic_input_kbd_6
 
-        @DrawableRes
-        val key7 = R.drawable.ic_input_kbd_7
-
-        @DrawableRes
-        val key8 = R.drawable.ic_input_kbd_8
-
-        @DrawableRes
-        val key9 = R.drawable.ic_input_kbd_9
-
         // ==================== Function Keys (F1-F12) ====================
         @DrawableRes
         val f1 = R.drawable.ic_input_kbd_f1

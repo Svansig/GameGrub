@@ -22,20 +22,19 @@ public class XForm {
         return xform;
     }
 
-    public static float[] set(float[] xform, float tx, float ty, float sx, float sy) {
+    public static void set(float[] xform, float tx, float ty, float sx, float sy) {
         xform[0] = sx; xform[1] =  0;
         xform[2] =  0; xform[3] = sy;
         xform[4] = tx; xform[5] = ty;
-        return xform;
     }
 
-    public static float[] makeTransform(float[] xform, float tx, float ty, float sx, float sy, float angle) {
+    public static void makeTransform(float[] xform, float tx, float ty, float sx, float sy, float angle) {
         float c = (float)Math.cos(angle);
         float s = (float)Math.sin(angle);
-        return set(xform,
-                sx *  c,  sy * s,
-                sx * -s,  sy * c,
-                tx,  ty
+        set(xform,
+                sx * c, sy * s,
+                sx * -s, sy * c,
+                tx, ty
         );
     }
 
@@ -70,8 +69,8 @@ public class XForm {
         return multiply(xform, xform, makeTranslation(tmpXForm, x, y));
     }
 
-    public static synchronized float[] scale(float[] xform, float x, float y) {
-        return multiply(xform, xform, makeScale(tmpXForm, x, y));
+    public static synchronized void scale(float[] xform, float x, float y) {
+        multiply(xform, xform, makeScale(tmpXForm, x, y));
     }
 
     public static synchronized float[] rotate(float[] xform, float angle) {

@@ -83,7 +83,7 @@
     <string name="uninstall">Odinstaluj</string>
     <string name="run_app">Graj</string>
     <string name="download_prompt_title">Zainstaluj aplikację</string>
-    <string name="calculating_space_requirements">Obliczanie wymaganego miejsca...</string>
+    <string name="calculating_space_requirements">Obliczanie wymaganego miejsca…</string>
     <string name="delete_prompt_title">Usuń aplikację</string>
     <string name="cancel_download_prompt_title">Anuluj pobieranie</string>
     <string name="acknowledge">OK</string>
@@ -491,8 +491,8 @@
     <string name="need_internet_to_install">Wymagany internet do instalacji</string>
     <string name="install_wifi_only_enabled">Włączono instalację tylko przez WiFi</string>
     <string name="installation_progress">Postęp instalacji</string>
-    <string name="downloading">Pobieranie...</string>
-    <string name="calculating_time">Obliczanie...</string>
+    <string name="downloading">Pobieranie…</string>
+    <string name="calculating_time">Obliczanie…</string>
     <string name="download_failed_try_again">Pobieranie nie powiodło się. Spróbuj ponownie.</string>
     <string name="update_available">Dostępna aktualizacja</string>
     <string name="game_information">Informacje o grze</string>
@@ -775,7 +775,7 @@
     <!-- Contents Manager -->
     <string name="contents_manager">Menedżer zawartości</string>
     <string name="import_wcp_from_device">Importuj .wcp z urządzenia</string>
-    <string name="working">Pracuję...</string>
+    <string name="working">Pracuję…</string>
     <string name="selected">Wybrano</string>
     <string name="selected_content">Wybrana zawartość</string>
     <string name="installed_contents">Zainstalowana zawartość</string>
@@ -791,7 +791,7 @@
     <string name="settings_language_restart_title">Wymagane ponowne uruchomienie</string>
     <string name="settings_language_restart_message">Zmiana języka wymaga ponownego uruchomienia aplikacji. Czy chcesz kontynuować?</string>
     <string name="settings_language_restart_confirm">Uruchom ponownie</string>
-    <string name="settings_language_changing">Zmiana języka i ponowne uruchamianie...</string>
+    <string name="settings_language_changing">Zmiana języka i ponowne uruchamianie…</string>
 
     <!-- Settings: Emulation Group -->
     <string name="settings_emulation_title">Emulacja</string>
@@ -890,7 +890,7 @@
 
 
     <!-- Connecting to Servers Screen -->
-    <string name="connect_to_remote_server">Łączenie z serwerami zdalnymi...</string>
+    <string name="connect_to_remote_server">Łączenie z serwerami zdalnymi…</string>
 
     <!-- LibraryAppScreen: Dialogs -->
     <string name="library_not_enough_space_message">Instalowana aplikacja wymaga %1$s miejsca, ale na tym urządzeniu pozostało tylko %2$s</string>
@@ -949,10 +949,10 @@
     <string name="main_open_discord">Otwórz Discord</string>
 
     <!-- GameGrubMain: Game Launch -->
-    <string name="main_downloading_steam">Pobieranie Steam...</string>
-    <string name="main_installing_glibc">Instalowanie komponentów glibc...</string>
-    <string name="main_installing_bionic">Instalowanie komponentów Bionic...</string>
-    <string name="main_loading">Ładowanie...</string>
+    <string name="main_downloading_steam">Pobieranie Steam…</string>
+    <string name="main_installing_glibc">Instalowanie komponentów glibc…</string>
+    <string name="main_installing_bionic">Instalowanie komponentów Bionic…</string>
+    <string name="main_loading">Ładowanie…</string>
 
     <!-- GameGrubMain: Session Conflicts -->
     <string name="main_app_running_title">Aplikacja uruchomiona</string>
@@ -1171,7 +1171,7 @@
     <string name="wine_proton_import_package">Importuj pakiet Wine/Proton</string>
     <string name="wine_proton_select_file_description">Wybierz plik .wcp (o nazwie zaczynającej się od \'wine\' lub \'proton\')</string>
     <string name="wine_proton_import_wcp_button">Importuj pakiet .wcp</string>
-    <string name="wine_proton_processing">Przetwarzanie...</string>
+    <string name="wine_proton_processing">Przetwarzanie…</string>
     <string name="wine_proton_package_details">Szczegóły pakietu</string>
     <string name="wine_proton_type">Typ</string>
     <string name="wine_proton_version">Wersja</string>
@@ -1196,7 +1196,7 @@
     <string name="cancel_import_keep">Nie, kontynuuj import</string>
 
     <!-- Wine/Proton Manager - Status Messages -->
-    <string name="wine_proton_extracting">Rozpakowywanie i weryfikacja pakietu (może to zająć 2-3 minuty dla dużych plików)...</string>
+    <string name="wine_proton_extracting">Rozpakowywanie i weryfikacja pakietu (może to zająć 2–3 minuty dla dużych plików)…</string>
     <string name="wine_proton_filename_error">Nazwa pliku musi zaczynać się od \'wine\' lub \'proton\' (wielkość liter nie ma znaczenia)</string>
     <string name="wine_proton_file_empty">Plik jest pusty lub nie można go odczytać</string>
     <string name="wine_proton_cannot_open">Nie można otworzyć pliku</string>
@@ -1268,7 +1268,7 @@
     <string name="amazon_logout_failed">Nie udało się wylogować: %s</string>
     <string name="amazon_logout_in_progress">Wylogowywanie z Amazon Games…</string>
 
-    <string name="manifest_downloading_item">Pobieranie %1$s...</string>
+    <string name="manifest_downloading_item">Pobieranie %1$s…</string>
     <string name="manifest_download_failed">Pobieranie nie powiodło się: %1$s</string>
     <string name="manifest_install_failed">Nie udało się zainstalować %1$s</string>
     <string name="manifest_install_success">%1$s zainstalowano</string>

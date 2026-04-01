@@ -1,19 +1,15 @@
 package com.winlator.inputcontrols;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import java.util.ArrayList;
+
 import java.util.Iterator;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.winlator.PrefManager;
-import com.winlator.winhandler.WinHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,7 +41,7 @@ public class ExternalController {
     private byte triggerType = TRIGGER_IS_AXIS;
     private final ArrayList<ExternalControllerBinding> controllerBindings = new ArrayList<>();
     public final GamepadState state = new GamepadState();
-    private boolean processTriggerButtonOnMotionEvent = true;
+    private final boolean processTriggerButtonOnMotionEvent = true;
 
     public String getName() {
         return this.name;
@@ -71,10 +67,7 @@ public class ExternalController {
         triggerType = mode;
     }
 
-    private Context context;
-
     public void setContext(Context context) {
-        this.context = context;
         PrefManager.init(context);
     }
 
@@ -112,9 +105,7 @@ public class ExternalController {
     }
 
     public ExternalControllerBinding getControllerBinding(int keyCode) {
-        Iterator<ExternalControllerBinding> it = this.controllerBindings.iterator();
-        while (it.hasNext()) {
-            ExternalControllerBinding controllerBinding = it.next();
+        for (ExternalControllerBinding controllerBinding : this.controllerBindings) {
             if (controllerBinding.getKeyCodeForAxis() == keyCode) {
                 return controllerBinding;
             }
@@ -157,9 +148,7 @@ public class ExternalController {
             controllerJSONObject.put("id", this.id);
             controllerJSONObject.put("name", this.name);
             JSONArray controllerBindingsJSONArray = new JSONArray();
-            Iterator<ExternalControllerBinding> it = this.controllerBindings.iterator();
-            while (it.hasNext()) {
-                ExternalControllerBinding controllerBinding = it.next();
+            for (ExternalControllerBinding controllerBinding : this.controllerBindings) {
                 controllerBindingsJSONArray.put(controllerBinding.toJSONObject());
             }
             controllerJSONObject.put("controllerBindings", controllerBindingsJSONArray);
@@ -333,9 +322,7 @@ public class ExternalController {
     }
 
     public static ExternalController getController(String id) {
-        Iterator<ExternalController> it = getControllers().iterator();
-        while (it.hasNext()) {
-            ExternalController controller = it.next();
+        for (ExternalController controller : getControllers()) {
             if (controller.getId().equals(id)) {
                 return controller;
             }

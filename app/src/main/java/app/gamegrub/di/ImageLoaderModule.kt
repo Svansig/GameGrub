@@ -40,18 +40,16 @@ class ImageLoaderModule {
             .diskCachePolicy(CachePolicy.ENABLED)
             .diskCache(diskCache)
             .components {
-                add(
-                    Interceptor { chain ->
-                        val request = if (!NetworkMonitor.hasInternet.value) {
-                            chain.request.newBuilder()
-                                .networkCachePolicy(CachePolicy.DISABLED)
-                                .build()
-                        } else {
-                            chain.request
-                        }
-                        chain.proceed(request)
-                    },
-                )
+                add { chain ->
+                    val request = if (!NetworkMonitor.hasInternet.value) {
+                        chain.request.newBuilder()
+                            .networkCachePolicy(CachePolicy.DISABLED)
+                            .build()
+                    } else {
+                        chain.request
+                    }
+                    chain.proceed(request)
+                }
                 add(IconDecoder.Factory())
                 add(AnimatedPngDecoder.Factory())
             }

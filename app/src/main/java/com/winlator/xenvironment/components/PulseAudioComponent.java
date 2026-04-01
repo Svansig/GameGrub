@@ -16,8 +16,6 @@ import com.winlator.xenvironment.XEnvironment;
 
 import java.io.File;
 
-import app.gamegrub.BuildConfig;
-
 public class PulseAudioComponent extends EnvironmentComponent {
     private final UnixSocketConfig socketConfig;
     private static int pid = -1;
@@ -32,7 +30,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
 
     @Override
     public void start() {
-        Log.d("PulseAudioComponent", "Starting...");
+        Timber.tag("PulseAudioComponent").d("Starting...");
         synchronized (lock) {
             stop();
             pid = execPulseAudio();
@@ -42,7 +40,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
 
     @Override
     public void stop() {
-        Log.d("PulseAudioComponent", "Stopping...");
+        Timber.tag("PulseAudioComponent").d("Stopping...");
         synchronized (lock) {
             if (pid != -1) {
                 Process.killProcess(pid);
@@ -53,7 +51,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
     }
 
     public void pause() {
-        Log.d("PulseAudioComponent", "Pausing...");
+        Timber.tag("PulseAudioComponent").d("Pausing...");
         synchronized (lock) {
             if (!isPaused && pid != -1) {
                 executePactl(true);
@@ -63,7 +61,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
                     synchronized (lock) {
                         if (isPaused && capturedPid == pid) {
                             ProcessHelper.suspendProcess(capturedPid);
-                            Log.d("PulseAudioComponent", "Audio paused");
+                            Timber.tag("PulseAudioComponent").d("Audio paused");
                         }
                     }
                 }, 200);
@@ -72,7 +70,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
     }
 
     public void resume() {
-        Log.d("PulseAudioComponent", "Resuming...");
+        Timber.tag("PulseAudioComponent").d("Resuming...");
         synchronized (lock) {
             if (isPaused && pid != -1) {
                 final int capturedPid = pid;
@@ -82,7 +80,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
                     synchronized (lock) {
                         if (!isPaused && capturedPid == pid) {
                             executePactl(false);
-                            Log.d("PulseAudioComponent", "Audio resumed");
+                            Timber.tag("PulseAudioComponent").d("Audio resumed");
                         }
                     }
                 }, 200);
@@ -105,7 +103,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
         File workingDir = new File(context.getFilesDir(), "/pulseaudio");
         if (!workingDir.isDirectory()) {
             workingDir.mkdirs();
-            FileUtils.chmod(workingDir, 0771);
+            FileUtils.chmod(workingDir, 505);
         }
 
         File configFile = new File(workingDir, "default.pa");
@@ -143,7 +141,7 @@ public class PulseAudioComponent extends EnvironmentComponent {
         File workingDir = new File(context.getFilesDir(), "/pulseaudio");
         if (!workingDir.isDirectory()) {
             workingDir.mkdirs();
-            FileUtils.chmod(workingDir, 0771);
+            FileUtils.chmod(workingDir, 505);
         }
 
         EnvVars envVars = new EnvVars();

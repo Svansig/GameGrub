@@ -15,6 +15,7 @@ import com.winlator.xserver.extensions.SyncExtension;
 
 import java.nio.charset.Charset;
 import java.util.EnumMap;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class XServer {
@@ -46,7 +47,7 @@ public class XServer {
     private boolean simulateTouchScreen = false;
 
     public XServer(ScreenInfo screenInfo) {
-        Log.d("XServer", "Creating xServer " + screenInfo);
+        Timber.tag("XServer").d("Creating xServer " + screenInfo);
         this.screenInfo = screenInfo;
         cursorLocker = new CursorLocker(this);
         for (Lockable lockable : Lockable.values()) locks.put(lockable, new ReentrantLock());
@@ -107,7 +108,7 @@ public class XServer {
 
         private SingleXLock(Lockable lockable) {
             this.lock = locks.get(lockable);
-            lock.lock();
+            Objects.requireNonNull(lock).lock();
         }
 
         @Override
@@ -121,13 +122,13 @@ public class XServer {
 
         private MultiXLock(Lockable[] lockables) {
             this.lockables = lockables;
-            for (Lockable lockable : lockables) locks.get(lockable).lock();
+            for (Lockable lockable : lockables) Objects.requireNonNull(locks.get(lockable)).lock();
         }
 
         @Override
         public void close() {
             for (int i = lockables.length - 1; i >= 0; i--) {
-                locks.get(lockables[i]).unlock();
+                Objects.requireNonNull(locks.get(lockables[i])).unlock();
             }
         }
     }

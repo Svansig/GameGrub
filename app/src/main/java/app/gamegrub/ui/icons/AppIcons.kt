@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
  * Custom icons exposed similarly to Material icons.
  * Steam icon will be tinted by Icon() like Material icons.
  */
-val Icons.Filled.Steam: ImageVector
+val Steam: ImageVector
     get() {
         if (_steam != null) return _steam!!
         _steam = ImageVector.Builder(
@@ -38,7 +38,7 @@ val Icons.Filled.Steam: ImageVector
 
 private var _steam: ImageVector? = null
 
-val Icons.Filled.Amazon: ImageVector
+val Amazon: ImageVector
     get() {
         if (_amazon != null) return _amazon!!
         _amazon = ImageVector.Builder(
@@ -61,5 +61,5 @@ val Icons.Filled.Amazon: ImageVector
 
 private var _amazon: ImageVector? = null
 
-val Icons.Filled.CustomGame: ImageVector
+val CustomGame: ImageVector
     get() = Icons.Filled.FolderOpen

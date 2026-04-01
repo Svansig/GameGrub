@@ -2,7 +2,6 @@ package com.winlator.core;
 
 import com.winlator.core.envvars.EnvVars;
 import com.winlator.winhandler.WinHandler;
-import com.winlator.xserver.ScreenInfo;
 import com.winlator.xserver.Window;
 import com.winlator.xserver.XServer;
 import java.util.Locale;
@@ -72,10 +71,8 @@ public class Win32AppWorkarounds {
         // Note: Most workarounds that require activity-level changes (env vars, screen size, etc.)
         // are now handled at the container/environment setup level in XServerScreen.kt
         // This class now focuses primarily on window-level workarounds
-        if (workaround instanceof WindowWorkaround) {
-            // Window workarounds can still be applied here
-            // They will be applied in applyWindowWorkarounds when the window is created
-        }
+        // Window workarounds can still be applied here
+        // They will be applied in applyWindowWorkarounds when the window is created
         // Other workaround types (EnvVars, ScreenSize, DXWrapper, etc.) are now handled
         // during environment setup phase rather than at window creation time
     }
@@ -144,9 +141,7 @@ public class Win32AppWorkarounds {
     }
 
     private Workaround getWorkaroundFor(String className) {
-        switch (className.toLowerCase(Locale.ENGLISH)) {
-            default:
-                return null;
-        }
+        className.toLowerCase(Locale.ENGLISH);
+        return null;
     }
 }

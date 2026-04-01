@@ -3,7 +3,6 @@ package com.winlator.core;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
-import android.util.Log;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
@@ -38,7 +37,7 @@ public abstract class TarCompressorUtils {
             tar.closeArchiveEntry();
         }
         catch (Exception e) {
-            Log.e("TarCompressorUtils", "Failed to add file: " + e);
+            Timber.tag("TarCompressorUtils").e("Failed to add file: " + e);
         }
     }
 
@@ -50,7 +49,7 @@ public abstract class TarCompressorUtils {
             tar.closeArchiveEntry();
         }
         catch (Exception e) {
-            Log.e("TarCompressorUtils", "Failed to add link file: " + e);
+            Timber.tag("TarCompressorUtils").e("Failed to add link file: " + e);
         }
     }
 
@@ -98,7 +97,7 @@ public abstract class TarCompressorUtils {
             tar.finish();
         }
         catch (IOException e) {
-            Log.e("TarCompressorUtils", "Failed to compress: " + e);
+            Timber.tag("TarCompressorUtils").e("Failed to compress: " + e);
         }
     }
 
@@ -150,8 +149,8 @@ public abstract class TarCompressorUtils {
         return extract(type, source, destination, null);
     }
 
-    public static boolean extract(Type type, InputStream source, File destination) {
-        return extract(type, source, destination, null);
+    public static void extract(Type type, InputStream source, File destination) {
+        extract(type, source, destination, null);
     }
 
     public static boolean extract(Type type, File source, File destination, OnExtractFileListener onExtractFileListener) {
@@ -167,7 +166,7 @@ public abstract class TarCompressorUtils {
     private static boolean extract(Type type, InputStream source, File destination, OnExtractFileListener onExtractFileListener) {
         if (source == null) return false;
         try (InputStream inStream = getCompressorInputStream(type, source);
-             ArchiveInputStream tar = new TarArchiveInputStream(inStream)) {
+             ArchiveInputStream<TarArchiveEntry> tar = new TarArchiveInputStream(inStream)) {
             TarArchiveEntry entry;
             while ((entry = (TarArchiveEntry)tar.getNextEntry()) != null) {
                 if (!tar.canReadEntryData(entry)) continue;
@@ -199,7 +198,7 @@ public abstract class TarCompressorUtils {
                     }
                 }
 
-                FileUtils.chmod(file, 0771);
+                FileUtils.chmod(file, 505);
             }
             return true;
         }

@@ -57,7 +57,6 @@ import timber.log.Timber
  * telemetry-related state, and post-launch watchers).
  */
 internal object EnvironmentSetupCoordinator {
-    @Suppress("UNUSED_PARAMETER")
     fun setupXEnvironment(
         context: Context,
         appId: String,

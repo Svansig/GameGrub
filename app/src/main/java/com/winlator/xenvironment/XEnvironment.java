@@ -1,12 +1,8 @@
 package com.winlator.xenvironment;
 
 import android.content.Context;
-import android.media.AudioDeviceCallback;
-import android.media.AudioDeviceInfo;
-import android.media.AudioManager;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.winlator.core.FileUtils;
 import com.winlator.xenvironment.components.ALSAServerComponent;
@@ -59,6 +55,7 @@ public class XEnvironment implements Iterable<EnvironmentComponent> {
         return null;
     }
 
+    @NonNull
     @Override
     public Iterator<EnvironmentComponent> iterator() {
         return components.iterator();
@@ -68,7 +65,7 @@ public class XEnvironment implements Iterable<EnvironmentComponent> {
         File tmpDir = new File(context.getFilesDir(), "tmp");
         if (!tmpDir.isDirectory()) {
             tmpDir.mkdirs();
-            FileUtils.chmod(tmpDir, 0771);
+            FileUtils.chmod(tmpDir, 505);
         }
         return tmpDir;
     }

@@ -16,7 +16,7 @@ import timber.log.Timber
 
 @Singleton
 class GameCompatibilityCache @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     companion object {
         private const val CACHE_TTL_MS = 6 * 60 * 60 * 1000L

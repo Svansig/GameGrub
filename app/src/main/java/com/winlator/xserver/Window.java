@@ -407,12 +407,12 @@ public class Window extends XResource {
     }
 
     public String serializeProperties() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < properties.size(); i++) {
             Property property = properties.valueAt(i);
-            result += property.nameAsString()+"="+property+"\n";
+            result.append(property.nameAsString()).append("=").append(property).append("\n");
         }
-        return result;
+        return result.toString();
     }
 
     public boolean isRenderable() {

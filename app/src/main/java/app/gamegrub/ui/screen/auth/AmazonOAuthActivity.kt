@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.core.net.toUri
 import app.gamegrub.service.amazon.AmazonAuthManager
 import app.gamegrub.ui.component.dialog.AuthWebViewDialog
 import app.gamegrub.ui.theme.GameGrubTheme
@@ -141,7 +142,7 @@ private fun isAmazonRedirect(url: String): Boolean {
 
 private fun extractAuthCode(url: String): String? {
     return try {
-        val uri = Uri.parse(url)
+        val uri = url.toUri()
         uri.getQueryParameter("openid.oa2.authorization_code")
     } catch (e: Exception) {
         Timber.w(e, "[AmazonOAuth] Failed to parse URL")

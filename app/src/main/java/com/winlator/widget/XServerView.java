@@ -2,22 +2,12 @@ package com.winlator.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Rect;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import androidx.annotation.Nullable;
-import androidx.collection.MutableObjectList;
-
-import com.winlator.core.Callback;
 import com.winlator.renderer.GLRenderer;
 import com.winlator.xserver.XServer;
-
-import java.util.ArrayList;
 
 @SuppressLint("ViewConstructor")
 public class XServerView extends GLSurfaceView {

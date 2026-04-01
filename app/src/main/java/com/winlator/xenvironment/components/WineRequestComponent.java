@@ -14,13 +14,14 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import app.gamegrub.ui.screen.auth.EpicOAuthActivity;
 
 public class WineRequestComponent extends EnvironmentComponent {
-    abstract class RequestCodes {
+    abstract static class RequestCodes {
         static final int OPEN_URL = 1;
         //static final int GET_WINE_CLIPBOARD = 2;
         //static final int SET_WINE_CLIPBAORD = 3;
@@ -30,7 +31,7 @@ public class WineRequestComponent extends EnvironmentComponent {
     private volatile boolean isRunning = false;
     private ExecutorService executor;
 
-    private boolean openWithAndroidBrowser = false;
+    private boolean openWithAndroidBrowser;
 
     public WineRequestComponent() {
         this.openWithAndroidBrowser = PrefManager.getBoolean("open_web_links_externally", false);
@@ -51,7 +52,7 @@ public class WineRequestComponent extends EnvironmentComponent {
                     handleRequest(inputStream, outputStream, requestCode);
                     socket.close();
                 }
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         });
     }
@@ -61,7 +62,7 @@ public class WineRequestComponent extends EnvironmentComponent {
         if (serverSocket != null) {
             try {
                 serverSocket.close();
-            } catch (IOException e) {
+            } catch (IOException ignored) {
             }
         }
         if (executor != null) {
@@ -70,11 +71,9 @@ public class WineRequestComponent extends EnvironmentComponent {
     }
 
     public void handleRequest(DataInputStream inputStream, DataOutputStream outputStream, int requestCode) throws IOException {
-        switch(requestCode) {
-            case RequestCodes.OPEN_URL:
-                openURL(inputStream, outputStream);
-                break;
-//            case RequestCodes.GET_WINE_CLIPBOARD:
+        if (requestCode == RequestCodes.OPEN_URL) {
+            openURL(inputStream, outputStream);
+            //            case RequestCodes.GET_WINE_CLIPBOARD:
 //                getWineClipboard(inputStream, outputStream);
 //                break;
 //            case RequestCodes.SET_WINE_CLIPBAORD:
@@ -89,7 +88,7 @@ public class WineRequestComponent extends EnvironmentComponent {
         int messageLength = inputStream.readInt();
         byte[] data = new byte[messageLength];
         inputStream.readFully(data);
-        String url = new String(data, "UTF-8");
+        String url = new String(data, StandardCharsets.UTF_8);
 
         if (url.startsWith(EpicOAuthActivity.EPIC_AUTH_URL_PREFIX)) {
             // handled, start EpicOAuthActivity here, pass the url to EpicOAuthActivity
@@ -102,7 +101,7 @@ public class WineRequestComponent extends EnvironmentComponent {
         }
 
         if (openWithAndroidBrowser) {
-            Log.d("WineRequestComponent", "Received request code OPEN_URL with url " + url.substring(0, Math.min(url.length(), 20)));
+            Timber.tag("WineRequestComponent").d("Received request code OPEN_URL with url " + url.substring(0, Math.min(url.length(), 20)));
             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

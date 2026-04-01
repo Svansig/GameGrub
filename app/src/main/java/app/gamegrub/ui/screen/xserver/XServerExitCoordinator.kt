@@ -19,7 +19,6 @@ internal object XServerExitCoordinator {
         isExiting.set(false)
     }
 
-    @Suppress("UNUSED_PARAMETER")
     fun requestExit(
         winHandler: WinHandler?,
         environment: XEnvironment?,

@@ -33,7 +33,7 @@ fun getGOGInstallDomain(context: Context): GOGInstallDomain {
  */
 @Singleton
 class GOGInstallDomain @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     private val TAG = "GOGInstallDomain"
 

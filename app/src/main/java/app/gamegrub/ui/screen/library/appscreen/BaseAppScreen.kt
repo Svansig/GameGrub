@@ -27,7 +27,6 @@ import app.gamegrub.R
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.ContainerConfigDialog
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
@@ -813,10 +812,9 @@ abstract class BaseAppScreen {
             ContainerConfigDialog(
                 title = "${displayInfo.name} Config",
                 initialConfig = containerData,
-                onDismissRequest = { showConfigDialog = false },
+                onDismissRequest = { },
                 onSave = {
                     saveContainerConfig(context, libraryItem, it)
-                    showConfigDialog = false
                 },
             )
         }

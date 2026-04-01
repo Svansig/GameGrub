@@ -36,6 +36,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -74,9 +76,9 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     var isImporting by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
     var isInstalling by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableStateOf(0f) }
-    var downloadBytes by remember { mutableStateOf(0L) }
-    var totalBytes by remember { mutableStateOf(-1L) }
+    var downloadProgress by remember { mutableFloatStateOf(0f) }
+    var downloadBytes by remember { mutableLongStateOf(0L) }
+    var totalBytes by remember { androidx.compose.runtime.mutableLongStateOf(-1L) }
     val scope = rememberCoroutineScope()
 
     // Driver manifest handling
@@ -164,7 +166,6 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             scope.launch {
                 isImporting = true
                 val res = withContext(Dispatchers.IO) { handlePickedUri(ctx, it) }
-                lastMessage = res
                 if (res.startsWith("Installed driver:")) refreshDriverList()
                 SnackbarManager.show(res)
                 SteamService.isImporting = false
@@ -215,7 +216,6 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 val res = withContext(Dispatchers.IO) { handlePickedUri(ctx, uri) }
                 val installDurationMs = System.currentTimeMillis() - installStart
                 withContext(Dispatchers.Main) {
-                    lastMessage = res
                     if (res.startsWith("Installed driver:")) refreshDriverList()
                     SnackbarManager.show(res)
                 }
@@ -228,7 +228,6 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 }
             } catch (e: SocketTimeoutException) {
                 val errorMessage = ctx.getString(R.string.driver_timeout)
-                lastMessage = errorMessage
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download timeout")
             } catch (e: IOException) {
@@ -237,12 +236,10 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 } else {
                     ctx.getString(R.string.driver_network_error, e.message ?: "")
                 }
-                lastMessage = errorMessage
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download failed with IO error")
             } catch (e: Exception) {
                 val errorMessage = "Error downloading driver: ${e.message}"
-                lastMessage = errorMessage
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download failed")
             } finally {
@@ -480,11 +477,11 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                                     onClick = {
                                         try {
                                             AdrenotoolsManager(ctx).removeDriver(id)
-                                            lastMessage = "Removed driver: $id"
+                                            "Removed driver: $id"
                                             SnackbarManager.show("Removed driver: $id")
                                             refreshDriverList()
                                         } catch (e: Exception) {
-                                            lastMessage = "Error removing $id: ${e.message}"
+                                            "Error removing $id: ${e.message}"
                                             SnackbarManager.show("Error removing $id: ${e.message}")
                                         }
                                         driverToDelete = null

@@ -162,7 +162,6 @@ public class WindowManager extends XResourceManager {
                 } else throw new BadMatch();
                 break;
             case INPUT_ONLY:
-                isInputOutput = false;
                 break;
         }
 

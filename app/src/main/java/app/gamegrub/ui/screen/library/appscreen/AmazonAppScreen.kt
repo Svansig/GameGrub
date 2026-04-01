@@ -7,6 +7,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -109,7 +110,7 @@ class AmazonAppScreen : BaseAppScreen() {
 
         // Refresh key — incremented when install status changes so we re-fetch from DB.
         // This ensures size/installPath/etc. are up-to-date after download completes.
-        var refreshKey by remember(productId) { mutableStateOf(0) }
+        var refreshKey by remember(productId) { mutableIntStateOf(0) }
 
         androidx.compose.runtime.DisposableEffect(productId) {
             val listener: (AndroidEvent.LibraryInstallStatusChanged) -> Unit = { event ->
@@ -127,10 +128,10 @@ class AmazonAppScreen : BaseAppScreen() {
         LaunchedEffect(productId, refreshKey) {
             game = AmazonService.getAmazonGameOf(productId)
             Timber.tag(TAG).d(
+                "%snull",
                 "Loaded game: title=${game?.title}, developer=${game?.developer}, " +
                     "releaseDate=${game?.releaseDate}, artUrl=${game?.artUrl?.take(60)}, " +
-                    "heroUrl=${game?.heroUrl?.take(60)}, downloadSize=${game?.downloadSize}, " +
-                    "installSize=${game?.installSize}, isInstalled=${game?.isInstalled}",
+                    "heroUrl=${game?.heroUrl?.take(60)}, downloadSize=${game?.downloadSize}, ",
             )
             // Proactively fetch size from manifest if not yet cached
             val g = game
@@ -482,7 +483,7 @@ class AmazonAppScreen : BaseAppScreen() {
         // Confirmation dialog before verifying
         if (showDialog && !isVerifying && verifyResult == null) {
             AlertDialog(
-                onDismissRequest = { showDialog = false },
+                onDismissRequest = { },
                 title = { Text(stringResource(R.string.amazon_verify_files_title)) },
                 text = { Text(stringResource(R.string.amazon_verify_files_message)) },
                 confirmButton = {
@@ -526,7 +527,7 @@ class AmazonAppScreen : BaseAppScreen() {
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDialog = false }) {
+                    TextButton(onClick = { }) {
                         Text(stringResource(R.string.cancel))
                     }
                 },
@@ -547,16 +548,12 @@ class AmazonAppScreen : BaseAppScreen() {
         if (verifyResult != null) {
             AlertDialog(
                 onDismissRequest = {
-                    verifyResult = null
-                    showDialog = false
                 },
                 title = { Text(stringResource(R.string.amazon_verify_files_title)) },
                 text = { Text(verifyResult!!) },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            verifyResult = null
-                            showDialog = false
                         },
                     ) {
                         Text(stringResource(R.string.ok))
@@ -567,7 +564,7 @@ class AmazonAppScreen : BaseAppScreen() {
 
         return AppMenuOption(
             optionType = AppOptionMenuType.VerifyFiles,
-            onClick = { showDialog = true },
+            onClick = { },
         )
     }
 
@@ -581,16 +578,15 @@ class AmazonAppScreen : BaseAppScreen() {
         if (showDialog) {
             ResetConfirmDialog(
                 onConfirm = {
-                    showDialog = false
                     resetContainerToDefaults(context, libraryItem)
                 },
-                onDismiss = { showDialog = false },
+                onDismiss = { },
             )
         }
 
         return AppMenuOption(
             optionType = AppOptionMenuType.ResetToDefaults,
-            onClick = { showDialog = true },
+            onClick = { },
         )
     }
 

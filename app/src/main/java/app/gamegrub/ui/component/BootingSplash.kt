@@ -28,7 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -87,7 +87,7 @@ fun BootingSplash(
         )
     }
 
-    var tipIndex by remember { mutableStateOf(if (tips.isNotEmpty()) Random.nextInt(tips.size) else 0) }
+    var tipIndex by remember { mutableIntStateOf(if (tips.isNotEmpty()) Random.nextInt(tips.size) else 0) }
 
     LaunchedEffect(visible, tips) {
         while (visible && tips.isNotEmpty()) {

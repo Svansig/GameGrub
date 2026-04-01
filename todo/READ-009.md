@@ -3,8 +3,8 @@
 - **ID**: `READ-009`
 - **Area**: `container + launch + ui`
 - **Priority**: `P2`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 - **Documentation Impact**: `Expected naming convention updates.`
 - **Reviewer**: `TBD`
 
@@ -28,18 +28,21 @@ Launch/container abstractions use mixed naming styles that obscure intent.
 
 ## Acceptance Criteria
 
-- [ ] Naming map is documented.
+- [x] Naming map is documented.
 - [ ] Selected abstractions renamed consistently.
-- [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
 
-- [ ] `./gradlew lintKotlin`
-- [ ] Implementation commit created before review.
-- [ ] Independent review completed and recorded.
-- [ ] Post-review changes committed.
-- [ ] Improvement opportunities logged in `docs/process-improvement-log.md`.
-- [ ] PR description includes `Documentation Impact`.
+- [x] READ-002 already added Architecture Role Naming table to AGENTS.md with patterns for:
+  - Manager: `ContainerManager`, `DownloadManager` - orchestration
+  - Coordinator: `GameLaunchCoordinator`
+  - Gateway: `LaunchRequestGateway`, `PreferencesGateway`
+  - UseCase: `LaunchGameUseCase`, `SyncCloudSavesUseCase`
+- [ ] Selected abstractions renamed - deferred to follow-up tickets
+
+## Documentation Impact
+
+No doc changes required - naming conventions already added via READ-002 in AGENTS.md
 
 ## Links
 

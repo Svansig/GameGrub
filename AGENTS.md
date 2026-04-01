@@ -125,6 +125,16 @@ The project uses these ktlint rules:
 - **Package names**: lowercase, no underscores (e.g., `app.gamegrub.utils`)
 - **Test classes**: Must end with `Test` (e.g., `DateTimeUtilsTest`)
 
+#### Architecture Role Naming
+
+| Role | Suffix/Pattern | Example |
+|------|---------------|---------|
+| **Domain** | `Domain` | `SteamInstallDomain`, `GOGAccountDomain` |
+| **Manager** | `Manager` | `ContainerManager`, `DownloadManager` - use for orchestration |
+| **Coordinator** | Use object/singleton or `Coordinator` suffix | `GameLaunchCoordinator` |
+| **Gateway** | `Gateway` | `LaunchRequestGateway`, `PreferencesGateway` - boundaries |
+| **UseCase** | `UseCase` | `LaunchGameUseCase`, `SyncCloudSavesUseCase` |
+
 ### Imports
 
 - **Order**: No strict order enforced (ktlint rule disabled), but group logically
@@ -228,10 +238,19 @@ class DateTimeUtilsTest {
 ### Logging
 
 - **Use Timber**: Never use `println()` or `android.util.Log`
-- **Debug logs**: `Timber.d("message")`
-- **Info logs**: `Timber.i("message")`
-- **Warning logs**: `Timber.w(e, "message")`
-- **Error logs**: `Timber.e(e, "message")`
+- **Log levels**:
+  - `Timber.d("message")` - Debug, development info
+  - `Timber.i("message")` - Info, general operational events
+  - `Timber.w(e, "message")` or `Timber.w("message")` - Warning, recoverable issues
+  - `Timber.e(e, "message")` - Error, failures that need attention
+- **Tag conventions**:
+  - Default: Use class name automatically via `Timber.tag("TagName")`
+  - Contextual: `[ComponentName][Action] message` for clarity (e.g., `[GameGrubMain][Launch] Starting game`)
+  - Avoid: Hard-coded tags per line; use contextual logging or class tags
+- **Message format**:
+  - Be descriptive but concise
+  - Include relevant identifiers (appId, gameId, userId) when available
+  - Avoid敏感 data in logs (see `todo/SEC-004.md`)
 - **Plant DebugTree in debug builds**:
 ```kotlin
 if (BuildConfig.DEBUG) {

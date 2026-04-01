@@ -249,6 +249,7 @@ fun SystemMenu(
     gogLoggedIn: Boolean,
     epicLoggedIn: Boolean,
     amazonLoggedIn: Boolean,
+    steamLoggedIn: Boolean,
     onGogLoginClick: () -> Unit,
     onGogLogoutClick: () -> Unit,
     onEpicLoginClick: () -> Unit,
@@ -604,8 +605,8 @@ fun SystemMenu(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        if (isOffline || !SteamService.isLoggedIn) {
-                            val goOnlineLabelRes = if (!SteamService.isLoggedIn) {
+                        if (isOffline || !steamLoggedIn) {
+                            val goOnlineLabelRes = if (!steamLoggedIn) {
                                 R.string.steam_sign_in
                             } else {
                                 R.string.steam_go_online
@@ -780,6 +781,7 @@ private fun Preview_SystemMenu() {
                     gogLoggedIn = false,
                     epicLoggedIn = false,
                     amazonLoggedIn = false,
+                    steamLoggedIn = false,
                     onGogLoginClick = { },
                     onGogLogoutClick = { },
                     onEpicLoginClick = { },

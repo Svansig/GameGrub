@@ -210,12 +210,12 @@ fun QuickMenu(
     isVisible: Boolean,
     onDismiss: () -> Unit,
     onItemSelected: (Int) -> Boolean,
+    modifier: Modifier = Modifier,
     renderer: GLRenderer? = null,
     isPerformanceHudEnabled: Boolean = false,
     performanceHudConfig: PerformanceHudConfig = PerformanceHudConfig(),
     onPerformanceHudConfigChanged: (PerformanceHudConfig) -> Unit = {},
     hasPhysicalController: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     val exitGameItem = QuickMenuItem(
         id = QuickMenuAction.EXIT_GAME,
@@ -541,8 +541,8 @@ private fun PerformanceHudQuickMenuTab(
     onTogglePerformanceHud: () -> Unit,
     onPerformanceHudConfigChanged: (PerformanceHudConfig) -> Unit,
     scrollState: ScrollState,
-    focusRequester: FocusRequester? = null,
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
 ) {
     val accentColor = GameGrubTheme.colors.accentPurple
 
@@ -571,7 +571,7 @@ private fun PerformanceHudQuickMenuTab(
             modifier = Modifier.padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            PerformanceHudPreset.values().forEach { preset ->
+            PerformanceHudPreset.entries.forEach { preset ->
                 QuickMenuChoiceChip(
                     text = stringResource(preset.labelResId),
                     selected = matchesPerformanceHudPreset(performanceHudConfig, preset),
@@ -825,8 +825,8 @@ private fun PerformanceHudQuickMenuTab(
 @Composable
 private fun QuickMenuSectionHeader(
     title: String,
-    subtitle: String? = null,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
 ) {
     Column(
         modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -1476,8 +1476,8 @@ private fun QuickMenuSwitch(
 private fun QuickMenuItemRow(
     item: QuickMenuItem,
     onClick: () -> Unit,
-    focusRequester: FocusRequester? = null,
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()

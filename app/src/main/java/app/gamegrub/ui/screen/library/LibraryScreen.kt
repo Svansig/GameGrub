@@ -999,6 +999,7 @@ private fun LibraryScreenContent(
                 gogLoggedIn = state.isGogLoggedIn,
                 epicLoggedIn = state.isEpicLoggedIn,
                 amazonLoggedIn = state.isAmazonLoggedIn,
+                steamLoggedIn = state.isSteamLoggedIn,
                 onGogLoginClick = {
                     gogOAuthLauncher.launch(Intent(context, GOGOAuthActivity::class.java))
                 },

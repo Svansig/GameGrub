@@ -45,9 +45,6 @@ import app.gamegrub.PrefManager
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.service.DownloadService
-import app.gamegrub.service.amazon.AmazonService
-import app.gamegrub.service.epic.EpicService
-import app.gamegrub.service.gog.GOGService
 import app.gamegrub.ui.component.Scrollbar
 import app.gamegrub.ui.data.LibraryState
 import app.gamegrub.ui.enums.AppFilter
@@ -68,7 +65,13 @@ import timber.log.Timber
  * @param state The current library state containing filters and visibility settings
  * @return The number of installed games, respecting current filters and source visibility
  */
-private fun calculateInstalledCount(context: android.content.Context, state: LibraryState): Int {
+private fun calculateInstalledCount(
+    context: android.content.Context,
+    state: LibraryState,
+    isGogLoggedIn: Boolean,
+    isEpicLoggedIn: Boolean,
+    isAmazonLoggedIn: Boolean,
+): Int {
     if (state.appInfoSortType.contains(AppFilter.INSTALLED)) {
         return state.totalAppsInFilter
     }
@@ -87,19 +90,19 @@ private fun calculateInstalledCount(context: android.content.Context, state: Lib
         0
     }
 
-    val gogCount = if (state.showGOGInLibrary && GOGService.hasStoredCredentials(context)) {
+    val gogCount = if (state.showGOGInLibrary && isGogLoggedIn) {
         PrefManager.gogInstalledGamesCount
     } else {
         0
     }
 
-    val epicCount = if (state.showEpicInLibrary && EpicService.hasStoredCredentials(context)) {
+    val epicCount = if (state.showEpicInLibrary && isEpicLoggedIn) {
         PrefManager.epicInstalledGamesCount
     } else {
         0
     }
 
-    val amazonCount = if (state.showAmazonInLibrary && AmazonService.hasStoredCredentials(context)) {
+    val amazonCount = if (state.showAmazonInLibrary && isAmazonLoggedIn) {
         PrefManager.amazonInstalledGamesCount
     } else {
         0
@@ -133,8 +136,11 @@ internal fun LibraryListPane(
         state.showEpicInLibrary,
         state.showAmazonInLibrary,
         state.totalAppsInFilter,
+        state.isGogLoggedIn,
+        state.isEpicLoggedIn,
+        state.isAmazonLoggedIn,
     ) {
-        calculateInstalledCount(context, state)
+        calculateInstalledCount(context, state, state.isGogLoggedIn, state.isEpicLoggedIn, state.isAmazonLoggedIn)
     }
 
     val pullToRefreshState = rememberPullToRefreshState()
@@ -243,33 +249,39 @@ internal fun LibraryListPane(
                     state.showGOGInLibrary,
                     state.showEpicInLibrary,
                     state.showAmazonInLibrary,
+                    state.isGogLoggedIn,
+                    state.isEpicLoggedIn,
+                    state.isAmazonLoggedIn,
                 ) {
                     val customCount = if (state.showCustomGamesInLibrary) PrefManager.customGamesCount else 0
                     val steamCount = if (state.showSteamInLibrary) PrefManager.steamGamesCount else 0
                     val gogInstalledCount = if (state.showGOGInLibrary &&
-                        GOGService.hasStoredCredentials(context)
+                        state.isGogLoggedIn
                     ) {
                         PrefManager.gogInstalledGamesCount
                     } else {
                         0
                     }
                     val epicInstalledCount = if (state.showEpicInLibrary &&
-                        EpicService.hasStoredCredentials(context)
+                        state.isEpicLoggedIn
                     ) {
                         PrefManager.epicInstalledGamesCount
                     } else {
                         0
                     }
                     val amazonInstalledCount = if (state.showAmazonInLibrary &&
-                        AmazonService.hasStoredCredentials(context)
+                        state.isAmazonLoggedIn
                     ) {
                         PrefManager.amazonInstalledGamesCount
                     } else {
                         0
                     }
                     val total = customCount + steamCount + gogInstalledCount + epicInstalledCount + amazonInstalledCount
-                    Timber.tag("LibraryListPane")
-                        .d("Skeleton calculation - Custom: $customCount, Steam: $steamCount, GOG installed: $gogInstalledCount, Epic installed: $epicInstalledCount, Amazon installed: $amazonInstalledCount, Total: $total")
+                    Timber.tag("LibraryListPane").d(
+                        "Skeleton calculation - Custom: $customCount, Steam: $steamCount, " +
+                            "GOG installed: $gogInstalledCount, Epic installed: $epicInstalledCount, " +
+                            "Amazon installed: $amazonInstalledCount, Total: $total",
+                    )
                     if (total == 0) 6 else minOf(total, 20)
                 }
 

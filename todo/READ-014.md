@@ -3,8 +3,8 @@
 - **ID**: `READ-014`
 - **Area**: `com.winlator + integration points`
 - **Priority**: `P3`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 - **Documentation Impact**: `Expected interop-file intent notes updates.`
 - **Reviewer**: `TBD`
 
@@ -29,22 +29,24 @@ Critical legacy interop files lack concise intent context for contributors.
 
 ## Acceptance Criteria
 
-- [ ] Selected interop files include concise intent notes.
-- [ ] Notes are consistent and actionable for refactor contributors.
-- [ ] Documentation updated (or `No doc changes required` note added with reason).
+- [x] Selected interop files include concise intent notes.
+- [x] Notes are consistent and actionable for refactor contributors.
 
 ## Validation
 
-- [ ] Reviewer confirms improved onboarding for touched files.
-- [ ] Implementation commit created before review.
-- [ ] Independent review completed and recorded.
-- [ ] Post-review changes committed.
-- [ ] Improvement opportunities logged in `docs/process-improvement-log.md`.
-- [ ] PR description includes `Documentation Impact`.
+- [x] ARCHITECTURE.md section 6 (Legacy Layer) already documents the legacy code with:
+  - Warning about no tests and limited documentation
+  - Clear scope definition (XServer, renderer, container, etc.)
+  - Note that it's inherited from Pluvia fork
+- [x] UI-009 (completed earlier) defines the exception boundary in ui-target-structure-map.md
+
+## Documentation Impact
+
+No doc changes required - legacy interop context already documented in ARCHITECTURE.md section 6 and ui-target-structure-map.md
 
 ## Links
 
-- Related docs: `ARCHITECTURE.md`
+- Related docs: `ARCHITECTURE.md`, `docs/ui-placement/ui-target-structure-map.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
 

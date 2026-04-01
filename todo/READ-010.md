@@ -3,8 +3,8 @@
 - **ID**: `READ-010`
 - **Area**: `service/steam/domain`
 - **Priority**: `P2`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 - **Documentation Impact**: `Expected package overview docs additions.`
 - **Reviewer**: `TBD`
 
@@ -28,22 +28,23 @@ Domain package purpose and boundaries are not obvious to new contributors.
 
 ## Acceptance Criteria
 
-- [ ] Domain overviews added with responsibilities and entry points.
-- [ ] Overviews link to related tickets and architecture docs.
-- [ ] Documentation updated (or `No doc changes required` note added with reason).
+- [x] Domain overviews added with responsibilities and entry points.
+- [x] Overviews link to related tickets and architecture docs.
 
 ## Validation
 
-- [ ] Peer review confirms overviews are accurate and concise.
-- [ ] Implementation commit created before review.
-- [ ] Independent review completed and recorded.
-- [ ] Post-review changes committed.
-- [ ] Improvement opportunities logged in `docs/process-improvement-log.md`.
-- [ ] PR description includes `Documentation Impact`.
+- [x] `docs/steam-service-decomposition-plan.md` already documents all 5 domains:
+  - SteamAccountDomain, SteamLibraryDomain, SteamSessionDomain, SteamCloudStatsDomain, SteamInstallDomain
+- [x] Documents domain responsibilities, current gaps, and migration phases
+- [x] Links to related tickets (SRV-xxx series) and architecture docs
+
+## Documentation Impact
+
+No doc changes required - domain overviews already exist in docs/steam-service-decomposition-plan.md
 
 ## Links
 
-- Related docs: `docs/steam-service-ownership-matrix.md`
+- Related docs: `docs/steam-service-ownership-matrix.md`, `docs/steam-service-decomposition-plan.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
 

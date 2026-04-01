@@ -16,7 +16,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-002 | P1 | Remove unmanaged IO scopes from GOG UI paths | `ui/screen/library/appscreen` | `todo/UI-002.md` |
 | UI-003 | P1 | Remove unmanaged IO scopes from Steam UI paths | `ui/screen/library/appscreen` | `todo/UI-003.md` |
 | UI-005 | P1 | Decompose orchestration from `GameGrubMain` | `ui` | `todo/UI-005.md` |
-| UI-009 | P3 | Define legacy UI seam guardrails | `com.winlator + res/layout` | `todo/UI-009.md` |
 | UI-010 | P2 | Move platform login-state derivation into ViewModel state | `ui/screen/library` | `todo/UI-010.md` |
 | UI-011 | P2 | Extract OAuth launcher callback wiring from screen composables | `ui/screen/library + settings` | `todo/UI-011.md` |
 | UI-012 | P3 | Standardize dialog state ownership across screens | `ui/component/dialog + ui/screen` | `todo/UI-012.md` |
@@ -247,7 +246,17 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-006 | P2 | Resolve lint blockers in `GameGrubMain` | TBD | `todo/UI-006.md` |
 | UI-007 | P2 | Align architecture doc path naming | TBD | `todo/UI-007.md` |
 | UI-008 | P3 | Move preview fake data to safer location | TBD | `todo/UI-008.md` |
+| UI-009 | P3 | Define legacy UI seam guardrails | TBD | `todo/UI-009.md` |
 | COH-001 | P1 | Define UI-to-ViewModel boundary contract | TBD | `todo/COH-001.md` |
+| COH-004 | P2 | Create module-level dependency map | TBD | `todo/COH-004.md` |
+| COH-008 | P2 | Add ADR notes for key architecture boundary decisions | TBD | `todo/COH-008.md` |
+| COH-011 | P3 | Standardize app-level coordinator placement rules | TBD | `todo/COH-011.md` |
+| READ-002 | P2 | Normalize naming for manager/coordinator/domain classes | TBD | `todo/READ-002.md` |
+| READ-007 | P3 | Standardize log tag/message conventions | TBD | `todo/READ-007.md` |
+| READ-009 | P2 | Normalize naming in launch/container abstractions | TBD | `todo/READ-009.md` |
+| READ-010 | P2 | Add focused package overviews for service domains | TBD | `todo/READ-010.md` |
+| READ-014 | P3 | Add concise file-level intent notes for critical legacy interop files | TBD | `todo/READ-014.md` |
+| DOC-001 | P1 | Create architecture navigation index | TBD | `todo/DOC-001.md` |
 | SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
 | SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |

@@ -23,8 +23,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,14 +43,82 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-/** Fallback item height in pixels when no visible items available for measurement */
-private const val FALLBACK_ITEM_HEIGHT_PX = 100f
+private data class ScrollbarMetrics(
+    val totalItemsCount: Int,
+    val visibleItemsCount: Int,
+    val viewportHeight: Int,
+    val columnsCount: Int,
+    val totalRows: Int,
+    val scrollProgress: Float,
+    val thumbHeightRatio: Float,
+)
 
 /**
- * Draggable scrollbar for LazyVerticalGrid
+ * Reads frequently changing [LazyGridState] values once and exposes stable metrics for UI rendering.
+ *
+ * Rationale: direct reads like `layoutInfo`, `firstVisibleItemScrollOffset`, and scroll progress in
+ * composable bodies can trigger avoidable recompositions and Compose lint warnings. Centralizing the
+ * calculation keeps behavior the same while reducing composition churn.
+ */
+private fun calculateScrollbarMetrics(listState: LazyGridState): ScrollbarMetrics {
+    val layoutInfo = listState.layoutInfo
+    val totalItemsCount = layoutInfo.totalItemsCount
+    val visibleItemsInfo = layoutInfo.visibleItemsInfo
+    val visibleItemsCount = visibleItemsInfo.size
+    val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+
+    if (totalItemsCount == 0 || visibleItemsInfo.isEmpty()) {
+        return ScrollbarMetrics(
+            totalItemsCount = totalItemsCount,
+            visibleItemsCount = visibleItemsCount,
+            viewportHeight = viewportHeight,
+            columnsCount = 1,
+            totalRows = 1,
+            scrollProgress = 0f,
+            thumbHeightRatio = 1f,
+        )
+    }
+
+    val firstRowY = visibleItemsInfo.first().offset.y
+    val columnsCount = visibleItemsInfo.count { it.offset.y == firstRowY }.coerceAtLeast(1)
+    val avgItemHeight = visibleItemsInfo.sumOf { it.size.height } / visibleItemsInfo.size.toFloat()
+    val totalRows = (totalItemsCount + columnsCount - 1) / columnsCount
+
+    val estimatedTotalHeight = totalRows * avgItemHeight
+    val estimatedScrollableHeight = (estimatedTotalHeight - viewportHeight).coerceAtLeast(1f)
+    val currentRow = listState.firstVisibleItemIndex / columnsCount
+    val currentScrollOffset = currentRow * avgItemHeight + listState.firstVisibleItemScrollOffset
+    val scrollProgress = (currentScrollOffset / estimatedScrollableHeight).coerceIn(0f, 1f)
+
+    val thumbHeightRatio = if (viewportHeight <= 0 || estimatedTotalHeight <= 0f) {
+        1f
+    } else {
+        (viewportHeight.toFloat() / estimatedTotalHeight).coerceIn(0.05f, 1f)
+    }
+
+    return ScrollbarMetrics(
+        totalItemsCount = totalItemsCount,
+        visibleItemsCount = visibleItemsCount,
+        viewportHeight = viewportHeight,
+        columnsCount = columnsCount,
+        totalRows = totalRows,
+        scrollProgress = scrollProgress,
+        thumbHeightRatio = thumbHeightRatio,
+    )
+}
+
+/**
+ * Draggable scrollbar for LazyVerticalGrid.
+ *
+ * Design notes for future refactors:
+ * - Rendering consumes derived metrics instead of directly reading volatile grid state.
+ * - Gesture interactions cache grid geometry at drag start to keep drag behavior stable.
+ * - Visibility and touch-scrolling are observed via flows in side effects, not composition-time keys.
  */
 @Composable
 fun Scrollbar(
@@ -65,7 +135,7 @@ fun Scrollbar(
     val scope = rememberCoroutineScope()
 
     // Track visibility and interaction state
-    var isVisible by remember { mutableStateOf(false) }
+    val visibilityState = remember { mutableStateOf(false) }
     var isDragging by remember { mutableStateOf(false) }
     var isTouchScrolling by remember { mutableStateOf(false) }
     var containerHeight by remember { mutableFloatStateOf(0f) }
@@ -73,75 +143,18 @@ fun Scrollbar(
     // Drag state - when dragging, thumb follows gesture directly instead of list state
     var dragProgress by remember { mutableFloatStateOf(0f) }
     // Cache grid parameters at drag start to prevent recalculation during drag
-    var dragColumnsCount by remember { mutableStateOf(1) }
-    var dragTotalRows by remember { mutableStateOf(1) }
-    var dragTotalItems by remember { mutableStateOf(0) }
+    var dragColumnsCount by remember { mutableIntStateOf(1) }
+    var dragTotalRows by remember { mutableIntStateOf(1) }
+    var dragTotalItems by remember { mutableIntStateOf(0) }
 
-    // Read layout info directly
-    val layoutInfo = listState.layoutInfo
-    val totalItemsCount = layoutInfo.totalItemsCount
-    val visibleItemsInfo = layoutInfo.visibleItemsInfo
-    val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
-    val isScrollInProgress = listState.isScrollInProgress
-
-    // Calculate smooth scroll progress using pixel-level precision
-    // For grids, account for multiple columns per row
-    val scrollProgress = remember(
-        listState.firstVisibleItemIndex,
-        listState.firstVisibleItemScrollOffset,
-        totalItemsCount,
-        viewportHeight,
-    ) {
-        if (totalItemsCount == 0 || visibleItemsInfo.isEmpty()) {
-            0f
-        } else {
-            // Estimate column count by counting items sharing the same Y offset
-            val firstRowY = visibleItemsInfo.first().offset.y
-            val columnsCount = visibleItemsInfo.count { it.offset.y == firstRowY }.coerceAtLeast(1)
-
-            // Calculate average row height from visible items
-            val avgRowHeight = if (visibleItemsInfo.isNotEmpty()) {
-                visibleItemsInfo.sumOf { it.size.height } / visibleItemsInfo.size.toFloat()
-            } else {
-                FALLBACK_ITEM_HEIGHT_PX
-            }
-
-            // Calculate total rows and current row
-            val totalRows = (totalItemsCount + columnsCount - 1) / columnsCount
-            val currentRow = listState.firstVisibleItemIndex / columnsCount
-
-            val estimatedTotalHeight = totalRows * avgRowHeight
-            val estimatedScrollableHeight = (estimatedTotalHeight - viewportHeight).coerceAtLeast(1f)
-
-            // Calculate current scroll position in pixels (row-based)
-            val currentScrollOffset = currentRow * avgRowHeight + listState.firstVisibleItemScrollOffset
-
-            (currentScrollOffset / estimatedScrollableHeight).coerceIn(0f, 1f)
-        }
-    }
-
-    // Calculate thumb height ratio based on viewport vs estimated total content height
-    // For grids, we need to account for multiple columns per row
-    val thumbHeightRatio = if (totalItemsCount == 0 || visibleItemsInfo.isEmpty() || viewportHeight <= 0) {
-        1f
-    } else {
-        // Estimate column count by counting items sharing the same Y offset (first row)
-        val firstRowY = visibleItemsInfo.first().offset.y
-        val columnsCount = visibleItemsInfo.count { it.offset.y == firstRowY }.coerceAtLeast(1)
-
-        // Calculate average row height from visible items
-        val avgItemHeight = visibleItemsInfo.sumOf { it.size.height } / visibleItemsInfo.size.toFloat()
-
-        // Calculate total rows (ceiling division)
-        val totalRows = (totalItemsCount + columnsCount - 1) / columnsCount
-        val estimatedTotalHeight = totalRows * avgItemHeight
-
-        if (estimatedTotalHeight <= 0f) {
-            1f
-        } else {
-            (viewportHeight.toFloat() / estimatedTotalHeight).coerceIn(0.05f, 1f)
-        }
-    }
+    // Keep volatile grid reads behind derived state so UI code only consumes stable primitive values.
+    val metrics by remember(listState) { derivedStateOf { calculateScrollbarMetrics(listState) } }
+    val totalItemsCount = metrics.totalItemsCount
+    val visibleItemsCount = metrics.visibleItemsCount
+    val scrollProgress = metrics.scrollProgress
+    val thumbHeightRatio = metrics.thumbHeightRatio
+    val columnsCount = metrics.columnsCount
+    val totalRows = metrics.totalRows
 
     val isExpanded = isDragging || isTouchScrolling
 
@@ -157,7 +170,7 @@ fun Scrollbar(
 
     // Animate visibility
     val alpha by animateFloatAsState(
-        targetValue = if (isVisible || isDragging) 1f else 0f,
+        targetValue = if (visibilityState.value || isDragging) 1f else 0f,
         animationSpec = tween(durationMillis = 200),
         label = "scrollbarAlpha",
     )
@@ -169,28 +182,37 @@ fun Scrollbar(
         label = "grabHandleAlpha",
     )
 
-    // Track touch scrolling state
-    LaunchedEffect(isScrollInProgress) {
-        if (isScrollInProgress && !isDragging) {
-            isTouchScrolling = true
-        } else if (!isScrollInProgress) {
-            delay(300)
-            isTouchScrolling = false
-        }
+    // Observe scroll-in-progress outside composition to avoid direct volatile reads in composable scope.
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .collectLatest { isScrollInProgress ->
+                if (isScrollInProgress && !isDragging) {
+                    isTouchScrolling = true
+                } else if (!isScrollInProgress) {
+                    delay(300)
+                    isTouchScrolling = false
+                }
+            }
     }
 
-    // Show scrollbar when scrolling
-    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
-        if (totalItemsCount > visibleItemsInfo.size) {
-            isVisible = true
-            delay(hideDelay)
-            if (!isDragging && !isTouchScrolling) {
-                isVisible = false
+    // React to scroll position/layout updates in a side effect and drive auto-hide visibility from there.
+    LaunchedEffect(listState, hideDelay) {
+        snapshotFlow {
+            val layoutInfo = listState.layoutInfo
+            listState.firstVisibleItemIndex to
+                (listState.firstVisibleItemScrollOffset to (layoutInfo.totalItemsCount > layoutInfo.visibleItemsInfo.size))
+        }.collectLatest { (_, scrollInfo) ->
+            if (scrollInfo.second) {
+                visibilityState.value = true
+                delay(hideDelay)
+                if (!isDragging && !isTouchScrolling) {
+                    visibilityState.value = false
+                }
             }
         }
     }
 
-    val showScrollbar = totalItemsCount > visibleItemsInfo.size
+    val showScrollbar = totalItemsCount > visibleItemsCount
 
     Box(modifier = modifier.fillMaxSize()) {
         content()
@@ -206,14 +228,6 @@ fun Scrollbar(
             val effectiveProgress = if (isDragging) dragProgress else scrollProgress
             val thumbOffset = effectiveProgress * maxOffset
 
-            // Pre-calculate grid info for scroll operations
-            val columnsCount = if (visibleItemsInfo.isNotEmpty()) {
-                val firstRowY = visibleItemsInfo.first().offset.y
-                visibleItemsInfo.count { it.offset.y == firstRowY }.coerceAtLeast(1)
-            } else {
-                1
-            }
-            val totalRows = (totalItemsCount + columnsCount - 1) / columnsCount
 
             Box(
                 modifier = Modifier
@@ -242,14 +256,14 @@ fun Scrollbar(
                                 dragTotalItems = totalItemsCount
                                 dragProgress = scrollProgress
                                 isDragging = true
-                                isVisible = true
+                                visibilityState.value = true
                             },
                             onDragEnd = {
                                 isDragging = false
                                 scope.launch {
                                     delay(hideDelay)
                                     if (!isTouchScrolling) {
-                                        isVisible = false
+                                        visibilityState.value = false
                                     }
                                 }
                             },
@@ -258,7 +272,7 @@ fun Scrollbar(
                                 scope.launch {
                                     delay(hideDelay)
                                     if (!isTouchScrolling) {
-                                        isVisible = false
+                                        visibilityState.value = false
                                     }
                                 }
                             },

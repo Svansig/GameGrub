@@ -73,6 +73,7 @@ import com.winlator.renderer.effects.Effect
 import com.winlator.renderer.effects.FXAAEffect
 import com.winlator.renderer.effects.NTSCCombinedEffect
 import com.winlator.renderer.effects.ToonEffect
+import java.util.Locale
 import kotlin.math.abs
 
 private const val SCREEN_EFFECT_PERCENT_STEP = 5f
@@ -177,7 +178,7 @@ fun ScreenEffectsTabContent(
         )
         ScreenEffectAdjustmentRow(
             title = stringResource(R.string.screen_effects_gamma),
-            valueText = String.format("%.2fx", gamma),
+            valueText = String.format(Locale.getDefault(), "%.2fx", gamma),
             progress = normalizedProgress(gamma, 0.5f, 2.5f),
             onDecrease = {
                 gamma = (gamma - SCREEN_EFFECT_GAMMA_STEP).coerceIn(0.5f, 2.5f)
@@ -447,7 +448,7 @@ fun ScreenEffectsPanel(
                         )
                         ScreenEffectAdjustmentRow(
                             title = stringResource(R.string.screen_effects_gamma),
-                            valueText = String.format("%.2fx", gamma),
+                            valueText = String.format(Locale.getDefault(), "%.2fx", gamma),
                             progress = normalizedProgress(gamma, 0.5f, 2.5f),
                             onDecrease = {
                                 gamma = (gamma - SCREEN_EFFECT_GAMMA_STEP).coerceIn(0.5f, 2.5f)

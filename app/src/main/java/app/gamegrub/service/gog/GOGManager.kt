@@ -10,12 +10,11 @@ import app.gamegrub.data.LibraryItem
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.PathType
-import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.network.Net
-
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
-import com.winlator.core.FileUtils as WinlatorFileUtils
+import com.winlator.core.FileUtils
 import com.winlator.core.envvars.EnvVars
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -772,9 +771,9 @@ class GOGManager @Inject constructor(
         val isiDir = File(commonRedistDir, "ISI")
         if (isiDir.isDirectory) {
             val rootDirLink = File(isiDir, "rootdir")
-            if (!rootDirLink.exists() || !WinlatorStorageManager.isSymlink(rootDirLink)) {
+            if (!rootDirLink.exists() || !FileUtils.isSymlink(rootDirLink)) {
                 try {
-                    WinlatorStorageManager.symlink(gameInstallDir, rootDirLink)
+                    FileUtils.symlink(gameInstallDir.path, rootDirLink.path)
                     Timber.tag("GOG").d(
                         "Created scriptinterpreter rootdir symlink: ${rootDirLink.absolutePath} -> ${gameInstallDir.absolutePath}",
                     )
@@ -960,7 +959,7 @@ class GOGManager @Inject constructor(
                 .url(url)
                 .build()
 
-            val response = Net.http.newCall(request).execute()
+            val response = NetworkManager.http.newCall(request).execute()
             response.use {
                 if (!response.isSuccessful) {
                     Timber.tag("GOG").w("[Cloud Saves] Failed to fetch remote config: HTTP ${response.code}")

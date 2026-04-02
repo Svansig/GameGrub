@@ -2,7 +2,7 @@ package app.gamegrub.utils.manifest
 
 import android.content.Context
 import app.gamegrub.PrefManager
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -41,7 +41,7 @@ object ManifestRepository {
     private suspend fun fetchManifestJson(): String? = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder().url(MANIFEST_URL).build()
-            Net.http.newCall(request).execute().use { response ->
+            NetworkManager.http.newCall(request).execute().use { response ->
                 response.takeIf { it.isSuccessful }?.body?.string()
             }
         } catch (e: Exception) {

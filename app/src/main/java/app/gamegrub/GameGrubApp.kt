@@ -10,6 +10,7 @@ import androidx.navigation.NavController
 import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.events.EventDispatcher
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.utils.auth.PlayIntegrity
@@ -63,7 +64,7 @@ class GameGrubApp : SplitCompatApplication() {
             Timber.plant(ReleaseTree())
         }
 
-        NetworkMonitor.init(this)
+        NetworkManager.init(this)
 
         // Init our custom crash handler.
         CrashHandler.initialize(this)

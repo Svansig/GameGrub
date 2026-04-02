@@ -1,7 +1,7 @@
 package app.gamegrub.service.amazon
 
 import app.gamegrub.data.AmazonGame
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -116,7 +116,7 @@ object AmazonApiClient {
                 .header("Content-Encoding", "amz-1.0")
                 .build()
 
-            Net.http.newCall(request).execute().use { response ->
+            NetworkManager.http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     val errorBody = response.body?.string() ?: "(no body)"
                     Timber.e("[Amazon] HTTP ${response.code} from $url (target=${target.substringAfterLast('.')}): $errorBody")
@@ -317,7 +317,7 @@ object AmazonApiClient {
                 .get()
                 .build()
 
-            Net.http.newCall(request).execute().use { response ->
+            NetworkManager.http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     Timber.tag("Amazon").e("fetchDownloadSize: HTTP ${response.code} fetching manifest")
                     return@withContext null
@@ -361,7 +361,7 @@ object AmazonApiClient {
                 .header("User-Agent", AmazonConstants.GAMING_USER_AGENT)
                 .build()
 
-            Net.http.newCall(request).execute().use { response ->
+            NetworkManager.http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     val errorBody = response.body?.string() ?: "(no body)"
                     Timber.tag("Amazon").e("fetchSdkDownload: HTTP ${response.code}: $errorBody")

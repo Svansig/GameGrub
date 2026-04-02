@@ -3,7 +3,6 @@ package app.gamegrub.ui.screen.library.appscreen
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
-import android.os.storage.StorageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
@@ -31,8 +30,8 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
 import app.gamegrub.api.config.BestConfigService
-import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.data.LibraryItem
+import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
@@ -40,6 +39,7 @@ import app.gamegrub.service.DownloadService
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
+import app.gamegrub.storage.StorageManager as AppStorageManager
 import app.gamegrub.ui.component.dialog.GameManagerDialog
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
@@ -57,8 +57,6 @@ import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
 import app.gamegrub.utils.manifest.ManifestInstaller
 import app.gamegrub.utils.steam.SteamUtils
-import app.gamegrub.storage.StorageManager
-
 import com.posthog.PostHog
 import com.winlator.container.ContainerData
 import dagger.hilt.EntryPoint
@@ -823,9 +821,9 @@ class SteamAppScreen(
                 AppOptionMenuType.ResetDrm,
                 onClick = {
                     val container = ContainerUtils.getOrCreateContainer(context, appId)
-                    StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
-                    StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
-                    StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
+                    AppStorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
+                    AppStorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
+                    AppStorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
                     container.isNeedsUnpacking = true
                     container.saveData()
                 },
@@ -1034,7 +1032,7 @@ class SteamAppScreen(
         var progress by remember { mutableFloatStateOf(0f) }
         var moved by remember { mutableIntStateOf(0) }
         var total by remember { mutableIntStateOf(0) }
-        val sm = context.getSystemService(StorageManager::class.java)
+        val sm = context.getSystemService(android.os.storage.StorageManager::class.java)
         val externalStorageDirs = remember {
             context.getExternalFilesDirs(null)
                 .filterNotNull()
@@ -1053,9 +1051,9 @@ class SteamAppScreen(
             val installedApp = SteamService.getInstalledApp(gameId)
             if (installedApp != null) {
                 // Remove markers if the app is already installed
-                StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
-                StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
-                StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
+                AppStorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
+                AppStorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
+                AppStorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
             }
 
             PostHog.capture(
@@ -1082,7 +1080,7 @@ class SteamAppScreen(
             onResult = { _ ->
                 scope.launch {
                     showMoveDialog = true
-                    StorageManager.moveGamesFromOldPath(
+                    AppStorageManager.moveGamesFromOldPath(
                         Paths.get(Environment.getExternalStorageDirectory().absolutePath, "GameNative", "Steam").pathString,
                         oldGamesDirectory,
                         onProgressUpdate = { currentFile, fileProgress, movedFiles, totalFiles ->
@@ -1144,15 +1142,15 @@ class SteamAppScreen(
                 val info = withContext(Dispatchers.IO) {
                     val depots = SteamService.getDownloadableDepots(gameId)
                     Timber.i("There are ${depots.size} depots belonging to ${libraryItem.appId}")
-                    val availableBytes = StorageManager.getAvailableSpace(SteamPaths.defaultStoragePath)
+                    val availableBytes = AppStorageManager.getAvailableSpace(SteamPaths.defaultStoragePath)
                     val downloadBytes = depots.values.sumOf {
                         SteamUtils.getDownloadBytes(it.manifests["public"])
                     }
                     val installBytes = depots.values.sumOf { it.manifests["public"]?.size ?: 0 }
                     InstallSizeInfo(
-                        downloadSize = StorageManager.formatBinarySize(downloadBytes),
-                        installSize = StorageManager.formatBinarySize(installBytes),
-                        availableSpace = StorageManager.formatBinarySize(availableBytes),
+                        downloadSize = AppStorageManager.formatBinarySize(downloadBytes),
+                        installSize = AppStorageManager.formatBinarySize(installBytes),
+                        availableSpace = AppStorageManager.formatBinarySize(availableBytes),
                         installBytes = installBytes,
                         availableBytes = availableBytes,
                     )

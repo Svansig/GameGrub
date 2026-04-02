@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import app.gamegrub.R
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
 import java.io.File
@@ -1091,7 +1091,7 @@ private suspend fun loadWineProtonManifest(
             .url(manifestUrl)
             .build()
 
-        val response = Net.http.newCall(request).execute()
+        val response = NetworkManager.http.newCall(request).execute()
         if (response.isSuccessful) {
             val jsonString = response.body?.string() ?: "{}"
             val jsonObject = Json.decodeFromString<JsonObject>(jsonString)

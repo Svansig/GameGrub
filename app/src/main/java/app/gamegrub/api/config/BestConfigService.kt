@@ -10,7 +10,7 @@ import app.gamegrub.utils.manifest.ManifestComponentHelper
 import app.gamegrub.utils.manifest.ManifestContentTypes
 import app.gamegrub.utils.manifest.ManifestEntry
 import app.gamegrub.utils.manifest.ManifestRepository
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import com.winlator.box86_64.Box86_64PresetManager
 import com.winlator.container.Container
 import com.winlator.contents.ContentProfile
@@ -37,7 +37,7 @@ class BestConfigService @Inject constructor(
     private val cache: BestConfigCache,
     @param:ApplicationContext private val context: Context,
 ) {
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     private var lastMissingContentDescription: String? = null
 

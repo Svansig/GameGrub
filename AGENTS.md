@@ -381,7 +381,7 @@ ubuntufs/src/
 
 ## Entry Points
 
-- **Application**: `app.gamegrub.GameGrubApp` (root package) - initializes Timber, NetworkMonitor, CrashHandler, PrefManager, PostHog, PlayIntegrity
+- **Application**: `app.gamegrub.GameGrubApp` (root package) - initializes Timber, NetworkManager, CrashHandler, PrefManager, PostHog, PlayIntegrity
 - **Main Activity**: `app.gamegrub.MainActivity` (root package) - handles `home://gamegrub` deep link and `app.gamegrub.LAUNCH_GAME` action
 - **OAuth**: `ui/screen/auth/{GOG,Epic,Amazon}OAuthActivity.kt`
 - **Services**: SteamService, GOGService, EpicService, AmazonService (foreground)

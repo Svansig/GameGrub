@@ -2,7 +2,7 @@ package app.gamegrub.api
 
 import app.gamegrub.BuildConfig
 import app.gamegrub.utils.auth.PlayIntegrity
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -16,7 +16,7 @@ object GameNativeApi {
     val BASE_URL: String =
         if (BuildConfig.DEBUG) "http://10.0.2.2:8787" else "https://api.gamenative.app"
 
-    val httpClient: OkHttpClient = Net.http
+    val httpClient: OkHttpClient = NetworkManager.http
 
     inline fun <T> executeRequest(request: Request, parser: (String) -> T): ApiResult<T> {
         return try {

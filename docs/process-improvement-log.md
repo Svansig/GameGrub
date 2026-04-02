@@ -16,6 +16,24 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-01`
+- **Ticket**: `todo/COH-023.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Network ownership was split between `NetworkMonitor` and `utils/network/Net`, which increased drift risk for connectivity policy and HTTP defaults.
+- **Proposed Action**: Keep connectivity state and transport infrastructure in `app.gamegrub.network.NetworkManager` and enforce compatibility wrappers as delegation-only.
+- **Owner**: `TBD`
+- **Status**: `Done`
+
+- **Date**: `2026-04-01`
+- **Ticket**: `todo/COH-023.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Large cross-package infra migrations are error-prone without a quick ownership audit step.
+- **Proposed Action**: Add a lightweight checklist for infra migrations: static search for old surface usage, wrapper-only compatibility validation, and docs boundary update before marking tickets done.
+- **Owner**: `TBD`
+- **Status**: `Backlog`
+
+- **Date**: `2026-04-01`
 - **Ticket**: `todo/COH-022.md`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

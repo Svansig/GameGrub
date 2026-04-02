@@ -1,7 +1,7 @@
 package app.gamegrub.service.amazon
 
 import android.content.Context
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -171,7 +171,7 @@ object AmazonSdkManager {
             .get()
             .build()
 
-        Net.http.newCall(request).execute().use { response ->
+        NetworkManager.http.newCall(request).execute().use { response ->
             if (response.isSuccessful) {
                 response.body?.bytes()
             } else {
@@ -193,7 +193,7 @@ object AmazonSdkManager {
             .get()
             .build()
 
-        Net.http.newCall(request).execute().use { response ->
+        NetworkManager.http.newCall(request).execute().use { response ->
             if (response.isSuccessful) {
                 response.body?.byteStream()?.use { input ->
                     tmpFile.outputStream().use { output ->

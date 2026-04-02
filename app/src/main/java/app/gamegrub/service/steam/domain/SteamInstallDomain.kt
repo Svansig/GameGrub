@@ -2,7 +2,6 @@ package app.gamegrub.service.steam.domain
 
 import android.content.Context
 import app.gamegrub.GameGrubApp
-import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.DownloadInfo
@@ -11,6 +10,7 @@ import app.gamegrub.data.SteamApp
 import app.gamegrub.data.SteamControllerConfigDetail
 import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.managers.SteamCatalogManager
@@ -18,7 +18,6 @@ import app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager
 import app.gamegrub.service.steam.managers.SteamInputManager
 import app.gamegrub.service.steam.managers.SteamInstallManager
 import app.gamegrub.service.steam.managers.SteamInstalledExeManager
-import app.gamegrub.utils.network.Net
 import app.gamegrub.storage.StorageManager
 import com.winlator.container.ContainerManager
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -136,7 +135,7 @@ class SteamInstallDomain @Inject constructor(
     }
 
     private fun hasWifiOrEthernet(): Boolean {
-        return NetworkMonitor.hasWifiOrEthernet.value
+        return NetworkManager.hasWifiOrEthernet.value
     }
 
     fun getDownloadableDepots(appId: Int, preferredLanguage: String): Map<Int, DepotInfo> {
@@ -348,7 +347,7 @@ class SteamInstallDomain @Inject constructor(
                                 .post(requestBody)
                                 .build()
 
-                            Net.http.newCall(request).execute().use { response ->
+                            NetworkManager.http.newCall(request).execute().use { response ->
                                 if (!response.isSuccessful) {
                                     Timber.w("Failed to get steam controller config details for $publishedFileId: ${response.code}")
                                     return@use null
@@ -362,7 +361,7 @@ class SteamInstallDomain @Inject constructor(
                                 .get()
                                 .build()
 
-                            Net.http.newCall(downloadRequest).execute().use { downloadResponse ->
+                            NetworkManager.http.newCall(downloadRequest).execute().use { downloadResponse ->
                                 if (!downloadResponse.isSuccessful) {
                                     Timber.w("Failed to download steam controller config from %s: %d", fileUrl, downloadResponse.code)
                                     return@use null

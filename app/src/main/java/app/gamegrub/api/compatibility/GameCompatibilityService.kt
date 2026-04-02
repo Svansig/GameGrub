@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import app.gamegrub.R
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +23,7 @@ class GameCompatibilityService @Inject constructor(
     private val cache: GameCompatibilityCache,
     @param:ApplicationContext private val context: Context,
 ) {
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     data class GameCompatibilityResponse(
         val gameName: String,

@@ -9,7 +9,7 @@ import app.gamegrub.service.gog.api.GOGApiClient
 import app.gamegrub.service.gog.api.GOGManifestMeta
 import app.gamegrub.service.gog.api.GOGManifestParser
 import app.gamegrub.service.gog.api.V1DepotFile
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedOutputStream
@@ -62,7 +62,7 @@ class GOGDownloadManager @Inject constructor(
     @param:ApplicationContext private val context: Context,
 ) {
     private val WINDOWS_OS_VERSION = "windows"
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     /**
      * Context needed to refresh secure CDN links when they expire

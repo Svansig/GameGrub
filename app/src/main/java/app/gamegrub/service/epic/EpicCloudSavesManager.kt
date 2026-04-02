@@ -5,7 +5,7 @@ import androidx.core.content.edit
 import app.gamegrub.data.EpicGame
 import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.io.File
 import java.time.Instant
 import java.util.zip.GZIPInputStream
@@ -41,7 +41,7 @@ object EpicCloudSavesManager {
 
     private const val baseCloudSyncUrl = "https://datastorage-public-service-liveegs.live.use1a.on.epicgames.com"
 
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     data class CloudFileInfo(
         val hash: String,

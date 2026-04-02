@@ -11,7 +11,6 @@ import android.os.IBinder
 import androidx.room.withTransaction
 import app.gamegrub.BuildConfig
 import app.gamegrub.GameGrubApp
-import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.data.AppInfo
@@ -32,6 +31,7 @@ import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.service.steam.managers.LaunchIntentResult
@@ -246,7 +246,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         var cachedAchievementsAppId: Int? = null
             private set
 
-        val hasWifiOrEthernet: Boolean get() = NetworkMonitor.hasWifiOrEthernet.value
+        val hasWifiOrEthernet: Boolean get() = NetworkManager.hasWifiOrEthernet.value
 
         /** @return true if download may proceed; false if blocked (notifies user) */
         private fun checkWifiOrNotify(): Boolean {
@@ -1410,10 +1410,10 @@ class SteamService : Service(), IChallengeUrlChanged {
             override fun onLost(p0: Network) = checkAndPauseDownloads()
             override fun onCapabilitiesChanged(p0: Network, p1: NetworkCapabilities) = checkAndPauseDownloads()
 
-            // query ConnectivityManager directly (not NetworkMonitor) to avoid
+            // query ConnectivityManager directly (not NetworkManager state flow) to avoid
             // callback ordering race between our two separate registrations.
             // no VPN exclusion needed here — activeNetwork is always fresh
-            // (stale-VPN guard is only needed in NetworkMonitor's multi-network tracking)
+            // (stale-VPN guard is only needed in NetworkManager's multi-network tracking)
             private fun hasActiveWifiOrEthernet(): Boolean {
                 val activeNet = connectivityManager.activeNetwork ?: return false
                 val caps = connectivityManager.getNetworkCapabilities(activeNet) ?: return false

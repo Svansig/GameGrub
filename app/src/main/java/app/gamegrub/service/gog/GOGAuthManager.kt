@@ -2,7 +2,7 @@ package app.gamegrub.service.gog
 
 import android.content.Context
 import app.gamegrub.data.GOGCredentials
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +20,7 @@ import timber.log.Timber
  */
 object GOGAuthManager {
 
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     // Internal for testing - allows tests to override token URL
     @JvmField

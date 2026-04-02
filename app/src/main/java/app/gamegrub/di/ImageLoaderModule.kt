@@ -1,12 +1,11 @@
 package app.gamegrub.di
 
 import android.content.Context
-import app.gamegrub.NetworkMonitor
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.ui.utils.AnimatedPngDecoder
 import app.gamegrub.ui.utils.IconDecoder
 import coil.ImageLoader
 import coil.disk.DiskCache
-import coil.intercept.Interceptor
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import dagger.Module
@@ -41,7 +40,7 @@ class ImageLoaderModule {
             .diskCache(diskCache)
             .components {
                 add { chain ->
-                    val request = if (!NetworkMonitor.hasInternet.value) {
+                    val request = if (!NetworkManager.hasInternet.value) {
                         chain.request.newBuilder()
                             .networkCachePolicy(CachePolicy.DISABLED)
                             .build()

@@ -3,7 +3,7 @@ package app.gamegrub.service.epic
 import android.content.Context
 import app.gamegrub.data.EpicGame
 import app.gamegrub.db.dao.EpicGameDao
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.io.File
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -27,7 +27,7 @@ class EpicManager @Inject constructor(
 
     private val REFRESH_BATCH_SIZE = 10
 
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     // Separate client for CDN downloads - no connection pooling, follows redirects
     private val cdnClient = OkHttpClient.Builder()

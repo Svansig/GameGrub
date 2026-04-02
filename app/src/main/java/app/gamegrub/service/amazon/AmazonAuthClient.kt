@@ -1,6 +1,6 @@
 package app.gamegrub.service.amazon
 
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -21,7 +21,7 @@ data class AmazonAuthResponse(
 /** Low-level client for Amazon OAuth/device-auth APIs. */
 object AmazonAuthClient {
 
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
     private val JSON_MEDIA = "application/json; charset=utf-8".toMediaType()
 
     /** Exchange a PKCE authorization code for access and refresh tokens. */

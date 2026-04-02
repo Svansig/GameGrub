@@ -1,6 +1,6 @@
 package app.gamegrub.api.steamMetadata
 
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
@@ -14,7 +14,7 @@ import timber.log.Timber
 
 object SteamMetadataFetcher {
 
-    val http = Net.http.newBuilder()
+    val http = NetworkManager.http.newBuilder()
         .readTimeout(5, TimeUnit.MINUTES)
         .callTimeout(0, TimeUnit.MILLISECONDS)
         .protocols(listOf(Protocol.HTTP_1_1))

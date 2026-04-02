@@ -173,6 +173,48 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
 | SRV-001 | P1 | Move download orchestration to SteamInstallDomain | `service/steam` | `todo/SRV-001.md` |
+
+## Backlog - Architecture (Store Unification)
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-001 | P0 | Unified Game Domain Model | `data/domain` | `todo/ARCH-001.md` |
+| ARCH-001a | P0 | Define Unified Game Interface and Entity Schema | `data/domain` | `todo/ARCH-001a.md` |
+| ARCH-001b | P0 | Create Room Migration for Unified Games Table | `db` | `todo/ARCH-001b.md` |
+| ARCH-001c | P0 | Update DAO and Repository Layer | `db` | `todo/ARCH-001c.md` |
+| ARCH-002 | P1 | Unified Service Abstraction Layer | `service` | `todo/ARCH-002.md` |
+| ARCH-002a | P1 | Define GameStoreService Interface/Base | `service` | `todo/ARCH-002a.md` |
+| ARCH-002b | P1 | Migrate GOGService to Base Class | `service` | `todo/ARCH-002b.md` |
+| ARCH-002c | P1 | Migrate EpicService to Base Class | `service` | `todo/ARCH-002c.md` |
+| ARCH-002d | P1 | Migrate AmazonService to Base Class | `service` | `todo/ARCH-002d.md` |
+| ARCH-003 | P1 | Unified GameStoreLaunchStrategy | `container/launch` | `todo/ARCH-003.md` |
+| ARCH-003a | P1 | Design and Implement BaseLaunchCommandBuilder | `container/launch` | `todo/ARCH-003a.md` |
+| ARCH-003b | P1 | Migrate SteamLaunchCommandBuilder to Base | `container/launch` | `todo/ARCH-003b.md` |
+| ARCH-003c | P1 | Migrate GogLaunchCommandBuilder to Base | `container/launch` | `todo/ARCH-003c.md` |
+| ARCH-003d | P1 | Migrate EpicLaunchCommandBuilder to Base | `container/launch` | `todo/ARCH-003d.md` |
+| ARCH-003e | P1 | Migrate AmazonLaunchCommandBuilder to Base | `container/launch` | `todo/ARCH-003e.md` |
+| ARCH-004 | P2 | Unified Authentication Abstraction | `service/auth` | `todo/ARCH-004.md` |
+| ARCH-004a | P2 | Define GameStoreAuth Interface | `service/auth` | `todo/ARCH-004a.md` |
+| ARCH-004b | P2 | Migrate GOG Auth to Interface | `service/auth` | `todo/ARCH-004b.md` |
+| ARCH-004c | P2 | Migrate Epic Auth to Interface | `service/auth` | `todo/ARCH-004c.md` |
+| ARCH-004d | P2 | Migrate Amazon Auth to Interface | `service/auth` | `todo/ARCH-004d.md` |
+| ARCH-005 | P2 | Unified Download Management | `service/download` | `todo/ARCH-005.md` |
+| ARCH-005a | P2 | Define GameStoreDownloader Interface | `service/download` | `todo/ARCH-005a.md` |
+| ARCH-005b | P2 | Migrate GOG Download to Interface | `service/download` | `todo/ARCH-005b.md` |
+| ARCH-005c | P2 | Migrate Epic Download to Interface | `service/download` | `todo/ARCH-005c.md` |
+| ARCH-005d | P2 | Migrate Amazon Download to Interface | `service/download` | `todo/ARCH-005d.md` |
+| ARCH-005e | P2 | Wrap Steam Download in Interface | `service/download` | `todo/ARCH-005e.md` |
+| ARCH-006 | P2 | Unified AppScreen Base Class Enhancement | `ui/screen/library` | `todo/ARCH-006.md` |
+| ARCH-006a | P2 | Analyze BaseAppScreen Consolidation Opportunities | `ui/screen/library` | `todo/ARCH-006a.md` |
+| ARCH-006b | P2 | Refactor SteamAppScreen to Use Enhanced Base | `ui/screen/library` | `todo/ARCH-006b.md` |
+| ARCH-006c | P2 | Refactor GOGAppScreen to Use Enhanced Base | `ui/screen/library` | `todo/ARCH-006c.md` |
+| ARCH-006d | P2 | Refactor EpicAppScreen to Use Enhanced Base | `ui/screen/library` | `todo/ARCH-006d.md` |
+| ARCH-006e | P2 | Refactor AmazonAppScreen to Use Enhanced Base | `ui/screen/library` | `todo/ARCH-006e.md` |
+| ARCH-007 | P2 | Cloud Saves Unification | `service/cloud` | `todo/ARCH-007.md` |
+| ARCH-007a | P2 | Define GameStoreCloudSaves Interface | `service/cloud` | `todo/ARCH-007a.md` |
+| ARCH-007b | P2 | Wrap Steam Cloud Saves in Interface | `service/cloud` | `todo/ARCH-007b.md` |
+| ARCH-007c | P2 | Migrate GOG Cloud Saves to Interface | `service/cloud` | `todo/ARCH-007c.md` |
+| ARCH-007d | P2 | Migrate Epic Cloud Saves to Interface | `service/cloud` | `todo/ARCH-007d.md` |
 | SRV-002 | P2 | Move installer/download helpers to SteamInstallDomain | `service/steam` | `todo/SRV-002.md` |
 | SRV-003 | P2 | Remove DepotDownloader import from SteamService | `service/steam` | `todo/SRV-003.md` |
 | SRV-004 | P1 | Move session/launch orchestration to SteamSessionDomain | `service/steam` | `todo/SRV-004.md` |
@@ -277,6 +319,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-020 | P1 | Introduce `app.gamegrub.storage` gateways/managers and DI wiring | TBD | `todo/COH-020.md` |
 | COH-021 | P1 | Migrate Steam path policy to `StoragePathGateway` | TBD | `todo/COH-021.md` |
 | COH-022 | P1 | Replace legacy storage/file/marker utility access with storage gateways | TBD | `todo/COH-022.md` |
+| COH-023 | P1 | Consolidate network infrastructure under `NetworkManager` | TBD | `todo/COH-023.md` |
 | UI-021 | P1 | Move `SteamAppScreen` storage permission/migration flows behind storage gateways | TBD | `todo/UI-021.md` |
 | UI-022 | P1 | Move settings storage toggle and volume selection off direct preference writes | TBD | `todo/UI-022.md` |
 | UI-023 | P2 | Move custom game folder and storage access checks to storage gateways | TBD | `todo/UI-023.md` |

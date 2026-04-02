@@ -88,11 +88,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import app.gamegrub.NetworkMonitor
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.steamGridDB.SteamGridDB
 import app.gamegrub.data.LibraryItem
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.GamepadAction
 import app.gamegrub.ui.component.GamepadActionBar
@@ -512,8 +512,8 @@ internal fun AppScreenContent(
 ) {
     val context = LocalContext.current
     // reactive — recomposes when network state changes
-    val hasInternet by NetworkMonitor.hasInternet.collectAsState()
-    val hasWifiOrEthernet by NetworkMonitor.hasWifiOrEthernet.collectAsState()
+    val hasInternet by NetworkManager.hasInternet.collectAsState()
+    val hasWifiOrEthernet by NetworkManager.hasWifiOrEthernet.collectAsState()
     val downloadAllowed = !PrefManager.downloadOnWifiOnly || hasWifiOrEthernet
     val scrollState = rememberScrollState()
 

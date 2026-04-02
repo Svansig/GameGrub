@@ -54,7 +54,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import com.winlator.contents.AdrenotoolsManager
 import java.io.File
 import java.io.IOException
@@ -125,7 +125,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     .url(manifestUrl)
                     .build()
 
-                val response = Net.http.newCall(request).execute()
+                val response = NetworkManager.http.newCall(request).execute()
                 if (response.isSuccessful) {
                     val jsonString = response.body?.string() ?: "{}"
                     val jsonObject = Json.decodeFromString<JsonObject>(jsonString)

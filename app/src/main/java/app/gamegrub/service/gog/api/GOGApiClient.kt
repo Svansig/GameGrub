@@ -2,7 +2,7 @@ package app.gamegrub.service.gog.api
 
 import android.content.Context
 import app.gamegrub.service.gog.GOGAuthManager
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,7 +28,7 @@ class GOGApiClient @Inject constructor(
         private const val GOG_CDN = "https://gog-cdn-fastly.gog.com"
     }
 
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     // TODO: Compose any functions to reduce DRYNESS.
 

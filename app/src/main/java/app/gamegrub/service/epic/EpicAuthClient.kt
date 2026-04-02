@@ -1,6 +1,6 @@
 package app.gamegrub.service.epic
 
-import app.gamegrub.utils.network.Net
+import app.gamegrub.network.NetworkManager
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,7 +24,7 @@ data class EpicAuthResponse(
  */
 
 object EpicAuthClient {
-    private val httpClient = Net.http
+    private val httpClient = NetworkManager.http
 
     /**
      * Authenticate with Epic using authorization code

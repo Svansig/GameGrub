@@ -64,7 +64,6 @@ This folder contains utility classes used across the application. Due to organic
 
 | File               | Purpose                     |
 |--------------------|-----------------------------|
-| `NetworkUtils.kt`  | Network connectivity checks |
 | `UpdateChecker.kt` | App update checking         |
 
 ### Device / Hardware

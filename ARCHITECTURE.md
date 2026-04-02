@@ -53,7 +53,7 @@ UI Layer → Service Layer → Data Layer
 ```
 
 **Entry Points:**
-- `GameGrubApp` - Application class, initializes Hilt, Timber, NetworkMonitor, CrashHandler, PrefManager, PostHog, PlayIntegrity
+- `GameGrubApp` - Application class, initializes Hilt, Timber, NetworkManager, CrashHandler, PrefManager, PostHog, PlayIntegrity
 - `MainActivity` - Main activity, handles deep links (`home://gamegrub`) and external game launch intents
 
 Manifest and policy-sensitive permission rationale are tracked in `docs/android-manifest-audit.md`.
@@ -149,7 +149,7 @@ db/
 | **Steam** | `SteamUtils`, `SteamTokenHelper`, `SteamControllerVdfUtils` |
 | **Game Data** | `GameMetadataManager`, `CustomGameScanner`, `GameCompatibilityService` |
 | **Storage** | `FileUtils`, `StorageUtils`, `KeyValueUtils` |
-| **Network** | `NetworkUtils`, `UpdateChecker` |
+| **Network** | `network/NetworkManager`, `UpdateChecker` |
 | **Auth** | `PlatformAuthUtils`, `PlayIntegrity` |
 | **General** | `DateTimeUtils`, `StringUtils`, `MathUtils` |
 
@@ -158,6 +158,11 @@ db/
 - UI-layer utils (`ui/utils/`) should only depend on UI models, not service or domain
 - Business-logic utilities in `app.gamegrub.utils` can depend on service/domain but should not depend on UI
 - Platform-specific utils (Steam, GOG, etc.) should encapsulate platform adapters
+
+**Network boundary:**
+- `app.gamegrub.network.NetworkManager` is the central owner for network infrastructure concerns (shared OkHttp client setup, DNS fallback, connectivity checks, coroutine-friendly request execution).
+- Platform/service code should keep business logic and API semantics, while delegating transport/infra concerns to `NetworkManager`.
+- Legacy `NetworkMonitor` and `utils/network/Net` compatibility wrappers were removed after migration; new network infrastructure must use `NetworkManager` directly.
 
 ### 6. Legacy Layer (`com.winlator`)
 

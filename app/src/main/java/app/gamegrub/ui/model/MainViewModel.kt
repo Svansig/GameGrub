@@ -18,6 +18,7 @@ import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.ConnectionState
+import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.general.IntentLaunchManager
@@ -436,7 +437,11 @@ class MainViewModel @Inject constructor(
         // Show booting splash before launching the app
         viewModelScope.launch {
             setShowBootingSplash(true)
-            GameGrubApp.events.emit(AndroidEvent.SetAllowedOrientation(PrefManager.allowedOrientation))
+            GameGrubApp.events.emit(
+                AndroidEvent.SetOrientationPolicy(
+                    OrientationPolicy.default(PrefManager.allowedOrientation),
+                ),
+            )
 
             val apiJob = viewModelScope.async(Dispatchers.IO) {
                 val container = ContainerUtils.getOrCreateContainer(context, appId)

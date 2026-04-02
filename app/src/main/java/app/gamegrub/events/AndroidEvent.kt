@@ -1,13 +1,11 @@
 package app.gamegrub.events
 
-import app.gamegrub.ui.enums.Orientation
-import java.util.EnumSet
+import app.gamegrub.ui.orientation.OrientationPolicy
 
 interface AndroidEvent<T> : Event<T> {
     data object BackPressed : AndroidEvent<Unit>
     data class SetSystemUIVisibility(val visible: Boolean) : AndroidEvent<Unit>
-    data class SetAllowedOrientation(val orientations: EnumSet<Orientation>) : AndroidEvent<Unit>
-    data object StartOrientator : AndroidEvent<Unit>
+    data class SetOrientationPolicy(val policy: OrientationPolicy) : AndroidEvent<Unit>
     data object ActivityDestroyed : AndroidEvent<Unit>
     data object GuestProgramTerminated : AndroidEvent<Unit>
     data class KeyEvent(val event: android.view.KeyEvent) : AndroidEvent<Boolean>

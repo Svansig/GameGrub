@@ -77,8 +77,8 @@ import app.gamegrub.ui.component.dialog.state.GameFeedbackDialogState
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
-import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.model.MainViewModel
+import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.screen.HomeScreen
 import app.gamegrub.ui.screen.login.UserLoginScreen
@@ -110,7 +110,6 @@ import dagger.hilt.components.SingletonComponent
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
 import java.io.File
 import java.util.Date
-import java.util.EnumSet
 import kotlin.reflect.KFunction2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -579,7 +578,6 @@ fun GameGrubMain(
                 // in order not to trigger the screen changed launch effect
                 viewModel.setCurrentScreen(destination.route)
             }
-            GameGrubApp.events.emit(AndroidEvent.StartOrientator)
         } else {
             GameGrubApp.onDestinationChangedListener?.let {
                 navController.removeOnDestinationChangedListener(it)
@@ -604,9 +602,12 @@ fun GameGrubMain(
                 GameGrubApp.events.emit(AndroidEvent.SetSystemUIVisibility(shouldShowStatusBar))
 
                 // reset system ui visibility based on user preference
-                // TODO: add option for user to set
-                // reset available orientations
-                GameGrubApp.events.emit(AndroidEvent.SetAllowedOrientation(EnumSet.of(Orientation.UNSPECIFIED)))
+                // Keep non-game routes fully rotatable.
+                GameGrubApp.events.emit(
+                    AndroidEvent.SetOrientationPolicy(
+                        OrientationPolicy.unrestricted(PrefManager.allowedOrientation),
+                    ),
+                )
             }
             // find out if back is available
             hasBack = navController.previousBackStackEntry?.destination?.route != null

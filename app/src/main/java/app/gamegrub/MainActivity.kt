@@ -22,6 +22,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.GameGrubMain
 import app.gamegrub.ui.ImmersiveModeManager
 import app.gamegrub.ui.OrientationManager
+import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.utils.LocaleHelper
 import app.gamegrub.utils.container.ContainerUtils
 import coil.ImageLoader
@@ -46,12 +47,8 @@ class MainActivity : ComponentActivity() {
         immersiveModeManager.setSystemUIVisibility(it.visible)
     }
 
-    private val onSetAllowedOrientation: (AndroidEvent.SetAllowedOrientation) -> Unit = {
-        orientationManager.setAllowedOrientations(it.orientations)
-    }
-
-    private val onStartOrientator: (AndroidEvent.StartOrientator) -> Unit = {
-        orientationManager.startOrientator()
+    private val onSetOrientationPolicy: (AndroidEvent.SetOrientationPolicy) -> Unit = {
+        orientationManager.setOrientationPolicy(it.policy)
     }
 
     private val onEndProcess: (AndroidEvent.EndProcess) -> Unit = {
@@ -76,6 +73,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         immersiveModeManager.applyImmersiveMode()
+        orientationManager.setOrientationPolicy(OrientationPolicy.default(PrefManager.allowedOrientation))
 
         ControllerManager.getInstance().init(applicationContext)
         ContainerUtils.setContainerDefaults(applicationContext)
@@ -85,8 +83,7 @@ class MainActivity : ComponentActivity() {
         AppUtils.keepScreenOn(this)
 
         GameGrubApp.events.on<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
-        GameGrubApp.events.on<AndroidEvent.StartOrientator, Unit>(onStartOrientator)
-        GameGrubApp.events.on<AndroidEvent.SetAllowedOrientation, Unit>(onSetAllowedOrientation)
+        GameGrubApp.events.on<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
         GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         setContent {
@@ -127,8 +124,7 @@ class MainActivity : ComponentActivity() {
         GameGrubApp.events.emit(AndroidEvent.ActivityDestroyed)
 
         GameGrubApp.events.off<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
-        GameGrubApp.events.off<AndroidEvent.StartOrientator, Unit>(onStartOrientator)
-        GameGrubApp.events.off<AndroidEvent.SetAllowedOrientation, Unit>(onSetAllowedOrientation)
+        GameGrubApp.events.off<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
         GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         ServiceLifecycleManager.onDestroy(isChangingConfigurations)
@@ -200,6 +196,11 @@ class MainActivity : ComponentActivity() {
         }
         PostHog.capture(event = "app_backgrounded")
         super.onPause()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        orientationManager.startOrientator()
     }
 
     override fun onStop() {

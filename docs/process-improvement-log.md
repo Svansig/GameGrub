@@ -16,6 +16,24 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-01`
+- **Ticket**: `todo/REL-015.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Orientation updates were emitted from composable body execution, creating avoidable recomposition-driven event churn.
+- **Proposed Action**: Require orientation/system side effects to be emitted from keyed effect blocks (`LaunchedEffect`/lifecycle coordinators) and add lint guidance for event emissions in composable bodies.
+- **Owner**: `TBD`
+- **Status**: `Done`
+
+- **Date**: `2026-04-01`
+- **Ticket**: `todo/TEST-017.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Local verification for orientation tickets can be blocked when `JAVA_HOME` is missing, delaying regression validation.
+- **Proposed Action**: Add a short contributor runbook note for Java setup validation before Gradle tasks (`java -version`, `JAVA_HOME`) and include it in troubleshooting docs.
+- **Owner**: `TBD`
+- **Status**: `Backlog`
+
+- **Date**: `2026-04-01`
 - **Ticket**: `N/A (Steam PICS sync stabilization)`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

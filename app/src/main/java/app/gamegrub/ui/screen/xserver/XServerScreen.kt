@@ -67,6 +67,7 @@ import app.gamegrub.ui.component.QuickMenu
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.XServerState
 import app.gamegrub.ui.enums.Orientation
+import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.widget.PerformanceHudView
 import app.gamegrub.utils.container.ContainerUtils
@@ -168,15 +169,17 @@ fun XServerScreen(
         GameGrubApp.setActiveSuspendPolicy(suspendPolicy)
     }
 
-    GameGrubApp.events.emit(
-        AndroidEvent.SetAllowedOrientation(
-            if (container.isPortraitMode) {
-                EnumSet.of(Orientation.PORTRAIT)
-            } else {
-                PrefManager.allowedOrientation
-            },
-        ),
-    )
+    LaunchedEffect(container.id, container.isPortraitMode) {
+        val policy = if (container.isPortraitMode) {
+            OrientationPolicy.forSessionOverride(
+                userAllowedOrientations = PrefManager.allowedOrientation,
+                overrideOrientations = EnumSet.of(Orientation.PORTRAIT),
+            )
+        } else {
+            OrientationPolicy.default(PrefManager.allowedOrientation)
+        }
+        GameGrubApp.events.emit(AndroidEvent.SetOrientationPolicy(policy))
+    }
 
     val xServerState = rememberSaveable(stateSaver = XServerState.Saver) {
         mutableStateOf(

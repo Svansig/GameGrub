@@ -227,6 +227,22 @@ DisposableEffect(Unit) {
 GameGrubApp.events.emit(AndroidEvent.BackPressed)
 ```
 
+## Orientation Ownership Contract
+
+Orientation behavior is centrally owned by `OrientationManager` and lifecycle-owned by `MainActivity`.
+
+- `MainActivity` starts/stops orientation sensing in `onStart`/`onStop`.
+- `MainActivity` is the only component that writes `Activity.requestedOrientation` (through `OrientationManager`).
+- UI and ViewModel layers emit `AndroidEvent.SetOrientationPolicy` with an `OrientationPolicy` payload.
+- `OrientationPolicy` merges three orientation inputs:
+  - `userAllowedOrientations` (saved preference)
+  - `sessionOverrideOrientations` (route/session override, e.g., portrait-only container)
+  - `fallbackOrientations` (final fallback, usually `UNSPECIFIED`)
+
+Policy precedence is: `sessionOverrideOrientations` -> `userAllowedOrientations` -> `fallbackOrientations`.
+
+This contract prevents direct orientation writes from composables and keeps route-specific behavior explicit and testable.
+
 ## Data Flow Examples
 
 ### 1. Launching a Game

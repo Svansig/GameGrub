@@ -19,7 +19,7 @@ import app.gamegrub.service.steam.managers.SteamInputManager
 import app.gamegrub.service.steam.managers.SteamInstallManager
 import app.gamegrub.service.steam.managers.SteamInstalledExeManager
 import app.gamegrub.utils.network.Net
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.ContainerManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import `in`.dragonbra.javasteam.depotdownloader.DepotDownloader
@@ -455,9 +455,9 @@ class SteamInstallDomain @Inject constructor(
 
         if (downloadInfo.downloadingAppIds.isEmpty()) {
             withContext(Dispatchers.IO) {
-                MarkerUtils.addMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-                MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-                MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+                StorageManager.addMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+                StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
             }
 
             libraryDomain.deleteDownloadingApp(downloadInfo.gameId)

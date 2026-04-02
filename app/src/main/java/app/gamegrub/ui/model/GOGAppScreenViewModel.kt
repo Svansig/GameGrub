@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.domain.GOGInstallDomain
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -35,7 +35,7 @@ class GOGAppScreenViewModel @Inject constructor(
             try {
                 val game = gogInstallDomain.getGOGGameOf(gameId)
                 val downloadSize = game?.downloadSize ?: 0L
-                val availableSpace = StorageUtils.getAvailableSpace(GOGConstants.defaultGOGGamesPath)
+                val availableSpace = StorageManager.getAvailableSpace(GOGConstants.defaultGOGGamesPath)
                 onDialogReady(
                     InstallDialogData(
                         gameId = gameId,

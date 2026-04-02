@@ -19,7 +19,7 @@ import app.gamegrub.service.steam.di.SteamLibraryClient
 import app.gamegrub.service.steam.managers.DownloadManager
 import app.gamegrub.service.steam.managers.PicsChangesManager
 import app.gamegrub.utils.steam.LicenseSerializer
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
@@ -251,7 +251,7 @@ class SteamLibraryDomain @Inject constructor(
             return true
         }
         val dirPath = SteamService.getAppDirPath(appId)
-        return File(dirPath).exists() && !MarkerUtils.hasMarker(dirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+        return File(dirPath).exists() && !StorageManager.hasMarker(dirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
     }
 
     suspend fun getMainAppDepots(appId: Int, language: String): Map<Int, DepotInfo> {

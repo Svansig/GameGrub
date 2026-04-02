@@ -13,7 +13,7 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -190,8 +190,8 @@ class EpicService : Service() {
                     } else {
                         Timber.tag("Epic").w("Failed to delete some files in installation folder")
                     }
-                    MarkerUtils.removeMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER)
-                    MarkerUtils.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                    StorageManager.removeMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER)
+                    StorageManager.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                 }
 
                 // Uninstall from database (keeps the entry but marks as not installed)
@@ -223,7 +223,7 @@ class EpicService : Service() {
             withContext(Dispatchers.IO) {
                 getInstance()?.epicManager?.getGameById(appId)?.let { game ->
                     val path = EpicConstants.getGameInstallPath(context, game.appName)
-                    MarkerUtils.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                    StorageManager.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                 }
             }
             getInstance()?.activeDownloads?.remove(appId)
@@ -253,7 +253,7 @@ class EpicService : Service() {
             val game = getEpicGameOf(appId) ?: return false
 
             if (game.isInstalled && game.installPath.isNotEmpty()) {
-                return MarkerUtils.hasMarker(game.installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                return StorageManager.hasMarker(game.installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
             }
 
             val installPath = game.installPath.takeIf { it.isNotEmpty() }
@@ -262,8 +262,8 @@ class EpicService : Service() {
                 }
                 ?: return false
 
-            val isDownloadComplete = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-            val isDownloadInProgress = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            val isDownloadComplete = StorageManager.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            val isDownloadInProgress = StorageManager.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
             if (isDownloadComplete && !isDownloadInProgress) {
                 val updatedGame = game.copy(
                     isInstalled = true,

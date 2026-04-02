@@ -40,7 +40,7 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.steam.generateSteamApp
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
 import dagger.hilt.android.AndroidEntryPoint
@@ -404,7 +404,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         fun isAppInstalled(appId: Int): Boolean {
-            return MarkerUtils.hasMarker(getAppDirPath(appId), Marker.DOWNLOAD_COMPLETE_MARKER)
+            return StorageManager.hasMarker(getAppDirPath(appId), Marker.DOWNLOAD_COMPLETE_MARKER)
         }
 
         fun getAppDlc(appId: Int): Map<Int, DepotInfo> {
@@ -515,7 +515,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     if (name.isEmpty()) continue
                     val path = Paths.get(basePath, name)
                     if (Files.isDirectory(path)) {
-                        if (MarkerUtils.hasMarker(path.pathString, Marker.DOWNLOAD_COMPLETE_MARKER)) {
+                        if (StorageManager.hasMarker(path.pathString, Marker.DOWNLOAD_COMPLETE_MARKER)) {
                             return path.pathString
                         }
                         if (firstExisting == null) firstExisting = path.pathString
@@ -591,7 +591,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun deleteApp(appId: Int): Boolean {
             val appDirPath = getAppDirPath(appId)
-            MarkerUtils.removeMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            StorageManager.removeMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
             val svc = instance ?: return false
             svc.scope.launch {
                 svc.db.withTransaction {
@@ -821,9 +821,9 @@ class SteamService : Service(), IChallengeUrlChanged {
             if (downloadInfo.downloadingAppIds.isEmpty()) {
                 // Handle completion: add markers
                 withContext(Dispatchers.IO) {
-                    MarkerUtils.addMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-                    MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-                    MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+                    StorageManager.addMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                    StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+                    StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
                 }
 
                 // clean up DB record BEFORE notifying UI to avoid stale "Resume" button

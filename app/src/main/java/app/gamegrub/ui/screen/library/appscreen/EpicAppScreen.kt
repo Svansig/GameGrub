@@ -29,7 +29,7 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.ContainerData
 import com.winlator.core.StringUtils
 import java.io.File
@@ -306,7 +306,7 @@ class EpicAppScreen : BaseAppScreen() {
         val game = EpicService.getEpicGameOf(libraryItem.gameId) ?: return false
         if (game.isInstalled) return false // Already installed (including old installs with no marker)
         val path = EpicConstants.getGameInstallPath(context, game.appName)
-        return File(path).exists() && !MarkerUtils.hasMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER)
+        return File(path).exists() && !StorageManager.hasMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER)
     }
 
     override fun onDownloadInstallClick(context: Context, libraryItem: LibraryItem, onClickPlay: (Boolean) -> Unit) {

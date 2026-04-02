@@ -96,7 +96,7 @@ object GameFeedbackUtils {
             // Get GPU info if available
             val gpu: String = try {
                 Timber.d("GameFeedbackUtils: About to get GPU info")
-                val gpuInfo = deviceQueryGateway.getGpuRendererOrUnknown()
+                val gpuInfo = deviceQueryGateway.getGpuRendererOrUnknown() ?: "Unknown GPU"
                 Timber.d("GameFeedbackUtils: GPU info: $gpuInfo")
                 gpuInfo
             } catch (e: Exception) {

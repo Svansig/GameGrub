@@ -2,7 +2,7 @@ package app.gamegrub.utils.preInstallSteps
 
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import java.io.File
 
@@ -54,7 +54,7 @@ object VcRedistStep : PreInstallStep {
         gameSource: GameSource,
         gameDirPath: String,
     ): Boolean {
-        return !MarkerUtils.hasMarker(gameDirPath, Marker.VCREDIST_INSTALLED)
+        return !StorageManager.hasMarker(gameDirPath, Marker.VCREDIST_INSTALLED)
     }
 
     override fun buildCommand(

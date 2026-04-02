@@ -57,8 +57,8 @@ import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
 import app.gamegrub.utils.manifest.ManifestInstaller
 import app.gamegrub.utils.steam.SteamUtils
-import app.gamegrub.utils.storage.MarkerUtils
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
+
 import com.posthog.PostHog
 import com.winlator.container.ContainerData
 import dagger.hilt.EntryPoint
@@ -823,9 +823,9 @@ class SteamAppScreen(
                 AppOptionMenuType.ResetDrm,
                 onClick = {
                     val container = ContainerUtils.getOrCreateContainer(context, appId)
-                    MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
-                    MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
-                    MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
+                    StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
+                    StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
+                    StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
                     container.isNeedsUnpacking = true
                     container.saveData()
                 },
@@ -1053,9 +1053,9 @@ class SteamAppScreen(
             val installedApp = SteamService.getInstalledApp(gameId)
             if (installedApp != null) {
                 // Remove markers if the app is already installed
-                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
-                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
-                MarkerUtils.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
+                StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_REPLACED)
+                StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_DLL_RESTORED)
+                StorageManager.removeMarker(getAppDirPath(gameId), Marker.STEAM_COLDCLIENT_USED)
             }
 
             PostHog.capture(
@@ -1082,7 +1082,7 @@ class SteamAppScreen(
             onResult = { _ ->
                 scope.launch {
                     showMoveDialog = true
-                    StorageUtils.moveGamesFromOldPath(
+                    StorageManager.moveGamesFromOldPath(
                         Paths.get(Environment.getExternalStorageDirectory().absolutePath, "GameNative", "Steam").pathString,
                         oldGamesDirectory,
                         onProgressUpdate = { currentFile, fileProgress, movedFiles, totalFiles ->
@@ -1144,15 +1144,15 @@ class SteamAppScreen(
                 val info = withContext(Dispatchers.IO) {
                     val depots = SteamService.getDownloadableDepots(gameId)
                     Timber.i("There are ${depots.size} depots belonging to ${libraryItem.appId}")
-                    val availableBytes = StorageUtils.getAvailableSpace(SteamPaths.defaultStoragePath)
+                    val availableBytes = StorageManager.getAvailableSpace(SteamPaths.defaultStoragePath)
                     val downloadBytes = depots.values.sumOf {
                         SteamUtils.getDownloadBytes(it.manifests["public"])
                     }
                     val installBytes = depots.values.sumOf { it.manifests["public"]?.size ?: 0 }
                     InstallSizeInfo(
-                        downloadSize = StorageUtils.formatBinarySize(downloadBytes),
-                        installSize = StorageUtils.formatBinarySize(installBytes),
-                        availableSpace = StorageUtils.formatBinarySize(availableBytes),
+                        downloadSize = StorageManager.formatBinarySize(downloadBytes),
+                        installSize = StorageManager.formatBinarySize(installBytes),
+                        availableSpace = StorageManager.formatBinarySize(availableBytes),
                         installBytes = installBytes,
                         availableBytes = availableBytes,
                     )

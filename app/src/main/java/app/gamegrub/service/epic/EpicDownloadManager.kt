@@ -7,7 +7,7 @@ import app.gamegrub.data.EpicGame
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.service.epic.manifest.ManifestUtils
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -77,7 +77,7 @@ class EpicDownloadManager @Inject constructor(
             Timber.tag("Epic").i("Starting download for ${game.title} to $installPath")
 
             File(installPath).mkdirs()
-            MarkerUtils.addMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.addMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
             // Emit download started event so UI can attach progress listeners
             val gameId = game.id
@@ -351,8 +351,8 @@ class EpicDownloadManager @Inject constructor(
                 // Don't fail the entire download for DB issues
             }
 
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
-            MarkerUtils.addMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.addMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
 
             // Clean up and update UI
             downloadInfo.updateStatusMessage("Complete")
@@ -371,7 +371,7 @@ class EpicDownloadManager @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             Timber.tag("Epic").e(e, "Download failed: ${e.message}")
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
             downloadInfo.updateStatusMessage("Failed: ${e.message}")
             downloadInfo.setProgress(-1.0f)
             downloadInfo.setActive(false)

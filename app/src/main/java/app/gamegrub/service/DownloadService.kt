@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Environment
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -81,7 +81,7 @@ object DownloadService {
         // How big is the game? The store should know. Human-readable.
         val depots = SteamService.getDownloadableDepots(appId)
         val installBytes = depots.values.sumOf { it.manifests["public"]?.size ?: 0L }
-        return StorageUtils.formatBinarySize(installBytes)
+        return StorageManager.formatBinarySize(installBytes)
     }
 
     suspend fun getSizeOnDiskDisplay(appId: Int, setResult: (String) -> Unit) {
@@ -89,8 +89,8 @@ object DownloadService {
         withContext(Dispatchers.IO) {
             // Do it async
             if (SteamService.isAppInstalled(appId)) {
-                val appSizeText = StorageUtils.formatBinarySize(
-                    StorageUtils.getFolderSize(SteamService.getAppDirPath(appId)),
+                val appSizeText = StorageManager.formatBinarySize(
+                    StorageManager.getFolderSize(SteamService.getAppDirPath(appId)),
                 )
 
                 Timber.d("Finding $appId size on disk $appSizeText")

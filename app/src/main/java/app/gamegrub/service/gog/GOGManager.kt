@@ -12,8 +12,8 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.enums.PathType
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.network.Net
-import app.gamegrub.utils.storage.FileUtils
-import app.gamegrub.utils.storage.MarkerUtils
+
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import com.winlator.core.FileUtils as WinlatorFileUtils
 import com.winlator.core.envvars.EnvVars
@@ -370,7 +370,7 @@ class GOGManager @Inject constructor(
                 if (gameId.isNotEmpty()) {
                     val game = getGameFromDbById(gameId)
                     if (game != null) {
-                        val installSize = FileUtils.calculateDirectorySize(installDir)
+                        val installSize = StorageManager.calculateDirectorySize(installDir)
                         return game.copy(
                             isInstalled = true,
                             installPath = installDir.absolutePath,
@@ -396,7 +396,7 @@ class GOGManager @Inject constructor(
                 } == true
 
                 if (hasContent) {
-                    val installSize = FileUtils.calculateDirectorySize(installDir)
+                    val installSize = StorageManager.calculateDirectorySize(installDir)
                     Timber.d("Matched directory '$dirName' to game '${game.title}'")
                     return game.copy(
                         isInstalled = true,
@@ -445,7 +445,7 @@ class GOGManager @Inject constructor(
                 val gameId = libraryItem.gameId.toString()
                 val installPath = getGameInstallPath(gameId, libraryItem.name)
                 val installDir = File(installPath)
-                val wasInstalled = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                val wasInstalled = StorageManager.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
 
                 // Delete the manifest file
                 val manifestPath = File(context.filesDir, "manifests/$gameId")
@@ -467,8 +467,8 @@ class GOGManager @Inject constructor(
                     Timber.w("GOG game directory doesn't exist: $installPath")
                 }
 
-                MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-                MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                StorageManager.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
                 if (wasInstalled) {
                     val game = getGameFromDbById(gameId)
@@ -501,8 +501,8 @@ class GOGManager @Inject constructor(
             val appDirPath = getAppDirPath(libraryItem.appId)
 
             // Use marker-based approach
-            val isDownloadComplete = MarkerUtils.hasMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-            val isDownloadInProgress = MarkerUtils.hasMarker(appDirPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            val isDownloadComplete = StorageManager.hasMarker(appDirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            val isDownloadInProgress = StorageManager.hasMarker(appDirPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
             val isInstalled = isDownloadComplete && !isDownloadInProgress
 
@@ -658,7 +658,7 @@ class GOGManager @Inject constructor(
                 if (task.has("isPrimary") && task.getBoolean("isPrimary")) {
                     val executablePath = task.getString("path")
                     Timber.e("executable_path: $executablePath, gameDir: ${gameDir.absolutePath}")
-                    val exeFile = FileUtils.findFileCaseInsensitive(gameDir, executablePath)
+                    val exeFile = StorageManager.findFileCaseInsensitive(gameDir, executablePath)
                     if (exeFile != null) {
                         val relativePath = exeFile.relativeTo(installDir).path
                         return Result.success(relativePath)
@@ -772,9 +772,9 @@ class GOGManager @Inject constructor(
         val isiDir = File(commonRedistDir, "ISI")
         if (isiDir.isDirectory) {
             val rootDirLink = File(isiDir, "rootdir")
-            if (!rootDirLink.exists() || !WinlatorFileUtils.isSymlink(rootDirLink)) {
+            if (!rootDirLink.exists() || !WinlatorStorageManager.isSymlink(rootDirLink)) {
                 try {
-                    WinlatorFileUtils.symlink(gameInstallDir, rootDirLink)
+                    WinlatorStorageManager.symlink(gameInstallDir, rootDirLink)
                     Timber.tag("GOG").d(
                         "Created scriptinterpreter rootdir symlink: ${rootDirLink.absolutePath} -> ${gameInstallDir.absolutePath}",
                     )

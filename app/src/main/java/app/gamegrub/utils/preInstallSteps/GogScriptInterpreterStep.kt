@@ -3,7 +3,7 @@ package app.gamegrub.utils.preInstallSteps
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.gog.GOGService
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import java.io.File
 
@@ -17,7 +17,7 @@ object GogScriptInterpreterStep : PreInstallStep {
     ): Boolean {
         return gameSource == GameSource.GOG &&
             container.containerVariant.equals(Container.GLIBC) &&
-            !MarkerUtils.hasMarker(gameDirPath, Marker.GOG_SCRIPT_INSTALLED)
+            !StorageManager.hasMarker(gameDirPath, Marker.GOG_SCRIPT_INSTALLED)
     }
 
     override fun buildCommand(

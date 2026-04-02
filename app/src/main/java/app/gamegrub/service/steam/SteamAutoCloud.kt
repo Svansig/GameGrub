@@ -9,7 +9,7 @@ import app.gamegrub.data.UserFilesUploadResult
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
-import app.gamegrub.utils.storage.FileUtils
+import app.gamegrub.storage.StorageManager
 import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileChangeList
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.AppFileInfo
@@ -223,7 +223,7 @@ object SteamAutoCloud {
 
                     Timber.i("Looking for saves in $basePath with pattern ${userFile.pattern} (prefix ${userFile.prefix})")
 
-                    val files = FileUtils.findFilesRecursive(
+                    val files = StorageManager.findFilesRecursive(
                         rootPath = basePath,
                         pattern = userFile.pattern,
                         maxDepth = 5,
@@ -257,7 +257,7 @@ object SteamAutoCloud {
 
                 Timber.i("No UFS patterns; scanning $basePath recursively (depth 5) under ${rootType.name}")
 
-                val files = FileUtils.findFilesRecursive(
+                val files = StorageManager.findFilesRecursive(
                     rootPath = basePath,
                     pattern = "*",
                     maxDepth = 5,

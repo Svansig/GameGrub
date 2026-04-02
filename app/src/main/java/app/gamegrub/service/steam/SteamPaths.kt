@@ -4,7 +4,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamApp
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.DownloadService
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -82,7 +82,7 @@ object SteamPaths {
                 if (name.isEmpty()) continue
                 val path = Paths.get(basePath, name)
                 if (Files.isDirectory(path)) {
-                    if (MarkerUtils.hasMarker(path.pathString, Marker.DOWNLOAD_COMPLETE_MARKER)) {
+                    if (StorageManager.hasMarker(path.pathString, Marker.DOWNLOAD_COMPLETE_MARKER)) {
                         return path.pathString
                     }
                     if (firstExisting == null) firstExisting = path.pathString

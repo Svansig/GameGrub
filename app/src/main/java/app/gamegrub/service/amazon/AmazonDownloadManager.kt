@@ -4,7 +4,7 @@ import android.content.Context
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.enums.Marker
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import java.io.File
 import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
@@ -52,11 +52,11 @@ class AmazonDownloadManager @Inject constructor(
             Timber.tag(TAG).i("Starting download for ${game.title} → $installPath")
 
             File(installPath).mkdirs()
-            MarkerUtils.addMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.addMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
             // Helper to cleanup marker on early failure
             fun cleanupOnFailure() {
-                MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
             }
 
             // ── 1. Credentials ───────────────────────────────────────────────
@@ -137,7 +137,7 @@ class AmazonDownloadManager @Inject constructor(
 
                 val failure = results.firstOrNull { it.isFailure }
                 if (failure != null) {
-                    MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                    StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                     return@withContext Result.failure(
                         failure.exceptionOrNull() ?: Exception("File download failed"),
                     )
@@ -164,8 +164,8 @@ class AmazonDownloadManager @Inject constructor(
             Timber.tag(TAG).i("Persisting install: productId=$productId, version=${spec.versionId}")
             amazonManager.markInstalled(productId, installPath, manifest.totalInstallSize, spec.versionId)
 
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
-            MarkerUtils.addMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.addMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
 
             downloadInfo.updateStatusMessage("Complete")
             // Clamp bytes so progress reads exactly 1.0
@@ -179,13 +179,13 @@ class AmazonDownloadManager @Inject constructor(
             Result.success(Unit)
         } catch (e: Exception) {
             if (e is CancellationException) {
-                MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                 downloadInfo.persistProgressSnapshot()
                 downloadInfo.setActive(false)
                 throw e
             }
             Timber.tag(TAG).e(e, "Download failed for ${game.title}: ${e.message}")
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
             downloadInfo.updateStatusMessage("Failed: ${e.message}")
             downloadInfo.setProgress(-1f)
             downloadInfo.setActive(false)

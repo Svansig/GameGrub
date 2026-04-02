@@ -31,7 +31,7 @@ import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.game.ExeIconExtractor
 import app.gamegrub.utils.game.GameMetadataManager
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.ContainerData
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -148,8 +148,8 @@ class CustomGameAppScreen(
             gameFolderPath?.let { path ->
                 withContext(Dispatchers.IO) {
                     try {
-                        val folderSize = StorageUtils.getFolderSize(path)
-                        val formattedSize = StorageUtils.formatBinarySize(folderSize)
+                        val folderSize = StorageManager.getFolderSize(path)
+                        val formattedSize = StorageManager.formatBinarySize(folderSize)
                         sizeOnDisk = formattedSize
                     } catch (e: Exception) {
                         // Ignore errors, sizeOnDisk will remain null

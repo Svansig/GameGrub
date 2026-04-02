@@ -50,7 +50,7 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.component.topbar.BackButton
 import app.gamegrub.ui.data.GameDisplayInfo
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import com.winlator.core.StringUtils
@@ -112,7 +112,7 @@ fun EpicGameManagerDialog(
     fun getInstallSizeInfo(): InstallSizeInfo {
         val installPath = EpicConstants.defaultEpicGamesPath(context)
         val availableBytes = try {
-            StorageUtils.getAvailableSpace(installPath)
+            StorageManager.getAvailableSpace(installPath)
         } catch (e: Exception) {
             0L
         }

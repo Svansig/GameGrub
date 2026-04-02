@@ -2,7 +2,7 @@ package app.gamegrub.utils.preInstallSteps
 
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import java.io.File
 import timber.log.Timber
@@ -15,7 +15,7 @@ object PhysXStep : PreInstallStep {
         gameSource: GameSource,
         gameDirPath: String,
     ): Boolean {
-        return !MarkerUtils.hasMarker(gameDirPath, Marker.PHYSX_INSTALLED)
+        return !StorageManager.hasMarker(gameDirPath, Marker.PHYSX_INSTALLED)
     }
 
     override fun buildCommand(

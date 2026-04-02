@@ -17,7 +17,7 @@ import app.gamegrub.service.amazon.AmazonService.Companion.getInstance
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.game.ExecutableSelectionUtils
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
@@ -201,7 +201,7 @@ class AmazonService : Service() {
             val game = getAmazonGameOf(productId) ?: return false
 
             if (game.isInstalled && game.installPath.isNotEmpty()) {
-                return MarkerUtils.hasMarker(game.installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                return StorageManager.hasMarker(game.installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
             }
 
             val installPath = game.installPath.takeIf { it.isNotEmpty() }
@@ -210,8 +210,8 @@ class AmazonService : Service() {
                 }
                 ?: return false
 
-            val isDownloadComplete = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-            val isDownloadInProgress = MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            val isDownloadComplete = StorageManager.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            val isDownloadInProgress = StorageManager.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
             if (isDownloadComplete && !isDownloadInProgress) {
                 instance?.amazonManager?.markInstalled(productId, installPath, 0L)
                 return true
@@ -266,11 +266,11 @@ class AmazonService : Service() {
                 return false
             }
 
-            if (MarkerUtils.hasMarker(expectedPath, Marker.DOWNLOAD_COMPLETE_MARKER)) {
+            if (StorageManager.hasMarker(expectedPath, Marker.DOWNLOAD_COMPLETE_MARKER)) {
                 Timber.tag("Amazon").d("[PARTIAL] appId=$appId partial=false reason=complete_marker path=$expectedPath")
                 return false
             }
-            if (MarkerUtils.hasMarker(expectedPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)) {
+            if (StorageManager.hasMarker(expectedPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)) {
                 Timber.tag("Amazon").d("[PARTIAL] appId=$appId partial=true reason=in_progress_marker path=$expectedPath")
                 return true
             }
@@ -448,7 +448,7 @@ class AmazonService : Service() {
             instance.activeDownloadPaths[productId] = installPath
 
             // Fresh install/update run should clear stale completion marker before starting
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
 
             GameGrubApp.events.emitJava(
                 AndroidEvent.DownloadStatusChanged(game.appId, true),
@@ -584,8 +584,8 @@ class AmazonService : Service() {
                             installDir.deleteRecursively()
                         }
 
-                        MarkerUtils.removeMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER)
-                        MarkerUtils.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                        StorageManager.removeMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER)
+                        StorageManager.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
                         // Remove metadata residue and ensure uninstall leaves no resumable state behind.
                         val downloadInfoDir = File(installDir, ".DownloadInfo")
@@ -632,8 +632,8 @@ class AmazonService : Service() {
 
                     val postUninstallPath = AmazonConstants.getGameInstallPath(context, game.title)
                     val postInstallDirExists = File(postUninstallPath).exists()
-                    val completeMarkerExists = MarkerUtils.hasMarker(postUninstallPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-                    val inProgressMarkerExists = MarkerUtils.hasMarker(postUninstallPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                    val completeMarkerExists = StorageManager.hasMarker(postUninstallPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+                    val inProgressMarkerExists = StorageManager.hasMarker(postUninstallPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
                     Timber.tag("Amazon").i(
                         "[UNINSTALL] final_state productId=$productId appId=${game.appId} installDirExists=$postInstallDirExists completeMarker=$completeMarkerExists inProgressMarker=$inProgressMarkerExists",
@@ -853,8 +853,8 @@ class AmazonService : Service() {
 
     private suspend fun cleanupFailedInstall(context: Context, game: AmazonGame, installPath: String) {
         withContext(Dispatchers.IO) {
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-            MarkerUtils.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
             runCatching {
                 val dir = File(installPath)

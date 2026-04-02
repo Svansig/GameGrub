@@ -56,7 +56,7 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.internal.fakeAppInfo
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.utils.steam.SteamUtils
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import java.text.SimpleDateFormat
@@ -177,8 +177,8 @@ fun GameManagerDialog(
             }
 
             return Pair(
-                StorageUtils.formatBinarySize(downloadBytes),
-                StorageUtils.formatBinarySize(installBytes),
+                StorageManager.formatBinarySize(downloadBytes),
+                StorageManager.formatBinarySize(installBytes),
             )
         }
 
@@ -195,13 +195,13 @@ fun GameManagerDialog(
         }
 
         return Pair(
-            StorageUtils.formatBinarySize(downloadBytes),
-            StorageUtils.formatBinarySize(installBytes),
+            StorageManager.formatBinarySize(downloadBytes),
+            StorageManager.formatBinarySize(installBytes),
         )
     }
 
     fun getInstallSizeInfo(): InstallSizeInfo {
-        val availableBytes = StorageUtils.getAvailableSpace(SteamPaths.defaultStoragePath)
+        val availableBytes = StorageManager.getAvailableSpace(SteamPaths.defaultStoragePath)
 
         // For Base Game
         val baseGameInstallBytes = if (installedApp == null) {
@@ -240,9 +240,9 @@ fun GameManagerDialog(
             }
 
         return InstallSizeInfo(
-            downloadSize = StorageUtils.formatBinarySize(baseGameDownloadBytes + selectedDownloadBytes),
-            installSize = StorageUtils.formatBinarySize(baseGameInstallBytes + selectedInstallBytes),
-            availableSpace = StorageUtils.formatBinarySize(availableBytes),
+            downloadSize = StorageManager.formatBinarySize(baseGameDownloadBytes + selectedDownloadBytes),
+            installSize = StorageManager.formatBinarySize(baseGameInstallBytes + selectedInstallBytes),
+            availableSpace = StorageManager.formatBinarySize(availableBytes),
             installBytes = baseGameInstallBytes + selectedInstallBytes,
             availableBytes = availableBytes,
         )

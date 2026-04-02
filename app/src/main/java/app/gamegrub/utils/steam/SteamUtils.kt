@@ -10,8 +10,8 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppInfoOf
 import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.storage.FileUtils
-import app.gamegrub.utils.storage.MarkerUtils
+
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import com.winlator.core.TarCompressorUtils
 import com.winlator.core.WineRegistryEditor
@@ -119,11 +119,11 @@ object SteamUtils {
     suspend fun replaceSteamApi(context: Context, appId: String, isOffline: Boolean = false) {
         val steamAppId = ContainerUtils.extractGameIdFromContainerId(appId)
         val appDirPath = SteamService.getAppDirPath(steamAppId)
-        if (MarkerUtils.hasMarker(appDirPath, Marker.STEAM_DLL_REPLACED)) {
+        if (StorageManager.hasMarker(appDirPath, Marker.STEAM_DLL_REPLACED)) {
             return
         }
-        MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_RESTORED)
-        MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+        StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_RESTORED)
+        StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
         Timber.i("Starting replaceSteamApi for appId: $appId")
         Timber.i("Checking directory: $appDirPath")
         var replaced32Count = 0
@@ -199,7 +199,7 @@ object SteamUtils {
         // Generate achievements.json
         generateAchievementsFile(rootPath.resolve("steam_settings"), appId)
 
-        MarkerUtils.addMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+        StorageManager.addMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
     }
 
     /**
@@ -210,13 +210,13 @@ object SteamUtils {
         val appDirPath = SteamService.getAppDirPath(steamAppId)
         val container = ContainerUtils.getContainer(context, appId)
 
-        if (MarkerUtils.hasMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED) &&
+        if (StorageManager.hasMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED) &&
             File(container.rootDir, ".wine/drive_c/Program Files (x86)/Steam/steamclient_loader_x64.dll").exists()
         ) {
             return
         }
-        MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-        MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_RESTORED)
+        StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+        StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_RESTORED)
 
         // Make a backup before extracting
         backupSteamclientFiles(context, steamAppId)
@@ -247,7 +247,7 @@ object SteamUtils {
         // Game-specific Handling
         ensureSaveLocationsForGames(context, steamAppId)
 
-        MarkerUtils.addMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+        StorageManager.addMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
     }
 
     fun steamClientFiles(): Array<String> {
@@ -438,11 +438,11 @@ object SteamUtils {
 
         skipFirstTimeSteamSetup(imageFs.rootDir)
         val appDirPath = SteamService.getAppDirPath(steamAppId)
-        if (MarkerUtils.hasMarker(appDirPath, Marker.STEAM_DLL_RESTORED)) {
+        if (StorageManager.hasMarker(appDirPath, Marker.STEAM_DLL_RESTORED)) {
             return
         }
-        MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-        MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+        StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+        StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
         Timber.i("Checking directory: $appDirPath")
 
         autoLoginUserChanges(imageFs)
@@ -464,7 +464,7 @@ object SteamUtils {
         // Game-specific Handling
         ensureSaveLocationsForGames(context, steamAppId)
 
-        MarkerUtils.addMarker(appDirPath, Marker.STEAM_DLL_RESTORED)
+        StorageManager.addMarker(appDirPath, Marker.STEAM_DLL_RESTORED)
     }
 
     fun findSteamApiDllRootFile(file: File, depth: Int): File? {
@@ -768,7 +768,7 @@ object SteamUtils {
             val localConfigFile = File(configPath, "localconfig.vdf")
 
             if (localConfigFile.exists()) {
-                val vdfContent = FileUtils.readFileAsString(localConfigFile.absolutePath)
+                val vdfContent = StorageManager.readFileAsString(localConfigFile.absolutePath)
                 val vdfData = KeyValue.loadFromString(vdfContent!!)!!
                 val app = vdfData["Software"]["Valve"]["Steam"]["apps"][appId]
                 val option = app.children.firstOrNull { it.name == "LaunchOptions" }
@@ -803,7 +803,7 @@ object SteamUtils {
             val appManifestFile = File(steamappsDir, "appmanifest_$appId.acf")
 
             if (appManifestFile.exists()) {
-                val manifestContent = FileUtils.readFileAsString(appManifestFile.absolutePath)
+                val manifestContent = StorageManager.readFileAsString(appManifestFile.absolutePath)
                 val manifestData = KeyValue.loadFromString(manifestContent!!)!!
 
                 val userConfig = manifestData.children.firstOrNull { it.name == "UserConfig" }

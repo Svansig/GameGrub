@@ -8,7 +8,7 @@ import app.gamegrub.utils.preInstallSteps.PhysXStep
 import app.gamegrub.utils.preInstallSteps.PreInstallStep
 import app.gamegrub.utils.preInstallSteps.VcRedistStep
 import app.gamegrub.utils.preInstallSteps.XnaFrameworkStep
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import java.io.File
 
@@ -89,19 +89,19 @@ object PreInstallSteps {
         val gameDir = getGameDir(container) ?: return
         val gameDirPath = gameDir.absolutePath
         for (marker in allMarkers) {
-            MarkerUtils.addMarker(gameDirPath, marker)
+            StorageManager.addMarker(gameDirPath, marker)
         }
     }
 
     fun markStepDone(container: Container, marker: Marker) {
         val gameDir = getGameDir(container) ?: return
         val gameDirPath = gameDir.absolutePath
-        MarkerUtils.addMarker(gameDirPath, marker)
+        StorageManager.addMarker(gameDirPath, marker)
     }
 
     private fun resetMarkers(gameDirPath: String) {
         for (marker in allMarkers) {
-            MarkerUtils.removeMarker(gameDirPath, marker)
+            StorageManager.removeMarker(gameDirPath, marker)
         }
     }
 

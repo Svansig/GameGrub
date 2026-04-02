@@ -13,7 +13,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.general.IntentLaunchManager
 import app.gamegrub.utils.steam.SteamUtils
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import com.winlator.container.ContainerData
 import com.winlator.container.ContainerManager
@@ -534,22 +534,22 @@ object ContainerUtils {
         if (previousLanguage.lowercase() != containerData.language.lowercase()) {
             val steamAppId = extractGameIdFromContainerId(container.id)
             val appDirPath = SteamService.getAppDirPath(steamAppId)
-            MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-            MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+            StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+            StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
             Timber.i("Language changed from '$previousLanguage' to '${containerData.language}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
         }
         if (previousForceDlc != containerData.forceDlc) {
             val steamAppId = extractGameIdFromContainerId(container.id)
             val appDirPath = SteamService.getAppDirPath(steamAppId)
-            MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-            MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+            StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+            StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
             Timber.i("forceDlc changed from '$previousForceDlc' to '${containerData.forceDlc}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
         }
         if (previousSteamOfflineMode != containerData.steamOfflineMode) {
             val steamAppId = extractGameIdFromContainerId(container.id)
             val appDirPath = SteamService.getAppDirPath(steamAppId)
-            MarkerUtils.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
-            MarkerUtils.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
+            StorageManager.removeMarker(appDirPath, Marker.STEAM_DLL_REPLACED)
+            StorageManager.removeMarker(appDirPath, Marker.STEAM_COLDCLIENT_USED)
             Timber.i("steamOfflineMode changed from '$previousSteamOfflineMode' to '${containerData.steamOfflineMode}'. Cleared STEAM_DLL_REPLACED marker for container ${container.id}.")
         }
 
@@ -798,7 +798,7 @@ object ContainerUtils {
                 val appInfo = SteamService.getAppInfoOf(gameId)
                 if (appInfo != null) {
                     val gameName = appInfo.name
-                    val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown()
+                    val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown() ?: "Unknown GPU"
 
                     // Check cache first (synchronous, fast)
                     // If not cached, make request on background thread (not UI thread)

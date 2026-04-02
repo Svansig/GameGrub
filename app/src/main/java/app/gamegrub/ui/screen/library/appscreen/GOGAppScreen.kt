@@ -29,8 +29,8 @@ import app.gamegrub.ui.model.GOGAppScreenViewModel
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
-import app.gamegrub.utils.storage.MarkerUtils
-import app.gamegrub.utils.storage.StorageUtils
+import app.gamegrub.storage.StorageManager
+
 import com.winlator.container.ContainerData
 import java.io.File
 import java.util.Locale
@@ -212,7 +212,7 @@ class GOGAppScreen(
     override fun hasPartialDownload(context: Context, libraryItem: LibraryItem): Boolean {
         if (isDownloading(context, libraryItem) || isInstalled(context, libraryItem)) return false
         val installPath = GOGConstants.getGameInstallPath(libraryItem.name)
-        return File(installPath).exists() && !MarkerUtils.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
+        return File(installPath).exists() && !StorageManager.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
     }
 
     override fun onDownloadInstallClick(context: Context, libraryItem: LibraryItem, onClickPlay: (Boolean) -> Unit) {
@@ -245,9 +245,9 @@ class GOGAppScreen(
         Timber.tag(TAG).i("Showing install confirmation dialog for: ${libraryItem.appId}")
         viewModel.showInstallConfirmationDialog(gameId) { dialogData ->
             // Calculate sizes
-            val downloadSize = StorageUtils.formatBinarySize(dialogData.downloadSize)
-            val availableSpace = StorageUtils.formatBinarySize(
-                StorageUtils.getAvailableSpace(GOGConstants.defaultGOGGamesPath),
+            val downloadSize = StorageManager.formatBinarySize(dialogData.downloadSize)
+            val availableSpace = StorageManager.formatBinarySize(
+                StorageManager.getAvailableSpace(GOGConstants.defaultGOGGamesPath),
             )
             val message = context.getString(
                 R.string.gog_install_confirmation_message,

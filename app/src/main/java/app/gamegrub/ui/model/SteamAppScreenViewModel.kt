@@ -10,7 +10,7 @@ import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.domain.SteamInstallDomain
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.ContainerManager
 import com.winlator.xenvironment.ImageFsInstaller
@@ -108,9 +108,9 @@ class SteamAppScreenViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val container = ContainerUtils.getOrCreateContainer(context, appId.toString())
             steamInstallDomain.downloadApp(appId)
-            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
-            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
-            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
+            StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
+            StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
+            StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
             withContext(Dispatchers.Main) {
                 onComplete()
             }
@@ -210,9 +210,9 @@ class SteamAppScreenViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val container = ContainerUtils.getOrCreateContainer(context, appId.toString())
             steamInstallDomain.downloadApp(appId)
-            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
-            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
-            MarkerUtils.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
+            StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
+            StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)
+            StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_COLDCLIENT_USED)
 
             if (shouldSyncCloud) {
                 val accountId = SteamService.getSteam3AccountId()

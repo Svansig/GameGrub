@@ -10,7 +10,7 @@ import app.gamegrub.service.gog.api.GOGManifestMeta
 import app.gamegrub.service.gog.api.GOGManifestParser
 import app.gamegrub.service.gog.api.V1DepotFile
 import app.gamegrub.utils.network.Net
-import app.gamegrub.utils.storage.MarkerUtils
+import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
@@ -378,7 +378,7 @@ class GOGDownloadManager @Inject constructor(
 
             // Mark download as in-progress so UI and install checks can detect partial installs
             installPath.mkdirs()
-            MarkerUtils.addMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.addMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
             downloadInfo.updateStatusMessage("Downloading chunks...")
 
@@ -395,7 +395,7 @@ class GOGDownloadManager @Inject constructor(
             )
 
             if (downloadResult.isFailure) {
-                MarkerUtils.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                StorageManager.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                 return@withContext downloadResult
             }
 
@@ -407,7 +407,7 @@ class GOGDownloadManager @Inject constructor(
 
             val assembleResult = assembleFiles(gameFiles, chunkCacheDir, gameInstallDir, downloadInfo)
             if (assembleResult.isFailure) {
-                MarkerUtils.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                StorageManager.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                 return@withContext assembleResult
             }
 
@@ -443,7 +443,7 @@ class GOGDownloadManager @Inject constructor(
             )
 
             // Ensure in-progress marker is cleared on failure
-            MarkerUtils.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+            StorageManager.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
 
             Result.failure(e)
         }
@@ -512,8 +512,8 @@ class GOGDownloadManager @Inject constructor(
         downloadInfo.setProgress(1.0f)
         downloadInfo.setActive(false)
         downloadInfo.emitProgressChange()
-        MarkerUtils.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
-        MarkerUtils.addMarker(installPath.absolutePath, Marker.DOWNLOAD_COMPLETE_MARKER)
+        StorageManager.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+        StorageManager.addMarker(installPath.absolutePath, Marker.DOWNLOAD_COMPLETE_MARKER)
         app.gamegrub.GameGrubApp.events.emitJava(
             app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId.toIntOrNull() ?: 0, false),
         )

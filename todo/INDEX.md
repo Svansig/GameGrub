@@ -24,6 +24,8 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-015 | P3 | Consolidate duplicate platform action components into shared UI primitives | `ui/component + ui/screen/library` | `todo/UI-015.md` |
 | UI-016 | P2 | Replace global launch/network reads in UI with injected state gateways | `ui/GameGrubMain + ui/model` | `todo/UI-016.md` |
 | UI-017 | P2 | Remove direct `PrefManager` access from target composables via ViewModel state | `ui/screen + ui/model` | `todo/UI-017.md` |
+| UI-018 | P1 | Move orientation lifecycle ownership into `MainActivity` and `OrientationManager` | `MainActivity + ui` | `todo/UI-018.md` |
+| UI-019 | P1 | Remove composable-body orientation side effects and route updates through controlled effects | `ui/GameGrubMain + ui/screen/xserver` | `todo/UI-019.md` |
 
 ## Backlog - Cohesion
 
@@ -35,6 +37,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-007 | P2 | Detect and reduce cyclic package dependencies | `app/gamegrub` | `todo/COH-007.md` |
 | COH-015 | P2 | Introduce `LaunchRequestGateway` and migrate away from static launch request manager access | `app + ui/model` | `todo/COH-015.md` |
 | COH-016 | P2 | Introduce `PreferencesGateway` and phase out direct global `PrefManager` reads | `app + service + ui` | `todo/COH-016.md` |
+| COH-017 | P2 | Unify orientation preference flow behind a single manager-owned policy contract | `ui + app + preferences` | `todo/COH-017.md` |
 
 ## Backlog - Readability
 
@@ -88,6 +91,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | REL-012 | P3 | Add reliability incident review template | `docs + process` | `todo/REL-012.md` |
 | REL-013 | P2 | Harden cache invalidation and stale-data fallback behavior | `service + data cache` | `todo/REL-013.md` |
 | REL-014 | P3 | Add defensive guards for null/empty platform payload edge cases | `service/platform adapters` | `todo/REL-014.md` |
+| REL-015 | P1 | Harden `OrientationManager` correctness, idempotency, and sensor edge-case handling | `ui/OrientationManager + MainActivity` | `todo/REL-015.md` |
 
 ## Backlog - Testing
 
@@ -109,6 +113,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | TEST-014 | P3 | Add snapshot tests for navigation state reducers | `ui/model + navigation` | `todo/TEST-014.md` |
 | TEST-015 | P2 | Add contract tests for launch request gateway and pending-launch state behavior | `app/src/test` | `todo/TEST-015.md` |
 | TEST-016 | P2 | Add regression tests for gateway-backed preferences and service facades | `app/src/test + service tests` | `todo/TEST-016.md` |
+| TEST-017 | P1 | Add orientation manager and lifecycle regression tests | `app/src/test + Robolectric` | `todo/TEST-017.md` |
 
 ## Backlog - CI and Build
 
@@ -167,6 +172,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | DOC-013 | P2 | Add refactor progress dashboard doc linked to ticket themes | `docs + todo` | `todo/DOC-013.md` |
 | DOC-014 | P3 | Add codebase map for legacy-to-refactor transition zones | `docs + architecture` | `todo/DOC-014.md` |
 | DOC-015 | P2 | Document global-state migration strategy and approved gateway patterns | `docs + architecture` | `todo/DOC-015.md` |
+| DOC-016 | P2 | Document orientation ownership contract and route/lifecycle policy | `docs + architecture + todo` | `todo/DOC-016.md` |
 
 ## Backlog - Service Refactoring
 

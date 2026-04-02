@@ -31,6 +31,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
 import app.gamegrub.api.config.BestConfigService
+import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.enums.Marker
 import app.gamegrub.enums.SyncResult
@@ -60,7 +61,6 @@ import app.gamegrub.utils.storage.MarkerUtils
 import app.gamegrub.utils.storage.StorageUtils
 import com.posthog.PostHog
 import com.winlator.container.ContainerData
-import com.winlator.core.GPUInformation
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -466,7 +466,7 @@ class SteamAppScreen(
         var compatibilityColor by remember { mutableStateOf<ULong?>(null) }
         LaunchedEffect(isInstalled, gameId, appInfo.name) {
             try {
-                val gpuName = GPUInformation.getRenderer(context)
+                val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown()
 
                 val message = gameCompatibilityService.getCompatibilityMessageForGame(
                     context = context,
@@ -914,7 +914,7 @@ class SteamAppScreen(
                     scope.launch(Dispatchers.IO) {
                         try {
                             val gameName = appInfo.name
-                            val gpuName = GPUInformation.getRenderer(context)
+                            val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown()
 
                             val bestConfig = EntryPointAccessors
                                 .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)

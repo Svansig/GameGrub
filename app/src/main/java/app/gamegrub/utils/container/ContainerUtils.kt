@@ -3,6 +3,7 @@ package app.gamegrub.utils.container
 import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.api.config.BestConfigService
+import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.amazon.AmazonService
@@ -18,7 +19,6 @@ import com.winlator.container.ContainerData
 import com.winlator.container.ContainerManager
 import com.winlator.core.DefaultVersion
 import com.winlator.core.FileUtils
-import com.winlator.core.GPUInformation
 import com.winlator.core.WineRegistryEditor
 import com.winlator.core.WineThemeManager
 import com.winlator.winhandler.WinHandler
@@ -50,17 +50,18 @@ object ContainerUtils {
     )
 
     fun setContainerDefaults(context: Context) {
+        val deviceQueryGateway = DeviceQueryProvider.from(context)
         // Override default driver and DXVK version based on Turnip capability
-        if (GPUInformation.isTurnipCapable(context)) {
+        if (deviceQueryGateway.isTurnipCapable()) {
             DefaultVersion.VARIANT = Container.BIONIC
             DefaultVersion.WINE_VERSION = "proton-9.0-arm64ec"
             DefaultVersion.DEFAULT_GRAPHICS_DRIVER = "Wrapper"
-            DefaultVersion.DXVK = if (GPUInformation.isAdreno6xx(context)) "1.11.1-sarek" else "2.4.1-gplasync"
+            DefaultVersion.DXVK = if (deviceQueryGateway.isAdreno6xx()) "1.11.1-sarek" else "2.4.1-gplasync"
             DefaultVersion.VKD3D = "2.14.1"
             DefaultVersion.WRAPPER = "turnip26.0.0_R8"
             DefaultVersion.STEAM_TYPE = Container.STEAM_TYPE_NORMAL
             DefaultVersion.ASYNC_CACHE = "1"
-        } else if (GPUInformation.isAdreno8Elite(context)) {
+        } else if (deviceQueryGateway.isAdreno8Elite()) {
             DefaultVersion.VARIANT = Container.BIONIC
             DefaultVersion.WINE_VERSION = "proton-9.0-arm64ec"
             DefaultVersion.DEFAULT_GRAPHICS_DRIVER = "Wrapper"
@@ -797,7 +798,7 @@ object ContainerUtils {
                 val appInfo = SteamService.getAppInfoOf(gameId)
                 if (appInfo != null) {
                     val gameName = appInfo.name
-                    val gpuName = GPUInformation.getRenderer(context)
+                    val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown()
 
                     // Check cache first (synchronous, fast)
                     // If not cached, make request on background thread (not UI thread)

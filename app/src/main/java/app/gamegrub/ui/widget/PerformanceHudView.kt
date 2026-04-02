@@ -1,9 +1,6 @@
 package app.gamegrub.ui.widget
 
-import android.app.ActivityManager
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -12,7 +9,6 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.BatteryManager
 import android.text.TextUtils
-import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -21,14 +17,13 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isGone
+import app.gamegrub.device.DeviceQueryGateway
+import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.PerformanceHudSize
 import app.gamegrub.utils.general.DateTimeUtils.formatRuntimeHours
-import java.io.File
 import java.util.ArrayDeque
-import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
@@ -52,6 +47,11 @@ class PerformanceHudView(
     initialConfig: PerformanceHudConfig = PerformanceHudConfig(),
     initialCompactMode: Boolean = false,
 ) : FrameLayout(context) {
+    /**
+     * Central device/hardware query gateway used by HUD metric collection.
+     */
+    private val deviceQueryGateway: DeviceQueryGateway = DeviceQueryProvider.from(context)
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var updateJob: Job? = null
     private var config = initialConfig
@@ -121,9 +121,6 @@ class PerformanceHudView(
 
     private val allTextRows = allMetrics.flatMap { listOf(it.stackedText, it.compactText) }
     private val allGraphs = allMetrics.flatMap { listOfNotNull(it.stackedGraph, it.compactGraph) }
-
-    private var lastCpuTotal: Long? = null
-    private var lastCpuIdle: Long? = null
 
     init {
         background = backgroundDrawable
@@ -301,20 +298,11 @@ class PerformanceHudView(
     }
 
     private fun collectBatterySnapshot(): BatterySnapshot {
-        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
-            ?: return BatterySnapshot()
-
-        val percent = batteryManager
-            .getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-            .takeIf { it in 0..100 }
-
-        val statusIntent: Intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            ?: return BatterySnapshot(percent = percent)
-
-        val status = statusIntent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)
-        val currentMicroAmps = abs(batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW))
-        val chargeCounterMicroAmpHours = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
-        val voltageMilliVolts = statusIntent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
+        val batterySnapshot = deviceQueryGateway.readBatterySnapshot()
+        val status = batterySnapshot.status
+        val currentMicroAmps = batterySnapshot.currentMicroAmps
+        val chargeCounterMicroAmpHours = batterySnapshot.chargeCounterMicroAmpHours
+        val voltageMilliVolts = batterySnapshot.voltageMilliVolts
 
         val powerWatts = if (currentMicroAmps > 0L && voltageMilliVolts > 0) {
             (currentMicroAmps.toDouble() * voltageMilliVolts.toDouble()) / 1_000_000_000.0
@@ -346,14 +334,14 @@ class PerformanceHudView(
         }
 
         return BatterySnapshot(
-            percent = percent,
+            percent = batterySnapshot.percent,
             powerWatts = powerWatts,
             runtimeText = runtimeText,
         )
     }
 
     private fun readClockText(): String {
-        return "TIME ${DateFormat.getTimeFormat(context).format(Date())}"
+        return "TIME ${deviceQueryGateway.readClockText()}"
     }
 
     private fun renderSnapshot(snapshot: HudSnapshot) {
@@ -559,122 +547,23 @@ class PerformanceHudView(
     }
 
     private fun readCpuUsagePercent(): Int? {
-        val parts = readFirstLine("/proc/stat")
-            ?.trim()
-            ?.split(Regex("\\s+"))
-            ?: return null
-
-        if (parts.size < 5 || parts.firstOrNull() != "cpu") {
-            return null
-        }
-
-        val values = parts.drop(1).mapNotNull { it.toLongOrNull() }
-        if (values.size < 4) {
-            return null
-        }
-
-        val idle = values.getOrElse(3) { 0L }
-        val iowait = values.getOrElse(4) { 0L }
-        val total = values.sum()
-        val idleTotal = idle + iowait
-
-        val previousTotal = lastCpuTotal
-        val previousIdle = lastCpuIdle
-        lastCpuTotal = total
-        lastCpuIdle = idleTotal
-
-        if (previousTotal == null || previousIdle == null) {
-            return null
-        }
-
-        val totalDiff = total - previousTotal
-        val idleDiff = idleTotal - previousIdle
-        if (totalDiff <= 0) {
-            return null
-        }
-
-        return (((totalDiff - idleDiff).coerceAtLeast(0L)) * 100L / totalDiff).toInt().coerceIn(0, 100)
+        return deviceQueryGateway.readCpuUsagePercent()
     }
 
     private fun readGpuUsagePercent(): Int? {
-        val raw = readFirstLine("/sys/class/kgsl/kgsl-3d0/gpubusy") ?: return null
-        val parts = raw.trim().split(Regex("\\s+"))
-        if (parts.size < 2) {
-            return null
-        }
-
-        val busy = parts[0].toLongOrNull() ?: return null
-        val total = parts[1].toLongOrNull() ?: return null
-        if (total <= 0L) {
-            return null
-        }
-
-        return ((busy * 100L) / total).toInt().coerceIn(0, 100)
+        return deviceQueryGateway.readGpuUsagePercent()
     }
 
     private fun readUsedRamText(): String {
-        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager ?: return "—"
-        val info = ActivityManager.MemoryInfo()
-        activityManager.getMemoryInfo(info)
-        val usedBytes = (info.totalMem - info.availMem).coerceAtLeast(0L)
-        val usedGb = usedBytes.toDouble() / (1024.0 * 1024.0 * 1024.0)
-        return if (usedGb >= 1.0) {
-            String.format(Locale.US, "%.1fGB", usedGb)
-        } else {
-            val usedMb = usedBytes / (1024L * 1024L)
-            "${usedMb}MB"
-        }
+        return deviceQueryGateway.readUsedRamText()
     }
 
     private fun readCpuTempC(): Int? {
-        return readTemperatureC(
-            discoverThermalZoneTempPaths { type ->
-                type.contains("cpu") || type.contains("tsens")
-            },
-        )
+        return deviceQueryGateway.readCpuTempC()
     }
 
     private fun readGpuTempC(): Int? {
-        return readTemperatureC(
-            listOf("/sys/class/kgsl/kgsl-3d0/temp") +
-                discoverThermalZoneTempPaths { type ->
-                    type.contains("gpu") || type.contains("kgsl")
-                },
-        )
-    }
-
-    private fun discoverThermalZoneTempPaths(matches: (String) -> Boolean): List<String> {
-        val thermalDir = File("/sys/class/thermal")
-        val zones = thermalDir.listFiles { file ->
-            file.isDirectory && file.name.startsWith("thermal_zone")
-        } ?: return emptyList()
-
-        return zones.mapNotNull { zone ->
-            val type = readFirstLine(File(zone, "type").path)?.trim()?.lowercase(Locale.US) ?: return@mapNotNull null
-            if (!matches(type)) {
-                return@mapNotNull null
-            }
-            File(zone, "temp").path
-        }
-    }
-
-    private fun readTemperatureC(paths: List<String>): Int? {
-        for (path in paths.distinct()) {
-            val raw = readFirstLine(path)?.trim()?.toIntOrNull() ?: continue
-            val celsius = if (raw > 1000) raw / 1000 else raw
-            if (celsius in 1..150) {
-                return celsius
-            }
-        }
-        return null
-    }
-
-    private fun readFirstLine(path: String): String? {
-        return try {
-            File(path).bufferedReader().use { it.readLine() }
-        } catch (_: Exception) {
-            null
-        }
+        return deviceQueryGateway.readGpuTempC()
     }
 
     private fun appearanceFor(size: PerformanceHudSize): HudAppearance {

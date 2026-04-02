@@ -1,6 +1,7 @@
 package app.gamegrub
 
 import android.content.Context
+import app.gamegrub.device.DeviceQueryProvider
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -96,6 +97,11 @@ class CrashHandler(
         defaultHandler?.uncaughtException(thread, throwable)
     }
 
+    /**
+     * Persist an uncaught exception report with app/device metadata and recent logcat output.
+     *
+     * @param throwable Uncaught exception instance.
+     */
     private fun saveCrashToFile(throwable: Throwable) {
         try {
             val stackTrace = StringWriter().apply {
@@ -105,14 +111,15 @@ class CrashHandler(
 
             val timestamp = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault()).format(Date())
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            val identitySnapshot = DeviceQueryProvider.from(context).getIdentitySnapshot()
 
             val crashReport = buildString {
                 appendLine("Timestamp: $timestamp")
                 appendLine("App Version: ${packageInfo.versionName} (${packageInfo.longVersionCode})")
                 appendLine()
                 appendLine("---------- Device Information ----------")
-                appendLine("${android.os.Build.MANUFACTURER} - ${android.os.Build.BRAND} - ${android.os.Build.MODEL}")
-                appendLine("Android Version: ${android.os.Build.VERSION.RELEASE}")
+                appendLine("${identitySnapshot.manufacturer} - ${identitySnapshot.brand} - ${identitySnapshot.model}")
+                appendLine("Android Version: ${identitySnapshot.androidVersion}")
                 appendLine()
                 appendLine("---------- Cause ----------")
                 appendLine("Exception: ${throwable.javaClass.name}")

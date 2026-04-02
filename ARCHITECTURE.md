@@ -257,6 +257,20 @@ System bar visibility and immersive-mode writes are centrally owned by `Immersiv
 
 This contract keeps platform-specific insets behavior in one place and reduces lifecycle/focus regressions.
 
+## Device Query Ownership Contract
+
+Device and hardware queries are centralized behind `DeviceQueryGateway` with `AndroidDeviceQueryManager` as the Android implementation.
+
+- Only the device query manager may directly read:
+  - Android identity APIs (`Build`, `Settings.*`)
+  - runtime hardware APIs (`ActivityManager`, `BatteryManager`)
+  - low-level probe sources (`/proc`, `/sys` thermal/KGSL)
+  - Winlator GPU probes (`GPUInformation`)
+- App/service/UI callers consume the gateway contract and avoid direct hardware API access.
+- Legacy wrappers (`DeviceUtils`, `HardwareUtils`) are removed as part of this consolidation.
+
+This keeps Android 13+ device-behavior assumptions in one maintainable boundary and improves testability.
+
 ## Data Flow Examples
 
 ### 1. Launching a Game

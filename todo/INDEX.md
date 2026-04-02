@@ -255,6 +255,10 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | REL-015 | P1 | Harden `OrientationManager` correctness, idempotency, and sensor edge-case handling | TBD | `todo/REL-015.md` |
 | TEST-017 | P1 | Add orientation manager and lifecycle regression tests | TBD | `todo/TEST-017.md` |
 | DOC-016 | P2 | Document orientation ownership contract and route/lifecycle policy | TBD | `todo/DOC-016.md` |
+| COH-018 | P1 | Centralize device and hardware queries behind `DeviceQueryGateway` | TBD | `todo/COH-018.md` |
+| UI-020 | P1 | Migrate UI hardware query consumers to `DeviceQueryGateway` | TBD | `todo/UI-020.md` |
+| TEST-018 | P2 | Add regression tests for centralized device query gateway | TBD | `todo/TEST-018.md` |
+| DOC-017 | P2 | Document device/hardware query ownership contract | TBD | `todo/DOC-017.md` |
 | DOC-001 | P1 | Create architecture navigation index | TBD | `todo/DOC-001.md` |
 | CI-001 | P1 | Add `lintKotlin` to PR checks | TBD | `todo/CI-001.md` |
 | CI-004 | P2 | Add release signing guard checks | TBD | `todo/CI-004.md` |

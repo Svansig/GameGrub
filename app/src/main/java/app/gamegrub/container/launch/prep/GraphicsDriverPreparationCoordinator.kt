@@ -1,13 +1,13 @@
 package app.gamegrub.container.launch.prep
 
 import android.content.Context
+import app.gamegrub.device.DeviceQueryProvider
 import com.winlator.container.Container
 import com.winlator.contents.AdrenotoolsManager
 import com.winlator.core.DXVKHelper
 import com.winlator.core.DefaultVersion
 import com.winlator.core.FileUtils
 import com.winlator.core.GPUHelper
-import com.winlator.core.GPUInformation
 import com.winlator.core.KeyValueSet
 import com.winlator.core.TarCompressorUtils
 import com.winlator.core.envvars.EnvVars
@@ -32,6 +32,7 @@ internal object GraphicsDriverPreparationCoordinator {
         vkbasaltConfig: String,
         alwaysReextract: Boolean,
     ) {
+        val deviceQueryGateway = DeviceQueryProvider.from(context)
         if (container.containerVariant.equals(Container.GLIBC)) {
             val turnipVersion =
                 container.graphicsDriverVersion.takeIf { it.isNotEmpty() && graphicsDriver == "turnip" } ?: DefaultVersion.TURNIP
@@ -48,7 +49,7 @@ internal object GraphicsDriverPreparationCoordinator {
             if (graphicsDriver == "turnip") {
                 cacheId += "-$turnipVersion-$zinkVersion"
                 if (turnipVersion == "25.2.0" || turnipVersion == "25.3.0") {
-                    if (GPUInformation.isAdreno710_720_732(context)) {
+                    if (deviceQueryGateway.isAdreno710720732()) {
                         envVars.put("TU_DEBUG", "gmem")
                     } else {
                         envVars.put("TU_DEBUG", "sysmem")
@@ -101,7 +102,7 @@ internal object GraphicsDriverPreparationCoordinator {
                 }
                 envVars.put("vblank_mode", "0")
 
-                if (!GPUInformation.isAdreno6xx(context) && !GPUInformation.isAdreno710_720_732(context)) {
+                if (!deviceQueryGateway.isAdreno6xx() && !deviceQueryGateway.isAdreno710720732()) {
                     val userEnvVars = EnvVars(container.envVars)
                     val tuDebug = userEnvVars.get("TU_DEBUG")
                     if (!tuDebug.contains("sysmem")) {
@@ -257,7 +258,7 @@ internal object GraphicsDriverPreparationCoordinator {
                         "graphics_driver/extra_libs.tzst",
                         rootDir,
                     )
-                    val renderer = GPUInformation.getRenderer(null, null)
+                    val renderer = deviceQueryGateway.getActiveDriverRenderer()
                     if (container.wineVersion.contains("arm64ec") && renderer?.contains("Mali") != true) {
                         TarCompressorUtils.extract(
                             TarCompressorUtils.Type.ZSTD,
@@ -286,8 +287,8 @@ internal object GraphicsDriverPreparationCoordinator {
             val gpuName = graphicsDriverConfig.get("gpuName")
             if (gpuName != "Device") {
                 envVars.put("WRAPPER_DEVICE_NAME", gpuName)
-                envVars.put("WRAPPER_DEVICE_ID", GPUInformation.getDeviceIdFromGPUName(context, gpuName))
-                envVars.put("WRAPPER_VENDOR_ID", GPUInformation.getVendorIdFromGPUName(context, gpuName))
+                envVars.put("WRAPPER_DEVICE_ID", deviceQueryGateway.getDeviceIdFromGpuName(gpuName))
+                envVars.put("WRAPPER_VENDOR_ID", deviceQueryGateway.getVendorIdFromGpuName(gpuName))
             }
 
             val maxDeviceMemory: String? = graphicsDriverConfig.get("maxDeviceMemory", "0")
@@ -316,7 +317,7 @@ internal object GraphicsDriverPreparationCoordinator {
             val bcnEmulationType = graphicsDriverConfig.get("bcnEmulationType")
             when (bcnEmulation) {
                 "auto" -> {
-                    if (bcnEmulationType.equals("compute") && GPUInformation.getVendorID(null, null) != 0x5143) {
+                    if (bcnEmulationType.equals("compute") && deviceQueryGateway.getActiveDriverVendorId() != 0x5143) {
                         envVars.put("ENABLE_BCN_COMPUTE", "1")
                         envVars.put("BCN_COMPUTE_AUTO", "1")
                     }
@@ -324,7 +325,7 @@ internal object GraphicsDriverPreparationCoordinator {
                 }
 
                 "full" -> {
-                    if (bcnEmulationType.equals("compute") && GPUInformation.getVendorID(null, null) != 0x5143) {
+                    if (bcnEmulationType.equals("compute") && deviceQueryGateway.getActiveDriverVendorId() != 0x5143) {
                         envVars.put("ENABLE_BCN_COMPUTE", "1")
                         envVars.put("BCN_COMPUTE_AUTO", "0")
                     }

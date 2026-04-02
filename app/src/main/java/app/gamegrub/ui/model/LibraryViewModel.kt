@@ -11,6 +11,7 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
+import app.gamegrub.device.DeviceQueryGateway
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.EpicGame
 import app.gamegrub.data.GOGGame
@@ -36,7 +37,6 @@ import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.general.unaccent
-import com.winlator.core.GPUInformation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -61,6 +61,7 @@ class LibraryViewModel @Inject constructor(
     private val epicGameDao: EpicGameDao,
     private val amazonGameDao: AmazonGameDao,
     private val gameCompatibilityService: GameCompatibilityService,
+    private val deviceQueryGateway: DeviceQueryGateway,
     private val customGameScanner: CustomGameScanner,
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
@@ -108,10 +109,12 @@ class LibraryViewModel @Inject constructor(
     private var searchDebounceJob: Job? = null
     private val searchDebounceMs = 500L // 500ms debounce
 
-    // Cache GPU name to avoid repeated calls
+    /**
+     * Cached GPU renderer used for compatibility lookups.
+     */
     private val gpuName: String by lazy {
         try {
-            val gpu = GPUInformation.getRenderer(context)
+            val gpu = deviceQueryGateway.getGpuRenderer()
             if (gpu.isNullOrEmpty()) {
                 Timber.tag("LibraryViewModel").w("GPU name is null or empty")
                 "Unknown GPU"

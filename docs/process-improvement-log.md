@@ -16,6 +16,15 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-01`
+- **Ticket**: `todo/COH-018.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Device and hardware reads were duplicated across service, UI, and utility layers, increasing drift and version-specific behavior risk.
+- **Proposed Action**: Keep all hardware/device queries behind `DeviceQueryGateway` and prohibit new direct reads outside the gateway implementation.
+- **Owner**: `TBD`
+- **Status**: `Done`
+
+- **Date**: `2026-04-01`
 - **Ticket**: `N/A (immersive ownership hardening)`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

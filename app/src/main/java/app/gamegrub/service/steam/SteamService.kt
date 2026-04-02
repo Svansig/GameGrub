@@ -1025,7 +1025,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                         val pendingRemoteOperations = steamCloud.signalAppLaunchIntent(
                             appId = appId,
                             clientId = clientId,
-                            machineName = steamInstance.accountDomain.deviceIdentityManager.getMachineName(steamInstance),
+                            machineName = steamInstance.accountDomain.deviceIdentityManager.getMachineName(),
                             ignorePendingOperations = ignorePendingOperations,
                             osType = EOSType.AndroidUnknown,
                         ).await()
@@ -1146,8 +1146,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                     twoFactorCode = twoFactorAuth,
                     authCode = emailAuth,
                     accessToken = refreshToken,
-                    loginID = svc.accountDomain.deviceIdentityManager.getUniqueDeviceId(svc),
-                    machineName = svc.accountDomain.deviceIdentityManager.getMachineName(svc),
+                    loginID = svc.accountDomain.deviceIdentityManager.getUniqueDeviceId(),
+                    machineName = svc.accountDomain.deviceIdentityManager.getMachineName(),
                     chatMode = ChatMode.NEW_STEAM_CHAT,
                 ),
             )

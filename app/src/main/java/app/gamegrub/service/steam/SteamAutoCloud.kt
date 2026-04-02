@@ -453,7 +453,7 @@ object SteamAutoCloud {
 
                     val uploadBatchResponse = steamCloud.beginAppUploadBatch(
                         appId = appInfo.id,
-                        machineName = steamInstance.accountDomain.deviceIdentityManager.getMachineName(steamInstance),
+                        machineName = steamInstance.accountDomain.deviceIdentityManager.getMachineName(),
                         clientId = clientId,
                         filesToDelete = filesToDelete,
                         filesToUpload = filesToUpload.map { it.first },

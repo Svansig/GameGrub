@@ -1,25 +1,36 @@
 package app.gamegrub.api.compatibility
 
 import android.content.Context
-import android.os.Build
 import app.gamegrub.BuildConfig
 import app.gamegrub.api.ApiResult
+import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.data.GameSource
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.device.HardwareUtils
 import app.gamegrub.utils.game.CustomGameScanner
-import com.winlator.core.GPUInformation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import timber.log.Timber
 
+/**
+ * Compatibility feedback helper responsible for submitting post-session telemetry.
+ */
 object GameFeedbackUtils {
 
+    /**
+     * Submit user feedback and contextual device/config metadata for a game session.
+     *
+     * @param context Android context used to resolve data sources and submit API requests.
+     * @param appId Container-backed application identifier.
+     * @param rating User rating value.
+     * @param tags User-selected feedback tags.
+     * @param notes Optional free-form feedback text.
+     * @return `true` when submission succeeds, otherwise `false`.
+     */
     suspend fun submitGameFeedback(
         context: Context,
         appId: String,
@@ -35,6 +46,9 @@ object GameFeedbackUtils {
             val configJson = JSONObject(container.containerJson)
             Timber.d("config string is: %s", container.containerJson)
             Timber.d("configJson: $configJson")
+
+            val deviceQueryGateway = DeviceQueryProvider.from(context)
+            val identitySnapshot = deviceQueryGateway.getIdentitySnapshot()
 
             // Get the game name from container or use a fallback
             val gameName = when (gameSource) {
@@ -80,9 +94,9 @@ object GameFeedbackUtils {
             Timber.d("GameFeedbackUtils: Game name: $gameName")
 
             // Get GPU info if available
-            val gpu = try {
+            val gpu: String = try {
                 Timber.d("GameFeedbackUtils: About to get GPU info")
-                val gpuInfo = GPUInformation.getRenderer(context)
+                val gpuInfo = deviceQueryGateway.getGpuRendererOrUnknown()
                 Timber.d("GameFeedbackUtils: GPU info: $gpuInfo")
                 gpuInfo
             } catch (e: Exception) {
@@ -92,7 +106,7 @@ object GameFeedbackUtils {
 
             // Get SOC identifier
             val soc = try {
-                val socName = HardwareUtils.getSOCName()
+                val socName = deviceQueryGateway.getSocName()
                 Timber.d("GameFeedbackUtils: SOC info: $socName")
                 socName
             } catch (e: Exception) {
@@ -101,7 +115,7 @@ object GameFeedbackUtils {
             }
 
             // Get Android version
-            val androidVer = Build.VERSION.RELEASE
+            val androidVer = identitySnapshot.androidVersion
             Timber.d("GameFeedbackUtils: Android version: $androidVer")
 
             // Get app version
@@ -132,12 +146,20 @@ object GameFeedbackUtils {
                 null
             }
 
-            Timber.i("GameFeedbackUtils: Submitting game feedback: game=$gameName, device=${Build.MODEL}, rating=$rating, tags=${tags.joinToString()}, avgFps=$avgFps, sessionLengthSec=$sessionLengthSec")
+            Timber.i(
+                "GameFeedbackUtils: Submitting game feedback: game=%s, device=%s, rating=%d, tags=%s, avgFps=%s, sessionLengthSec=%s",
+                gameName,
+                identitySnapshot.model,
+                rating,
+                tags.joinToString(),
+                avgFps,
+                sessionLengthSec,
+            )
 
             val result = GameRunApi.submit(
                 gameName = gameName,
-                deviceModel = Build.MODEL,
-                deviceManufacturer = Build.MANUFACTURER,
+                deviceModel = identitySnapshot.model,
+                deviceManufacturer = identitySnapshot.manufacturer,
                 gpuName = gpu,
                 socName = soc,
                 androidVersion = androidVer,

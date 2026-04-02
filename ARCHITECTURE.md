@@ -271,6 +271,16 @@ Device and hardware queries are centralized behind `DeviceQueryGateway` with `An
 
 This keeps Android 13+ device-behavior assumptions in one maintainable boundary and improves testability.
 
+## Storage Ownership Contract
+
+Storage-related tasks are centrally owned by `app.gamegrub.storage.StorageManager` and storage package abstractions.
+
+- Callers outside `app.gamegrub.storage` must not perform direct storage policy logic.
+- Marker lifecycle, filesystem reads/writes, file traversal, and storage-capacity operations are delegated to storage package APIs.
+- Legacy utility wrappers in `utils/storage` are removed; callers now use storage package ownership paths.
+
+Migration rule: new storage changes must be implemented in the storage package first, then consumed by service/UI callers via that boundary.
+
 ## Data Flow Examples
 
 ### 1. Launching a Game

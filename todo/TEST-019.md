@@ -3,7 +3,7 @@
 - **ID**: `TEST-019`
 - **Area**: `app/src/test + Robolectric`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required; test-only coverage expansion.`
 - **Reviewer**: `TBD`

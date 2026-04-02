@@ -24,9 +24,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-015 | P3 | Consolidate duplicate platform action components into shared UI primitives | `ui/component + ui/screen/library` | `todo/UI-015.md` |
 | UI-016 | P2 | Replace global launch/network reads in UI with injected state gateways | `ui/GameGrubMain + ui/model` | `todo/UI-016.md` |
 | UI-017 | P2 | Remove direct `PrefManager` access from target composables via ViewModel state | `ui/screen + ui/model` | `todo/UI-017.md` |
-| UI-021 | P1 | Move `SteamAppScreen` storage permission/migration flows behind storage gateways | `ui/screen/library/appscreen + storage` | `todo/UI-021.md` |
-| UI-022 | P1 | Move settings storage toggle and volume selection off direct preference writes | `ui/screen/settings + storage` | `todo/UI-022.md` |
-| UI-023 | P2 | Move custom game folder and storage access checks to storage gateways | `ui + utils/game + storage` | `todo/UI-023.md` |
 
 ## Backlog - Cohesion
 
@@ -38,10 +35,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-007 | P2 | Detect and reduce cyclic package dependencies | `app/gamegrub` | `todo/COH-007.md` |
 | COH-015 | P2 | Introduce `LaunchRequestGateway` and migrate away from static launch request manager access | `app + ui/model` | `todo/COH-015.md` |
 | COH-016 | P2 | Introduce `PreferencesGateway` and phase out direct global `PrefManager` reads | `app + service + ui` | `todo/COH-016.md` |
-| COH-019 | P1 | Define StorageManager ownership contract and full storage call-site inventory | `storage + app architecture` | `todo/COH-019.md` |
-| COH-020 | P1 | Introduce `app.gamegrub.storage` gateways/managers and DI wiring | `storage + di` | `todo/COH-020.md` |
-| COH-021 | P1 | Migrate Steam path policy to `StoragePathGateway` | `service/steam + storage` | `todo/COH-021.md` |
-| COH-022 | P1 | Replace legacy storage/file/marker utility access with storage gateways | `utils/storage + storage` | `todo/COH-022.md` |
 
 ## Backlog - Readability
 
@@ -116,8 +109,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | TEST-014 | P3 | Add snapshot tests for navigation state reducers | `ui/model + navigation` | `todo/TEST-014.md` |
 | TEST-015 | P2 | Add contract tests for launch request gateway and pending-launch state behavior | `app/src/test` | `todo/TEST-015.md` |
 | TEST-016 | P2 | Add regression tests for gateway-backed preferences and service facades | `app/src/test + service tests` | `todo/TEST-016.md` |
-| TEST-019 | P1 | Add contract tests for storage gateways (paths, permissions, markers, file operations) | `app/src/test + Robolectric` | `todo/TEST-019.md` |
-| TEST-020 | P1 | Add regression tests for cross-platform install/move flows under storage boundary | `app/src/test + service + ui` | `todo/TEST-020.md` |
 
 ## Backlog - CI and Build
 
@@ -156,7 +147,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SEC-012 | P3 | Add security review checklist for high-risk PRs | `docs + process` | `todo/SEC-012.md` |
 | SEC-013 | P2 | Audit and reduce sensitive fields persisted in local debug artifacts | `storage + debug tooling` | `todo/SEC-013.md` |
 | SEC-014 | P3 | Add hardening checklist for third-party SDK configuration | `build + runtime config` | `todo/SEC-014.md` |
-| SEC-015 | P2 | Centralize external-path validation and storage safety checks in storage managers | `storage + path validation` | `todo/SEC-015.md` |
 
 ## Backlog - Documentation
 
@@ -177,7 +167,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | DOC-013 | P2 | Add refactor progress dashboard doc linked to ticket themes | `docs + todo` | `todo/DOC-013.md` |
 | DOC-014 | P3 | Add codebase map for legacy-to-refactor transition zones | `docs + architecture` | `todo/DOC-014.md` |
 | DOC-015 | P2 | Document global-state migration strategy and approved gateway patterns | `docs + architecture` | `todo/DOC-015.md` |
-| DOC-018 | P1 | Document storage ownership contract and migration rules for storage-only boundaries | `docs + architecture + storage` | `todo/DOC-018.md` |
 
 ## Backlog - Service Refactoring
 
@@ -221,8 +210,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-033 | P3 | Evaluate JavaSteam `PublishedFile` integration usefulness and feasibility | `service/steam + content` | `todo/SRV-033.md` |
 | SRV-034 | P3 | Evaluate JavaSteam `SteamWorkshop` integration usefulness and feasibility | `service/steam + workshop` | `todo/SRV-034.md` |
 | SRV-035 | P3 | Evaluate JavaSteam `SteamScreenshots` integration usefulness and feasibility | `service/steam + media` | `todo/SRV-035.md` |
-| SRV-036 | P1 | Migrate GOG/Epic/Amazon install-path ownership to `StoragePathGateway` | `service/* + storage` | `todo/SRV-036.md` |
-| SRV-037 | P1 | Migrate service-layer marker/file operations to storage gateways | `service + utils/storage + storage` | `todo/SRV-037.md` |
 
 ## In Progress
 
@@ -286,3 +273,16 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-016a | P1 | Add download orchestration methods to SteamInstallDomain | TBD | `todo/SRV-016a.md` |
 | SRV-016b | P1 | Migrate download call sites to SteamInstallDomain | TBD | `todo/SRV-016b.md` |
 | SRV-016c | P2 | Clean up download-related imports and constants | TBD | `todo/SRV-016c.md` |
+| COH-019 | P1 | Define StorageManager ownership contract and full storage call-site inventory | TBD | `todo/COH-019.md` |
+| COH-020 | P1 | Introduce `app.gamegrub.storage` gateways/managers and DI wiring | TBD | `todo/COH-020.md` |
+| COH-021 | P1 | Migrate Steam path policy to `StoragePathGateway` | TBD | `todo/COH-021.md` |
+| COH-022 | P1 | Replace legacy storage/file/marker utility access with storage gateways | TBD | `todo/COH-022.md` |
+| UI-021 | P1 | Move `SteamAppScreen` storage permission/migration flows behind storage gateways | TBD | `todo/UI-021.md` |
+| UI-022 | P1 | Move settings storage toggle and volume selection off direct preference writes | TBD | `todo/UI-022.md` |
+| UI-023 | P2 | Move custom game folder and storage access checks to storage gateways | TBD | `todo/UI-023.md` |
+| SRV-036 | P1 | Migrate GOG/Epic/Amazon install-path ownership to `StoragePathGateway` | TBD | `todo/SRV-036.md` |
+| SRV-037 | P1 | Migrate service-layer marker/file operations to storage gateways | TBD | `todo/SRV-037.md` |
+| SEC-015 | P2 | Centralize external-path validation and storage safety checks in storage managers | TBD | `todo/SEC-015.md` |
+| TEST-019 | P1 | Add contract tests for storage gateways (paths, permissions, markers, file operations) | TBD | `todo/TEST-019.md` |
+| TEST-020 | P1 | Add regression tests for cross-platform install/move flows under storage boundary | TBD | `todo/TEST-020.md` |
+| DOC-018 | P1 | Document storage ownership contract and migration rules for storage-only boundaries | TBD | `todo/DOC-018.md` |

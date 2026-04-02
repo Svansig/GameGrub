@@ -16,6 +16,15 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-01`
+- **Ticket**: `todo/COH-022.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Storage helpers were fragmented across multiple utility objects, causing duplicated file/marker logic in service and UI layers.
+- **Proposed Action**: Keep storage operations in a dedicated storage package and require caller-layer delegation through storage-owned APIs.
+- **Owner**: `TBD`
+- **Status**: `Done`
+
+- **Date**: `2026-04-01`
 - **Ticket**: `todo/COH-018.md`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

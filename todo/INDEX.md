@@ -29,20 +29,10 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| COH-001 | P1 | Define UI-to-ViewModel boundary contract | `ui/model` | `todo/COH-001.md` |
 | COH-002 | P1 | Reduce service singleton usage from app layer | `service + ui` | `todo/COH-002.md` |
-| COH-003 | P2 | Standardize event emission ownership | `events + service + ui` | `todo/COH-003.md` |
-| COH-004 | P2 | Create module-level dependency map | `architecture` | `todo/COH-004.md` |
 | COH-005 | P2 | Introduce use-case boundaries for launch and auth flows | `ui/model + service` | `todo/COH-005.md` |
 | COH-006 | P2 | Standardize state/effect contracts across ViewModels | `ui/model` | `todo/COH-006.md` |
 | COH-007 | P2 | Detect and reduce cyclic package dependencies | `app/gamegrub` | `todo/COH-007.md` |
-| COH-008 | P2 | Add ADR notes for key architecture boundary decisions | `docs + architecture` | `todo/COH-008.md` |
-| COH-009 | P2 | Define service-to-domain handoff checklist | `service` | `todo/COH-009.md` |
-| COH-010 | P2 | Consolidate cross-platform auth flow ownership model | `service/auth + ui/model` | `todo/COH-010.md` |
-| COH-011 | P3 | Standardize app-level coordinator placement rules | `app/gamegrub` | `todo/COH-011.md` |
-| COH-012 | P3 | Create dependency guardrails for utils packages | `utils + architecture` | `todo/COH-012.md` |
-| COH-013 | P2 | Define boundary between platform services and shared download pipeline | `service + downloader` | `todo/COH-013.md` |
-| COH-014 | P3 | Introduce refactor checklist for cross-layer pull requests | `docs + process` | `todo/COH-014.md` |
 | COH-015 | P2 | Introduce `LaunchRequestGateway` and migrate away from static launch request manager access | `app + ui/model` | `todo/COH-015.md` |
 | COH-016 | P2 | Introduce `PreferencesGateway` and phase out direct global `PrefManager` reads | `app + service + ui` | `todo/COH-016.md` |
 
@@ -128,11 +118,10 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| CI-001 | P1 | Add `lintKotlin` to PR checks | `.github/workflows` | `todo/CI-001.md` |
-| CI-002 | P1 | Add test sharding and reporting improvements | `CI` | `todo/CI-002.md` |
-| CI-003 | P2 | Add build cache and timing benchmarks | `Gradle + CI` | `todo/CI-003.md` |
-| CI-004 | P2 | Add release signing guard checks | `build scripts` | `todo/CI-004.md` |
-| CI-005 | P2 | Add nightly full matrix validation workflow | `.github/workflows` | `todo/CI-005.md` |
+| CI-001 | P1 | Add `lintKotlin` to PR checks | TBD | `todo/CI-001.md` |
+| CI-002 | P1 | Add test sharding and reporting improvements | TBD | `todo/CI-002.md` |
+| CI-004 | P2 | Add release signing guard checks | TBD | `todo/CI-004.md` |
+| CI-005 | P2 | Add nightly full matrix validation workflow | TBD | `todo/CI-005.md` |
 | CI-006 | P2 | Add static analysis gate for maintainability risks | `CI + static analysis` | `todo/CI-006.md` |
 | CI-007 | P3 | Auto-link ticket IDs and PR metadata in CI checks | `CI automation` | `todo/CI-007.md` |
 | CI-008 | P3 | Add PR risk labeling by changed areas | `.github/workflows` | `todo/CI-008.md` |
@@ -248,15 +237,26 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-008 | P3 | Move preview fake data to safer location | TBD | `todo/UI-008.md` |
 | UI-009 | P3 | Define legacy UI seam guardrails | TBD | `todo/UI-009.md` |
 | COH-001 | P1 | Define UI-to-ViewModel boundary contract | TBD | `todo/COH-001.md` |
+| COH-003 | P2 | Standardize event emission ownership | TBD | `todo/COH-003.md` |
 | COH-004 | P2 | Create module-level dependency map | TBD | `todo/COH-004.md` |
 | COH-008 | P2 | Add ADR notes for key architecture boundary decisions | TBD | `todo/COH-008.md` |
+| COH-009 | P2 | Define service-to-domain handoff checklist | TBD | `todo/COH-009.md` |
+| COH-010 | P2 | Consolidate cross-platform auth flow ownership model | TBD | `todo/COH-010.md` |
 | COH-011 | P3 | Standardize app-level coordinator placement rules | TBD | `todo/COH-011.md` |
+| COH-012 | P3 | Create dependency guardrails for utils packages | TBD | `todo/COH-012.md` |
+| COH-013 | P2 | Define boundary between platform services and shared download pipeline | TBD | `todo/COH-013.md` |
+| COH-014 | P3 | Introduce refactor checklist for cross-layer pull requests | TBD | `todo/COH-014.md` |
 | READ-002 | P2 | Normalize naming for manager/coordinator/domain classes | TBD | `todo/READ-002.md` |
+| READ-003 | P2 | Replace ambiguous comments with intent-focused docs | TBD | `todo/READ-003.md` |
+| READ-005 | P2 | Document public utility APIs with KDoc where needed | TBD | `todo/READ-005.md` |
 | READ-007 | P3 | Standardize log tag/message conventions | TBD | `todo/READ-007.md` |
 | READ-009 | P2 | Normalize naming in launch/container abstractions | TBD | `todo/READ-009.md` |
 | READ-010 | P2 | Add focused package overviews for service domains | TBD | `todo/READ-010.md` |
 | READ-014 | P3 | Add concise file-level intent notes for critical legacy interop files | TBD | `todo/READ-014.md` |
 | DOC-001 | P1 | Create architecture navigation index | TBD | `todo/DOC-001.md` |
+| CI-001 | P1 | Add `lintKotlin` to PR checks | TBD | `todo/CI-001.md` |
+| CI-004 | P2 | Add release signing guard checks | TBD | `todo/CI-004.md` |
+| CI-005 | P2 | Add nightly full matrix validation workflow | TBD | `todo/CI-005.md` |
 | SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
 | SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |

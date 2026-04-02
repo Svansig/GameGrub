@@ -194,6 +194,12 @@ fun parseStoreReleaseDateToEpochSeconds(dateString: String?): Long
 - **Don't swallow exceptions silently**: At minimum, log with `Timber.e(e, "message")`
 - **Use `getOrDefault` / `getOrElse`**: For recoverable failures
 
+**Error Message Guidelines:**
+- Be specific about what went wrong (e.g., "Failed to download game" not "Error occurred")
+- Include actionable info when possible (e.g., "Download failed: network unavailable")
+- Use consistent voice: short, direct, user-friendly
+- Avoid technical jargon in user-facing messages; log details for debugging
+
 Example:
 ```kotlin
 return runCatching {

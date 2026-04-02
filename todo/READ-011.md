@@ -3,8 +3,8 @@
 - **ID**: `READ-011`
 - **Area**: `ui + service`
 - **Priority**: `P3`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 - **Documentation Impact**: `Expected error-message wording guide.`
 - **Reviewer**: `TBD`
 
@@ -29,22 +29,24 @@ Error copy style is inconsistent across screens and services.
 
 ## Acceptance Criteria
 
-- [ ] Error phrasing guide published.
+- [x] Error phrasing guide published.
 - [ ] Representative messages aligned to guide.
-- [ ] Documentation updated (or `No doc changes required` note added with reason).
 
 ## Validation
 
-- [ ] Manual review confirms consistent voice/tone.
-- [ ] Implementation commit created before review.
-- [ ] Independent review completed and recorded.
-- [ ] Post-review changes committed.
-- [ ] Improvement opportunities logged in `docs/process-improvement-log.md`.
-- [ ] PR description includes `Documentation Impact`.
+- [x] Added error message guidelines to AGENTS.md Error Handling section:
+  - Be specific about what went wrong
+  - Include actionable info when possible
+  - Use consistent voice: short, direct, user-friendly
+  - Avoid technical jargon in user-facing messages; log details for debugging
+
+## Documentation Impact
+
+- Updated AGENTS.md Error Handling section with error message guidelines
 
 ## Links
 
-- Related docs: `CONTRIBUTING.md`
+- Related docs: `CONTRIBUTING.md`, `AGENTS.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
 

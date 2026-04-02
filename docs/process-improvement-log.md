@@ -16,6 +16,15 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-01`
+- **Ticket**: `N/A (immersive ownership hardening)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Legacy utility code retained duplicate immersive-mode writes outside the manager-owned path.
+- **Proposed Action**: Keep a single immersive owner (`ImmersiveModeManager`) and restrict legacy utilities to delegation-only shims.
+- **Owner**: `TBD`
+- **Status**: `Done`
+
+- **Date**: `2026-04-01`
 - **Ticket**: `todo/REL-015.md`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

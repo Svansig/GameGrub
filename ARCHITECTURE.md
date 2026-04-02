@@ -243,6 +243,20 @@ Policy precedence is: `sessionOverrideOrientations` -> `userAllowedOrientations`
 
 This contract prevents direct orientation writes from composables and keeps route-specific behavior explicit and testable.
 
+## System UI Ownership Contract
+
+System bar visibility and immersive-mode writes are centrally owned by `ImmersiveModeManager`.
+
+- `MainActivity` owns a single `ImmersiveModeManager` instance.
+- UI and screen layers request visibility intent through `AndroidEvent.SetSystemUIVisibility`.
+- `ImmersiveModeManager` is the only owner that applies:
+  - `WindowCompat.setDecorFitsSystemWindows(...)`
+  - status/navigation bar `show(...)`/`hide(...)`
+  - system-bars behavior policy for swipe-to-reveal transient bars
+- Legacy helpers (for example `AppUtils.hideSystemUI(...)`) must delegate to `ImmersiveModeManager` and must not write insets directly.
+
+This contract keeps platform-specific insets behavior in one place and reduces lifecycle/focus regressions.
+
 ## Data Flow Examples
 
 ### 1. Launching a Game

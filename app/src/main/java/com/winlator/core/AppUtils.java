@@ -12,12 +12,10 @@ import android.os.Build;
 import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Spinner;
+import app.gamegrub.ui.ImmersiveModeManager;
 // import androidx.appcompat.app.AppCompatActivity;
 
 // import com.google.android.material.tabs.TabLayout;
@@ -68,44 +66,23 @@ public abstract class AppUtils {
          imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
      }
 
+    /**
+     * Compatibility shim that delegates system UI visibility control to {@link ImmersiveModeManager}.
+     *
+     * @param activity Host activity whose window receives immersive mode updates.
+     */
     public static void hideSystemUI(final Activity activity) {
         hideSystemUI(activity, true);
     }
+
+    /**
+     * Compatibility shim that delegates system UI visibility control to {@link ImmersiveModeManager}.
+     *
+     * @param activity Host activity whose window receives immersive mode updates.
+     * @param hide {@code true} to hide bars (immersive), {@code false} to show bars.
+     */
     public static void hideSystemUI(final Activity activity, Boolean hide) {
-        Window window = activity.getWindow();
-        final View decorView = window.getDecorView();
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            window.setDecorFitsSystemWindows(false);
-            final WindowInsetsController insetsController = decorView.getWindowInsetsController();
-            if (insetsController != null) {
-                if (hide) {
-                    insetsController.hide(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                    insetsController.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-                } else {
-                    insetsController.show(WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars());
-                    insetsController.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_DEFAULT);
-                }
-            }
-        }
-        else {
-            final int flags;
-            if (hide) {
-                flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            } else {
-                flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
-            }
-
-            decorView.setSystemUiVisibility(flags);
-            decorView.setOnSystemUiVisibilityChangeListener((visibility) -> {
-                if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) decorView.setSystemUiVisibility(flags);
-            });
-        }
+        new ImmersiveModeManager(activity.getWindow()).setSystemUIVisibility(!hide);
     }
 
     public static boolean isUiThread() {

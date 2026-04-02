@@ -78,10 +78,6 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| REL-001 | P1 | Standardize retry/backoff policy for network calls | `service + utils/network` | `todo/REL-001.md` |
-| REL-002 | P1 | Harden cancellation and shutdown semantics | `service + ui` | `todo/REL-002.md` |
-| REL-003 | P2 | Implement atomic file-write helpers for critical data | `utils/storage` | `todo/REL-003.md` |
-| REL-004 | P2 | Add failure taxonomy and user-safe error mapping | `service + ui` | `todo/REL-004.md` |
 | REL-005 | P2 | Define and enforce timeout policy per operation type | `service + network` | `todo/REL-005.md` |
 | REL-006 | P2 | Add startup crash recovery guardrails | `app startup` | `todo/REL-006.md` |
 | REL-007 | P2 | Improve foreground service restart resilience | `service` | `todo/REL-007.md` |
@@ -257,6 +253,10 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | CI-001 | P1 | Add `lintKotlin` to PR checks | TBD | `todo/CI-001.md` |
 | CI-004 | P2 | Add release signing guard checks | TBD | `todo/CI-004.md` |
 | CI-005 | P2 | Add nightly full matrix validation workflow | TBD | `todo/CI-005.md` |
+| REL-001 | P1 | Standardize retry/backoff policy for network calls | TBD | `todo/REL-001.md` |
+| REL-002 | P1 | Harden cancellation and shutdown semantics | TBD | `todo/REL-002.md` |
+| REL-003 | P2 | Implement atomic file-write helpers for critical data | TBD | `todo/REL-003.md` |
+| REL-004 | P2 | Add failure taxonomy and user-safe error mapping | TBD | `todo/REL-004.md` |
 | SRV-009 | P1 | Remove remaining class fields that belong in domains | TBD | `todo/SRV-009.md` |
 | SRV-014 | P1 | Remove DAO injections from SteamService | TBD | `todo/SRV-014.md` |
 | SRV-010 | P2 | Move Steam Input config resolution to SteamInstallDomain | TBD | `todo/SRV-010.md` |

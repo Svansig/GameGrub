@@ -84,7 +84,7 @@ class SteamGridDB @Inject constructor() {
                 return@withContext null
             }
 
-            val body = response.body?.string() ?: return@withContext null
+            val body = response.body.string()
             val json = JSONObject(body)
 
             if (!json.optBoolean("success", false)) {
@@ -172,7 +172,7 @@ class SteamGridDB @Inject constructor() {
                 return@withContext Pair(null, null)
             }
 
-            val body = response.body?.string() ?: return@withContext Pair(null, null)
+            val body = response.body.string()
             val json = JSONObject(body)
 
             if (!json.optBoolean("success", false)) {
@@ -219,7 +219,7 @@ class SteamGridDB @Inject constructor() {
                     continue
                 }
 
-                val imageBytes = imageResponse.body?.bytes() ?: continue
+                val imageBytes = imageResponse.body.bytes()
 
                 // Determine orientation
                 val isHorizontal = isImageHorizontal(imageBytes)
@@ -315,7 +315,7 @@ class SteamGridDB @Inject constructor() {
                 return@withContext null
             }
 
-            val body = response.body?.string() ?: return@withContext null
+            val body = response.body.string()
             val json = JSONObject(body)
 
             if (!json.optBoolean("success", false)) {
@@ -364,7 +364,7 @@ class SteamGridDB @Inject constructor() {
                 return@withContext null
             }
 
-            val imageBytes = imageResponse.body?.bytes() ?: return@withContext null
+            val imageBytes = imageResponse.body.bytes()
 
             // Save to file
             FileOutputStream(outputFile).use { it.write(imageBytes) }

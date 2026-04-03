@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.PrefManager
 import app.gamegrub.R
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.manifest.ManifestComponentHelper
 import app.gamegrub.utils.manifest.ManifestContentTypes
 import app.gamegrub.utils.manifest.ManifestEntry
 import app.gamegrub.utils.manifest.ManifestRepository
-import app.gamegrub.network.NetworkManager
 import com.winlator.box86_64.Box86_64PresetManager
 import com.winlator.container.Container
 import com.winlator.contents.ContentProfile
@@ -127,7 +127,7 @@ class BestConfigService @Inject constructor(
                     return@withContext null
                 }
 
-                val responseBody = response.body?.string() ?: return@withContext null
+                val responseBody = response.body.string()
                 val jsonResponse = JSONObject(responseBody)
 
                 val bestConfigJson = jsonResponse.getJSONObject("bestConfig")

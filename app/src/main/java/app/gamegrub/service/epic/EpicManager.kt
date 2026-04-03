@@ -287,13 +287,13 @@ class EpicManager @Inject constructor(
                 val response = httpClient.newCall(request).execute()
 
                 if (!response.isSuccessful) {
-                    val error = response.body?.string() ?: "Unknown error"
+                    val error = response.body.string()
                     Timber.tag("Epic").e("Library fetch failed: ${response.code} - $error")
                     return@withContext Result.failure(Exception("HTTP ${response.code}: $error"))
                 }
 
-                val body = response.body?.string()
-                if (body.isNullOrEmpty()) {
+                val body = response.body.string()
+                if (body.isEmpty()) {
                     Timber.tag("Epic").e("Empty response body from library API")
                     return@withContext Result.failure(Exception("Empty response"))
                 }
@@ -439,8 +439,8 @@ class EpicManager @Inject constructor(
                 return@withContext Result.failure(Exception("Could not fetch game info: ${response.code}"))
             }
 
-            val body = response.body?.string()
-            if (body.isNullOrEmpty()) {
+            val body = response.body.string()
+            if (body.isEmpty()) {
                 return@withContext Result.failure(Exception("Could not fetch game info for ${game.catalogItemId}"))
             }
 
@@ -806,8 +806,8 @@ class EpicManager @Inject constructor(
                     return@withContext Result.failure(Exception("Manifest API request failed: ${response.code}"))
                 }
 
-                val body = response.body?.string()
-                if (body.isNullOrEmpty()) {
+                val body = response.body.string()
+                if (body.isEmpty()) {
                     return@withContext Result.failure(Exception("Empty manifest API response"))
                 }
 
@@ -912,7 +912,7 @@ class EpicManager @Inject constructor(
                     return@withContext Result.failure(Exception("Failed to download manifest binary: ${manifestResponse.code}"))
                 }
 
-                val bytes = manifestResponse.body?.bytes() ?: return@withContext Result.failure(Exception("Empty manifest bytes from CDN"))
+                val bytes = manifestResponse.body.bytes()
 
                 bytes
             }

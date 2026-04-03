@@ -13,7 +13,7 @@ import com.winlator.xenvironment.components.GuestProgramLauncherComponent
  * Builders can mutate [container], [envVars], and [guestProgramLauncherComponent]
  * exactly like the original monolithic launch method did.
  */
-internal data class LaunchCommandContext(
+data class LaunchCommandContext(
     val context: Context,
     val appId: String,
     val gameId: Int,

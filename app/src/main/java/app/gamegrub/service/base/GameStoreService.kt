@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import androidx.core.app.ServiceCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -19,17 +18,14 @@ abstract class GameStoreService : Service() {
     protected val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     protected var backgroundSyncJob: Job? = null
+    protected var syncInProgress = false
+    protected var lastSyncTimestamp = 0L
+    protected var hasPerformedInitialSync = false
 
     companion object {
-        protected const val ACTION_SYNC_LIBRARY = "app.gamegrub.SYNC_LIBRARY"
-        protected const val ACTION_MANUAL_SYNC = "app.gamegrub.MANUAL_SYNC"
-        protected const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L
-
-        protected var syncInProgress = false
-        protected var lastSyncTimestamp = 0L
-        protected var hasPerformedInitialSync = false
-
-        protected abstract val isRunning: Boolean
+        const val ACTION_SYNC_LIBRARY = "app.gamegrub.SYNC_LIBRARY"
+        const val ACTION_MANUAL_SYNC = "app.gamegrub.MANUAL_SYNC"
+        const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L
     }
 
     protected abstract fun getServiceTag(): String
@@ -41,23 +37,18 @@ abstract class GameStoreService : Service() {
     protected abstract fun getNotificationContent(): String
 
     protected fun startServiceWithSync(context: Context) {
-        if (isRunning) {
-            Timber.tag(getServiceTag()).d("Service already running, skipping start")
-            return
-        }
-
         if (!hasPerformedInitialSync) {
             Timber.tag(getServiceTag()).i("First-time start - starting service with initial sync")
-            val intent = Intent(this, this::class.java)
+            val intent = Intent(context, this::class.java)
             intent.action = ACTION_SYNC_LIBRARY
-            startForegroundService(intent)
+            context.startForegroundService(intent)
             return
         }
 
         val now = System.currentTimeMillis()
         val timeSinceLastSync = now - lastSyncTimestamp
 
-        val intent = Intent(this, this::class.java)
+        val intent = Intent(context, this::class.java)
         if (timeSinceLastSync >= SYNC_THROTTLE_MILLIS) {
             Timber.tag(getServiceTag()).i("Starting service with automatic sync (throttle passed)")
             intent.action = ACTION_SYNC_LIBRARY
@@ -65,7 +56,7 @@ abstract class GameStoreService : Service() {
             val remainingMinutes = (SYNC_THROTTLE_MILLIS - timeSinceLastSync) / 1000 / 60
             Timber.tag(getServiceTag()).d("Starting service without sync - throttled (${remainingMinutes}min remaining)")
         }
-        startForegroundService(intent)
+        context.startForegroundService(intent)
     }
 
     protected fun triggerManualSync(context: Context) {
@@ -102,16 +93,6 @@ abstract class GameStoreService : Service() {
         }
     }
 
-    protected fun startForeground(notificationId: Int, channelId: String) {
-        val notification = NotificationHelper.createNotification(
-            context = this,
-            channelId = channelId,
-            notificationId = notificationId,
-            title = getNotificationTitle(),
-            content = getNotificationContent(),
-        )
-        startForeground(notificationId, notification)
-    }
 
     protected fun stopSelfWithDelay() {
         serviceScope.launch {

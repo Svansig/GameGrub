@@ -2,6 +2,7 @@ package app.gamegrub.service.amazon
 
 import android.content.Context
 import android.content.Intent
+import android.os.IBinder
 import app.gamegrub.GameGrubApp
 import app.gamegrub.data.AmazonCredentials
 import app.gamegrub.data.AmazonGame
@@ -28,6 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
@@ -59,8 +61,9 @@ class AmazonService : GameStoreService() {
 
     companion object {
         private var instance: AmazonService? = null
+        private var isSyncInProgress: Boolean = false
 
-        fun isRunning: Boolean
+        val isRunning: Boolean
             get() = instance != null
 
         fun start(context: Context) {
@@ -68,7 +71,10 @@ class AmazonService : GameStoreService() {
                 Timber.d("[Amazon] Service already running")
                 return
             }
-            startServiceWithSync(context)
+            val intent = Intent(context, AmazonService::class.java).apply {
+                action = ACTION_SYNC_LIBRARY
+            }
+            context.startForegroundService(intent)
         }
 
         fun stop() {
@@ -125,7 +131,10 @@ class AmazonService : GameStoreService() {
         /** Trigger a manual library sync, bypassing throttle. */
         fun triggerLibrarySync(context: Context) {
             if (instance != null) {
-                triggerManualSync(context)
+                val intent = Intent(context, AmazonService::class.java).apply {
+                    action = ACTION_MANUAL_SYNC
+                }
+                context.startForegroundService(intent)
             }
         }
 
@@ -734,7 +743,18 @@ class AmazonService : GameStoreService() {
 
     override fun performSync(context: Context, isManual: Boolean) {
         Timber.i("[Amazon] Starting library sync (manual=$isManual)")
-        syncLibrary()
+        if (isSyncInProgress) {
+            Timber.i("[Amazon] Sync already in progress - skipping")
+            return
+        }
+        isSyncInProgress = true
+        try {
+            runBlocking(Dispatchers.IO) {
+                syncLibrary()
+            }
+        } finally {
+            isSyncInProgress = false
+        }
     }
 
     override fun getNotificationTitle(): String = "Amazon Games"

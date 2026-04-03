@@ -3,9 +3,9 @@ package app.gamegrub.api.compatibility
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.R
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.utils.auth.KeyAttestationHelper
 import app.gamegrub.utils.auth.PlayIntegrity
-import app.gamegrub.network.NetworkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -147,7 +147,7 @@ class GameCompatibilityService @Inject constructor(
                     return@withContext null
                 }
 
-                val responseBody = response.body?.string() ?: return@withContext null
+                val responseBody = response.body.string()
                 val jsonResponse = JSONObject(responseBody)
 
                 val result = mutableMapOf<String, GameCompatibilityResponse>()

@@ -1,8 +1,8 @@
 package app.gamegrub.api
 
 import app.gamegrub.BuildConfig
-import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.network.NetworkManager
+import app.gamegrub.utils.auth.PlayIntegrity
 import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -21,7 +21,7 @@ object GameNativeApi {
     inline fun <T> executeRequest(request: Request, parser: (String) -> T): ApiResult<T> {
         return try {
             val response = httpClient.newCall(request).execute()
-            val body = response.body?.string() ?: ""
+            val body = response.body.string()
 
             if (!response.isSuccessful) {
                 val message = try {

@@ -4,7 +4,7 @@ import app.gamegrub.data.GameSource
 import com.winlator.core.envvars.EnvVars
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
 
-abstract class BaseLaunchCommandBuilder : StoreLaunchCommandBuilder {
+internal abstract class BaseLaunchCommandBuilder : StoreLaunchCommandBuilder {
 
     protected abstract val gameSource: GameSource
 

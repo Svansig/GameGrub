@@ -129,11 +129,38 @@ object PrefManager {
     fun getString(key: String, defaultValue: String): String =
         getPref(stringPreferencesKey(key), defaultValue)
 
+    fun getInt(key: String, defaultValue: Int): Int =
+        getPref(intPreferencesKey(key), defaultValue)
+
+    fun getLong(key: String, defaultValue: Long): Long =
+        getPref(longPreferencesKey(key), defaultValue)
+
     fun getFloat(key: String, defaultValue: Float): Float =
         getPref(floatPreferencesKey(key), defaultValue)
 
-    fun setFloat(key: String, value: Float): Unit =
+    fun putFloat(key: String, value: Float): Unit =
         setPref(floatPreferencesKey(key), value)
+
+    fun putString(key: String, value: String): Unit =
+        setPref(stringPreferencesKey(key), value)
+
+    fun putInt(key: String, value: Int): Unit =
+        setPref(intPreferencesKey(key), value)
+
+    fun putLong(key: String, value: Long): Unit =
+        setPref(longPreferencesKey(key), value)
+
+    fun putBoolean(key: String, value: Boolean): Unit =
+        setPref(booleanPreferencesKey(key), value)
+
+    fun remove(key: String) {
+        // Remove from all supported primitive keyspaces to preserve legacy dynamic key behavior.
+        removePref(stringPreferencesKey(key))
+        removePref(intPreferencesKey(key))
+        removePref(longPreferencesKey(key))
+        removePref(booleanPreferencesKey(key))
+        removePref(floatPreferencesKey(key))
+    }
 
     @Suppress("SameParameterValue")
     private fun <T> getPref(key: Preferences.Key<T>, defaultValue: T): T {

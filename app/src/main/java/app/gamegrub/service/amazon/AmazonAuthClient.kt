@@ -83,7 +83,7 @@ object AmazonAuthClient {
                 .build()
 
             val response = httpClient.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
+            val responseBody = response.body.string()
 
             if (!response.isSuccessful) {
                 Timber.e("[Amazon] Device registration failed: ${response.code} - $responseBody")
@@ -138,7 +138,7 @@ object AmazonAuthClient {
                 .build()
 
             val response = httpClient.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
+            val responseBody = response.body.string()
 
             if (!response.isSuccessful) {
                 Timber.e("[Amazon] Token refresh failed: ${response.code} - $responseBody")
@@ -189,7 +189,7 @@ object AmazonAuthClient {
                 .build()
 
             httpClient.newCall(request).execute().use { response ->
-                val responseBody = response.body?.string() ?: ""
+                val responseBody = response.body.string()
 
                 if (!response.isSuccessful) {
                     Timber.w("[Amazon] Deregister returned ${response.code}: $responseBody")

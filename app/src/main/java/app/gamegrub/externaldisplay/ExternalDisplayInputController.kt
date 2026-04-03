@@ -113,7 +113,7 @@ class ExternalDisplayInputController(
     }
 
     private fun findPresentationDisplay(): Display? {
-        val currentDisplay = context.display ?: return null
+        val currentDisplay = context.display
         // Required detection logic for external presentation displays
         return displayManager
             ?.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)

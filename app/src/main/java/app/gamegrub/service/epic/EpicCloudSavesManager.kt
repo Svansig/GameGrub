@@ -3,9 +3,9 @@ package app.gamegrub.service.epic
 import android.content.Context
 import androidx.core.content.edit
 import app.gamegrub.data.EpicGame
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.network.NetworkManager
 import java.io.File
 import java.time.Instant
 import java.util.zip.GZIPInputStream
@@ -261,7 +261,7 @@ object EpicCloudSavesManager {
                     return@withContext Result.failure(Exception("Failed to list cloud saves: ${response.code}"))
                 }
 
-                val json = JSONObject(response.body?.string() ?: "{}")
+                val json = JSONObject(response.body.string())
                 val filesJson = json.optJSONObject("files") ?: JSONObject()
 
                 val files = mutableMapOf<String, CloudFileInfo>()
@@ -297,7 +297,7 @@ object EpicCloudSavesManager {
                     return@withContext Result.failure(Exception("Download failed: ${response.code}"))
                 }
 
-                val data = response.body?.bytes() ?: return@withContext Result.failure(Exception("Empty response"))
+                val data = response.body.bytes()
 
                 if (data.isEmpty()) {
                     Timber.tag("Epic").w("[Cloud Saves] Downloaded file is empty (0 bytes)")
@@ -825,7 +825,7 @@ object EpicCloudSavesManager {
             Timber.tag("Epic").d("[Cloud Saves] Response code: ${response.code}")
 
             val responseBody = try {
-                response.body?.string() ?: ""
+                response.body.string()
             } catch (e: Exception) {
                 Timber.tag("Epic").e(e, "[Cloud Saves] Failed to read response body")
                 ""

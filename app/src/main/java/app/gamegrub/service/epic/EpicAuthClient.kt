@@ -49,7 +49,7 @@ object EpicAuthClient {
                 .build()
 
             val response = httpClient.newCall(request).execute()
-            val body = response.body?.string() ?: ""
+            val body = response.body.string()
 
             if (!response.isSuccessful) {
                 Timber.e("Authentication failed: ${response.code} - $body")
@@ -105,7 +105,7 @@ object EpicAuthClient {
                 .build()
 
             val response = httpClient.newCall(request).execute()
-            val body = response.body?.string() ?: ""
+            val body = response.body.string()
 
             if (!response.isSuccessful) {
                 Timber.e("Token refresh failed: ${response.code} - $body")
@@ -154,7 +154,7 @@ object EpicAuthClient {
                 .build()
 
             val response = httpClient.newCall(request).execute()
-            val body = response.body?.string() ?: ""
+            val body = response.body.string()
 
             if (!response.isSuccessful) {
                 Timber.e("Failed to get game exchange token: ${response.code} - $body")
@@ -208,13 +208,13 @@ object EpicAuthClient {
             val response = httpClient.newCall(request).execute()
 
             if (!response.isSuccessful) {
-                val errorBody = response.body?.string() ?: "Unknown error"
+                val errorBody = response.body.string()
                 Timber.e("Failed to get ownership token: ${response.code} - $errorBody")
                 return@withContext Result.failure(Exception("HTTP ${response.code}: $errorBody"))
             }
 
-            val tokenBytes = response.body?.bytes()
-            if (tokenBytes == null || tokenBytes.isEmpty()) {
+            val tokenBytes = response.body.bytes()
+            if (tokenBytes.isEmpty()) {
                 return@withContext Result.failure(Exception("Empty ownership token response"))
             }
 

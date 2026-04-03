@@ -118,12 +118,12 @@ object AmazonApiClient {
 
             NetworkManager.http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "(no body)"
+                    val errorBody = response.body.string()
                     Timber.e("[Amazon] HTTP ${response.code} from $url (target=${target.substringAfterLast('.')}): $errorBody")
                     return null
                 }
 
-                val responseText = response.body?.string() ?: return null
+                val responseText = response.body.string()
                 JSONObject(responseText)
             }
         } catch (e: Exception) {
@@ -322,7 +322,7 @@ object AmazonApiClient {
                     Timber.tag("Amazon").e("fetchDownloadSize: HTTP ${response.code} fetching manifest")
                     return@withContext null
                 }
-                response.body?.bytes()
+                response.body.bytes()
             }
         } catch (e: Exception) {
             Timber.tag("Amazon").e(e, "fetchDownloadSize: failed to fetch manifest.proto")
@@ -363,12 +363,12 @@ object AmazonApiClient {
 
             NetworkManager.http.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "(no body)"
+                    val errorBody = response.body.string()
                     Timber.tag("Amazon").e("fetchSdkDownload: HTTP ${response.code}: $errorBody")
                     return@withContext null
                 }
 
-                val responseText = response.body?.string() ?: return@withContext null
+                val responseText = response.body.string()
                 val json = JSONObject(responseText)
 
                 val downloadUrl = json.optString("downloadUrl", "").ifEmpty {

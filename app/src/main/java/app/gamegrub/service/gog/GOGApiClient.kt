@@ -128,14 +128,14 @@ object GOGApiClient {
 
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
+                    val errorBody = response.body.string()
                     Timber.e("Failed to fetch game IDs: HTTP ${response.code} - $errorBody")
                     return@withContext Result.failure(
                         Exception("Failed to fetch game IDs: HTTP ${response.code}"),
                     )
                 }
 
-                val responseBody = response.body?.string() ?: ""
+                val responseBody = response.body.string()
                 if (responseBody.isBlank()) {
                     Timber.w("Empty response when fetching game IDs")
                     return@withContext Result.failure(Exception("Empty response from GOG"))
@@ -213,14 +213,14 @@ object GOGApiClient {
             // Execute request
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG").e("Failed to fetch game details for $gameId: HTTP ${response.code} - $errorBody")
                     return@withContext Result.failure(
                         Exception("Failed to fetch game details: HTTP ${response.code}"),
                     )
                 }
 
-                val responseBody = response.body?.string() ?: ""
+                val responseBody = response.body.string()
                 if (responseBody.isBlank()) {
                     Timber.tag("GOG").w("Empty response when fetching game details for $gameId")
                     return@withContext Result.failure(Exception("Empty response from GOG"))
@@ -272,7 +272,7 @@ object GOGApiClient {
                     return@withContext null
                 }
 
-                val jsonStr = response.body?.string() ?: ""
+                val jsonStr = response.body.string()
                 val buildsJson = JSONObject(jsonStr)
 
                 // Get first build
@@ -311,7 +311,7 @@ object GOGApiClient {
                 Timber.tag("GOG").d("[Cloud Saves] Response headers - Content-Encoding: $contentEncoding, Content-Type: $contentType")
 
                 // Read the response bytes (can only read body once)
-                val manifestBytes = manifestResponse.body?.bytes() ?: return@withContext null
+                val manifestBytes = manifestResponse.body.bytes()
 
                 // Check compression type by magic bytes
                 val isGzipped = manifestBytes.size >= 2 &&

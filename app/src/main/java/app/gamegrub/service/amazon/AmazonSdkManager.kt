@@ -173,7 +173,7 @@ object AmazonSdkManager {
 
         NetworkManager.http.newCall(request).execute().use { response ->
             if (response.isSuccessful) {
-                response.body?.bytes()
+                response.body.bytes()
             } else {
                 Timber.tag(TAG).e("fetchBytes: HTTP ${response.code} for $url")
                 null
@@ -195,7 +195,7 @@ object AmazonSdkManager {
 
         NetworkManager.http.newCall(request).execute().use { response ->
             if (response.isSuccessful) {
-                response.body?.byteStream()?.use { input ->
+                response.body.byteStream().use { input ->
                     tmpFile.outputStream().use { output ->
                         input.copyTo(output, bufferSize = 8192)
                     }

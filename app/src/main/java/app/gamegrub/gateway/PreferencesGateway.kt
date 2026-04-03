@@ -9,7 +9,7 @@ interface PreferencesGateway {
 
     fun getLong(key: String, default: Long = 0L): Long
 
-    fun getBoolean(key: String, default: Boolean = false): Float
+    fun getBoolean(key: String, default: Boolean = false): Boolean
 
     fun getFloat(key: String, default: Float = 0f): Float
 

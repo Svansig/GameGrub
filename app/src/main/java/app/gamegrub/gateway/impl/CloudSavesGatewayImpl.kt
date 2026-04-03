@@ -1,12 +1,12 @@
 package app.gamegrub.gateway.impl
 
 import app.gamegrub.gateway.CloudSaveResolution
-import app.gamegrub.gateway.CloudSavesGateway
 import app.gamegrub.gateway.CloudSaveSyncStatus
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import app.gamegrub.gateway.CloudSavesGateway
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Singleton
 class CloudSavesGatewayImpl @Inject constructor() : CloudSavesGateway {
@@ -31,7 +31,7 @@ class CloudSavesGatewayImpl @Inject constructor() : CloudSavesGateway {
 
     override fun observeSyncStatus(gameId: String): Flow<CloudSaveSyncStatus> {
         return syncStatuses.getOrPut(gameId) {
-            MutableStateFlow(CloudSaveSyncStatus(gameId, false, 0)
+            MutableStateFlow(CloudSaveSyncStatus(gameId, false, 0))
         }
     }
 }

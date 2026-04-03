@@ -16,7 +16,7 @@ fun LibraryItem.toUnifiedGame(): UnifiedGame {
         iconUrl = iconHash,
         headerUrl = headerImageUrl,
         isInstalled = isInstalled,
-        sizeBytes = sizeBytes,
+        installSize = sizeBytes,
     )
 }
 

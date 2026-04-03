@@ -49,9 +49,41 @@ class GOGService : GameStoreService() {
 
     companion object {
         private var instance: GOGService? = null
+        private var isSyncInProgress: Boolean = false
+        private var lastSyncTimestampMs: Long = 0L
+        private var hasPerformedInitialSyncFlag: Boolean = false
 
         val isRunning: Boolean
             get() = instance != null
+
+        fun start(context: Context) {
+            if (instance != null) {
+                Timber.tag("GOG").d("[GOGService] Service already running, skipping start")
+                return
+            }
+            val intent = Intent(context, GOGService::class.java).apply {
+                action = ACTION_SYNC_LIBRARY
+            }
+            context.startForegroundService(intent)
+        }
+
+        fun triggerLibrarySync(context: Context) {
+            if (instance == null) {
+                return
+            }
+            val intent = Intent(context, GOGService::class.java).apply {
+                action = ACTION_MANUAL_SYNC
+            }
+            context.startForegroundService(intent)
+        }
+
+        fun stop() {
+            instance?.stopSelf()
+        }
+
+        fun hasActiveOperations(): Boolean {
+            return isSyncInProgress || hasActiveDownload()
+        }
 
         // ==========================================================================
         // AUTHENTICATION - Delegate to GOGAuthManager
@@ -540,11 +572,11 @@ class GOGService : GameStoreService() {
             null -> {
                 // Service restarted by Android with null intent (START_STICKY behavior)
                 // Only sync if we haven't done initial sync yet, or if it's been a while
-                val timeSinceLastSync = System.currentTimeMillis() - lastSyncTimestamp
-                val shouldResync = !hasPerformedInitialSync || timeSinceLastSync >= SYNC_THROTTLE_MILLIS
+                val timeSinceLastSync = System.currentTimeMillis() - lastSyncTimestampMs
+                val shouldResync = !hasPerformedInitialSyncFlag || timeSinceLastSync >= SYNC_THROTTLE_MILLIS
 
                 if (shouldResync) {
-                    Timber.i("[GOGService] Service restarted by Android - performing sync (hasPerformedInitialSync=$hasPerformedInitialSync, timeSinceLastSync=${timeSinceLastSync}ms)")
+                    Timber.i("[GOGService] Service restarted by Android - performing sync (hasPerformedInitialSync=$hasPerformedInitialSyncFlag, timeSinceLastSync=${timeSinceLastSync}ms)")
                     true
                 } else {
                     Timber.d("[GOGService] Service restarted by Android - skipping sync (throttled)")
@@ -565,7 +597,7 @@ class GOGService : GameStoreService() {
             backgroundSyncJob?.cancel() // Cancel any existing job
             backgroundSyncJob = scope.launch {
                 try {
-                    setSyncInProgress(true)
+                    isSyncInProgress = true
                     Timber.d("[GOGService]: Starting background library sync")
 
                     val syncResult = gogManager.startBackgroundSync(applicationContext)
@@ -574,14 +606,14 @@ class GOGService : GameStoreService() {
                     } else {
                         Timber.i("[GOGService]: Background library sync completed successfully")
                         // Update last sync timestamp on successful sync
-                        lastSyncTimestamp = System.currentTimeMillis()
+                        lastSyncTimestampMs = System.currentTimeMillis()
                         // Mark that initial sync has been performed
-                        hasPerformedInitialSync = true
+                        hasPerformedInitialSyncFlag = true
                     }
                 } catch (e: Exception) {
                     Timber.e(e, "[GOGService]: Exception starting background sync")
                 } finally {
-                    setSyncInProgress(false)
+                    isSyncInProgress = false
                 }
             }
         } else if (shouldSync) {
@@ -597,7 +629,7 @@ class GOGService : GameStoreService() {
 
         // Cancel sync operations
         backgroundSyncJob?.cancel()
-        setSyncInProgress(false)
+        isSyncInProgress = false
 
         scope.cancel() // Cancel any ongoing operations
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -606,4 +638,21 @@ class GOGService : GameStoreService() {
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun getServiceTag(): String = "GOG"
+
+    override fun performSync(context: Context, isManual: Boolean) {
+        runBlocking(Dispatchers.IO) {
+            isSyncInProgress = true
+            try {
+                gogManager.startBackgroundSync(context)
+            } finally {
+                isSyncInProgress = false
+            }
+        }
+    }
+
+    override fun getNotificationTitle(): String = "GOG"
+
+    override fun getNotificationContent(): String = "Connected"
 }

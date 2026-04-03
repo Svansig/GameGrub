@@ -117,7 +117,7 @@ class ExternalDisplaySwapController(
     }
 
     private fun findPresentationDisplay(): Display? {
-        val currentDisplay = context.display ?: return null
+        val currentDisplay = context.display
         return displayManager
             ?.getDisplays(DisplayManager.DISPLAY_CATEGORY_PRESENTATION)
             ?.firstOrNull { display ->

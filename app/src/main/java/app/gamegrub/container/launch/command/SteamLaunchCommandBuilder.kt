@@ -74,7 +74,4 @@ internal object SteamLaunchCommandBuilder : BaseLaunchCommandBuilder() {
         return "\"$drive:/$executablePath\""
     }
 
-    private fun wrapWithWinhandler(args: String): String {
-        return "winhandler.exe $args"
-    }
 }

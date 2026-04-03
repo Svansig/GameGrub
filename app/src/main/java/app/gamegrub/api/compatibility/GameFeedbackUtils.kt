@@ -3,8 +3,8 @@ package app.gamegrub.api.compatibility
 import android.content.Context
 import app.gamegrub.BuildConfig
 import app.gamegrub.api.ApiResult
-import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.data.GameSource
+import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
@@ -96,7 +96,7 @@ object GameFeedbackUtils {
             // Get GPU info if available
             val gpu: String = try {
                 Timber.d("GameFeedbackUtils: About to get GPU info")
-                val gpuInfo = deviceQueryGateway.getGpuRendererOrUnknown() ?: "Unknown GPU"
+                val gpuInfo = deviceQueryGateway.getGpuRendererOrUnknown()
                 Timber.d("GameFeedbackUtils: GPU info: $gpuInfo")
                 gpuInfo
             } catch (e: Exception) {

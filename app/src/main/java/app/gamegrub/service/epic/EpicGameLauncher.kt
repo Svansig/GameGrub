@@ -76,7 +76,7 @@ object EpicGameLauncher {
 
             // Authentication parameters
             params.add("-AUTH_LOGIN=unused")
-            params.add("-AUTH_PASSWORD=${gameToken?.authCode ?: "0"}")
+            params.add("-AUTH_PASSWORD=${gameToken.authCode}")
             params.add("-AUTH_TYPE=exchangecode")
             params.add("-epicapp=${game.appName}")
             params.add("-epicenv=Prod")
@@ -86,7 +86,7 @@ object EpicGameLauncher {
 
             // User information parameters
             val displayName = "GameNativeUser" // ! We should adjust this later and use the user's real displayName later
-            val accountId = gameToken?.accountId ?: "0"
+            val accountId = gameToken.accountId
 
             params.add("-epicusername=$displayName")
             params.add("-epicuserid=$accountId")

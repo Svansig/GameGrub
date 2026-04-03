@@ -378,7 +378,7 @@ class EpicDownloadManager @Inject constructor(
             Result.failure(e)
         } finally {
             // Always emit download stopped event
-            val gameId = game.id ?: 0
+            val gameId = game.id
             app.gamegrub.GameGrubApp.events.emitJava(
                 app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId, false),
             )
@@ -561,7 +561,7 @@ class EpicDownloadManager @Inject constructor(
                         }
 
                         // Download and decompress Epic chunk file using streaming to avoid OOM exceptions
-                        val responseBody = response.body!!
+                        val responseBody = response.body
                         val tempChunkFile = File(chunkCacheDir, "${chunk.guidStr}.tmp")
 
                         try {

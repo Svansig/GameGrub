@@ -2,6 +2,7 @@ package app.gamegrub.service.epic
 
 import android.content.Context
 import android.content.Intent
+import android.os.IBinder
 import app.gamegrub.GameGrubApp
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.EpicCredentials
@@ -10,14 +11,17 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.base.GameStoreService
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -31,6 +35,7 @@ class EpicService : GameStoreService() {
 
     companion object {
         private var instance: EpicService? = null
+        private var isSyncInProgress: Boolean = false
 
         val isRunning: Boolean
             get() = instance != null
@@ -40,12 +45,18 @@ class EpicService : GameStoreService() {
                 Timber.tag("EPIC").d("[EpicService] Service already running, skipping start")
                 return
             }
-            startServiceWithSync(context)
+            val intent = Intent(context, EpicService::class.java).apply {
+                action = ACTION_SYNC_LIBRARY
+            }
+            context.startForegroundService(intent)
         }
 
         fun triggerLibrarySync(context: Context) {
             if (instance != null) {
-                triggerManualSync(context)
+                val intent = Intent(context, EpicService::class.java).apply {
+                    action = ACTION_MANUAL_SYNC
+                }
+                context.startForegroundService(intent)
             }
         }
 
@@ -272,7 +283,7 @@ class EpicService : GameStoreService() {
 
             val game = runBlocking { instance.epicManager.getGameById(appId) }
                 ?: return Result.failure(Exception("Game not found for appId: $appId"))
-            val gameId = game.id ?: return Result.failure(Exception("Game ID not found for appId: $appId"))
+            val gameId = game.id
 
             // Check if already downloading
             if (instance.activeDownloads.containsKey(appId)) {
@@ -391,12 +402,18 @@ class EpicService : GameStoreService() {
 
     override fun performSync(context: Context, isManual: Boolean) {
         Timber.tag("EPIC").i("Starting library sync (manual=$isManual)")
-        val result = epicManager.startBackgroundSync(context)
+        if (isSyncInProgress) {
+            Timber.tag("EPIC").d("Sync already in progress, skipping")
+            return
+        }
+        isSyncInProgress = true
+        val result = runBlocking(Dispatchers.IO) { epicManager.startBackgroundSync(context) }
         if (result.isFailure) {
             Timber.w("Background sync failed: ${result.exceptionOrNull()?.message}")
         } else {
             Timber.tag("EPIC").i("Background library sync completed successfully")
         }
+        isSyncInProgress = false
     }
 
     override fun getNotificationTitle(): String = "Epic Games"

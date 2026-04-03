@@ -11,7 +11,7 @@ import timber.log.Timber
 internal object GogLaunchCommandBuilder : BaseLaunchCommandBuilder() {
     override val gameSource: GameSource = GameSource.GOG
 
-    override fun buildStoreCommand(context: LaunchCommandContext): String? {
+    override fun buildStoreCommand(context: LaunchCommandContext): String {
         Timber.tag("XServerScreen").i("Launching GOG game: ${context.gameId}")
 
         val libraryItem = LibraryItem(

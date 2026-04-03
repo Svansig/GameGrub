@@ -1,7 +1,6 @@
 package app.gamegrub.ui.screen.xserver
 
 import android.graphics.PointF
-import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent

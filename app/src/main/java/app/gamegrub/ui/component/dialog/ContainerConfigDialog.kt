@@ -180,7 +180,6 @@ fun ContainerConfigDialog(
         val bionicWineEntriesRef = remember { mutableStateOf(bionicWineEntriesBase) }
         var bionicWineEntries by bionicWineEntriesRef
         val glibcWineEntriesRef = remember { mutableStateOf(glibcWineEntriesBase) }
-        var glibcWineEntries by glibcWineEntriesRef
         val emulatorEntries = stringArrayResource(R.array.emulator_entries).toList()
         val bionicGraphicsDrivers = stringArrayResource(R.array.bionic_graphics_driver_entries).toList()
         val baseWrapperVersions = stringArrayResource(R.array.wrapper_graphics_driver_version_entries).toList()
@@ -195,9 +194,7 @@ fun ContainerConfigDialog(
         var manifestDownloadLabel by remember { mutableStateOf("") }
         var versionsLoaded by remember { mutableStateOf(false) }
         val showCustomResolutionDialogRef = remember { mutableStateOf(false) }
-        var showCustomResolutionDialog by showCustomResolutionDialogRef
         val customResolutionValidationErrorRef = remember { mutableStateOf<String?>(null) }
-        var customResolutionValidationError by customResolutionValidationErrorRef
 
         LaunchedEffect(visible) {
             if (visible) {
@@ -450,7 +447,6 @@ fun ContainerConfigDialog(
             }
             mutableIntStateOf(idx)
         }
-        var emulator64Index by emulator64IndexRef
         val emulator32IndexRef = rememberSaveable {
             val current = config.emulator.ifEmpty { Container.DEFAULT_EMULATOR }
             val idx = emulatorEntries.indexOfFirst { it.equals(current, true) }.coerceAtLeast(0)
@@ -495,7 +491,6 @@ fun ContainerConfigDialog(
         val bcnEmulationIndexRef = rememberSaveable { mutableIntStateOf(0) }
         var bcnEmulationIndex by bcnEmulationIndexRef
         val bcnEmulationTypeIndexRef = rememberSaveable { mutableIntStateOf(0) }
-        var bcnEmulationTypeIndex by bcnEmulationTypeIndexRef
         val bcnEmulationCacheEnabledRef = rememberSaveable { mutableStateOf(false) }
         var bcnEmulationCacheEnabled by bcnEmulationCacheEnabledRef
         val disablePresentWaitCheckedRef = rememberSaveable { mutableStateOf(false) }
@@ -534,7 +529,7 @@ fun ContainerConfigDialog(
                 bcnEmulationEntries.indexOfFirst { it.equals(bcnMode, true) }.let { if (it >= 0) it else defaultBcnIdx }
 
             val bcnType = cfg.get("bcnEmulationType", bcnEmulationTypeEntries.firstOrNull().orEmpty())
-            val defaultBcnTypeIdx = bcnEmulationTypeEntries.indexOfFirst { it.equals(bcnType, true) }.takeIf { it >= 0 } ?: 0
+            bcnEmulationTypeEntries.indexOfFirst { it.equals(bcnType, true) }.takeIf { it >= 0 } ?: 0
 
             bcnEmulationCacheEnabled = cfg.get("bcnEmulationCache", "0") == "1"
             disablePresentWaitChecked = cfg.get("disablePresentWait", "0") == "1"

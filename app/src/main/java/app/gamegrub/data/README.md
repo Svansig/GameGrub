@@ -22,7 +22,9 @@ data/
 ## Models
 
 ### UnifiedGame
+
 Primary model for all games, uses `GameSource` discriminator:
+
 ```kotlin
 data class UnifiedGame(
     val id: Int = 0,
@@ -36,7 +38,9 @@ data class UnifiedGame(
 ```
 
 ### GameSource
+
 Discriminator for game stores:
+
 - `STEAM` - Steam platform
 - `GOG` - GOG platform
 - `EPIC` - Epic Games Store
@@ -46,6 +50,7 @@ Discriminator for game stores:
 ## Repository
 
 `GameRepository` provides single source of truth for game data:
+
 ```kotlin
 @Singleton
 class GameRepository @Inject constructor(

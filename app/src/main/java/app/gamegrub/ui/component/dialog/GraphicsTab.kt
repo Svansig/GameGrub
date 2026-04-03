@@ -416,7 +416,8 @@ private fun DxWrapperSection(state: ContainerConfigState) {
             )
         } else {
             // Ensure default version for vortek-like when hidden
-            val driverType = StringUtils.parseIdentifier(state.graphicsDrivers.value.getOrNull(state.graphicsDriverIndex.intValue).orEmpty())
+            val driverType =
+                StringUtils.parseIdentifier(state.graphicsDrivers.value.getOrNull(state.graphicsDriverIndex.intValue).orEmpty())
             val isVortekLike =
                 config.containerVariant == Container.GLIBC &&
                     (driverType == "vortek" || driverType == "adreno" || driverType == "sd-8-elite")

@@ -64,4 +64,3 @@ data class SteamLibraryApp(
         return if (imageLink.isNullOrEmpty()) "" else "https://shared.steamstatic.com/store_item_assets/steam/apps/$id/$imageLink"
     }
 }
-

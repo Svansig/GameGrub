@@ -14,10 +14,10 @@ import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstallPath
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstance
 import app.gamegrub.service.base.GameStoreService
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.game.ExecutableSelectionUtils
-import app.gamegrub.storage.StorageManager
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,9 +27,9 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 

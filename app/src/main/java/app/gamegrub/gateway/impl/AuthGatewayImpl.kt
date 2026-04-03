@@ -3,7 +3,6 @@ package app.gamegrub.gateway.impl
 import app.gamegrub.data.GameSource
 import app.gamegrub.gateway.AuthGateway
 import app.gamegrub.gateway.AuthState
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 

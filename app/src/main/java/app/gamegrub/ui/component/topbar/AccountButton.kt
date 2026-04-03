@@ -21,7 +21,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.ProfileDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SteamIconImage
-import app.gamegrub.utils.general.getAvatarURL
+import app.gamegrub.service.steam.getAvatarURL
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import kotlinx.coroutines.launch
 import timber.log.Timber

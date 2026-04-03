@@ -1,6 +1,5 @@
 package app.gamegrub.ui.component.dialog
 
-import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.compose.foundation.clickable
@@ -934,7 +933,7 @@ private fun copyElementsIfNeeded(context: android.content.Context, destProfile: 
             return
         }
 
-        val sourceJson = org.json.JSONObject(com.winlator.core.FileUtils.readString(sourceFile))
+        val sourceJson = org.json.JSONObject(FileUtils.readString(sourceFile))
         if (!sourceJson.has("elements")) {
             Timber.tag("gncontrol").w("copyElements: Source profile has no elements")
             return
@@ -945,7 +944,7 @@ private fun copyElementsIfNeeded(context: android.content.Context, destProfile: 
         if (!destFile.isFile) {
             needsCopy = true
         } else {
-            val destJson = org.json.JSONObject(com.winlator.core.FileUtils.readString(destFile))
+            val destJson = org.json.JSONObject(FileUtils.readString(destFile))
             if (!destJson.has("elements") || destJson.getJSONArray("elements").length() == 0) {
                 needsCopy = true
             } else {
@@ -973,7 +972,7 @@ private fun copyElementsIfNeeded(context: android.content.Context, destProfile: 
 
         if (needsCopy) {
             val destJson = if (destFile.isFile) {
-                org.json.JSONObject(com.winlator.core.FileUtils.readString(destFile))
+                org.json.JSONObject(FileUtils.readString(destFile))
             } else {
                 org.json.JSONObject().apply {
                     put("id", destProfile.id)

@@ -49,9 +49,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.gamegrub.R
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.network.NetworkManager
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
 import java.io.File

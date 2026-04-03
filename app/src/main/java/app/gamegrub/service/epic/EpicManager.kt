@@ -543,7 +543,6 @@ class EpicManager @Inject constructor(
 
         // Get categories to check for mods
         val categories = data.optJSONArray("categories")
-        var isMod = false
         if (categories != null) {
             for (i in 0 until categories.length()) {
                 val cat = categories.getJSONObject(i)

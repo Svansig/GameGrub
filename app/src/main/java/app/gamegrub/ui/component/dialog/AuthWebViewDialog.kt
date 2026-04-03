@@ -1,5 +1,6 @@
 package app.gamegrub.ui.component.dialog
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.ViewGroup
@@ -36,6 +37,7 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.utils.auth.redactUrlForLogging
 import timber.log.Timber
 
+@SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthWebViewDialog(

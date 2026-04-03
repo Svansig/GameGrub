@@ -1,6 +1,5 @@
 package app.gamegrub.device
 
-
 /**
  * Central boundary for all user-device and hardware queries.
  *
@@ -109,7 +108,6 @@ interface DeviceQueryGateway {
      */
     fun getActiveDriverVendorId(): Int
 
-
     /**
      * Read current CPU usage percentage.
      *
@@ -195,4 +193,3 @@ data class DeviceBatterySnapshot(
     val chargeCounterMicroAmpHours: Long = 0L,
     val voltageMilliVolts: Int = 0,
 )
-

@@ -18,8 +18,8 @@ import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamLibraryClient
 import app.gamegrub.service.steam.managers.DownloadManager
 import app.gamegrub.service.steam.managers.PicsChangesManager
-import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.utils.steam.LicenseSerializer
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest

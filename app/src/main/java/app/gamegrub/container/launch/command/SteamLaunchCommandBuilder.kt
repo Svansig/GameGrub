@@ -73,5 +73,4 @@ internal object SteamLaunchCommandBuilder : BaseLaunchCommandBuilder() {
         context.envVars.put("WINEPATH", "$drive:/${context.appLaunchInfo!!.workingDir}")
         return "\"$drive:/$executablePath\""
     }
-
 }

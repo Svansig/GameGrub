@@ -50,11 +50,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamegrub.R
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.network.NetworkManager
 import com.winlator.contents.AdrenotoolsManager
 import java.io.File
 import java.io.IOException
@@ -72,13 +72,12 @@ import timber.log.Timber
 fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     if (!open) return
     val ctx = LocalContext.current
-    var lastMessage by remember { mutableStateOf<String?>(null) }
     var isImporting by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
     var isInstalling by remember { mutableStateOf(false) }
     var downloadProgress by remember { mutableFloatStateOf(0f) }
     var downloadBytes by remember { mutableLongStateOf(0L) }
-    var totalBytes by remember { androidx.compose.runtime.mutableLongStateOf(-1L) }
+    var totalBytes by remember { mutableLongStateOf(-1L) }
     val scope = rememberCoroutineScope()
 
     // Driver manifest handling

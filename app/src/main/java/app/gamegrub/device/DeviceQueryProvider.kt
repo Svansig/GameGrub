@@ -35,4 +35,3 @@ object DeviceQueryProvider {
             .fromApplication(context.applicationContext, DeviceQueryEntryPoint::class.java)
             .deviceQueryGateway()
 }
-

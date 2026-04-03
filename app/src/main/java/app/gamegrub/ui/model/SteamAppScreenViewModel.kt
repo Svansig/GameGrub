@@ -9,8 +9,8 @@ import app.gamegrub.enums.SyncResult
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.domain.SteamInstallDomain
-import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.utils.container.ContainerUtils
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.ContainerManager
 import com.winlator.xenvironment.ImageFsInstaller
@@ -106,7 +106,7 @@ class SteamAppScreenViewModel @Inject constructor(
      */
     fun verifyAppWithCleanup(appId: Int, onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            val container = ContainerUtils.getOrCreateContainer(context, appId.toString())
+            ContainerUtils.getOrCreateContainer(context, appId.toString())
             steamInstallDomain.downloadApp(appId)
             StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_REPLACED)
             StorageManager.removeMarker(SteamPaths.getAppDirPath(appId), Marker.STEAM_DLL_RESTORED)

@@ -16,7 +16,6 @@ import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsTileDefaults
 import com.alorma.compose.settings.ui.core.LocalSettingsGroupEnabled
 
-
 @Composable
 fun SettingsTextField(
     value: String,

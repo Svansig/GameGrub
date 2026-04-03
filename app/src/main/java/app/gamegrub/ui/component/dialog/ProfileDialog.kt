@@ -49,7 +49,7 @@ import app.gamegrub.R
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SteamIconImage
-import app.gamegrub.utils.general.getAvatarURL
+import app.gamegrub.service.steam.getAvatarURL
 import `in`.dragonbra.javasteam.enums.EPersonaState
 
 @Composable

@@ -62,9 +62,9 @@ This folder contains utility classes used across the application. Due to organic
 
 ### Network
 
-| File               | Purpose                     |
-|--------------------|-----------------------------|
-| `UpdateChecker.kt` | App update checking         |
+| File               | Purpose             |
+|--------------------|---------------------|
+| `UpdateChecker.kt` | App update checking |
 
 ### Device / Hardware
 

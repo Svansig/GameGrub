@@ -17,7 +17,7 @@ import timber.log.Timber
 internal object AmazonLaunchCommandBuilder : BaseLaunchCommandBuilder() {
     override val gameSource: GameSource = GameSource.AMAZON
 
-    override fun buildStoreCommand(context: LaunchCommandContext): String? {
+    override fun buildStoreCommand(context: LaunchCommandContext): String {
         val appIdInt = context.gameId
         val productId = AmazonService.getProductIdByAppId(appIdInt)
         Timber.tag("XServerScreen").i("Launching Amazon game: appId=$appIdInt, productId=$productId")

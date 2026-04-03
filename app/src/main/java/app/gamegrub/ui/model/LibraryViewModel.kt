@@ -11,7 +11,6 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
-import app.gamegrub.device.DeviceQueryGateway
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.EpicGame
 import app.gamegrub.data.GOGGame
@@ -23,6 +22,7 @@ import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
+import app.gamegrub.device.DeviceQueryGateway
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.amazon.AmazonService
@@ -606,6 +606,7 @@ class LibraryViewModel @Inject constructor(
 
             // Map Steam apps to UI items
             data class LibraryEntry(val item: LibraryItem, val isInstalled: Boolean)
+
             val shouldResolveSteamSize =
                 currentState.currentSortOption == SortOption.SIZE_SMALLEST ||
                     currentState.currentSortOption == SortOption.SIZE_LARGEST

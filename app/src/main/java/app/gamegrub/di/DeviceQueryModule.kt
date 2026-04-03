@@ -24,4 +24,3 @@ abstract class DeviceQueryModule {
     @Singleton
     abstract fun bindDeviceQueryGateway(impl: AndroidDeviceQueryManager): DeviceQueryGateway
 }
-

@@ -161,7 +161,6 @@ class AndroidDeviceQueryManager @Inject constructor(
      */
     override fun getActiveDriverVendorId(): Int = GPUInformation.getVendorID(null, null)
 
-
     /**
      * Read CPU usage percent from `/proc/stat` using delta samples.
      *
@@ -376,4 +375,3 @@ class AndroidDeviceQueryManager @Inject constructor(
         }
     }
 }
-

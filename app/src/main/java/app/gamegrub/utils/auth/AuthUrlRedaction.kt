@@ -1,6 +1,5 @@
 package app.gamegrub.utils.auth
 
-import android.net.Uri
 import androidx.core.net.toUri
 
 /**

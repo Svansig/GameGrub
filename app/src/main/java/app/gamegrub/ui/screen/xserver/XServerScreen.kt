@@ -305,9 +305,9 @@ fun XServerScreen(
     var performanceHudHost by remember { mutableStateOf<FrameLayout?>(null) }
     var isDraggingPerformanceHud by remember { mutableStateOf(false) }
     var isTrackingPerformanceHudTouch by remember { mutableStateOf(false) }
-    var performanceHudTouchDownRawX by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
-    var performanceHudTouchDownRawY by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
-    var performanceHudDragOffsetX by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var performanceHudTouchDownRawX by remember { mutableFloatStateOf(0f) }
+    var performanceHudTouchDownRawY by remember { mutableFloatStateOf(0f) }
+    var performanceHudDragOffsetX by remember { mutableFloatStateOf(0f) }
     var performanceHudDragOffsetY by remember { mutableFloatStateOf(0f) }
     val performanceHudTouchSlop = ViewConfiguration.get(context).scaledTouchSlop.toFloat()
 

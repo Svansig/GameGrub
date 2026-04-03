@@ -18,8 +18,8 @@ import app.gamegrub.data.UnifiedGame
 import app.gamegrub.db.converters.AppConverter
 import app.gamegrub.db.converters.ByteArrayConverter
 import app.gamegrub.db.converters.FriendConverter
-import app.gamegrub.db.converters.GameSourceConverter
 import app.gamegrub.db.converters.GOGConverter
+import app.gamegrub.db.converters.GameSourceConverter
 import app.gamegrub.db.converters.LicenseConverter
 import app.gamegrub.db.converters.PathTypeConverter
 import app.gamegrub.db.converters.UserFileInfoListConverter

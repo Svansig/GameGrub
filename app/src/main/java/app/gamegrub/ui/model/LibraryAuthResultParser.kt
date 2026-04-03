@@ -24,4 +24,3 @@ internal object LibraryAuthResultParser {
         }
     }
 }
-

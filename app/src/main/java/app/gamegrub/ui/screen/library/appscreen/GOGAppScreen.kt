@@ -21,6 +21,7 @@ import app.gamegrub.data.LibraryItem
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.domain.getGOGInstallDomain
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
@@ -29,8 +30,6 @@ import app.gamegrub.ui.model.GOGAppScreenViewModel
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
-import app.gamegrub.storage.StorageManager
-
 import com.winlator.container.ContainerData
 import java.io.File
 import java.util.Locale

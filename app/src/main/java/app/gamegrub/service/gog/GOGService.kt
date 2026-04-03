@@ -1,6 +1,5 @@
 package app.gamegrub.service.gog
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
@@ -11,8 +10,8 @@ import app.gamegrub.data.GOGGame
 import app.gamegrub.data.LaunchInfo
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.service.NotificationHelper
+import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

@@ -50,13 +50,13 @@ import app.gamegrub.data.DepotInfo
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.INVALID_APP_ID
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.component.topbar.BackButton
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.internal.fakeAppInfo
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.utils.steam.SteamUtils
-import app.gamegrub.storage.StorageManager
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import java.text.SimpleDateFormat

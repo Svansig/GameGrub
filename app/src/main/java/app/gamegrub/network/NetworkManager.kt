@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import app.gamegrub.network.NetworkManager.http
 import java.net.InetAddress
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
@@ -300,5 +301,3 @@ object NetworkManager {
             caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     }
 }
-
-

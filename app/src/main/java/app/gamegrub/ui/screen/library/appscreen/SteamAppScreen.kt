@@ -1047,7 +1047,7 @@ class SteamAppScreen(
         }
         var installSizeInfo by remember(gameId) { mutableStateOf<InstallSizeInfo?>(null) }
         fun launchPendingInstall(selectedDlcIds: List<Int>) {
-            val installDomain = getSteamInstallDomain(context)
+            getSteamInstallDomain(context)
             val installedApp = SteamService.getInstalledApp(gameId)
             if (installedApp != null) {
                 // Remove markers if the app is already installed
@@ -1253,7 +1253,7 @@ class SteamAppScreen(
                         if (pendingInstallDlcIds != null) {
                             continuePendingInstallIfAuthorized()
                         } else {
-                            val installDomain = getSteamInstallDomain(context)
+                            getSteamInstallDomain(context)
                             PostHog.capture(
                                 event = "game_install_started",
                                 properties = mapOf("game_name" to (appInfo?.name ?: "")),
@@ -1287,7 +1287,7 @@ class SteamAppScreen(
                 DialogType.UPDATE_VERIFY_CONFIRM -> {
                     {
                         hideInstallDialog(gameId)
-                        val installDomain = getSteamInstallDomain(context)
+                        getSteamInstallDomain(context)
                         val operation = getPendingUpdateVerifyOperation(gameId)
                         setPendingUpdateVerifyOperation(gameId, null)
 

@@ -54,7 +54,7 @@ fun SettingsCPUList(
                                 val newAffinity = if (it) {
                                     (cpuAffinity + cpu).sorted()
                                 } else {
-                                    cpuAffinity.takeIf { it -> it.size > 1 }?.filter { it -> it != cpu } ?: cpuAffinity
+                                    cpuAffinity.takeIf { it.size > 1 }?.filter { it != cpu } ?: cpuAffinity
                                 }
                                 onValueChange(newAffinity.joinToString(","))
                             },

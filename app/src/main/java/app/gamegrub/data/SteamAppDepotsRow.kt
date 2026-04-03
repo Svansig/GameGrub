@@ -9,4 +9,3 @@ data class SteamAppDepotsRow(
     @ColumnInfo("depots")
     val depots: Map<Int, DepotInfo> = emptyMap(),
 )
-

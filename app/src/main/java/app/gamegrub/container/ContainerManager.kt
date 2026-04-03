@@ -1,7 +1,5 @@
 package app.gamegrub.container
 
-import app.gamegrub.data.LibraryItem
-
 interface ContainerManager {
     suspend fun createContainer(appId: String): Result<ContainerHandle>
 

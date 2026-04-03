@@ -36,11 +36,11 @@ import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.service.steam.managers.LaunchIntentResult
 import app.gamegrub.statsgen.Achievement
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.steam.SteamUtils
 import app.gamegrub.utils.steam.generateSteamApp
-import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
 import dagger.hilt.android.AndroidEntryPoint
@@ -383,11 +383,11 @@ class SteamService : Service(), IChallengeUrlChanged {
             requireInstance().libraryDomain.getDownloadingAppInfoOf(appId)
         }
 
-        fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp>? = runBlocking {
+        fun getDownloadableDlcAppsOf(appId: Int): List<SteamApp> = runBlocking {
             requireInstance().libraryDomain.getDownloadableDlcAppsOf(appId)
         }
 
-        fun getHiddenDlcAppsOf(appId: Int): List<SteamApp>? = runBlocking {
+        fun getHiddenDlcAppsOf(appId: Int): List<SteamApp> = runBlocking {
             requireInstance().libraryDomain.getHiddenDlcAppsOf(appId)
         }
 
@@ -409,7 +409,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun getAppDlc(appId: Int): Map<Int, DepotInfo> {
             return getAppInfoOf(appId)?.let {
-                it.depots.filter { it -> it.value.dlcAppId != INVALID_APP_ID }
+                it.depots.filter { it.value.dlcAppId != INVALID_APP_ID }
             }.orEmpty()
         }
 

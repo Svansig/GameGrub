@@ -2,8 +2,8 @@ package app.gamegrub.data.extension
 
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.EpicGame
-import app.gamegrub.data.GameSource
 import app.gamegrub.data.GOGGame
+import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.data.SteamApp
 import app.gamegrub.data.UnifiedGame

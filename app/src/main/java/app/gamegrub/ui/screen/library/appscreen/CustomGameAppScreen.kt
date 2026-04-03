@@ -23,6 +23,7 @@ import app.gamegrub.R
 import app.gamegrub.api.steamGridDB.SteamGridDB
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
@@ -31,7 +32,6 @@ import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.game.CustomGameScanner
 import app.gamegrub.utils.game.ExeIconExtractor
 import app.gamegrub.utils.game.GameMetadataManager
-import app.gamegrub.storage.StorageManager
 import com.winlator.container.ContainerData
 import java.io.File
 import kotlinx.coroutines.CoroutineScope

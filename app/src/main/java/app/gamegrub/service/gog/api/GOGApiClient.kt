@@ -1,8 +1,8 @@
 package app.gamegrub.service.gog.api
 
 import android.content.Context
-import app.gamegrub.service.gog.GOGAuthManager
 import app.gamegrub.network.NetworkManager
+import app.gamegrub.service.gog.GOGAuthManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton

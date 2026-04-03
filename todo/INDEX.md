@@ -35,6 +35,13 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-007 | P2 | Detect and reduce cyclic package dependencies | `app/gamegrub` | `todo/COH-007.md` |
 | COH-015 | P2 | Introduce `LaunchRequestGateway` and migrate away from static launch request manager access | `app + ui/model` | `todo/COH-015.md` |
 | COH-016 | P2 | Introduce `PreferencesGateway` and phase out direct global `PrefManager` reads | `app + service + ui` | `todo/COH-016.md` |
+| COH-024 | P1 | Audit utils ownership and drive boundary relocations | `utils + architecture` | `todo/COH-024.md` |
+| COH-025 | P1 | Move auth and integrity utilities to explicit auth/security boundaries | `utils/auth + auth/security` | `todo/COH-025.md` |
+| COH-026 | P1 | Move container launch/preinstall ownership out of utils | `utils/container + launch` | `todo/COH-026.md` |
+| COH-027 | P1 | Move custom game scanning/metadata ownership out of utils | `utils/game + custom game domain` | `todo/COH-027.md` |
+| COH-028 | P2 | Move manifest and update flows out of utils | `utils/manifest + update` | `todo/COH-028.md` |
+| COH-029 | P1 | Decompose Steam utilities into Steam domain owners | `utils/steam + service/steam` | `todo/COH-029.md` |
+| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | `utils + ui formatting + policy` | `todo/COH-030.md` |
 
 ## Backlog - Readability
 
@@ -276,7 +283,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Owner | File |
 |---|---|---|---|---|
-| _none_ |  |  |  |  |
+| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | TBD | `todo/COH-030.md` |
 
 ## Blocked
 

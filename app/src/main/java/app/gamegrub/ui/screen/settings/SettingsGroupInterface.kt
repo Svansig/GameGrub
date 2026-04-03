@@ -119,16 +119,14 @@ fun SettingsGroupInterface(
     }
     var openRegionDialog by rememberSaveable { mutableStateOf(false) }
     var selectedRegionIndex by rememberSaveable {
-        androidx.compose.runtime.mutableIntStateOf(
+        mutableIntStateOf(
             steamRegionsList.indexOfFirst { it.first == PrefManager.cellId }.takeIf { it >= 0 } ?: 0,
         )
     }
 
     // GOG login state
-    var gogLoginLoading by rememberSaveable { mutableStateOf(false) }
 
     // GOG library sync state
-    var gogLibraryGameCount by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) }
 
     // Epic login state
 
@@ -215,7 +213,7 @@ fun SettingsGroupInterface(
 
         // Unified visual icon picker (affects app and notification icons)
         var selectedVariant by rememberSaveable {
-            androidx.compose.runtime.mutableIntStateOf(
+            mutableIntStateOf(
                 if (PrefManager.useAltLauncherIcon ||
                     PrefManager.useAltNotificationIcon
                 ) {
@@ -377,7 +375,7 @@ fun SettingsGroupInterface(
         if (useExternalStorage) {
             // Currently selected item
             var selectedIndex by rememberSaveable {
-                androidx.compose.runtime.mutableIntStateOf(
+                mutableIntStateOf(
                     dirs.indexOfFirst { it.absolutePath == PrefManager.externalStoragePath }
                         .takeIf { it >= 0 } ?: 0,
                 )

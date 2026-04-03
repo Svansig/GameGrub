@@ -1,7 +1,5 @@
 package app.gamegrub.data
 
-import app.gamegrub.data.GameSource
-
 sealed class UnifiedCredentials {
     abstract val gameSource: GameSource
     abstract val isValid: Boolean
@@ -41,10 +39,10 @@ sealed class UnifiedCredentials {
     }
 
     companion object {
-        fun fromGOG(gog: app.gamegrub.data.GOGCredentials): UnifiedCredentials =
+        fun fromGOG(gog: GOGCredentials): UnifiedCredentials =
             GOG(gog.accessToken, gog.refreshToken, gog.userId, gog.username)
 
-        fun fromEpic(epic: app.gamegrub.data.EpicCredentials): UnifiedCredentials =
+        fun fromEpic(epic: EpicCredentials): UnifiedCredentials =
             Epic(epic.accessToken, epic.refreshToken, epic.accountId, epic.displayName, epic.expiresAt)
     }
 }

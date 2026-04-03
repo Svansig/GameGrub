@@ -2,7 +2,6 @@ package app.gamegrub.ui.screen.auth
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebView

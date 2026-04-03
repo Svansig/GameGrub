@@ -1,24 +1,22 @@
 package app.gamegrub.data.repository
 
 import app.gamegrub.data.GameSource
-import app.gamegrub.data.LibraryItem
 import app.gamegrub.data.UnifiedGame
 import app.gamegrub.db.dao.GameDao
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
 
 @Singleton
 class GameRepository @Inject constructor(
-    private val gameDao: GameDao
+    private val gameDao: GameDao,
 ) {
     fun getAllGames(): Flow<List<UnifiedGame>> = gameDao.getAll()
 
-    fun getGamesBySource(source: GameSource): Flow<List<UnifiedGame>> = 
+    fun getGamesBySource(source: GameSource): Flow<List<UnifiedGame>> =
         gameDao.getBySource(source)
 
-    fun getInstalledGames(): Flow<List<UnifiedGame>> = 
+    fun getInstalledGames(): Flow<List<UnifiedGame>> =
         gameDao.getByInstallStatus(true)
 
     fun getInstalledGamesBySource(source: GameSource): Flow<List<UnifiedGame>> =

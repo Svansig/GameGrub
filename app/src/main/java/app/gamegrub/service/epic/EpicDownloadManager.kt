@@ -1,7 +1,6 @@
 package app.gamegrub.service.epic
 
 import android.content.Context
-import android.util.Log
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.EpicGame
 import app.gamegrub.enums.Marker

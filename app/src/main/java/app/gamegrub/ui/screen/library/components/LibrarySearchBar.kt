@@ -1,6 +1,5 @@
 package app.gamegrub.ui.screen.library.components
 
-import android.graphics.drawable.ColorDrawable
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo

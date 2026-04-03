@@ -47,10 +47,10 @@ import app.gamegrub.R
 import app.gamegrub.data.EpicGame
 import app.gamegrub.service.epic.EpicConstants
 import app.gamegrub.service.epic.EpicService
+import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.component.topbar.BackButton
 import app.gamegrub.ui.data.GameDisplayInfo
-import app.gamegrub.storage.StorageManager
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import com.winlator.core.StringUtils

@@ -52,7 +52,7 @@ internal fun EditModeToolbar(
     onDuplicate: (Int) -> Unit,
 ) {
     var duplicateProfileOpen by remember { mutableStateOf(false) }
-    var toolbarOffsetX by remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
+    var toolbarOffsetX by remember { mutableFloatStateOf(0f) }
     var toolbarOffsetY by remember { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
 

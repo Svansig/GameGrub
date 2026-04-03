@@ -3,13 +3,13 @@ package app.gamegrub.service.gog
 import android.content.Context
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.enums.Marker
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.gog.api.DepotFile
 import app.gamegrub.service.gog.api.FileChunk
 import app.gamegrub.service.gog.api.GOGApiClient
 import app.gamegrub.service.gog.api.GOGManifestMeta
 import app.gamegrub.service.gog.api.GOGManifestParser
 import app.gamegrub.service.gog.api.V1DepotFile
-import app.gamegrub.network.NetworkManager
 import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedOutputStream

@@ -24,6 +24,10 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-015 | P3 | Consolidate duplicate platform action components into shared UI primitives | `ui/component + ui/screen/library` | `todo/UI-015.md` |
 | UI-016 | P2 | Replace global launch/network reads in UI with injected state gateways | `ui/GameGrubMain + ui/model` | `todo/UI-016.md` |
 | UI-017 | P2 | Remove direct `PrefManager` access from target composables via ViewModel state | `ui/screen + ui/model` | `todo/UI-017.md` |
+| UI-024 | P2 | Define root back-press exit/logout behavior in main navigation shell | `ui/GameGrubMain` | `todo/UI-024.md` |
+| UI-025 | P2 | Complete library sort-type handling in `LibraryViewModel` | `ui/model` | `todo/UI-025.md` |
+| UI-026 | P3 | Add per-game force-fullscreen launch option | `ui/screen/xserver + launch config` | `todo/UI-026.md` |
+| UI-027 | P3 | Add gamepad-aware window size adaptation | `ui/utils + ui/layout` | `todo/UI-027.md` |
 
 ## Backlog - Cohesion
 
@@ -95,6 +99,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | REL-012 | P3 | Add reliability incident review template | `docs + process` | `todo/REL-012.md` |
 | REL-013 | P2 | Harden cache invalidation and stale-data fallback behavior | `service + data cache` | `todo/REL-013.md` |
 | REL-014 | P3 | Add defensive guards for null/empty platform payload edge cases | `service/platform adapters` | `todo/REL-014.md` |
+| REL-016 | P2 | Add cancellation and explicit fail-state handling for prelaunch pipeline | `ui/GameGrubMain + launch` | `todo/REL-016.md` |
 
 ## Backlog - Testing
 
@@ -278,6 +283,9 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-033 | P3 | Evaluate JavaSteam `PublishedFile` integration usefulness and feasibility | `service/steam + content` | `todo/SRV-033.md` |
 | SRV-034 | P3 | Evaluate JavaSteam `SteamWorkshop` integration usefulness and feasibility | `service/steam + workshop` | `todo/SRV-034.md` |
 | SRV-035 | P3 | Evaluate JavaSteam `SteamScreenshots` integration usefulness and feasibility | `service/steam + media` | `todo/SRV-035.md` |
+| SRV-038 | P2 | Replace hardcoded Epic launcher version metadata with build-derived values | `service/epic` | `todo/SRV-038.md` |
+| SRV-039 | P2 | Implement Epic game update flow from app screen actions | `ui/screen/library/appscreen + service/epic` | `todo/SRV-039.md` |
+| SRV-040 | P2 | Implement GOG game update flow from app screen actions | `ui/screen/library/appscreen + service/gog` | `todo/SRV-040.md` |
 
 ## In Progress
 

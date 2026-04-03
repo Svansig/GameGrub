@@ -16,6 +16,16 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-002 | P1 | Remove unmanaged IO scopes from GOG UI paths | `ui/screen/library/appscreen` | `todo/UI-002.md` |
 | UI-003 | P1 | Remove unmanaged IO scopes from Steam UI paths | `ui/screen/library/appscreen` | `todo/UI-003.md` |
 | UI-005 | P1 | Decompose orchestration from `GameGrubMain` | `ui` | `todo/UI-005.md` |
+| UI-005b | P1 | Deduplicate external launch resolution handling in `GameGrubMain` | `ui` | `todo/UI-005b.md` |
+| UI-005c | P1 | Move launch resolution and Steam login gating out of UI launch orchestrator | `ui/launch + launch` | `todo/UI-005c.md` |
+| UI-005d | P1 | Move launch telemetry tracking out of UI launch orchestrator | `ui/launch + launch` | `todo/UI-005d.md` |
+| UI-005e | P1 | Isolate launch-request UI messaging helpers from launch orchestration core | `ui/launch` | `todo/UI-005e.md` |
+| UI-005f | P1 | Extract service startup lifecycle policy from `GameGrubMain` | `ui + session/service startup` | `todo/UI-005f.md` |
+| UI-005g | P1 | Isolate app update workflow orchestration from `GameGrubMain` | `ui + update workflow` | `todo/UI-005g.md` |
+| UI-005h | P1 | Move container config save/discard side effects out of `GameGrubMain` dialog handlers | `ui + container config flow` | `todo/UI-005h.md` |
+| UI-005i | P1 | Move game feedback submission side effects out of `GameGrubMain` | `ui + feedback flow` | `todo/UI-005i.md` |
+| UI-005j | P1 | Centralize launch-entry policy handling away from `GameGrubMain` branches | `ui + launch entry policy` | `todo/UI-005j.md` |
+| UI-005k | P1 | Extract message-dialog action mapping from `GameGrubMain` monolith | `ui + dialog action mapping` | `todo/UI-005k.md` |
 | UI-010 | P2 | Move platform login-state derivation into ViewModel state | `ui/screen/library` | `todo/UI-010.md` |
 | UI-011 | P2 | Extract OAuth launcher callback wiring from screen composables | `ui/screen/library + settings` | `todo/UI-011.md` |
 | UI-012 | P3 | Standardize dialog state ownership across screens | `ui/component/dialog + ui/screen` | `todo/UI-012.md` |
@@ -304,6 +314,17 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | ID | Priority | Title | PR | File |
 |---|---|---|---|---|
 | UI-004 | P1 | Move library auth workflow out of composables | TBD | `todo/UI-004.md` |
+| UI-005a | P1 | Extract preLaunchApp into LaunchCoordinator | TBD | `todo/UI-005a.md` |
+| UI-005b | P1 | Deduplicate external launch resolution handling in `GameGrubMain` | TBD | `todo/UI-005b.md` |
+| UI-005c | P1 | Move launch resolution and Steam login gating out of UI launch orchestrator | TBD | `todo/UI-005c.md` |
+| UI-005d | P1 | Move launch telemetry tracking out of UI launch orchestrator | TBD | `todo/UI-005d.md` |
+| UI-005e | P1 | Isolate launch-request UI messaging helpers from launch orchestration core | TBD | `todo/UI-005e.md` |
+| UI-005f | P1 | Extract service startup lifecycle policy from GameGrubMain | TBD | `todo/UI-005f.md` |
+| UI-005g | P1 | Isolate app update workflow orchestration from GameGrubMain | TBD | `todo/UI-005g.md` |
+| UI-005h | P1 | Move container config save/discard side effects out of GameGrubMain dialog handlers | TBD | `todo/UI-005h.md` |
+| UI-005i | P1 | Move game feedback submission side effects out of GameGrubMain | TBD | `todo/UI-005i.md` |
+| UI-005j | P1 | Centralize launch-entry policy handling away from GameGrubMain branches | TBD | `todo/UI-005j.md` |
+| UI-005k | P1 | Extract message-dialog action mapping from GameGrubMain monolith | TBD | `todo/UI-005k.md` |
 | UI-006 | P2 | Resolve lint blockers in `GameGrubMain` | TBD | `todo/UI-006.md` |
 | UI-007 | P2 | Align architecture doc path naming | TBD | `todo/UI-007.md` |
 | UI-008 | P3 | Move preview fake data to safer location | TBD | `todo/UI-008.md` |

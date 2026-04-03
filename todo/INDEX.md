@@ -215,6 +215,25 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | ARCH-007b | P2 | Wrap Steam Cloud Saves in Interface | `service/cloud` | `todo/ARCH-007b.md` |
 | ARCH-007c | P2 | Migrate GOG Cloud Saves to Interface | `service/cloud` | `todo/ARCH-007c.md` |
 | ARCH-007d | P2 | Migrate Epic Cloud Saves to Interface | `service/cloud` | `todo/ARCH-007d.md` |
+| ARCH-008 | P2 | Unified Library ViewModel | `ui/model` | `todo/ARCH-008.md` |
+| ARCH-009 | P1 | Service Locator Cleanup | `service` | `todo/ARCH-009.md` |
+| ARCH-010 | P2 | Remove Static Utility Classes | `utils` | `todo/ARCH-010.md` |
+| ARCH-011 | P2 | UI State Gateway Pattern | `ui/model + service` | `todo/ARCH-011.md` |
+| ARCH-012 | P2 | Consolidate Event Bus Usage | `events + ui` | `todo/ARCH-012.md` |
+| ARCH-013 | P1 | Unify Download Info Model | `data` | `todo/ARCH-013.md` |
+| ARCH-014 | P1 | Unified Credentials Model | `data` | `todo/ARCH-014.md` |
+| ARCH-015 | P1 | Unified LaunchInfo Model | `data` | `todo/ARCH-015.md` |
+| ARCH-016 | P1 | Create Gateway Implementations | `gateway` | `todo/ARCH-016.md` |
+| ARCH-017 | P1 | Create Hilt Modules for New Abstractions | `di` | `todo/ARCH-017.md` |
+| ARCH-018 | P1 | Migrate Services to Use GameStoreService Base | `service` | `todo/ARCH-018.md` |
+| ARCH-019 | P1 | Migrate Launch Builders to Base Class | `container/launch` | `todo/ARCH-019.md` |
+| ARCH-020 | P1 | Implement Gateway DI Bindings | `di` | `todo/ARCH-020.md` |
+| ARCH-021 | P2 | Create Architecture Decision Records | `docs` | `todo/ARCH-021.md` |
+| ARCH-022 | P1 | Migrate LibraryViewModel to Use GameRepository | `ui/model` | `todo/ARCH-022.md` |
+| ARCH-023 | P1 | Migrate App Screens to Use GameRepository | `ui/screen/library` | `todo/ARCH-023.md` |
+| ARCH-024 | P1 | Replace Service Companion Objects with Injection | `service` | `todo/ARCH-024.md` |
+| ARCH-025 | P2 | Add Unit Tests for GameRepository | `test` | `todo/ARCH-025.md` |
+| ARCH-026 | P2 | Add Unit Tests for Gateways | `test` | `todo/ARCH-026.md` |
 | SRV-002 | P2 | Move installer/download helpers to SteamInstallDomain | `service/steam` | `todo/SRV-002.md` |
 | SRV-003 | P2 | Remove DepotDownloader import from SteamService | `service/steam` | `todo/SRV-003.md` |
 | SRV-004 | P1 | Move session/launch orchestration to SteamSessionDomain | `service/steam` | `todo/SRV-004.md` |

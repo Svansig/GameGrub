@@ -14,12 +14,10 @@ import timber.log.Timber
 /**
  * Builds Amazon launch commands and applies Fuel/FuelPump environment setup.
  */
-internal object AmazonLaunchCommandBuilder : StoreLaunchCommandBuilder {
-    override fun build(context: LaunchCommandContext): String? {
-        if (context.gameSource != GameSource.AMAZON) {
-            return null
-        }
+internal object AmazonLaunchCommandBuilder : BaseLaunchCommandBuilder() {
+    override val gameSource: GameSource = GameSource.AMAZON
 
+    override fun buildStoreCommand(context: LaunchCommandContext): String? {
         val appIdInt = context.gameId
         val productId = AmazonService.getProductIdByAppId(appIdInt)
         Timber.tag("XServerScreen").i("Launching Amazon game: appId=$appIdInt, productId=$productId")

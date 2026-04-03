@@ -2,32 +2,22 @@ package com.winlator.xenvironment;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.util.Log;
-
 import app.gamegrub.R;
 import app.gamegrub.enums.Marker;
 import app.gamegrub.service.steam.SteamService;
+import app.gamegrub.storage.StorageManager;
 import app.gamegrub.utils.container.ContainerUtils;
-import app.gamegrub.utils.storage.MarkerUtils;
 import timber.log.Timber;
-
-// import com.winlator.MainActivity;
-// import com.winlator.R;
-// import com.winlator.SettingsFragment;
 import com.winlator.PrefManager;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
-// import com.winlator.core.DownloadProgressDialog;
 import com.winlator.core.Callback;
 import com.winlator.core.FileUtils;
-// import com.winlator.core.PreloaderDialog;
 import com.winlator.core.TarCompressorUtils;
 import com.winlator.core.WineInfo;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -361,9 +351,9 @@ public abstract class ImageFsInstaller {
                 try {
                     int gameId = ContainerUtils.INSTANCE.extractGameIdFromContainerId(container.id);
                     String mappedPath = SteamService.Companion.getAppDirPath(gameId);
-                    MarkerUtils.INSTANCE.removeMarker(mappedPath, Marker.STEAM_DLL_REPLACED);
-                    MarkerUtils.INSTANCE.removeMarker(mappedPath, Marker.STEAM_DLL_RESTORED);
-                    MarkerUtils.INSTANCE.removeMarker(mappedPath, Marker.STEAM_COLDCLIENT_USED);
+                    StorageManager.INSTANCE.removeMarker(mappedPath, Marker.STEAM_DLL_REPLACED);
+                    StorageManager.INSTANCE.removeMarker(mappedPath, Marker.STEAM_DLL_RESTORED);
+                    StorageManager.INSTANCE.removeMarker(mappedPath, Marker.STEAM_COLDCLIENT_USED);
                     Timber.tag("ImageFsInstaller").i("Cleared markers for container: " + container.getName() + " (ID: " + container.id + ")");
                 } catch (Exception e) {
                     Timber.tag("ImageFsInstaller").w("Failed to clear markers for container ID " + container.id + ": " + e.getMessage());

@@ -66,25 +66,6 @@ public abstract class AppUtils {
          imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
      }
 
-    /**
-     * Compatibility shim that delegates system UI visibility control to {@link ImmersiveModeManager}.
-     *
-     * @param activity Host activity whose window receives immersive mode updates.
-     */
-    public static void hideSystemUI(final Activity activity) {
-        hideSystemUI(activity, true);
-    }
-
-    /**
-     * Compatibility shim that delegates system UI visibility control to {@link ImmersiveModeManager}.
-     *
-     * @param activity Host activity whose window receives immersive mode updates.
-     * @param hide {@code true} to hide bars (immersive), {@code false} to show bars.
-     */
-    public static void hideSystemUI(final Activity activity, Boolean hide) {
-        new ImmersiveModeManager(activity.getWindow()).setSystemUIVisibility(!hide);
-    }
-
     public static boolean isUiThread() {
         return Looper.getMainLooper().getThread() == Thread.currentThread();
     }

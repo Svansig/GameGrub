@@ -8,6 +8,8 @@ import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.CachedLicenseDao
 import app.gamegrub.db.dao.DownloadingAppInfoDao
 import app.gamegrub.db.dao.EncryptedAppTicketDao
+import app.gamegrub.db.dao.GameDao
+import app.gamegrub.data.sync.GameSyncManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,4 +74,8 @@ class DatabaseModule {
     @Provides
     @Singleton
     fun provideDownloadingAppInfoDao(db: GameGrubDatabase): DownloadingAppInfoDao = db.downloadingAppInfoDao()
+
+    @Provides
+    @Singleton
+    fun provideGameDao(db: GameGrubDatabase): GameDao = db.gameDao()
 }

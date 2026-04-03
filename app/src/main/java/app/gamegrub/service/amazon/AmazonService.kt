@@ -1,9 +1,7 @@
 package app.gamegrub.service.amazon
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
 import app.gamegrub.GameGrubApp
 import app.gamegrub.data.AmazonCredentials
 import app.gamegrub.data.AmazonGame
@@ -14,6 +12,7 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstallPath
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstance
+import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.game.ExecutableSelectionUtils
@@ -27,11 +26,6 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -39,7 +33,7 @@ import timber.log.Timber
 
 /** Amazon Games foreground service. */
 @AndroidEntryPoint
-class AmazonService : Service() {
+class AmazonService : GameStoreService() {
 
     /** Entry point to access [AmazonGameDao] when service instance is unavailable. */
     @EntryPoint
@@ -57,68 +51,24 @@ class AmazonService : Service() {
     @Inject
     lateinit var amazonDownloadManager: AmazonDownloadManager
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     // Active downloads keyed by Amazon product ID (e.g. "amzn1.adg.product.XXXX")
-    private val activeDownloads = ConcurrentHashMap<String, DownloadInfo>()
+    val activeDownloads = ConcurrentHashMap<String, DownloadInfo>()
 
     // Active install paths keyed by Amazon product ID (used for robust partial-download detection)
-    private val activeDownloadPaths = ConcurrentHashMap<String, String>()
+    val activeDownloadPaths = ConcurrentHashMap<String, String>()
 
     companion object {
-        private const val ACTION_SYNC_LIBRARY = "app.gamegrub.AMAZON_SYNC_LIBRARY"
-        private const val ACTION_MANUAL_SYNC = "app.gamegrub.AMAZON_MANUAL_SYNC"
-        private const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L // 15 minutes
         private var instance: AmazonService? = null
 
-        // Sync tracking variables
-        private var lastSyncTimestamp: Long = 0L
-        private var hasPerformedInitialSync: Boolean = false
-        private var syncInProgress: Boolean = false
-        private var backgroundSyncJob: Job? = null
-
-        private fun setSyncInProgress(inProgress: Boolean) {
-            syncInProgress = inProgress
-        }
-
-        fun isSyncInProgress(): Boolean = syncInProgress
-
-        /** Returns true when sync or download work is still active. */
-        fun hasActiveOperations(): Boolean {
-            return syncInProgress || backgroundSyncJob?.isActive == true || hasActiveDownload()
-        }
-
-        val isRunning: Boolean
+        fun isRunning: Boolean
             get() = instance != null
 
         fun start(context: Context) {
-            if (isRunning) {
+            if (instance != null) {
                 Timber.d("[Amazon] Service already running")
                 return
             }
-
-            val intent = Intent(context, AmazonService::class.java)
-
-            // First-time start: always sync without throttle
-            if (!hasPerformedInitialSync) {
-                Timber.i("[Amazon] First-time start — starting service with initial sync")
-                intent.action = ACTION_SYNC_LIBRARY
-                context.startForegroundService(intent)
-                return
-            }
-
-            // Subsequent starts: check throttle for sync
-            val now = System.currentTimeMillis()
-            val timeSinceLastSync = now - lastSyncTimestamp
-
-            if (timeSinceLastSync >= SYNC_THROTTLE_MILLIS) {
-                Timber.i("[Amazon] Starting service with automatic sync (throttle passed)")
-                intent.action = ACTION_SYNC_LIBRARY
-            } else {
-                val remainingMinutes = (SYNC_THROTTLE_MILLIS - timeSinceLastSync) / 1000 / 60
-                Timber.i("[Amazon] Starting service without sync — throttled (${remainingMinutes}min remaining)")
-            }
-            context.startForegroundService(intent)
+            startServiceWithSync(context)
         }
 
         fun stop() {
@@ -174,10 +124,14 @@ class AmazonService : Service() {
 
         /** Trigger a manual library sync, bypassing throttle. */
         fun triggerLibrarySync(context: Context) {
-            Timber.i("[Amazon] Manual sync requested — bypassing throttle")
-            val intent = Intent(context, AmazonService::class.java)
-            intent.action = ACTION_MANUAL_SYNC
-            context.startForegroundService(intent)
+            if (instance != null) {
+                triggerManualSync(context)
+            }
+        }
+
+        /** Returns true when sync or download work is still active. */
+        fun hasActiveOperations(): Boolean {
+            return isSyncInProgress || hasActiveDownload()
         }
 
         // ── Install queries ───────────────────────────────────────────────────
@@ -776,6 +730,17 @@ class AmazonService : Service() {
         stop()
     }
 
+    override fun getServiceTag(): String = "AMAZON"
+
+    override fun performSync(context: Context, isManual: Boolean) {
+        Timber.i("[Amazon] Starting library sync (manual=$isManual)")
+        syncLibrary()
+    }
+
+    override fun getNotificationTitle(): String = "Amazon Games"
+
+    override fun getNotificationContent(): String = "Connected"
+
     override fun onCreate() {
         super.onCreate()
         instance = this
@@ -784,54 +749,13 @@ class AmazonService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = notificationHelper.createForegroundNotification("Connected")
-        startForeground(1, notification)
-
-        val shouldSync = when (intent?.action) {
-            ACTION_MANUAL_SYNC -> {
-                Timber.i("[Amazon] Manual sync requested — bypassing throttle")
-                true
-            }
-
-            ACTION_SYNC_LIBRARY -> {
-                Timber.i("[Amazon] Automatic sync requested")
-                true
-            }
-
-            null -> {
-                // Service restarted by Android (START_STICKY)
-                val timeSinceLastSync = System.currentTimeMillis() - lastSyncTimestamp
-                val shouldResync = !hasPerformedInitialSync || timeSinceLastSync >= SYNC_THROTTLE_MILLIS
-                if (shouldResync) {
-                    Timber.i("[Amazon] Service restarted by Android — performing sync (initial=$hasPerformedInitialSync, elapsed=${timeSinceLastSync}ms)")
-                } else {
-                    Timber.d("[Amazon] Service restarted by Android — skipping sync (throttled)")
-                }
-                shouldResync
-            }
-
-            else -> {
-                Timber.d("[Amazon] Service started without sync action")
-                false
-            }
-        }
-
-        if (shouldSync) {
-            if (syncInProgress) {
-                Timber.i("[Amazon] Sync already in progress — ignoring duplicate request")
-            } else {
-                backgroundSyncJob = serviceScope.launch { syncLibrary() }
-            }
-        }
-
+        startForeground(1, notificationHelper.createForegroundNotification("Connected"))
+        handleStartCommand(intent)
         return START_STICKY
     }
 
     override fun onDestroy() {
         GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
-        backgroundSyncJob?.cancel()
-        setSyncInProgress(false)
-        serviceScope.cancel()
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
         instance = null
@@ -885,16 +809,11 @@ class AmazonService : Service() {
     suspend fun getInstalledGamePath(gameId: String): String? = getInstallPath(gameId)
 
     private suspend fun syncLibrary() {
-        setSyncInProgress(true)
         try {
             amazonManager.refreshLibrary()
-            lastSyncTimestamp = System.currentTimeMillis()
-            hasPerformedInitialSync = true
             Timber.i("[Amazon] Sync complete — next auto-sync in 15 minutes")
         } catch (e: Exception) {
             Timber.e(e, "[Amazon] Library sync failed")
-        } finally {
-            setSyncInProgress(false)
         }
     }
 }

@@ -1,5 +1,6 @@
 package app.gamegrub.container.launch.command
 
+import app.gamegrub.data.GameSource
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.steam.SteamUtils
 import java.io.File
@@ -8,7 +9,9 @@ import timber.log.Timber
 /**
  * Handles Steam-specific prelaunch side effects and command generation.
  */
-internal object SteamLaunchCommandBuilder : StoreLaunchCommandBuilder {
+internal object SteamLaunchCommandBuilder : BaseLaunchCommandBuilder() {
+    override val gameSource: GameSource = GameSource.STEAM
+
     fun prepare(context: LaunchCommandContext) {
         if (context.container.executablePath.isEmpty()) {
             context.container.executablePath = SteamService.getInstalledExe(context.gameId)
@@ -27,11 +30,7 @@ internal object SteamLaunchCommandBuilder : StoreLaunchCommandBuilder {
         }
     }
 
-    override fun build(context: LaunchCommandContext): String? {
-        if (context.gameSource != app.gamegrub.data.GameSource.STEAM) {
-            return null
-        }
-
+    override fun buildStoreCommand(context: LaunchCommandContext): String? {
         return if (context.appLaunchInfo == null) {
             Timber.tag("XServerScreen").w("appLaunchInfo is null for Steam game: ${context.appId}")
             wrapWithWinhandler("\"wfm.exe\"")

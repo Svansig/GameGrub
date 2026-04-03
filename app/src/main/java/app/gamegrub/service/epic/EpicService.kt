@@ -1,9 +1,7 @@
 package app.gamegrub.service.epic
 
-import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
 import app.gamegrub.GameGrubApp
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.EpicCredentials
@@ -11,6 +9,7 @@ import app.gamegrub.data.EpicGame
 import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
+import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.storage.StorageManager
@@ -19,11 +18,6 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -33,62 +27,26 @@ import timber.log.Timber
  * Epic Games Service - thin coordinator that delegates to other Epic managers.
  */
 @AndroidEntryPoint
-class EpicService : Service() {
+class EpicService : GameStoreService() {
 
     companion object {
         private var instance: EpicService? = null
-
-        private const val ACTION_SYNC_LIBRARY = "app.gamegrub.EPIC_SYNC_LIBRARY"
-        private const val ACTION_MANUAL_SYNC = "app.gamegrub.EPIC_MANUAL_SYNC"
-        private const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L // 15 minutes
-
-        // Sync tracking variables
-        private var syncInProgress: Boolean = false
-        private var backgroundSyncJob: Job? = null
-        private var lastSyncTimestamp: Long = 0L
-        private var hasPerformedInitialSync: Boolean = false
 
         val isRunning: Boolean
             get() = instance != null
 
         fun start(context: Context) {
-            Timber.tag("EPIC").d("Starting service...")
-            // If already running, do nothing
-            if (isRunning) {
+            if (instance != null) {
                 Timber.tag("EPIC").d("[EpicService] Service already running, skipping start")
                 return
             }
-
-            // First-time start: always sync without throttle
-            if (!hasPerformedInitialSync) {
-                Timber.tag("EPIC").i("[EpicService] First-time start - starting service with initial sync")
-                val intent = Intent(context, EpicService::class.java)
-                intent.action = ACTION_SYNC_LIBRARY
-                context.startForegroundService(intent)
-                return
-            }
-
-            // Subsequent starts: always start service, but check throttle for sync
-            val now = System.currentTimeMillis()
-            val timeSinceLastSync = now - lastSyncTimestamp
-
-            val intent = Intent(context, EpicService::class.java)
-            if (timeSinceLastSync >= SYNC_THROTTLE_MILLIS) {
-                Timber.tag("EPIC").i("[EpicService] Starting service with automatic sync (throttle passed)")
-                intent.action = ACTION_SYNC_LIBRARY
-            } else {
-                val remainingMinutes = (SYNC_THROTTLE_MILLIS - timeSinceLastSync) / 1000 / 60
-                Timber.tag("EPIC").i("Starting service without sync - throttled (${remainingMinutes}min remaining)")
-                // Start service without sync action
-            }
-            context.startForegroundService(intent)
+            startServiceWithSync(context)
         }
 
         fun triggerLibrarySync(context: Context) {
-            Timber.tag("EPIC").i("Triggering manual library sync (bypasses throttle)")
-            val intent = Intent(context, EpicService::class.java)
-            intent.action = ACTION_MANUAL_SYNC
-            context.startForegroundService(intent)
+            if (instance != null) {
+                triggerManualSync(context)
+            }
         }
 
         fun stop() {
@@ -153,11 +111,7 @@ class EpicService : Service() {
         // ==========================================================================
 
         fun hasActiveOperations(): Boolean {
-            return syncInProgress || backgroundSyncJob?.isActive == true || hasActiveDownload()
-        }
-
-        private fun setSyncInProgress(inProgress: Boolean) {
-            syncInProgress = inProgress
+            return isSyncInProgress || hasActiveDownload()
         }
 
         fun getInstance(): EpicService? = instance
@@ -433,77 +387,29 @@ class EpicService : Service() {
         GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
     }
 
+    override fun getServiceTag(): String = "EPIC"
+
+    override fun performSync(context: Context, isManual: Boolean) {
+        Timber.tag("EPIC").i("Starting library sync (manual=$isManual)")
+        val result = epicManager.startBackgroundSync(context)
+        if (result.isFailure) {
+            Timber.w("Background sync failed: ${result.exceptionOrNull()?.message}")
+        } else {
+            Timber.tag("EPIC").i("Background library sync completed successfully")
+        }
+    }
+
+    override fun getNotificationTitle(): String = "Epic Games"
+
+    override fun getNotificationContent(): String = "Connected"
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.tag("EPIC").d("onStartCommand() - action: ${intent?.action}")
 
         getInstance()
-        // Start as foreground service
-        val notification = notificationHelper.createForegroundNotification("Connected")
-        startForeground(1, notification)
+        startForeground(1, notificationHelper.createForegroundNotification("Connected"))
 
-        // Determine if we should sync based on the action
-        val shouldSync = when (intent?.action) {
-            ACTION_MANUAL_SYNC -> {
-                Timber.tag("EPIC").i("Manual sync requested - bypassing throttle")
-                true
-            }
-
-            ACTION_SYNC_LIBRARY -> {
-                Timber.tag("EPIC").i("Automatic sync requested")
-                true
-            }
-
-            null -> {
-                // Service restarted by Android with null intent (START_STICKY behavior)
-                // Only sync if we haven't done initial sync yet, or if it's been a while
-                val timeSinceLastSync = System.currentTimeMillis() - lastSyncTimestamp
-                val shouldResync = !hasPerformedInitialSync || timeSinceLastSync >= SYNC_THROTTLE_MILLIS
-
-                if (shouldResync) {
-                    Timber.tag("EPIC")
-                        .i("Service restarted by Android - performing sync (hasPerformedInitialSync=$hasPerformedInitialSync, timeSinceLastSync=${timeSinceLastSync}ms)")
-                    true
-                } else {
-                    Timber.tag("EPIC").d("Service restarted by Android - skipping sync (throttled)")
-                    false
-                }
-            }
-
-            else -> {
-                // Service started without sync action (e.g., just to keep it alive)
-                Timber.tag("EPIC").d(" Service started without sync action")
-                false
-            }
-        }
-
-        // Start background library sync if requested
-        if (shouldSync && (backgroundSyncJob == null || backgroundSyncJob?.isActive != true)) {
-            Timber.tag("EPIC").i("Starting background library sync")
-
-            backgroundSyncJob?.cancel() // Cancel any existing job
-            backgroundSyncJob = scope.launch {
-                try {
-                    setSyncInProgress(true)
-                    Timber.tag("EPIC").d("Starting background library sync")
-                    val syncResult = epicManager.startBackgroundSync(applicationContext)
-                    if (syncResult.isFailure) {
-                        Timber.w("Failed to start background sync: ${syncResult.exceptionOrNull()?.message}")
-                    } else {
-                        Timber.tag("EPIC").i("Background library sync completed successfully")
-                        // Update last sync timestamp on successful sync
-                        lastSyncTimestamp = System.currentTimeMillis()
-                        // Mark that initial sync has been performed
-                        hasPerformedInitialSync = true
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "Exception starting background sync")
-                } finally {
-                    setSyncInProgress(false)
-                }
-            }
-        } else if (shouldSync) {
-            Timber.tag("EPIC").d("Background sync already in progress, skipping")
-        }
+        handleStartCommand(intent)
 
         return START_STICKY
     }
@@ -512,12 +418,6 @@ class EpicService : Service() {
         super.onDestroy()
         Timber.tag("Epic").i("[EpicService] Service destroyed")
         GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
-
-        // Cancel sync operations
-        backgroundSyncJob?.cancel()
-        setSyncInProgress(false)
-
-        scope.cancel() // Cancel any ongoing operations
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
         instance = null

@@ -8,12 +8,10 @@ import timber.log.Timber
 /**
  * Builds the command used to launch a GOG game through the existing GOG service.
  */
-internal object GogLaunchCommandBuilder : StoreLaunchCommandBuilder {
-    override fun build(context: LaunchCommandContext): String? {
-        if (context.gameSource != GameSource.GOG) {
-            return null
-        }
+internal object GogLaunchCommandBuilder : BaseLaunchCommandBuilder() {
+    override val gameSource: GameSource = GameSource.GOG
 
+    override fun buildStoreCommand(context: LaunchCommandContext): String? {
         Timber.tag("XServerScreen").i("Launching GOG game: ${context.gameId}")
 
         val libraryItem = LibraryItem(

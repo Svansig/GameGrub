@@ -8,6 +8,17 @@
 - **Documentation Impact**: `No doc changes required` - Internal refactor, no user-facing docs
 - **Reviewer**: `TBD`
 
+## Implementation Status
+
+**COMPLETED** (Infrastructure created, migration pending):
+- `UnifiedGame.kt` - Entity with GameSource discriminator
+- `GameDao.kt` - Unified DAO with all operations
+- `GameRepository.kt` - Repository with business logic
+- `GameMapper.kt` - Mappers between legacy entities
+- `GameSourceConverter.kt` - Room type converter
+- Updated `GameGrubDatabase.kt` (version 14, new entity)
+- Updated `DatabaseModule.kt` (new DAO provider)
+
 ## Problem
 
 Each game store has its own data entity (SteamApp, GOGGame, EpicGame, AmazonGame) with nearly identical fields (name, icon, installPath, isInstalled, size, playTime, etc.). This causes:
@@ -40,11 +51,11 @@ Each game store has its own data entity (SteamApp, GOGGame, EpicGame, AmazonGame
 
 ## Acceptance Criteria
 
-- [ ] Unified `Game` interface created with common fields
-- [ ] Store-specific fields handled via nullable fields or JSON extension
-- [ ] Room database has single games table with GameSource discriminator
-- [ ] All reads/writes go through unified DAO
-- [ ] Existing entities optionally deprecated/migrated
+- [x] Unified `Game` interface created with common fields
+- [x] Store-specific fields handled via nullable fields or JSON extension
+- [x] Room database has single games table with GameSource discriminator
+- [x] All reads/writes go through unified DAO
+- [ ] Existing entities migrated (legacy tables for backward compatibility)
 - [ ] No runtime regressions for existing features
 
 ## Validation

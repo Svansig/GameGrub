@@ -11,6 +11,7 @@ import app.gamegrub.data.GOGGame
 import app.gamegrub.data.LaunchInfo
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
@@ -44,66 +45,13 @@ import timber.log.Timber
  *
  */
 @AndroidEntryPoint
-class GOGService : Service() {
+class GOGService : GameStoreService() {
 
     companion object {
-        private const val ACTION_SYNC_LIBRARY = "app.gamegrub.GOG_SYNC_LIBRARY"
-        private const val ACTION_MANUAL_SYNC = "app.gamegrub.GOG_MANUAL_SYNC"
-        private const val SYNC_THROTTLE_MILLIS = 15 * 60 * 1000L // 15 minutes
-
         private var instance: GOGService? = null
-
-        // Sync tracking variables
-        private var syncInProgress: Boolean = false
-        private var backgroundSyncJob: Job? = null
-        private var lastSyncTimestamp: Long = 0L
-        private var hasPerformedInitialSync: Boolean = false
 
         val isRunning: Boolean
             get() = instance != null
-
-        fun start(context: Context) {
-            // If already running, do nothing
-            if (isRunning) {
-                Timber.d("[GOGService] Service already running, skipping start")
-                return
-            }
-
-            // First-time start: always sync without throttle
-            if (!hasPerformedInitialSync) {
-                Timber.i("[GOGService] First-time start - starting service with initial sync")
-                val intent = Intent(context, GOGService::class.java)
-                intent.action = ACTION_SYNC_LIBRARY
-                context.startForegroundService(intent)
-                return
-            }
-
-            // Subsequent starts: always start service, but check throttle for sync
-            val now = System.currentTimeMillis()
-            val timeSinceLastSync = now - lastSyncTimestamp
-
-            val intent = Intent(context, GOGService::class.java)
-            if (timeSinceLastSync >= SYNC_THROTTLE_MILLIS) {
-                Timber.i("[GOGService] Starting service with automatic sync (throttle passed)")
-                intent.action = ACTION_SYNC_LIBRARY
-            } else {
-                val remainingMinutes = (SYNC_THROTTLE_MILLIS - timeSinceLastSync) / 1000 / 60
-                Timber.d("[GOGService] Starting service without sync - throttled (${remainingMinutes}min remaining)")
-                // Start service without sync action
-            }
-            context.startForegroundService(intent)
-        }
-
-        fun triggerLibrarySync(context: Context) {
-            Timber.i("[GOGService] Triggering manual library sync (bypasses throttle)")
-            val intent = Intent(context, GOGService::class.java)
-            intent.action = ACTION_MANUAL_SYNC
-            context.startForegroundService(intent)
-        }
-
-        fun stop() {
-            instance?.stopSelf()
-        }
 
         // ==========================================================================
         // AUTHENTICATION - Delegate to GOGAuthManager
@@ -169,16 +117,6 @@ class GOGService : Service() {
         // ==========================================================================
         // SYNC & OPERATIONS
         // ==========================================================================
-
-        fun hasActiveOperations(): Boolean {
-            return syncInProgress || backgroundSyncJob?.isActive == true
-        }
-
-        private fun setSyncInProgress(inProgress: Boolean) {
-            syncInProgress = inProgress
-        }
-
-        fun isSyncInProgress(): Boolean = syncInProgress
 
         fun getInstance(): GOGService? = instance
 

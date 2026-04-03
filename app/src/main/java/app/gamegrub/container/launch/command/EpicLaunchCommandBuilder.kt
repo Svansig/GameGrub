@@ -9,12 +9,10 @@ import timber.log.Timber
 /**
  * Builds Epic launch commands and applies Epic-provided auth arguments.
  */
-internal object EpicLaunchCommandBuilder : StoreLaunchCommandBuilder {
-    override fun build(context: LaunchCommandContext): String? {
-        if (context.gameSource != GameSource.EPIC) {
-            return null
-        }
+internal object EpicLaunchCommandBuilder : BaseLaunchCommandBuilder() {
+    override val gameSource: GameSource = GameSource.EPIC
 
+    override fun buildStoreCommand(context: LaunchCommandContext): String? {
         Timber.tag("XServerScreen").i("Launching Epic game: ${context.gameId}")
         val game = runBlocking {
             EpicService.getInstance()?.epicManager?.getGameById(context.gameId)

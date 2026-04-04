@@ -1,6 +1,5 @@
 package app.gamegrub.utils
 
-import app.gamegrub.data.GameSource
 import java.text.DecimalFormat
 
 object FormatUtils {
@@ -42,32 +41,6 @@ object FormatUtils {
             hours > 0 -> "$hours hours ago"
             minutes > 0 -> "$minutes minutes ago"
             else -> "Just now"
-        }
-    }
-}
-
-object GameSourceUtils {
-    fun getDisplayName(source: GameSource): String {
-        return when (source) {
-            GameSource.STEAM -> "Steam"
-            GameSource.GOG -> "GOG"
-            GameSource.EPIC -> "Epic Games Store"
-            GameSource.AMAZON -> "Amazon Games"
-            GameSource.CUSTOM_GAME -> "Custom Game"
-        }
-    }
-
-    fun getShortName(source: GameSource): String {
-        return source.name
-    }
-
-    fun getIconResource(source: GameSource): Int {
-        return when (source) {
-            GameSource.STEAM -> app.gamegrub.R.drawable.ic_logo_color
-            GameSource.GOG -> app.gamegrub.R.drawable.ic_logo_color
-            GameSource.EPIC -> app.gamegrub.R.drawable.ic_logo_color
-            GameSource.AMAZON -> app.gamegrub.R.drawable.ic_logo_color
-            GameSource.CUSTOM_GAME -> app.gamegrub.R.drawable.ic_logo_color
         }
     }
 }

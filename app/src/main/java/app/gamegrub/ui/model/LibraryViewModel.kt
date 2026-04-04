@@ -286,7 +286,6 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    // TODO: include other sort types
     fun onFilterChanged(value: AppFilter) {
         _state.update { currentState ->
             val updatedFilter = EnumSet.copyOf(currentState.appInfoSortType)

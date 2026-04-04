@@ -17,6 +17,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.gateway.LaunchRequestGateway
 import app.gamegrub.service.ServiceLifecycleManager
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.GameGrubMain
@@ -39,6 +40,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var imageLoader: ImageLoader
+
+    @Inject
+    lateinit var launchRequestGateway: LaunchRequestGateway
 
     private lateinit var immersiveModeManager: ImmersiveModeManager
     private lateinit var orientationManager: OrientationManager
@@ -117,7 +121,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleLaunchIntent(intent: Intent, isNewIntent: Boolean = false) {
-        LaunchRequestManager.handleLaunchIntent(this, intent, isNewIntent)
+        launchRequestGateway.handleLaunchIntent(this, intent, isNewIntent)
     }
 
     override fun onDestroy() {

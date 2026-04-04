@@ -301,7 +301,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 
 | ID | Priority | Title | Owner | File |
 |---|---|---|---|---|
-| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | TBD | `todo/COH-030.md` |
+| COH-007 | P2 | Detect and reduce cyclic package dependencies | TBD | `todo/COH-007.md` |
 
 ## Blocked
 
@@ -384,3 +384,4 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | TEST-019 | P1 | Add contract tests for storage gateways (paths, permissions, markers, file operations) | TBD | `todo/TEST-019.md` |
 | TEST-020 | P1 | Add regression tests for cross-platform install/move flows under storage boundary | TBD | `todo/TEST-020.md` |
 | DOC-018 | P1 | Document storage ownership contract and migration rules for storage-only boundaries | TBD | `todo/DOC-018.md` |
+| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | TBD | `todo/COH-030.md` |

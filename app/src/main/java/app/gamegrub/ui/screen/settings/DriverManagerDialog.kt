@@ -1,5 +1,6 @@
 package app.gamegrub.ui.screen.settings
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
@@ -49,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.gamegrub.Constants
 import app.gamegrub.R
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.steam.SteamService
@@ -68,6 +70,7 @@ import okhttp3.Request
 import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     if (!open) return
@@ -119,7 +122,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
         scope.launch(Dispatchers.IO) {
             try {
                 val manifestUrl =
-                    "https://raw.githubusercontent.com/utkarshdalal/gamenative-landing-page/refs/heads/main/data/manifest.json"
+                    Constants.Api.DRIVER_MANIFEST_URL
                 val request = Request.Builder()
                     .url(manifestUrl)
                     .build()
@@ -165,8 +168,8 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             scope.launch {
                 isImporting = true
                 val res = withContext(Dispatchers.IO) { handlePickedUri(ctx, it) }
-                if (res.startsWith("Installed driver:")) refreshDriverList()
-                SnackbarManager.show(res)
+                if (res.installed) refreshDriverList()
+                SnackbarManager.show(res.message)
                 SteamService.isImporting = false
                 isImporting = false
             }
@@ -215,8 +218,8 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 val res = withContext(Dispatchers.IO) { handlePickedUri(ctx, uri) }
                 val installDurationMs = System.currentTimeMillis() - installStart
                 withContext(Dispatchers.Main) {
-                    if (res.startsWith("Installed driver:")) refreshDriverList()
-                    SnackbarManager.show(res)
+                    if (res.installed) refreshDriverList()
+                    SnackbarManager.show(res.message)
                 }
                 Timber.d("DriverManagerDialog: Install complete in ${installDurationMs}ms")
                 Timber.d("DriverManagerDialog: Download+Install total ${(System.currentTimeMillis() - overallStart)}ms")
@@ -238,7 +241,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download failed with IO error")
             } catch (e: Exception) {
-                val errorMessage = "Error downloading driver: ${e.message}"
+                val errorMessage = ctx.getString(R.string.driver_download_error, e.message ?: "")
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download failed")
             } finally {
@@ -262,7 +265,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     .verticalScroll(rememberScrollState()),
             ) {
                 Text(
-                    text = "Import a custom graphics driver package",
+                    text = stringResource(R.string.driver_import_custom_package),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
@@ -274,7 +277,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                         modifier = Modifier.padding(vertical = 8.dp),
                     ) {
                         Text(
-                            text = "Loading available drivers...",
+                            text = stringResource(R.string.driver_loading_available),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )
@@ -285,14 +288,14 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     }
                 } else if (manifestError != null) {
                     Text(
-                        text = manifestError ?: "Unknown error",
+                        text = manifestError ?: stringResource(R.string.driver_unknown_error),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
                 } else if (driverManifest.isNotEmpty()) {
                     Text(
-                        text = "Available online drivers:",
+                        text = stringResource(R.string.driver_available_online),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                     )
@@ -391,7 +394,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
                 // Local driver import section
                 Text(
-                    text = "Import from local storage:",
+                    text = stringResource(R.string.driver_import_from_local_storage),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -413,7 +416,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                         modifier = Modifier.padding(bottom = 8.dp),
                     ) {
                         Text(
-                            text = "Importing driver...",
+                            text = stringResource(R.string.driver_importing),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f),
                         )
@@ -427,7 +430,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 if (installedDrivers.isNotEmpty()) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     Text(
-                        text = "Installed custom drivers",
+                        text = stringResource(R.string.driver_installed_custom),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 8.dp),
                     )
@@ -458,7 +461,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.Delete,
-                                        contentDescription = "Delete",
+                                        contentDescription = stringResource(R.string.delete),
                                         tint = MaterialTheme.colorScheme.error,
                                     )
                                 }
@@ -476,18 +479,16 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                                     onClick = {
                                         try {
                                             AdrenotoolsManager(ctx).removeDriver(id)
-                                            "Removed driver: $id"
-                                            SnackbarManager.show("Removed driver: $id")
+                                            SnackbarManager.show(ctx.getString(R.string.driver_removed, id))
                                             refreshDriverList()
                                         } catch (e: Exception) {
-                                            "Error removing $id: ${e.message}"
-                                            SnackbarManager.show("Error removing $id: ${e.message}")
+                                            SnackbarManager.show(ctx.getString(R.string.driver_remove_error, id, e.message ?: ""))
                                         }
                                         driverToDelete = null
                                     },
                                 ) {
                                     Text(
-                                        text = "Delete",
+                                        text = stringResource(R.string.delete),
                                         color = MaterialTheme.colorScheme.error,
                                     )
                                 }
@@ -506,7 +507,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(
-                    text = "Close",
+                    text = stringResource(R.string.close),
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -514,16 +515,30 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     )
 }
 
-private fun handlePickedUri(context: Context, uri: Uri): String {
+private data class DriverInstallResult(
+    val message: String,
+    val installed: Boolean,
+)
+
+private fun handlePickedUri(context: Context, uri: Uri): DriverInstallResult {
     return try {
         val name = AdrenotoolsManager(context).installDriver(uri)
         if (name.isNotEmpty()) {
-            "Installed driver: $name"
+            DriverInstallResult(
+                message = context.getString(R.string.driver_installed, name),
+                installed = true,
+            )
         } else {
-            "Failed to install driver: driver already installed or .zip corrupted"
+            DriverInstallResult(
+                message = context.getString(R.string.driver_install_failed),
+                installed = false,
+            )
         }
     } catch (e: Exception) {
-        "Error importing driver: ${e.message}"
+        DriverInstallResult(
+            message = context.getString(R.string.driver_import_error, e.message ?: ""),
+            installed = false,
+        )
     }
 }
 

@@ -75,6 +75,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.gamegrub.Constants
 import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -587,7 +588,7 @@ fun SystemMenu(
                             text = stringResource(R.string.help_and_support),
                             icon = Icons.AutoMirrored.Filled.Help,
                             onClick = {
-                                uriHandler.openUri("https://discord.gg/2hKv4VfZfE")
+                                uriHandler.openUri(Constants.Links.DISCORD_INVITE)
                             },
                         )
 

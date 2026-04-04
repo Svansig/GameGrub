@@ -1,8 +1,9 @@
 package app.gamegrub.api
 
 import app.gamegrub.BuildConfig
+import app.gamegrub.Constants
 import app.gamegrub.network.NetworkManager
-import app.gamegrub.utils.auth.PlayIntegrity
+import app.gamegrub.service.auth.PlayIntegrity
 import java.io.IOException
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -45,7 +46,7 @@ object GameNativeApi {
     }
 
     suspend fun buildPostRequest(url: String, body: JSONObject): Request {
-        val mediaType = "application/json".toMediaType()
+        val mediaType = Constants.Protocol.MIME_APPLICATION_JSON.toMediaType()
         val bodyString = body.toString()
         val requestBody = bodyString.toRequestBody(mediaType)
 
@@ -54,7 +55,7 @@ object GameNativeApi {
         val builder = Request.Builder()
             .url(url)
             .post(requestBody)
-            .header("Content-Type", "application/json")
+            .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
 
         if (integrityToken != null) {
             builder.header("X-Integrity-Token", integrityToken)

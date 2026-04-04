@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
+import app.gamegrub.Constants
 import app.gamegrub.GameGrubApp
 import app.gamegrub.R
 import app.gamegrub.data.GameSource
@@ -411,7 +412,7 @@ abstract class BaseAppScreen {
             onClick = {
                 val browserIntent = Intent(
                     Intent.ACTION_VIEW,
-                    ("https://discord.gg/2hKv4VfZfE").toUri(),
+                    Constants.Links.DISCORD_INVITE.toUri(),
                 )
                 context.startActivity(browserIntent)
             },
@@ -465,7 +466,7 @@ abstract class BaseAppScreen {
 
         ContainerUtils.applyToContainer(context, libraryItem.appId, defaults)
 
-        SnackbarManager.show("Container reset to defaults")
+        SnackbarManager.show(context.getString(R.string.steam_container_reset_success))
     }
 
     /**

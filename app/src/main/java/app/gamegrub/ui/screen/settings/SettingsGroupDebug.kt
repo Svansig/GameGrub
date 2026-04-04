@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import app.gamegrub.Constants
 import app.gamegrub.CrashHandler
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -45,6 +46,9 @@ import kotlinx.serialization.json.Json
 fun SettingsGroupDebug() {
     val context = LocalContext.current
     val isPreview = LocalInspectionMode.current
+    val failedLogSaveMessage = stringResource(R.string.toast_failed_log_save)
+    val failedWineLogSaveMessage = stringResource(R.string.settings_debug_failed_wine_log_save)
+    val longClickToActivateMessage = stringResource(R.string.settings_debug_long_click_to_activate)
     if (!isPreview) {
         PrefManager.init(context)
         WinlatorPrefManager.init(context)
@@ -99,7 +103,7 @@ fun SettingsGroupDebug() {
 
     /* Save crash log */
     val saveResultContract = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/plain"),
+        contract = ActivityResultContracts.CreateDocument(Constants.Protocol.MIME_TEXT_PLAIN),
     ) { resultUri ->
         try {
             resultUri?.let { uri ->
@@ -109,14 +113,14 @@ fun SettingsGroupDebug() {
                     }
                 }
             }
-        } catch (e: Exception) {
-            SnackbarManager.show("Failed to save logcat to destination")
+        } catch (_: Exception) {
+            SnackbarManager.show(failedLogSaveMessage)
         }
     }
 
     /* Save log cat */
     val saveLogCat = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/plain"),
+        contract = ActivityResultContracts.CreateDocument(Constants.Protocol.MIME_TEXT_PLAIN),
     ) { resultUri ->
         try {
             resultUri?.let {
@@ -125,8 +129,8 @@ fun SettingsGroupDebug() {
                     outputStream.write(logs.toByteArray())
                 }
             }
-        } catch (e: Exception) {
-            SnackbarManager.show(context.getString(R.string.toast_failed_log_save))
+        } catch (_: Exception) {
+            SnackbarManager.show(failedLogSaveMessage)
         }
     }
 
@@ -153,7 +157,7 @@ fun SettingsGroupDebug() {
         latestWineLogFile = if (wineLogFile.exists()) wineLogFile else null
     }
     val saveWineLogContract = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("text/plain"),
+        contract = ActivityResultContracts.CreateDocument(Constants.Protocol.MIME_TEXT_PLAIN),
     ) { resultUri ->
         try {
             resultUri?.let { uri ->
@@ -161,8 +165,8 @@ fun SettingsGroupDebug() {
                     latestWineLogFile?.inputStream()?.use { input -> input.copyTo(output) }
                 }
             }
-        } catch (e: Exception) {
-            SnackbarManager.show("Failed to save Wine log to destination")
+        } catch (_: Exception) {
+            SnackbarManager.show(failedWineLogSaveMessage)
         }
     }
 
@@ -264,7 +268,7 @@ fun SettingsGroupDebug() {
                     (context as ComponentActivity).finishAffinity()
                 },
                 onClick = {
-                    SnackbarManager.show("Long click to activate")
+                    SnackbarManager.show(longClickToActivateMessage)
                 },
             ),
             colors = settingsTileColorsDebug(),
@@ -281,7 +285,7 @@ fun SettingsGroupDebug() {
                     (context as ComponentActivity).finishAffinity()
                 },
                 onClick = {
-                    SnackbarManager.show("Long click to activate")
+                    SnackbarManager.show(longClickToActivateMessage)
                 },
             ),
             colors = settingsTileColorsDebug(),
@@ -297,7 +301,7 @@ fun SettingsGroupDebug() {
                     context.imageLoader.memoryCache?.clear()
                 },
                 onClick = {
-                    SnackbarManager.show("Long click to activate")
+                    SnackbarManager.show(longClickToActivateMessage)
                 },
             ),
             colors = settingsTileColorsDebug(),

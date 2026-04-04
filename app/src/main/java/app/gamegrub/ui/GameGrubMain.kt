@@ -75,7 +75,13 @@ import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
 import app.gamegrub.ui.component.dialog.state.GameFeedbackDialogState
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
+import app.gamegrub.ui.container.ContainerConfigCoordinator
 import app.gamegrub.ui.enums.DialogType
+import app.gamegrub.ui.feedback.GameFeedbackCoordinator
+import app.gamegrub.ui.launch.consumePendingLaunchWithError
+import app.gamegrub.ui.launch.handleExternalLaunchSuccess
+import app.gamegrub.ui.launch.preLaunchApp
+import app.gamegrub.ui.launch.showGameNotInstalledDialog
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.screen.GameGrubScreen
@@ -83,15 +89,10 @@ import app.gamegrub.ui.screen.HomeScreen
 import app.gamegrub.ui.screen.login.UserLoginScreen
 import app.gamegrub.ui.screen.settings.SettingsScreen
 import app.gamegrub.ui.screen.xserver.XServerScreen
-import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.ui.launch.consumePendingLaunchWithError
-import app.gamegrub.ui.launch.handleExternalLaunchSuccess
-import app.gamegrub.ui.launch.preLaunchApp
-import app.gamegrub.ui.launch.showGameNotInstalledDialog
 import app.gamegrub.ui.service.ServiceStartupCoordinator
+import app.gamegrub.ui.service.getServiceStartupCoordinator
+import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.update.AppUpdateCoordinator
-import app.gamegrub.ui.container.ContainerConfigCoordinator
-import app.gamegrub.ui.feedback.GameFeedbackCoordinator
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.auth.PlatformAuthUtils
 import app.gamegrub.utils.container.ContainerUtils
@@ -107,6 +108,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+private const val BOOTING_SPLASH_Z_INDEX = 10f
+private const val CONNECTION_BANNER_Z_INDEX = 5f
+private val SNACKBAR_BOTTOM_PADDING = 16.dp
+private val SNACKBAR_CORNER_RADIUS = 24.dp
+private val SNACKBAR_SHADOW_ELEVATION = 4.dp
+private val SNACKBAR_HORIZONTAL_PADDING = 24.dp
+private val SNACKBAR_VERTICAL_PADDING = 12.dp
+
 private fun NavHostController.navigateFromLoginIfNeeded(
     targetRoute: String,
     logTag: String = "GameGrubMain",
@@ -121,7 +130,6 @@ private fun NavHostController.navigateFromLoginIfNeeded(
         }
     }
 }
-
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -148,6 +156,8 @@ fun GameGrubMain(
     val updateFailedMessage = stringResource(R.string.main_update_failed_message)
     val okText = stringResource(R.string.ok)
     val containerConfigTitle = stringResource(R.string.container_config_title)
+    val downloadingUpdateMessage = stringResource(R.string.main_downloading_update)
+    val feedbackSubmitFailed = stringResource(R.string.game_feedback_submit_failed)
     val isGoldBuild = BuildConfig.BUILD_TYPE.contains("gold", ignoreCase = true)
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -461,7 +471,7 @@ fun GameGrubMain(
         }
     }
 
-    // TODO merge to VM?
+    // TODO: merge to VM?
     LaunchedEffect(state.currentScreen) {
         // do the following each time we navigate to a new screen
         if (state.resettedScreen != state.currentScreen) {
@@ -495,7 +505,7 @@ fun GameGrubMain(
                 navController = navController,
                 state = state,
                 isConnecting = isConnecting,
-                onNavigation = null
+                onNavigation = null,
             )
         }
     }
@@ -549,7 +559,7 @@ fun GameGrubMain(
         DialogType.DISCORD -> {
             onConfirmClick = {
                 setMessageDialogState(MessageDialogState(false))
-                uriHandler.openUri("https://discord.gg/2hKv4VfZfE")
+                uriHandler.openUri(Constants.Links.DISCORD_INVITE)
             }
             onDismissClick = {
                 setMessageDialogState(MessageDialogState(false))
@@ -575,7 +585,7 @@ fun GameGrubMain(
                 val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_TEXT, mainShareText)
-                    type = "text/plain"
+                    type = Constants.Protocol.MIME_TEXT_PLAIN
                 }
                 context.startActivity(Intent.createChooser(shareIntent, mainShareLabel))
             }
@@ -819,7 +829,7 @@ fun GameGrubMain(
                 if (updateInfo != null) {
                     scope.launch {
                         viewModel.setLoadingDialogVisible(true)
-                        viewModel.setLoadingDialogMessage("Downloading update...")
+                        viewModel.setLoadingDialogMessage(downloadingUpdateMessage)
                         viewModel.setLoadingDialogProgress(0f)
 
                         val success = appUpdateCoordinator.downloadAndInstall(
@@ -948,7 +958,7 @@ fun GameGrubMain(
                         )
                     } catch (e: Exception) {
                         Timber.e(e, "GameFeedback: Error preparing game feedback")
-                        SnackbarManager.show("Failed to submit feedback")
+                        SnackbarManager.show(feedbackSubmitFailed)
                         gameFeedbackState = GameFeedbackDialogState(visible = false)
                     }
                 },
@@ -956,11 +966,11 @@ fun GameGrubMain(
                     gameFeedbackState = GameFeedbackDialogState(visible = false)
                 },
                 onDiscordSupport = {
-                    uriHandler.openUri("https://discord.gg/2hKv4VfZfE")
+                    uriHandler.openUri(Constants.Links.DISCORD_INVITE)
                 },
             )
 
-            Box(modifier = Modifier.zIndex(10f)) {
+            Box(modifier = Modifier.zIndex(BOOTING_SPLASH_Z_INDEX)) {
                 BootingSplash(
                     visible = state.showBootingSplash,
                     text = state.bootingSplashText,
@@ -974,7 +984,7 @@ fun GameGrubMain(
                 PrefManager.refreshToken.isNotEmpty() &&
                 PrefManager.username.isNotEmpty()
             ) {
-                Box(modifier = Modifier.zIndex(5f)) {
+                Box(modifier = Modifier.zIndex(CONNECTION_BANNER_Z_INDEX)) {
                     ConnectionStatusBanner(
                         connectionState = state.connectionState,
                         connectionMessage = state.connectionMessage,
@@ -1242,20 +1252,23 @@ fun GameGrubMain(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .windowInsetsPadding(WindowInsets.navigationBarsIgnoringVisibility)
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = SNACKBAR_BOTTOM_PADDING),
             ) { data ->
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(24.dp),
+                        shape = RoundedCornerShape(SNACKBAR_CORNER_RADIUS),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shadowElevation = 4.dp,
+                        shadowElevation = SNACKBAR_SHADOW_ELEVATION,
                     ) {
                         Text(
                             text = data.visuals.message,
-                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
+                            modifier = Modifier.padding(
+                                horizontal = SNACKBAR_HORIZONTAL_PADDING,
+                                vertical = SNACKBAR_VERTICAL_PADDING,
+                            ),
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                         )
@@ -1267,4 +1280,3 @@ fun GameGrubMain(
         }
     }
 }
-

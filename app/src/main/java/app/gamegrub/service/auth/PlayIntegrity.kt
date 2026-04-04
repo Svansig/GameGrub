@@ -1,4 +1,4 @@
-package app.gamegrub.utils.auth
+package app.gamegrub.service.auth
 
 import android.app.Application
 import app.gamegrub.BuildConfig
@@ -40,10 +40,6 @@ object PlayIntegrity {
         }
     }
 
-    /**
-     * Returns a fresh, one-use integrity token bound to the SHA-256 hash of
-     * [requestBodyBytes], or null if the provider is not ready or the request fails.
-     */
     suspend fun requestToken(requestBodyBytes: ByteArray): String? {
         val provider = tokenProvider ?: return null
 

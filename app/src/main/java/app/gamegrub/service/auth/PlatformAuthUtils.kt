@@ -1,4 +1,4 @@
-package app.gamegrub.utils.auth
+package app.gamegrub.service.auth
 
 import android.content.Context
 import app.gamegrub.service.amazon.AmazonService

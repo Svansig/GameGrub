@@ -1,5 +1,6 @@
 package app.gamegrub.service.amazon
 
+import app.gamegrub.Constants
 import app.gamegrub.network.NetworkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,7 +23,7 @@ data class AmazonAuthResponse(
 object AmazonAuthClient {
 
     private val httpClient = NetworkManager.http
-    private val JSON_MEDIA = "application/json; charset=utf-8".toMediaType()
+    private val JSON_MEDIA = "${Constants.Protocol.MIME_APPLICATION_JSON}; charset=utf-8".toMediaType()
 
     /** Exchange a PKCE authorization code for access and refresh tokens. */
     suspend fun registerDevice(
@@ -77,8 +78,8 @@ object AmazonAuthClient {
             val request = Request.Builder()
                 .url(AmazonConstants.AUTH_REGISTER_URL)
                 .header("User-Agent", AmazonConstants.USER_AGENT)
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
+                .header("Accept", Constants.Protocol.MIME_APPLICATION_JSON)
                 .post(body.toString().toRequestBody(JSON_MEDIA))
                 .build()
 
@@ -131,8 +132,8 @@ object AmazonAuthClient {
             val request = Request.Builder()
                 .url(AmazonConstants.AUTH_TOKEN_URL)
                 .header("User-Agent", AmazonConstants.USER_AGENT)
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
+                .header("Accept", Constants.Protocol.MIME_APPLICATION_JSON)
                 .header("x-amzn-identity-auth-domain", "api.amazon.com")
                 .post(body.toString().toRequestBody(JSON_MEDIA))
                 .build()
@@ -182,8 +183,8 @@ object AmazonAuthClient {
             val request = Request.Builder()
                 .url(AmazonConstants.AUTH_DEREGISTER_URL)
                 .header("User-Agent", AmazonConstants.USER_AGENT)
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
+                .header("Accept", Constants.Protocol.MIME_APPLICATION_JSON)
                 .header("Authorization", "Bearer $accessToken")
                 .post(body.toString().toRequestBody(JSON_MEDIA))
                 .build()

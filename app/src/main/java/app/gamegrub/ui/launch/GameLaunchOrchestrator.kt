@@ -51,6 +51,16 @@ private interface BestConfigServiceEntryPoint {
     fun bestConfigService(): BestConfigService
 }
 
+private const val SYNC_IN_PROGRESS_MAX_RETRIES = 5
+private const val SYNC_IN_PROGRESS_RETRY_DELAY_MS = 2000L
+
+internal fun shouldRetrySyncInProgress(
+    useTemporaryOverride: Boolean,
+    retryCount: Int,
+): Boolean {
+    return useTemporaryOverride && retryCount < SYNC_IN_PROGRESS_MAX_RETRIES
+}
+
 
 /**
  * Handles a resolved external launch by setting ViewModel state and running pre-launch setup.
@@ -489,9 +499,11 @@ fun preLaunchApp(
             }
 
             SyncResult.InProgress -> {
-                if (useTemporaryOverride && retryCount < 5) {
-                    Timber.i("Sync in progress for intent launch, retrying in 2 seconds... (attempt ${retryCount + 1}/5)")
-                    delay(2000)
+                if (shouldRetrySyncInProgress(useTemporaryOverride, retryCount)) {
+                    Timber.i(
+                        "Sync in progress for intent launch, retrying in 2 seconds... (attempt ${retryCount + 1}/$SYNC_IN_PROGRESS_MAX_RETRIES)",
+                    )
+                    delay(SYNC_IN_PROGRESS_RETRY_DELAY_MS)
                     preLaunchApp(
                         scope = scope,
                         context = context,

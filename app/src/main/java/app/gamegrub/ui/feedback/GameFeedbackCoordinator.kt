@@ -1,11 +1,12 @@
 package app.gamegrub.ui.feedback
 
 import android.content.Context
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameFeedbackUtils
 import app.gamegrub.ui.component.dialog.state.GameFeedbackDialogState
 import app.gamegrub.ui.utils.SnackbarManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -24,7 +25,7 @@ import timber.log.Timber
  */
 class GameFeedbackCoordinator(
     private val context: Context,
-    private val viewModelScope: androidx.lifecycle.viewModelScope,
+    private val viewModelScope: CoroutineScope,
 ) {
     /**
      * Submits game feedback based on the provided feedback state.
@@ -54,13 +55,13 @@ class GameFeedbackCoordinator(
                 )
 
                 if (result) {
-                    SnackbarManager.show("Thank you for your feedback!")
+                    SnackbarManager.show(context.getString(R.string.game_feedback_submit_success))
                 } else {
-                    SnackbarManager.show("Failed to submit feedback")
+                    SnackbarManager.show(context.getString(R.string.game_feedback_submit_failed))
                 }
             } catch (e: Exception) {
                 Timber.e(e, "GameFeedbackCoordinator: Error submitting game feedback")
-                SnackbarManager.show("Error submitting feedback")
+                SnackbarManager.show(context.getString(R.string.game_feedback_submit_error))
             } finally {
                 onComplete()
             }

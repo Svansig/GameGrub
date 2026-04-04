@@ -8,7 +8,7 @@ import androidx.core.net.toUri
 import app.gamegrub.service.epic.EpicConstants
 import app.gamegrub.ui.component.dialog.AuthWebViewDialog
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.utils.auth.redactUrlForLogging
+import app.gamegrub.service.auth.redactUrlForLogging
 import timber.log.Timber
 
 /**

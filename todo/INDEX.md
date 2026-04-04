@@ -38,6 +38,8 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | UI-025 | P2 | Complete library sort-type handling in `LibraryViewModel` | `ui/model` | `todo/UI-025.md` |
 | UI-026 | P3 | Add per-game force-fullscreen launch option | `ui/screen/xserver + launch config` | `todo/UI-026.md` |
 | UI-027 | P3 | Add gamepad-aware window size adaptation | `ui/utils + ui/layout` | `todo/UI-027.md` |
+| UI-028 | P1 | Localize hardcoded user-facing strings in main/settings/feedback flows | `ui/GameGrubMain.kt + ui/screen/settings + ui/feedback` | `todo/UI-028.md` |
+| UI-029 | P2 | Normalize repeated overlay and snackbar layout literals into UI tokens | `ui/GameGrubMain.kt + ui/theme` | `todo/UI-029.md` |
 
 ## Backlog - Cohesion
 
@@ -56,6 +58,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-028 | P2 | Move manifest and update flows out of utils | `utils/manifest + update` | `todo/COH-028.md` |
 | COH-029 | P1 | Decompose Steam utilities into Steam domain owners | `utils/steam + service/steam` | `todo/COH-029.md` |
 | COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | `utils + ui formatting + policy` | `todo/COH-030.md` |
+| COH-031 | P1 | Centralize external links and manifest endpoints under shared constants | `Constants + ui links + manifest/update endpoints` | `todo/COH-031.md` |
 
 ## Backlog - Readability
 
@@ -110,6 +113,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | REL-013 | P2 | Harden cache invalidation and stale-data fallback behavior | `service + data cache` | `todo/REL-013.md` |
 | REL-014 | P3 | Add defensive guards for null/empty platform payload edge cases | `service/platform adapters` | `todo/REL-014.md` |
 | REL-016 | P2 | Add cancellation and explicit fail-state handling for prelaunch pipeline | `ui/GameGrubMain + launch` | `todo/REL-016.md` |
+| REL-017 | P1 | Extract timing and retry literals into named launch/UI policy constants | `ui/model + ui/launch + ui/screen/library + ui/screen/login` | `todo/REL-017.md` |
 
 ## Backlog - Testing
 
@@ -131,6 +135,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | TEST-014 | P3 | Add snapshot tests for navigation state reducers | `ui/model + navigation` | `todo/TEST-014.md` |
 | TEST-015 | P2 | Add contract tests for launch request gateway and pending-launch state behavior | `app/src/test` | `todo/TEST-015.md` |
 | TEST-016 | P2 | Add regression tests for gateway-backed preferences and service facades | `app/src/test + service tests` | `todo/TEST-016.md` |
+| TEST-021 | P2 | Add regression tests for extracted timing and retry policy constants | `app/src/test + ui/model + ui/launch` | `todo/TEST-021.md` |
 
 ## Backlog - CI and Build
 
@@ -195,6 +200,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
 | SRV-001 | P1 | Move download orchestration to SteamInstallDomain | `service/steam` | `todo/SRV-001.md` |
+| SRV-041 | P2 | Deduplicate MIME and encoding protocol literals in service/UI owners | `service/* + ui + api` | `todo/SRV-041.md` |
 
 ## Backlog - Architecture (Store Unification)
 
@@ -297,13 +303,11 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SRV-039 | P2 | Implement Epic game update flow from app screen actions | `ui/screen/library/appscreen + service/epic` | `todo/SRV-039.md` |
 | SRV-040 | P2 | Implement GOG game update flow from app screen actions | `ui/screen/library/appscreen + service/gog` | `todo/SRV-040.md` |
 
-## In Progress
+## Backlog - Cohesion
 
-| ID | Priority | Title | Owner | File |
+| ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| COH-007 | P2 | Detect and reduce cyclic package dependencies | TBD | `todo/COH-007.md` |
-
-## Blocked
+| UI-017 | P2 | Remove direct `PrefManager` access from target composables via ViewModel state | `ui/screen + ui/model` | `todo/UI-017.md` |
 
 | ID | Priority | Title | Blocker | File |
 |---|---|---|---|---|

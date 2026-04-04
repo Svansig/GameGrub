@@ -39,4 +39,22 @@ object Constants {
         const val PRIVACY_LINK = "https://github.com/utkarshdalal/GameNative/tree/master/PrivacyPolicy"
         const val UPDATE_CHECK_URL = "https://api.gamenative.app/api/update-check"
     }
+
+    object Links {
+        const val DISCORD_INVITE = "https://discord.gg/2hKv4VfZfE"
+    }
+
+    object Api {
+        const val COMPONENT_MANIFEST_URL = "https://downloads.gamenative.app/component-manifest.json"
+        const val DRIVER_MANIFEST_URL =
+            "https://raw.githubusercontent.com/utkarshdalal/gamenative-landing-page/refs/heads/main/data/manifest.json"
+        const val LEGACY_COMPONENT_MANIFEST_URL =
+            "https://raw.githubusercontent.com/utkarshdalal/GameNative/refs/heads/master/manifest.json"
+    }
+
+    object Protocol {
+        const val MIME_TEXT_PLAIN = "text/plain"
+        const val MIME_APPLICATION_JSON = "application/json"
+        const val UTF_8 = "UTF-8"
+    }
 }

@@ -96,6 +96,11 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.game.CustomGameScanner
 import java.io.File
 
+private const val DETAIL_EXIT_FOCUS_RESTORE_DELAY_MS = 100L
+private const val TAB_CHANGE_FOCUS_RESTORE_DELAY_MS = 150L
+private const val FOCUS_REQUEST_RETRY_DELAY_MS = 32L
+private const val OVERLAY_CLOSE_FOCUS_RESTORE_DELAY_MS = 50L
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeLibraryScreen(
@@ -368,7 +373,7 @@ private fun LibraryScreenContent(
         }
         if (selectedAppId == null) {
             // Brief delay to let the UI settle after transition
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(DETAIL_EXIT_FOCUS_RESTORE_DELAY_MS)
             // Restore focus to content area
             if (state.appInfoList.isNotEmpty()) {
                 requestContentFocusOrDefer()
@@ -396,7 +401,7 @@ private fun LibraryScreenContent(
     // Restore focus after tab change - handles both empty and populated tabs
     LaunchedEffect(state.currentTab) {
         // Brief delay to let list populate after tab change
-        kotlinx.coroutines.delay(150)
+        kotlinx.coroutines.delay(TAB_CHANGE_FOCUS_RESTORE_DELAY_MS)
 
         if (state.appInfoList.isEmpty()) {
             // Empty tab - focus root so bumpers still work
@@ -426,7 +431,7 @@ private fun LibraryScreenContent(
                     } catch (_: IllegalStateException) {
                         retries++
                         // FocusRequester can be temporarily detached during recomposition.
-                        kotlinx.coroutines.delay(32)
+                        kotlinx.coroutines.delay(FOCUS_REQUEST_RETRY_DELAY_MS)
                     }
                 }
             }
@@ -455,7 +460,7 @@ private fun LibraryScreenContent(
                         pendingCarouselFocusRequest = false
                     } catch (_: IllegalStateException) {
                         retries++
-                        kotlinx.coroutines.delay(32)
+                        kotlinx.coroutines.delay(FOCUS_REQUEST_RETRY_DELAY_MS)
                     }
                 }
             }
@@ -492,7 +497,7 @@ private fun LibraryScreenContent(
 
         if ((systemMenuJustClosed || optionsPanelJustClosed) && !state.isSearching) {
             // Give a brief moment for the overlay to animate out
-            kotlinx.coroutines.delay(50)
+            kotlinx.coroutines.delay(OVERLAY_CLOSE_FOCUS_RESTORE_DELAY_MS)
             // Restore focus to the active content layout
             if (state.appInfoList.isNotEmpty()) {
                 requestContentFocusOrDefer()

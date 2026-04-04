@@ -45,6 +45,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
+internal fun shouldContinueConnecting(
+    elapsedSeconds: Int,
+    connectionState: ConnectionState,
+): Boolean {
+    return elapsedSeconds < MainViewModel.CONNECTION_TIMEOUT_SECONDS &&
+        connectionState == ConnectionState.CONNECTING
+}
+
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -53,6 +61,9 @@ class MainViewModel @Inject constructor(
 
     companion object {
         private const val KEY_CURRENT_SCREEN_ROUTE = "current_screen_route"
+        internal const val CONNECTION_TIMEOUT_SECONDS = 30
+        private const val CONNECTION_TICK_DELAY_MS = 1000L
+        private const val LAUNCH_SPLASH_MIN_VISIBLE_MS = 100L
     }
 
     sealed class MainUiEvent {
@@ -325,8 +336,8 @@ class MainViewModel @Inject constructor(
         // Start timeout counter
         connectionTimeoutJob = viewModelScope.launch {
             var seconds = 0
-            while (seconds < 30 && _state.value.connectionState == ConnectionState.CONNECTING) {
-                delay(1000)
+            while (shouldContinueConnecting(seconds, _state.value.connectionState)) {
+                delay(CONNECTION_TICK_DELAY_MS)
                 seconds++
                 _state.update { it.copy(connectionTimeoutSeconds = seconds) }
             }
@@ -461,7 +472,7 @@ class MainViewModel @Inject constructor(
             }
 
             // Small delay to ensure the splash screen is visible before proceeding
-            delay(100)
+            delay(LAUNCH_SPLASH_MIN_VISIBLE_MS)
 
             apiJob.await()
 

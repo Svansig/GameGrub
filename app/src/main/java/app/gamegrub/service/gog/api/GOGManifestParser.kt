@@ -1,5 +1,6 @@
 package app.gamegrub.service.gog.api
 
+import app.gamegrub.Constants
 import app.gamegrub.service.gog.GOGConstants
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -501,7 +502,7 @@ class GOGManifestParser @Inject constructor() {
                         // If count == 0 but !needsInput(), inflater is still processing, continue loop
                     }
 
-                    outputStream.toString("UTF-8")
+                    outputStream.toString(Constants.Protocol.UTF_8)
                 } finally {
                     inflater.end()
                 }

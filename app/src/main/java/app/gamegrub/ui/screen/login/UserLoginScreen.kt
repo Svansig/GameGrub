@@ -102,9 +102,11 @@ import app.gamegrub.ui.screen.auth.EpicOAuthActivity
 import app.gamegrub.ui.screen.auth.GOGOAuthActivity
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.auth.PlatformOAuthHandlers
+import app.gamegrub.service.auth.PlatformOAuthHandlers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private const val LOGIN_ERROR_REVEAL_DELAY_MS = 3000L
 
 /**
  * Modifier that allows D-pad up/down and B-button to escape focus from a text field,
@@ -598,7 +600,7 @@ private fun CredentialsForm(
             }
 
             ConnectionState.DISCONNECTED -> {
-                delay(3000)
+                delay(LOGIN_ERROR_REVEAL_DELAY_MS)
                 showDisconnected = true
             }
 
@@ -846,7 +848,7 @@ private fun QRCodeLogin(
         var showQrFailed by remember { mutableStateOf(false) }
         LaunchedEffect(isQrFailed) {
             if (isQrFailed) {
-                delay(3000)
+                delay(LOGIN_ERROR_REVEAL_DELAY_MS)
                 showQrFailed = true
             } else {
                 showQrFailed = false

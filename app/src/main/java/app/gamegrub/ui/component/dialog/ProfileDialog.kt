@@ -45,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.gamegrub.Constants
 import app.gamegrub.R
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.theme.GameGrubTheme
@@ -154,7 +155,7 @@ fun ProfileDialog(
                                 FilledTonalButton(
                                     modifier = Modifier.fillMaxWidth(),
                                     onClick = {
-                                        uriHandler.openUri("https://discord.gg/2hKv4VfZfE")
+                                        uriHandler.openUri(Constants.Links.DISCORD_INVITE)
                                     },
                                 ) {
                                     Icon(imageVector = Icons.AutoMirrored.Filled.Help, contentDescription = null)

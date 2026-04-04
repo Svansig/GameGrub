@@ -2,6 +2,7 @@ package app.gamegrub.service.epic
 
 import android.content.Context
 import androidx.core.content.edit
+import app.gamegrub.Constants
 import app.gamegrub.data.EpicGame
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.epic.manifest.EpicManifest
@@ -816,8 +817,8 @@ object EpicCloudSavesManager {
             val request = Request.Builder()
                 .url("$baseCloudSyncUrl/api/v1/access/egstore/savesync/$accountId/$appName/")
                 .header("Authorization", "Bearer $accessToken")
-                .header("Content-Type", "application/json")
-                .post(requestBody.toRequestBody("application/json".toMediaType()))
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
+                .post(requestBody.toRequestBody(Constants.Protocol.MIME_APPLICATION_JSON.toMediaType()))
                 .build()
 
             val response = httpClient.newCall(request).execute()

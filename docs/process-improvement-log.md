@@ -15,6 +15,24 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
+- **Date**: `2026-04-04`
+- **Ticket**: `todo/UI-028.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: User-facing strings in main/settings/feedback flows drifted into Kotlin files instead of shared resources, which fragments localization ownership.
+- **Proposed Action**: Keep UI copy resource-backed by default and gate new hardcoded user text in `ui/*` with periodic magic-literal audits.
+- **Owner**: `Copilot`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-04`
+- **Ticket**: `todo/UI-028.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Local validation stalls when Java/Gradle prerequisites are missing, delaying ticket closure evidence.
+- **Proposed Action**: Add a lightweight preflight check step (`JAVA_HOME` + `java -version`) before starting validation commands for Android tickets.
+- **Owner**: `Copilot`
+- **Status**: `Backlog`
+
 - **Date**: `2026-04-03`
 - **Ticket**: `todo/UI-005a.md`
 - **PR/Commit**: `TBD`

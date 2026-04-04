@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.gamegrub.Constants
 import app.gamegrub.R
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.steam.SteamService
@@ -1086,7 +1087,7 @@ private suspend fun loadWineProtonManifest(
     onError: suspend (String) -> Unit,
 ) {
     try {
-        val manifestUrl = "https://downloads.gamenative.app/component-manifest.json"
+        val manifestUrl = Constants.Api.COMPONENT_MANIFEST_URL
         val request = Request.Builder()
             .url(manifestUrl)
             .build()

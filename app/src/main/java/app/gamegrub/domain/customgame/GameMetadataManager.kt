@@ -1,4 +1,4 @@
-package app.gamegrub.utils.game
+package app.gamegrub.domain.customgame
 
 import java.io.File
 import org.json.JSONObject

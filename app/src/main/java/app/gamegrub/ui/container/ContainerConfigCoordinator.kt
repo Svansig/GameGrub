@@ -2,7 +2,7 @@ package app.gamegrub.ui.container
 
 import android.content.Context
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.general.IntentLaunchManager
+import app.gamegrub.launch.IntentLaunchManager
 import timber.log.Timber
 
 /**

@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.gateway.LaunchRequestGateway
-import app.gamegrub.utils.general.IntentLaunchManager
+import app.gamegrub.launch.IntentLaunchManager
 import javax.inject.Inject
 import javax.inject.Singleton
 

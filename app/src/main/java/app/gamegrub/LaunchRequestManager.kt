@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.general.IntentLaunchManager
+import app.gamegrub.launch.IntentLaunchManager
 import timber.log.Timber
 
 /**

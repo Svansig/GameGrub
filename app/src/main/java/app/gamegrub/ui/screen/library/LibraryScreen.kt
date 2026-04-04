@@ -93,7 +93,7 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.PlatformAuthUiHelpers
 import app.gamegrub.ui.utils.PlatformLogoutCallbacks
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.domain.customgame.CustomGameScanner
 import java.io.File
 
 private const val DETAIL_EXIT_FOCUS_RESTORE_DELAY_MS = 100L

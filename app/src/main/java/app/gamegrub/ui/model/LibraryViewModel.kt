@@ -35,7 +35,7 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
-import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.utils.general.unaccent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

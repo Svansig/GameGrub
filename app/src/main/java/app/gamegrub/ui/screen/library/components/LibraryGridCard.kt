@@ -58,7 +58,7 @@ import app.gamegrub.ui.component.CompatibilityBadge
 import app.gamegrub.ui.enums.PaneType
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.ListItemImage
-import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.domain.customgame.CustomGameScanner
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
 import java.io.File

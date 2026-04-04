@@ -7,7 +7,7 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.domain.customgame.CustomGameScanner
 
 /**
  * Result model for launch-request app-id resolution and install-state validation.

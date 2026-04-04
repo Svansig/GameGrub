@@ -21,8 +21,8 @@ import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.LaunchDependencies
-import app.gamegrub.utils.game.CustomGameScanner
-import app.gamegrub.utils.manifest.ManifestInstaller
+import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.content.manifest.ManifestInstaller
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager

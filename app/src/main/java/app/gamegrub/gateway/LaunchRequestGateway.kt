@@ -2,6 +2,7 @@ package app.gamegrub.gateway
 
 import android.content.Context
 import android.content.Intent
+import app.gamegrub.launch.IntentLaunchManager
 
 /**
  * Gateway for external launch request handling.
@@ -58,14 +59,14 @@ interface LaunchRequestGateway {
      *
      * @return The pending request, or null if none
      */
-    fun peekPendingLaunchRequest(): app.gamegrub.utils.general.IntentLaunchManager.LaunchRequest?
+    fun peekPendingLaunchRequest(): IntentLaunchManager.LaunchRequest?
 
     /**
      * Consumes and returns the pending launch request.
      *
      * @return The pending request, or null if none
      */
-    fun consumePendingLaunchRequest(): app.gamegrub.utils.general.IntentLaunchManager.LaunchRequest?
+    fun consumePendingLaunchRequest(): IntentLaunchManager.LaunchRequest?
 
     /**
      * Clears any pending launch request.

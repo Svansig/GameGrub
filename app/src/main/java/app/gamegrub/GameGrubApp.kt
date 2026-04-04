@@ -10,12 +10,12 @@ import androidx.navigation.NavController
 import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.events.EventDispatcher
+import app.gamegrub.launch.IntentLaunchManager
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.DownloadService
+import app.gamegrub.service.auth.PlayIntegrity
 import app.gamegrub.service.steam.AchievementWatcher
-import app.gamegrub.utils.auth.PlayIntegrity
 import app.gamegrub.utils.container.ContainerMigrator
-import app.gamegrub.utils.general.IntentLaunchManager
 import com.google.android.play.core.splitcompat.SplitCompatApplication
 import com.posthog.PersonProfiles
 import com.posthog.android.PostHogAndroid

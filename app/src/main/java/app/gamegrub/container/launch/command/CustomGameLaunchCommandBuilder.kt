@@ -1,7 +1,7 @@
 package app.gamegrub.container.launch.command
 
 import app.gamegrub.data.GameSource
-import app.gamegrub.utils.game.CustomGameScanner
+import app.gamegrub.domain.customgame.CustomGameScanner
 import java.io.File
 import timber.log.Timber
 

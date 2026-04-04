@@ -3,7 +3,7 @@ package app.gamegrub.api.steamGridDB
 import android.graphics.BitmapFactory
 import app.gamegrub.BuildConfig
 import app.gamegrub.PrefManager
-import app.gamegrub.utils.game.GameMetadataManager
+import app.gamegrub.domain.customgame.GameMetadataManager
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URLEncoder

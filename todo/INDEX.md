@@ -352,6 +352,24 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | READ-014 | P3 | Add concise file-level intent notes for critical legacy interop files | TBD | `todo/READ-014.md` |
 | UI-018 | P1 | Move orientation lifecycle ownership into `MainActivity` and `OrientationManager` | TBD | `todo/UI-018.md` |
 | UI-019 | P1 | Remove composable-body orientation side effects and route updates through controlled effects | TBD | `todo/UI-019.md` |
+| UI-010 | P2 | Move platform login-state derivation into ViewModel state | TBD | `todo/UI-010.md` |
+| UI-011 | P2 | Extract OAuth launcher callback wiring from screen composables | TBD | `todo/UI-011.md` |
+| UI-014 | P2 | Extract route/navigation side effects out of screen-level composables | TBD | `todo/UI-014.md` |
+| UI-016 | P2 | Replace global launch/network reads in UI with injected state gateways | TBD | `todo/UI-016.md` |
+| UI-024 | P2 | Define root back-press exit/logout behavior in main navigation shell | TBD | `todo/UI-024.md` |
+| UI-025 | P2 | Complete library sort-type handling in `LibraryViewModel` | TBD | `todo/UI-025.md` |
+| UI-026 | P3 | Add per-game force-fullscreen launch option | TBD | `todo/UI-026.md` |
+| UI-027 | P3 | Add gamepad-aware window size adaptation | TBD | `todo/UI-027.md` |
+| COH-002 | P1 | Reduce service singleton usage from app layer | TBD | `todo/COH-002.md` |
+| COH-005 | P2 | Introduce use-case boundaries for launch and auth flows | TBD | `todo/COH-005.md` |
+| COH-006 | P2 | Standardize state/effect contracts across ViewModels | TBD | `todo/COH-006.md` |
+| COH-007 | P2 | Detect and reduce cyclic package dependencies | TBD | `todo/COH-007.md` |
+| COH-015 | P2 | Introduce `LaunchRequestGateway` and migrate away from static launch request manager access | TBD | `todo/COH-015.md` |
+| COH-016 | P2 | Introduce `PreferencesGateway` and phase out direct global `PrefManager` reads | TBD | `todo/COH-016.md` |
+| COH-024 | P1 | Audit utils ownership and drive boundary relocations | TBD | `todo/COH-024.md` |
+| COH-025 | P1 | Move auth and integrity utilities to explicit auth/security boundaries | TBD | `todo/COH-025.md` |
+| COH-026 | P1 | Move container launch/preinstall ownership out of utils | TBD | `todo/COH-026.md` |
+| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | TBD | `todo/COH-030.md` |
 | COH-017 | P2 | Unify orientation preference flow behind a single manager-owned policy contract | TBD | `todo/COH-017.md` |
 | REL-015 | P1 | Harden `OrientationManager` correctness, idempotency, and sensor edge-case handling | TBD | `todo/REL-015.md` |
 | TEST-017 | P1 | Add orientation manager and lifecycle regression tests | TBD | `todo/TEST-017.md` |

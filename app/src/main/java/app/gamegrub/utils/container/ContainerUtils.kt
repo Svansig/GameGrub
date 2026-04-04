@@ -11,8 +11,8 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.storage.StorageManager
-import app.gamegrub.utils.game.CustomGameScanner
-import app.gamegrub.utils.general.IntentLaunchManager
+import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.launch.IntentLaunchManager
 import app.gamegrub.utils.steam.SteamUtils
 import com.winlator.container.Container
 import com.winlator.container.ContainerData

@@ -29,9 +29,9 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.game.CustomGameScanner
-import app.gamegrub.utils.game.ExeIconExtractor
-import app.gamegrub.utils.game.GameMetadataManager
+import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.domain.customgame.ExeIconExtractor
+import app.gamegrub.domain.customgame.GameMetadataManager
 import com.winlator.container.ContainerData
 import java.io.File
 import kotlinx.coroutines.CoroutineScope

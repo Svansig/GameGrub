@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.R
 import app.gamegrub.network.NetworkManager
-import app.gamegrub.utils.auth.KeyAttestationHelper
-import app.gamegrub.utils.auth.PlayIntegrity
+import app.gamegrub.service.auth.KeyAttestationHelper
+import app.gamegrub.service.auth.PlayIntegrity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton

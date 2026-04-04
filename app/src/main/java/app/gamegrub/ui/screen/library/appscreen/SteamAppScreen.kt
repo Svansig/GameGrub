@@ -55,7 +55,7 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.StoragePermissionGate
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
-import app.gamegrub.utils.manifest.ManifestInstaller
+import app.gamegrub.content.manifest.ManifestInstaller
 import app.gamegrub.utils.steam.SteamUtils
 import com.posthog.PostHog
 import com.winlator.container.ContainerData

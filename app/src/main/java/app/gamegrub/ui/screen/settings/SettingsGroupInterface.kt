@@ -53,6 +53,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.service.auth.PlatformOAuthHandlers
 import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
 import app.gamegrub.ui.component.dialog.SingleChoiceDialog
@@ -62,7 +63,6 @@ import app.gamegrub.ui.theme.settingsTileColorsAlt
 import app.gamegrub.ui.utils.IconSwitcher
 import app.gamegrub.ui.utils.LocaleHelper
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.utils.auth.PlatformOAuthHandlers
 import com.alorma.compose.settings.ui.SettingsGroup
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.alorma.compose.settings.ui.SettingsSwitch

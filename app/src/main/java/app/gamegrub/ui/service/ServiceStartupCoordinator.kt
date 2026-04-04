@@ -7,7 +7,6 @@ import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
-import app.gamegrub.utils.auth.PlatformAuthUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +16,7 @@ import timber.log.Timber
 class ServiceStartupCoordinator @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authStateGateway: AuthStateGateway,
-) {
+//) {
         viewModelScope: androidx.lifecycle.viewModelScope,
         viewModel: app.gamegrub.ui.model.MainViewModel,
         navController: androidx.navigation.NavHostController,

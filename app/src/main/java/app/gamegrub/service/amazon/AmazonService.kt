@@ -17,7 +17,7 @@ import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.game.ExecutableSelectionUtils
+import app.gamegrub.domain.customgame.ExecutableSelectionUtils
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint

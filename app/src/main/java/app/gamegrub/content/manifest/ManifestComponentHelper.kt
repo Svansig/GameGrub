@@ -1,4 +1,4 @@
-package app.gamegrub.utils.manifest
+package app.gamegrub.content.manifest
 
 import android.content.Context
 import com.winlator.contents.AdrenotoolsManager
@@ -9,6 +9,17 @@ import com.winlator.core.StringUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/**
+ * Helper for querying and comparing available vs installed components.
+ *
+ * Provides utilities for:
+ * - Loading list of installed drivers and content (DXVK, VKD3D, Wine, Proton, etc.)
+ * - Comparing manifest entries against installed versions
+ * - Building version selection UI data structures
+ *
+ * Ownership: Belongs to `content/manifest` package. Migrated from
+ * `utils/manifest` as part of COH-028.
+ */
 object ManifestComponentHelper {
     data class InstalledContentLists(
         val dxvk: List<String>,
@@ -153,15 +164,6 @@ object ManifestComponentHelper {
         val muted: List<Boolean>,
     )
 
-    /**
-     * Builds a [DxvkContext] describing the effective DXVK options for the current
-     * container / driver / wrapper configuration.
-     *
-     * This centralizes the logic for:
-     * - Detecting \"Vortek-like\" drivers
-     * - Applying Vulkan-version constraints on older devices
-     * - Selecting between constrained, bionic, and base DXVK lists
-     */
     fun buildDxvkContext(
         containerVariant: String,
         graphicsDrivers: List<String>,

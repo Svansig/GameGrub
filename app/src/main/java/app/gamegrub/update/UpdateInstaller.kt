@@ -1,4 +1,4 @@
-package app.gamegrub.utils.general
+package app.gamegrub.update
 
 import android.content.Context
 import kotlinx.coroutines.Dispatchers

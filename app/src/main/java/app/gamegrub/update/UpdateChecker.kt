@@ -1,4 +1,4 @@
-package app.gamegrub.utils.network
+package app.gamegrub.update
 
 import android.content.Context
 import app.gamegrub.BuildConfig

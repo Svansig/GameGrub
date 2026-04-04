@@ -1,4 +1,4 @@
-package app.gamegrub.utils.manifest
+package app.gamegrub.content.manifest
 
 import android.content.Context
 import android.net.Uri
@@ -14,11 +14,26 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
+/**
+ * Result of a manifest-based install operation.
+ *
+ * @param success Whether the install succeeded
+ * @param message User-facing status message
+ */
 data class ManifestInstallResult(
     val success: Boolean,
     val message: String,
 )
 
+/**
+ * Handles downloading and installing components from the manifest.
+ *
+ * Supports both driver installations (via AdrenotoolsManager) and content
+ * installations (DXVK, VKD3D, Wine, Proton, etc. via ContentsManager).
+ *
+ * Ownership: Belongs to `content/manifest` package. Migrated from
+ * `utils/manifest` as part of COH-028.
+ */
 object ManifestInstaller {
     suspend fun downloadAndInstallDriver(
         context: Context,
@@ -52,13 +67,6 @@ object ManifestInstaller {
         }
     }
 
-    /**
-     * Shared helper to install a single manifest entry (driver or content).
-     *
-     * UI layers should provide [onProgress] to update their own state and then
-     * handle the returned [ManifestInstallResult] (e.g. to show a Toast or
-     * refresh installed-content lists).
-     */
     suspend fun installManifestEntry(
         context: Context,
         entry: ManifestEntry,

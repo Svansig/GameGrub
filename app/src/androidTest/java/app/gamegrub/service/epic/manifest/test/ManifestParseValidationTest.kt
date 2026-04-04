@@ -105,7 +105,10 @@ class ManifestParseValidationTest {
                 val actualChunkParts = actualFile.getJSONArray("chunkParts")
                 val expectedChunkParts = expectedFile.getJSONArray("chunkParts")
                 if (actualChunkParts.length() != expectedChunkParts.length()) {
-                    differences.add("File $i (${actualFile.getString("filename")}): chunkParts count differs - Actual: ${actualChunkParts.length()}, Expected: ${expectedChunkParts.length()}")
+                    differences.add(
+    "File $i (${actualFile.getString("filename")}): chunkParts count differs - " +
+            "Actual: ${actualChunkParts.length()}, Expected: ${expectedChunkParts.length()}"
+)
                 }
             }
 

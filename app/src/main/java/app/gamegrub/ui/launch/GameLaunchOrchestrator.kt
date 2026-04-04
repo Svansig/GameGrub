@@ -1,34 +1,34 @@
 package app.gamegrub.ui.launch
 
 import android.content.Context
-import app.gamegrub.AppOptionMenuType
-import app.gamegrub.GameGrubApp
+import androidx.lifecycle.viewModelScope
 import app.gamegrub.LaunchRequestManager
-import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.data.GameSource
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
+import app.gamegrub.launch.trackGameLaunched
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicCloudSavesManager
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.ui.component.dialog.state.MessageDialogState
+import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.MainViewModel
-import app.gamegrub.ui.component.dialog.state.MessageDialogState
-import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.LaunchDependencies
 import app.gamegrub.utils.game.CustomGameScanner
-import app.gamegrub.utils.general.IntentLaunchManager
 import app.gamegrub.utils.manifest.ManifestInstaller
 import com.google.android.play.core.splitcompat.SplitCompat
-import com.posthog.PostHog
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
+import com.winlator.core.TarCompressorUtils
+import com.winlator.xenvironment.ImageFs
+import com.winlator.xenvironment.ImageFsInstaller
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -51,118 +51,15 @@ private interface BestConfigServiceEntryPoint {
     fun bestConfigService(): BestConfigService
 }
 
-sealed class GameResolutionResult {
-    data class Success(
-        val finalAppId: String,
-        val gameId: Int,
-        val isSteamInstalled: Boolean,
-        val isCustomGame: Boolean,
-    ) : GameResolutionResult()
 
-    data class NotFound(
-        val gameId: Int,
-        val originalAppId: String,
-    ) : GameResolutionResult()
-}
-
-fun resolveGameAppId(context: Context, appId: String): GameResolutionResult {
-    val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
-    val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
-    val isInstalled = when (gameSource) {
-        GameSource.STEAM -> {
-            if (SteamService.getAppInfoOf(gameId) != null) {
-                SteamService.isAppInstalled(gameId)
-            } else {
-                ContainerUtils.hasContainer(context, appId)
-            }
-        }
-
-        GameSource.GOG -> {
-            GOGService.isGameInstalled(gameId.toString())
-        }
-
-        GameSource.EPIC -> {
-            EpicService.isGameInstalled(context, gameId)
-        }
-
-        GameSource.AMAZON -> {
-            AmazonService.isGameInstalledByAppIdSync(context, gameId)
-        }
-
-        GameSource.CUSTOM_GAME -> {
-            CustomGameScanner.get().isGameInstalled(gameId)
-        }
-    }
-
-    if (!isInstalled) {
-        return GameResolutionResult.NotFound(
-            gameId = gameId,
-            originalAppId = appId,
-        )
-    }
-
-    val isSteamInstalled = gameSource == GameSource.STEAM
-    val isCustomGame = gameSource == GameSource.CUSTOM_GAME
-
-    return GameResolutionResult.Success(
-        finalAppId = appId,
-        gameId = gameId,
-        isSteamInstalled = isSteamInstalled,
-        isCustomGame = isCustomGame,
-    )
-}
-
-fun needsSteamLogin(context: Context, appId: String): Boolean {
-    val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
-    if (gameSource != GameSource.STEAM || SteamService.isLoggedIn) return false
-    return try {
-        !ContainerUtils.getContainer(context, appId).isSteamOfflineMode
-    } catch (_: Exception) {
-        true
-    }
-}
-
-fun consumePendingLaunchWithError(context: Context) {
-    val request = LaunchRequestManager.peekPendingLaunchRequest() ?: return
-    if (!needsSteamLogin(context, request.appId)) return
-    LaunchRequestManager.consumePendingLaunchRequest()
-    SnackbarManager.show(context.getString(R.string.intent_launch_steam_login_failed))
-}
-
-fun trackGameLaunched(appId: String) {
-    val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
-    val gameName = ContainerUtils.resolveGameName(appId)
-    PostHog.capture(
-        event = "game_launched",
-        properties = mapOf(
-            "game_name" to gameName,
-            "game_store" to gameSource.name,
-            "key_attestation_available" to PrefManager.keyAttestationAvailable,
-            "play_integrity_available" to PrefManager.playIntegrityAvailable,
-        ),
-    )
-}
-
-fun showGameNotInstalledDialog(
-    context: Context,
-    originalAppId: String,
-    requestAppId: String,
-    setMessageDialogState: (MessageDialogState) -> Unit,
-    logTag: String,
-) {
-    val appName = ContainerUtils.resolveGameName(originalAppId)
-    Timber.tag(logTag).w("Game not installed: $appName ($requestAppId)")
-    setMessageDialogState(
-        MessageDialogState(
-            visible = true,
-            type = DialogType.SYNC_FAIL,
-            title = context.getString(R.string.game_not_installed_title),
-            message = context.getString(R.string.game_not_installed_message, appName),
-            dismissBtnText = context.getString(R.string.ok),
-        ),
-    )
-}
-
+/**
+ * Handles a resolved external launch by setting ViewModel state and running pre-launch setup.
+ * @param context App context.
+ * @param appId Encoded app id to launch.
+ * @param useTemporaryOverride Whether the temporary container override is used.
+ * @param viewModel Main screen ViewModel used for launch state updates.
+ * @param setMessageDialogState UI callback for dialog updates.
+ */
 fun handleExternalLaunchSuccess(
     context: Context,
     appId: String,
@@ -175,6 +72,7 @@ fun handleExternalLaunchSuccess(
     viewModel.setLaunchedAppId(appId)
     viewModel.setBootToContainer(false)
     preLaunchApp(
+        scope = viewModel.viewModelScope,
         context = context,
         appId = appId,
         useTemporaryOverride = useTemporaryOverride,
@@ -186,7 +84,29 @@ fun handleExternalLaunchSuccess(
     )
 }
 
+/**
+ * Prepares runtime dependencies, sync state, and container activation before launching a title.
+ *
+ * This function runs on `Dispatchers.IO` and updates UI state through callback parameters.
+ *
+ * @param scope Parent coroutine scope used to launch the preparation job.
+ * @param context App context.
+ * @param appId Encoded app id being launched.
+ * @param ignorePendingOperations Whether Steam should ignore pending remote operations.
+ * @param preferredSave Preferred save conflict resolution strategy.
+ * @param useTemporaryOverride Whether to use temporary container override values.
+ * @param skipCloudSync Whether Steam cloud sync should be skipped.
+ * @param setLoadingDialogVisible UI callback for loading dialog visibility.
+ * @param setLoadingProgress UI callback for loading progress updates.
+ * @param setLoadingMessage UI callback for loading status text.
+ * @param setMessageDialogState UI callback for error/conflict dialog updates.
+ * @param onSuccess Callback invoked when launch can continue.
+ * @param retryCount Retry count for in-progress sync handling.
+ * @param isOffline Whether launch should avoid online Steam session checks.
+ * @param bootToContainer Whether launch targets container boot instead of game executable.
+ */
 fun preLaunchApp(
+    scope: CoroutineScope,
     context: Context,
     appId: String,
     ignorePendingOperations: Boolean = false,
@@ -206,7 +126,7 @@ fun preLaunchApp(
 
     val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
 
-    CoroutineScope(Dispatchers.IO).launch {
+    scope.launch(Dispatchers.IO) {
         val containerManager = ContainerManager(context)
         val container = if (useTemporaryOverride) {
             ContainerUtils.getOrCreateContainerWithOverride(context, appId)
@@ -219,6 +139,7 @@ fun preLaunchApp(
         val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
 
         if (!bootToContainer) {
+            // Resolve a concrete executable before expensive setup work so we can fail fast.
             val effectiveExe = when (gameSource) {
                 GameSource.STEAM -> SteamService.getLaunchExecutable(appId, container)
                 GameSource.GOG -> GOGService.getLaunchExecutable(appId, container)
@@ -245,6 +166,7 @@ fun preLaunchApp(
 
         if (gameSource == GameSource.STEAM) {
             try {
+                // Ensure manifest-provisioned components requested by best config are installed.
                 val configJson = Json.parseToJsonElement(container.containerJson).jsonObject
                 val missingRequests = EntryPointAccessors
                     .fromApplication(context.applicationContext, BestConfigServiceEntryPoint::class.java)
@@ -273,6 +195,7 @@ fun preLaunchApp(
 
         SplitCompat.install(context)
         try {
+            // Download and unpack runtime payloads (ImageFS, Wine/Proton, DRM, Steam assets) on demand.
             if (!SteamService.isImageFsInstallable(context, container.containerVariant)) {
                 setLoadingMessage("Downloading first-time files")
                 SteamService.downloadImageFs(
@@ -434,6 +357,7 @@ fun preLaunchApp(
         val isSteamGame = gameSource == GameSource.STEAM
         if (isSteamGame) {
             try {
+                // Guard against concurrent active session conflicts on another running Steam title.
                 val currentPlaying = SteamService.getSelfCurrentlyPlayingAppId()
                 if (!isOffline && currentPlaying != null && currentPlaying != gameId) {
                     val otherGameName = SteamService.getAppInfoOf(currentPlaying)?.name ?: "another game"
@@ -456,6 +380,7 @@ fun preLaunchApp(
         }
 
         if (isCustomGame) {
+            // Custom games do not participate in store cloud flows.
             Timber.tag("preLaunchApp").i("Custom Game detected for $appId - skipping Steam Cloud sync and launching container")
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
@@ -464,6 +389,7 @@ fun preLaunchApp(
 
         val isGOGGame = gameSource == GameSource.GOG
         if (isGOGGame) {
+            // GOG cloud saves are best-effort; launch continues even if pre-sync fails.
             Timber.tag("GOG").i("[Cloud Saves] GOG Game detected for $appId - syncing cloud saves before launch")
             Timber.tag("GOG").d("[Cloud Saves] Starting pre-game download sync for $appId")
             val syncSuccess = GOGService.syncCloudSaves(
@@ -484,6 +410,7 @@ fun preLaunchApp(
 
         val isAmazonGame = gameSource == GameSource.AMAZON
         if (isAmazonGame) {
+            // Amazon titles currently launch without cloud sync.
             Timber.tag("preLaunchApp").i("Amazon Game detected for $appId - skipping cloud sync and launching container")
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
@@ -492,6 +419,7 @@ fun preLaunchApp(
 
         val isEpicGame = gameSource == GameSource.EPIC
         if (isEpicGame) {
+            // Epic uses pre-launch cloud sync plus token cleanup before entering the container.
             Timber.tag("Epic").i("[Cloud Saves] Epic Game detected for $appId - syncing cloud saves before launch")
             Timber.tag("Epic").d("[Cloud Saves] Starting pre-game download sync for $appId")
             val syncSuccess = EpicCloudSavesManager.syncCloudSaves(
@@ -541,6 +469,7 @@ fun preLaunchApp(
 
         setLoadingDialogVisible(false)
 
+        // Explicitly route each sync outcome to UI conflict dialogs or launch continuation.
         when (postSyncInfo.syncResult) {
             SyncResult.Conflict -> {
                 setMessageDialogState(
@@ -564,6 +493,7 @@ fun preLaunchApp(
                     Timber.i("Sync in progress for intent launch, retrying in 2 seconds... (attempt ${retryCount + 1}/5)")
                     delay(2000)
                     preLaunchApp(
+                        scope = scope,
                         context = context,
                         appId = appId,
                         ignorePendingOperations = ignorePendingOperations,
@@ -717,4 +647,3 @@ fun preLaunchApp(
         }
     }
 }
-

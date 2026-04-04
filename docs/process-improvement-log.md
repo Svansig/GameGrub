@@ -15,6 +15,78 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005a.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: `GameGrubMain` contained a long pre-launch orchestration pipeline that mixed non-UI launch logic with composable orchestration.
+- **Proposed Action**: Keep launch orchestration in `ui/launch` helpers and let `GameGrubMain` act as a caller/orchestrator shell.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005a.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Launch orchestration previously created unmanaged IO scopes, making cancellation and ownership less predictable.
+- **Proposed Action**: Require caller-owned lifecycle scope injection for launch orchestration entry points (`preLaunchApp(scope = ...)`).
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005b.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: External-launch success handling and not-installed dialog mapping were duplicated across multiple `GameGrubMain` launch branches, increasing behavior-drift risk during refactors.
+- **Proposed Action**: Keep launch-branch side effects centralized in file-private helpers until a dedicated launch coordinator/use-case is introduced.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005b.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Small `GameGrubMain` cleanups can be delayed because they are not split into child tickets with explicit behavior-parity scope.
+- **Proposed Action**: Decompose large shell tickets into behavior-preserving child slices first, then run targeted validation per slice before broader coordinator extraction.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005c.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Launch resolution and Steam login gate logic lived in a UI launch orchestrator file, increasing cross-layer coupling.
+- **Proposed Action**: Keep resolution and login-gate policies in launch-domain helpers (`app.gamegrub.launch`) and keep UI launch orchestrator focused on launch setup flow.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005d.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Launch telemetry emission was colocated with orchestration code, making ownership and testing seams less clear.
+- **Proposed Action**: Isolate launch telemetry in launch-owned helpers and consume from orchestration/UI call sites.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005e.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: UI messaging helpers (snackbar/dialog construction) and launch prep logic were mixed in one file.
+- **Proposed Action**: Keep UI message mapping in dedicated UI launch helper files and leave launch orchestrator focused on pre-launch pipeline steps.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-03`
+- **Ticket**: `todo/UI-005.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Remaining `GameGrubMain` ownership gaps were broad enough to risk partial fixes and unclear review scope.
+- **Proposed Action**: Split remaining gaps into targeted child tickets (`UI-005f`..`UI-005k`) with one responsibility boundary per ticket and parity-focused validation.
+- **Owner**: `Sisyphus`
+- **Status**: `In Progress`
+
 - **Date**: `2026-04-01`
 - **Ticket**: `todo/COH-023.md`
 - **PR/Commit**: `TBD`

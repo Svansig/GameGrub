@@ -1,59 +1,110 @@
-# Privacy Policy for GameNative
-<sub>Last Updated: Feb. 1, 2026</sub>
+# Privacy Policy for GameGrub
 
-GameNative is an unofficial Steam client application for Android devices that enables users to access their Steam library and play their owned games.
+<sub>Last Updated: April 3, 2026</sub>
 
-## Data Collection and Usage
+This Privacy Policy ("Policy") describes how the GameGrub application ("GameGrub," "we," "us," or "our") processes information when you install, access, or use the GameGrub Android application (the "App").
 
-**Local Storage Only**
-All sensitive user data, including Steam login credentials and session information, is stored locally on your device. We do not collect, transmit, or store any personal information on external servers.
+By using the App, you acknowledge this Policy.
 
-**Steam Integration**
-When you use GameNative, your device communicates directly with Steam's servers to authenticate your account and access your game library. Any data collection, storage, or processing by Steam is governed by Steam's own privacy policy and terms of service.
+## 1. Scope and Applicability
 
-**Anonymous Usage Metadata**
-GameNative collects limited, non-personal technical metadata to improve compatibility and performance. This may include:
+**1.1** This Policy applies to information processed by the App and related App-operated workflows.
 
-- Game launch and close events
-- Selected configuration settings
-- Hardware category information such as GPU family or driver type
-- Performance indicators such as FPS ranges or crash flags
+**1.2** This Policy does not govern data practices of third-party platforms and services that you access through the App, including storefront/account providers (for example, Steam, GOG, Epic, and Amazon).
 
-This data:
+**1.3** Third-party services operate under their own privacy notices, terms, and policies, which you should review separately.
 
-- Does not include your name, email, Steam credentials, IP address, or any direct identifiers
-- Cannot be used to identify you personally
-- Is used only to improve game compatibility, recommend working settings, and prioritize development fixes
+## 2. Categories of Information Processed
 
-GameNative does not build user profiles, track browsing activity, or sell data to third parties.
+### 2.1 Information Stored Locally on Device
 
-## Third-Party Services
+GameGrub stores operational information on your device as required to provide App features. This may include:
 
-**Steam Platform**
-GameNative functions solely as an interface to Steam's services. We have no control over or responsibility for how Steam collects, uses, or stores your information. Please refer to Steam's privacy policy to understand how they handle your data.
+- Account/session-related tokens and identifiers required for signed-in workflows
+- App and game configuration settings
+- Library, install, and compatibility preference data
 
-## Data Security
+### 2.2 Technical Telemetry and Compatibility Signals
 
-**Local Protection**
-Your login credentials and session data are stored securely on your device using Android's standard security protocols. This data is only used to facilitate communication between your device and Steam's servers.
+GameGrub may transmit limited technical telemetry for compatibility, reliability, and performance analysis. This may include:
 
-## User Rights
+- App and game lifecycle events (for example, launch, exit, foreground, background)
+- Feature usage and configuration context relevant to runtime behavior
+- Device/runtime category signals (for example, hardware class, GPU/driver class)
+- Stability/performance indicators (for example, FPS summaries, crash or failure markers)
 
-You can clear all locally stored data at any time by:
-- Logging out of the app
-- Clearing app data through Android settings
-- Uninstalling the application
+### 2.3 Crash and Diagnostic Data
 
-## Changes to Privacy Policy
+GameGrub may generate local crash reports on your device that can include stack traces, recent app log output, device metadata, and app version metadata.
 
-We reserve the right to update this privacy policy at any time. Any changes will be effective immediately upon posting the updated policy within the app.
+## 3. Purposes of Processing
 
-## Contact Information
+We process information for the following purposes:
 
-For questions about this privacy policy or GameNative's privacy practices, please contact us at support@gameaway.in.
+- To authenticate accounts and provide storefront/library functionality
+- To provide install, launch, sync, and related game-management features
+- To diagnose defects and service interruptions
+- To improve compatibility outcomes across hardware/configuration combinations
+- To generate aggregate guidance on what configurations perform best
 
-## Age Requirements
+## 4. Legal/Commercial Use Limitations
 
-Users must be at least 13 years old to use GameNative, in accordance with Steam's own age requirements.
+**4.1** GameGrub is not intended as an advertising technology product.
 
-<sub>(Generated by Claude 3.5 Sonnet)</sub>
+**4.2** GameGrub does not sell personal data.
+
+**4.3** Telemetry is intended for operational diagnostics, compatibility research, and product improvement.
+
+## 5. Disclosure to Third Parties
+
+**5.1** The App necessarily exchanges data with connected storefront/account services to execute user-requested actions.
+
+**5.2** The App may use third-party analytics/telemetry infrastructure (including PostHog) to process technical event data.
+
+**5.3** When information is processed by third-party providers, their terms and policies apply in addition to this Policy.
+
+## 6. Data Retention
+
+**6.1** Data stored locally in the App remains on your device until removed by user action or app lifecycle events.
+
+**6.2** Telemetry retention periods are determined by the infrastructure and provider configuration used to process telemetry.
+
+**6.3** Crash logs generated locally are retained on device according to app-defined cleanup behavior and user/device actions.
+
+## 7. User Controls
+
+You may remove locally stored App information by one or more of the following actions:
+
+- Logging out of linked storefront accounts in the App
+- Clearing App data/storage through Android settings
+- Uninstalling the App
+
+If a build of the App provides telemetry/privacy controls, those controls govern applicable telemetry behavior for that build.
+
+## 8. Security Statement
+
+**8.1** GameGrub uses platform-standard Android storage and network mechanisms and applies reasonable technical measures designed to reduce unauthorized access.
+
+**8.2** No security control is absolute. We cannot guarantee complete security of data in storage or transit.
+
+## 9. Children's Privacy
+
+GameGrub is not directed to children under 13.
+
+Users are responsible for complying with age and account eligibility requirements imposed by connected storefront providers.
+
+## 10. International/Regional Compliance Note
+
+Because GameGrub is distributed to users in multiple regions, applicable privacy rights and obligations may vary by jurisdiction.
+
+Where required by applicable law, we will interpret and apply this Policy in a manner consistent with those legal requirements.
+
+## 11. Policy Changes
+
+We may amend this Policy from time to time.
+
+The "Last Updated" date reflects the effective date of the current version. Continued use of the App after a policy update constitutes acknowledgment of the revised Policy.
+
+## 12. Contact
+
+For privacy-related questions regarding GameGrub, contact: [support@gameaway.in](mailto:support@gameaway.in)

@@ -195,6 +195,108 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | DOC-014 | P3 | Add codebase map for legacy-to-refactor transition zones | `docs + architecture` | `todo/DOC-014.md` |
 | DOC-015 | P2 | Document global-state migration strategy and approved gateway patterns | `docs + architecture` | `todo/DOC-015.md` |
 
+## Backlog - User Stories
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| USER-001 | P0 | First Launch App Experience | `onboarding` | `todo/USER-001.md` |
+| USER-002 | P0 | Connect Steam Account | `authentication/steam` | `todo/USER-002.md` |
+| USER-003 | P0 | Connect GOG Account | `authentication/gog` | `todo/USER-003.md` |
+| USER-004 | P0 | Connect Epic Games Account | `authentication/epic` | `todo/USER-004.md` |
+| USER-005 | P1 | Connect Amazon Games Account | `authentication/amazon` | `todo/USER-005.md` |
+| USER-006 | P0 | View Game Library | `library` | `todo/USER-006.md` |
+| USER-007 | P0 | View Store-Specific Library | `library` | `todo/USER-007.md` |
+| USER-008 | P1 | Search Library | `library` | `todo/USER-008.md` |
+| USER-009 | P1 | Sort Library | `library` | `todo/USER-009.md` |
+| USER-010 | P0 | Install Game | `download` | `todo/USER-010.md` |
+| USER-011 | P0 | Update Installed Game | `download` | `todo/USER-011.md` |
+| USER-012 | P1 | Verify Game Files | `maintenance` | `todo/USER-012.md` |
+| USER-013 | P1 | Uninstall Game | `maintenance` | `todo/USER-013.md` |
+| USER-014 | P0 | Launch Installed Game | `launch` | `todo/USER-014.md` |
+| USER-015 | P1 | Configure Game Launch Settings | `launch/config` | `todo/USER-015.md` |
+| USER-016 | P1 | Apply Game Fixes | `launch/config` | `todo/USER-016.md` |
+| USER-017 | P1 | Sync Cloud Saves | `cloud/saves` | `todo/USER-017.md` |
+| USER-018 | P1 | View Installed Game Storage | `storage` | `todo/USER-018.md` |
+| USER-019 | P2 | Move Game to Different Storage | `storage` | `todo/USER-019.md` |
+| USER-020 | P2 | Add Custom Game | `library/custom` | `todo/USER-020.md` |
+| USER-021 | P1 | Access App Settings | `settings` | `todo/USER-021.md` |
+| USER-022 | P1 | Disconnect Store Account | `authentication` | `todo/USER-022.md` |
+| USER-023 | P0 | View Home Screen | `home` | `todo/USER-023.md` |
+| USER-024 | P0 | View Game Details | `library` | `todo/USER-024.md` |
+| USER-025 | P0 | Interact with Running Game | `gameplay` | `todo/USER-025.md` |
+| USER-026 | P2 | View Game Achievements | `game details` | `todo/USER-026.md` |
+| USER-027 | P2 | Manage DLC | `game details` | `todo/USER-027.md` |
+| USER-028 | P2 | Open Store Page | `game details` | `todo/USER-028.md` |
+| USER-029 | P2 | Create Home Screen Shortcut | `launch` | `todo/USER-029.md` |
+| USER-030 | P0 | Handle Failed Game Launch | `error handling` | `todo/USER-030.md` |
+| USER-031 | P0 | Handle Download Failure | `error handling` | `todo/USER-031.md` |
+| USER-032 | P0 | Handle Authentication Failure | `error handling` | `todo/USER-032.md` |
+| USER-033 | P1 | Monitor Active Downloads | `download` | `todo/USER-033.md` |
+| USER-034 | P1 | Configure Container Resources | `settings/emulation` | `todo/USER-034.md` |
+| USER-035 | P1 | Select Wine/Proton Version | `settings/emulation` | `todo/USER-035.md` |
+| USER-036 | P2 | Manage Installed Wine/Proton Versions | `settings/emulation` | `todo/USER-036.md` |
+| USER-037 | P1 | Configure Display Settings | `settings/display` | `todo/USER-037.md` |
+| USER-038 | P1 | Configure Controller Settings | `settings/input` | `todo/USER-038.md` |
+| USER-039 | P1 | Configure Input Overlay | `settings/input` | `todo/USER-039.md` |
+| USER-040 | P2 | Configure Network/Download Settings | `settings/network` | `todo/USER-040.md` |
+| USER-041 | P1 | Switch Between Games While Running | `gameplay` | `todo/USER-041.md` |
+| USER-042 | P1 | Exit Game Properly | `gameplay` | `todo/USER-042.md` |
+| USER-043 | P1 | View App Update | `settings/about` | `todo/USER-043.md` |
+| USER-044 | P2 | View App Info and Logs | `settings/about` | `todo/USER-044.md` |
+| USER-045 | P2 | Submit Game Feedback | `feedback` | `todo/USER-045.md` |
+| USER-046 | P1 | Launch Game via Deep Link | `launch` | `todo/USER-046.md` |
+| USER-047 | P1 | Handle App Background/Foreground | `lifecycle` | `todo/USER-047.md` |
+| USER-048 | P2 | Import/Export Game Configuration | `backup/restore` | `todo/USER-048.md` |
+| USER-049 | P1 | Toggle Night Mode | `settings/display` | `todo/USER-049.md` |
+| USER-050 | P2 | Clear App Cache | `settings/maintenance` | `todo/USER-050.md` |
+| USER-051 | P2 | Configure Privacy Settings | `settings/privacy` | `todo/USER-051.md` |
+| USER-052 | P1 | Handle Notification During Gameplay | `notifications` | `todo/USER-052.md` |
+| USER-053 | P2 | View Controller Layout in Game | `gameplay` | `todo/USER-053.md` |
+| USER-054 | P2 | View Download History | `download` | `todo/USER-054.md` |
+| USER-055 | P2 | Enable/Disable Auto-Start | `settings/system` | `todo/USER-055.md` |
+| USER-056 | P3 | View Play Statistics | `stats` | `todo/USER-056.md` |
+| USER-057 | P2 | Use Performance HUD | `gameplay` | `todo/USER-057.md` |
+| USER-058 | P2 | Configure Overlay Menu | `settings/gameplay` | `todo/USER-058.md` |
+| USER-059 | P0 | Handle Insufficient Storage | `error handling` | `todo/USER-059.md` |
+| USER-060 | P0 | Handle Network Connection Loss | `error handling` | `todo/USER-060.md` |
+| USER-061 | P2 | Take Screenshot | `gameplay` | `todo/USER-061.md` |
+| USER-062 | P3 | Record Gameplay Video | `gameplay` | `todo/USER-062.md` |
+| USER-063 | P2 | Configure Audio Settings | `settings/audio` | `todo/USER-063.md` |
+| USER-064 | P1 | Handle Anti-Cheat Games | `compatibility` | `todo/USER-064.md` |
+| USER-065 | P2 | Reset Game Configuration | `settings/maintenance` | `todo/USER-065.md` |
+| USER-066 | P2 | Backup and Restore App Data | `backup/restore` | `todo/USER-066.md` |
+| USER-067 | P3 | Browse Steam Workshop | `steam/workshop` | `todo/USER-067.md` |
+| USER-068 | P1 | View Installed Games List | `library` | `todo/USER-068.md` |
+| USER-069 | P2 | Rate Game Compatibility | `community` | `todo/USER-069.md` |
+| USER-070 | P1 | Manage Save Files | `saves` | `todo/USER-070.md` |
+| USER-071 | P1 | Get Support Help | `support` | `todo/USER-071.md` |
+| USER-072 | P2 | Change Language | `settings/language` | `todo/USER-072.md` |
+| USER-073 | P2 | View Cloud Saves Browser | `cloud/saves` | `todo/USER-073.md` |
+| USER-074 | P1 | Manage App Permissions | `settings/permissions` | `todo/USER-074.md` |
+| USER-075 | P2 | Pin Games to Top | `library` | `todo/USER-075.md` |
+| USER-076 | P2 | Switch Between Multiple Accounts Same Store | `authentication` | `todo/USER-076.md` |
+| USER-077 | P2 | Configure DXVK Settings | `settings/graphics` | `todo/USER-077.md` |
+| USER-078 | P2 | Configure Mouse/Keyboard Controls | `settings/input` | `todo/USER-078.md` |
+| USER-079 | P2 | Configure Battery Optimization | `settings/system` | `todo/USER-079.md` |
+| USER-080 | P2 | View System Information | `settings/about` | `todo/USER-080.md` |
+| USER-081 | P3 | View Steam Cloud Statistics | `steam/cloud` | `todo/USER-081.md` |
+| USER-082 | P2 | Configure esync and Fsync | `settings/performance` | `todo/USER-082.md` |
+| USER-083 | P2 | Add Custom Controller Profile | `input/profiles` | `todo/USER-083.md` |
+| USER-084 | P2 | Configure Vulkan/GLES | `settings/graphics` | `todo/USER-084.md` |
+| USER-085 | P2 | Configure Window Size and Resolution | `settings/display` | `todo/USER-085.md` |
+| USER-086 | P1 | Improve First-Run Account Connection Flow | `onboarding/improvement` | `todo/USER-086.md` |
+| USER-087 | P1 | Improve Game Installation Flow | `download/improvement` | `todo/USER-087.md` |
+| USER-088 | P1 | Improve Library Browsing Experience | `library/improvement` | `todo/USER-088.md` |
+| USER-089 | P0 | Improve Game Launch Reliability | `launch/improvement` | `todo/USER-089.md` |
+| USER-090 | P1 | Streamline Game Configuration Experience | `settings/improvement` | `todo/USER-090.md` |
+| USER-091 | P1 | Unified Store Authentication Experience | `authentication/improvement` | `todo/USER-091.md` |
+| USER-092 | P1 | Seamless Cloud Save Sync Experience | `cloud/improvement` | `todo/USER-092.md` |
+| USER-093 | P0 | Enhanced Error Recovery Experience | `error handling/improvement` | `todo/USER-093.md` |
+| USER-094 | P2 | Quick Actions for Installed Games | `library/improvement` | `todo/USER-094.md` |
+| USER-095 | P2 | Smart Download Queue Management | `download/improvement` | `todo/USER-095.md` |
+| USER-096 | P2 | Cross-Store Game Discovery | `library/new feature` | `todo/USER-096.md` |
+| USER-097 | P1 | Game Session Quick Resume | `gameplay/improvement` | `todo/USER-097.md` |
+
 ## Backlog - Service Refactoring
 
 | ID | Priority | Title | Area | File |

@@ -950,7 +950,7 @@
     <string name="main_open_discord">Abrir Discord</string>
 
     <!-- PluviaMain: Game Launch -->
-    <string name="main_downloading_entry">Descargando %s…</string>
+    <string name="main_downloading_entry">Descargando %s</string>
     <string name="main_downloading_steam">Descargando Steam…</string>
 
     <string name="main_installing_glibc">Instalando componentes de glibc…</string>
@@ -1288,4 +1288,6 @@
     <string name="download_failed_message">No se pudo descargar un archivo necesario. Comprueba tu conexión de red e inténtalo de nuevo.</string>
     <string name="install_failed_title">Error de instalación</string>
     <string name="install_failed_message">No se pudieron instalar los archivos del sistema. Inténtalo de nuevo. Si el problema persiste, prueba con una red diferente o usa una VPN.</string>
+    <string name="download_no_wifi">Sin conexión a Wi-Fi/LAN</string>
+    <string name="download_paused_wifi">Descarga en pausa - esperando Wi-Fi/LAN</string>
 </resources>

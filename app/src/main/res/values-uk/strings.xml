@@ -1279,5 +1279,18 @@
     <string name="download_failed_message">Не вдалося завантажити необхідний файл. Перевірте підключення до мережі та спробуйте ще раз.</string>
     <string name="install_failed_title">Помилка інсталяції</string>
     <string name="install_failed_message">Не вдалося інсталювати системні файли. Спробуйте ще раз. Якщо проблема не зникає, спробуйте іншу мережу або скористайтеся VPN.</string>
+    <string name="epic_cancel_download_message">Ви впевнені, що хочете скасувати завантаження гри?</string>
+    <string name="epic_delete_download_message">Видалити всі завантажені дані цієї гри?</string>
+    <string name="epic_cloud_sync_starting">Початок синхронізації хмарних збережень</string>
+    <string name="epic_cloud_sync_success">Хмарні збереження успішно синхронізовано</string>
+    <string name="epic_cloud_sync_failed">Не вдалося синхронізувати хмарні збереження</string>
+    <string name="epic_cloud_sync_error">Помилка синхронізації хмарних збережень: %1$s</string>
+    <string name="epic_uninstall_failed">Не вдалося видалити: %1$s</string>
+    <string name="epic_uninstall_error">Помилка видалення: %1$s</string>
+    <string name="settings_emulation_auto_apply_known_config_title">Автоматично застосовувати відому конфігурацію</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">Автоматично застосовувати рекомендовані налаштування для ігор Steam під час першого запуску</string>
+    <string name="download_no_wifi">Немає підключення до Wi-Fi/LAN</string>
+    <string name="download_paused_wifi">Завантаження призупинено - очікування Wi-Fi/LAN</string>
+    <string name="main_downloading_entry">Завантаження %s</string>
 </resources>
 

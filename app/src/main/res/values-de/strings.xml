@@ -1223,4 +1223,14 @@
     <string name="download_failed_message">Eine erforderliche Datei konnte nicht heruntergeladen werden. Bitte überprüfe deine Netzwerkverbindung und versuche es erneut.</string>
     <string name="install_failed_title">Installation fehlgeschlagen</string>
     <string name="install_failed_message">Systemdateien konnten nicht installiert werden. Bitte versuche es erneut. Falls das Problem weiterhin besteht, versuche ein anderes Netzwerk oder verwende ein VPN.</string>
+    <string name="steam_install_space">Downloadgroesse: %1$s\nGroesse auf dem Datentraeger: %2$s\nVerfuegbarer Speicher: %3$s</string>
+    <string name="container_config_custom_resolution_title">Benutzerdefinierte Aufloesung festlegen</string>
+    <string name="container_config_custom_resolution_separator">x</string>
+    <string name="container_config_custom_resolution_error_nonzero">Breite und Hoehe muessen groesser als 0 sein</string>
+    <string name="container_config_custom_resolution_error_aspect">Breite muss groesser als Hoehe sein</string>
+    <string name="settings_emulation_auto_apply_known_config_title">Bekannte Konfiguration automatisch anwenden</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">Empfohlene Einstellungen fuer Steam-Spiele beim ersten Start automatisch anwenden</string>
+    <string name="download_no_wifi">Nicht mit Wi-Fi/LAN verbunden</string>
+    <string name="download_paused_wifi">Download pausiert - warte auf Wi-Fi/LAN</string>
+    <string name="main_downloading_entry">Lade %s herunter</string>
 </resources>

@@ -1281,8 +1281,17 @@
     <string name="library_source_no_custom_games">Vous n\'avez ajouté aucun jeu personnalisé.</string>
     <string name="download_failed_title">Échec du téléchargement</string>
     <string name="download_failed_message">Un fichier requis n\'a pas pu être téléchargé. Veuillez vérifier votre connexion réseau et réessayer.</string>
-    <string name="install_failed_title">Échec de l\'installation</string>
-    <string name="install_failed_message">Les fichiers système n\'ont pas pu être installés. Veuillez réessayer. Si le problème persiste, essayez un autre réseau ou utilisez un VPN.</string>
+    <string name="install_failed_title">‰chec de l\'installation</string>
+    <string name="install_failed_message">Les fichiers systme n\'ont pas pu tre installs. Veuillez ressayer. Si le problme persiste, essayez un autre rseau ou utilisez un VPN.</string>
+    <string name="container_config_custom_resolution_title">Definir une resolution personnalisee</string>
+    <string name="container_config_custom_resolution_separator">x</string>
+    <string name="container_config_custom_resolution_error_nonzero">La largeur et la hauteur doivent etre superieures a 0</string>
+    <string name="container_config_custom_resolution_error_aspect">La largeur doit etre superieure a la hauteur</string>
+    <string name="settings_emulation_auto_apply_known_config_title">Appliquer automatiquement la configuration connue</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">Appliquer automatiquement les parametres recommandes pour les jeux Steam au premier lancement</string>
+    <string name="download_no_wifi">Non connecte au Wi-Fi/LAN</string>
+    <string name="download_paused_wifi">Telechargement en pause - en attente du Wi-Fi/LAN</string>
+    <string name="main_downloading_entry">Telechargement de %s</string>
 </resources>
 
 

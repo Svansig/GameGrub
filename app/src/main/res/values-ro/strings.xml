@@ -1288,4 +1288,9 @@
     <string name="download_failed_message">Un fișier necesar nu a putut fi descărcat. Verifică conexiunea la rețea și încearcă din nou.</string>
     <string name="install_failed_title">Instalarea a eșuat</string>
     <string name="install_failed_message">Fișierele de sistem nu au putut fi instalate. Încearcă din nou. Dacă problema persistă, încearcă o altă rețea sau folosește un VPN.</string>
+	<string name="settings_emulation_auto_apply_known_config_title">Aplica automat configuratia cunoscuta</string>
+	<string name="settings_emulation_auto_apply_known_config_subtitle">Aplica automat setarile recomandate pentru jocurile Steam la prima lansare</string>
+	<string name="download_no_wifi">Neconectat la Wi-Fi/LAN</string>
+	<string name="download_paused_wifi">Descarcare intrerupta - in asteptarea Wi-Fi/LAN</string>
+	<string name="main_downloading_entry">Se descarca %s</string>
 </resources>

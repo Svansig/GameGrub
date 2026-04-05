@@ -1286,4 +1286,10 @@
     <string name="download_failed_message">Nie udało się pobrać wymaganego pliku. Sprawdź połączenie sieciowe i spróbuj ponownie.</string>
     <string name="install_failed_title">Instalacja nie powiodła się</string>
     <string name="install_failed_message">Nie udało się zainstalować plików systemowych. Spróbuj ponownie. Jeśli problem będzie się powtarzał, spróbuj innej sieci lub użyj VPN.</string>
+    <string name="extreme">Ekstremalny</string>
+    <string name="settings_emulation_auto_apply_known_config_title">Automatycznie stosuj znana konfiguracje</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">Automatycznie stosuj zalecane ustawienia dla gier Steam przy pierwszym uruchomieniu</string>
+    <string name="download_no_wifi">Brak polaczenia z Wi-Fi/LAN</string>
+    <string name="download_paused_wifi">Pobieranie wstrzymane - oczekiwanie na Wi-Fi/LAN</string>
+    <string name="main_downloading_entry">Pobieranie %s</string>
 </resources>

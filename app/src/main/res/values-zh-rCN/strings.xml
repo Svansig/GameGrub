@@ -1277,4 +1277,17 @@
     <string name="download_failed_message">无法下载所需文件。请检查您的网络连接后重试。</string>
     <string name="install_failed_title">安装失败</string>
     <string name="install_failed_message">无法安装系统文件。请重试。如果问题持续存在，请尝试使用其他网络或使用 VPN。</string>
+    <string name="steam_not_logged_in">您必须登录 Steam 才能使用此功能</string>
+    <string name="container_config_custom_resolution_title">设置自定义分辨率</string>
+    <string name="container_config_custom_resolution_separator">x</string>
+    <string name="container_config_custom_resolution_error_nonzero">宽度和高度必须大于 0</string>
+    <string name="container_config_custom_resolution_error_aspect">宽度必须大于高度</string>
+    <string name="settings_emulation_auto_apply_known_config_title">自动应用已知配置</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">首次启动时自动为 Steam 游戏应用推荐设置</string>
+    <string name="download_no_wifi">未连接到 Wi-Fi/LAN</string>
+    <string name="download_paused_wifi">下载已暂停 - 等待 Wi-Fi/LAN</string>
+    <string name="main_downloading_entry">正在下载 %s</string>
+    <string name="library_compatibility_unknown">未知</string>
+    <string name="library_not_compatible">不兼容</string>
+    <string name="settings_interface_icon_style">图标样式</string>
 </resources>

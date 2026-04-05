@@ -1278,5 +1278,18 @@
     <string name="download_failed_title">Download non riuscito</string>
     <string name="download_failed_message">Non è stato possibile scaricare un file necessario. Controlla la connessione di rete e riprova.</string>
     <string name="install_failed_title">Installazione non riuscita</string>
-    <string name="install_failed_message">Non è stato possibile installare i file di sistema. Riprova. Se il problema persiste, prova una rete diversa o usa una VPN.</string>
+    <string name="install_failed_message">Non  stato possibile installare i file di sistema. Riprova. Se il problema persiste, prova una rete diversa o usa una VPN.</string>
+    <string name="external_display_input">Input display esterno</string>
+    <string name="external_display_input_subtitle">Scegli come deve comportarsi un display di presentazione collegato</string>
+    <string name="external_display_mode_off">Non usare il display esterno</string>
+    <string name="external_display_mode_touchpad">Usa come superficie touchpad</string>
+    <string name="external_display_mode_keyboard">Usa come tastiera completa</string>
+    <string name="external_display_mode_hybrid">Ibrido (touchpad + pulsante tastiera)</string>
+    <string name="external_display_swap">Mostra il gioco sul display esterno</string>
+    <string name="external_display_swap_subtitle">Scambia gli schermi in modo che il gioco venga mostrato sul display esterno e questo dispositivo diventi la superficie di controllo</string>
+    <string name="settings_emulation_auto_apply_known_config_title">Applica automaticamente la configurazione nota</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">Applica automaticamente le impostazioni consigliate per i giochi Steam al primo avvio</string>
+    <string name="download_no_wifi">Non connesso a Wi-Fi/LAN</string>
+    <string name="download_paused_wifi">Download in pausa - in attesa di Wi-Fi/LAN</string>
+    <string name="main_downloading_entry">Download di %s</string>
 </resources>

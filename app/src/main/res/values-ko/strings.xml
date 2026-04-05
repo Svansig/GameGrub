@@ -1287,4 +1287,9 @@
     <string name="download_failed_message">필수 파일을 다운로드할 수 없습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.</string>
     <string name="install_failed_title">설치 실패</string>
     <string name="install_failed_message">시스템 파일을 설치할 수 없습니다. 다시 시도해 주세요. 문제가 지속되면 다른 네트워크를 사용하거나 VPN을 사용해 보세요.</string>
+    <string name="settings_emulation_auto_apply_known_config_title">알려진 구성 자동 적용</string>
+    <string name="settings_emulation_auto_apply_known_config_subtitle">첫 실행 시 Steam 게임에 권장 설정을 자동으로 적용</string>
+    <string name="download_no_wifi">Wi-Fi/LAN에 연결되어 있지 않음</string>
+    <string name="download_paused_wifi">다운로드 일시중지 - Wi-Fi/LAN 대기 중</string>
+    <string name="main_downloading_entry">%s 다운로드 중</string>
 </resources>

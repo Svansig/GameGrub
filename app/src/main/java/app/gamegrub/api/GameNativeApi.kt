@@ -15,7 +15,7 @@ import timber.log.Timber
 object GameNativeApi {
 
     val BASE_URL: String =
-        if (BuildConfig.DEBUG) "http://10.0.2.2:8787" else "https://api.gamenative.app"
+        if (BuildConfig.DEBUG) "http://10.0.2.2:8787" else Constants.Api.API_BASE_URL
 
     val httpClient: OkHttpClient = NetworkManager.http
 

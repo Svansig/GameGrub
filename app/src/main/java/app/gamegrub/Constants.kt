@@ -45,6 +45,7 @@ object Constants {
     }
 
     object Api {
+        const val API_BASE_URL = "https://api.gamenative.app"
         const val COMPONENT_MANIFEST_URL = "https://downloads.gamenative.app/component-manifest.json"
         const val DRIVER_MANIFEST_URL =
             "https://raw.githubusercontent.com/utkarshdalal/gamenative-landing-page/refs/heads/main/data/manifest.json"

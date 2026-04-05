@@ -53,7 +53,7 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.PrefManager
 import app.gamegrub.R
-import app.gamegrub.data.UpdateInfo
+import app.gamegrub.update.UpdateInfo
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.SaveLocation
@@ -494,11 +494,11 @@ fun GameGrubMain(
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             val coordinator = context.getServiceStartupCoordinator()
             coordinator.evaluateAndStartServices(
-                viewModelScope = viewModel.viewModelScope,
                 viewModel = viewModel,
                 navController = navController,
                 state = state,
                 isConnecting = isConnecting,
+                onConnectingChanged = { isConnecting = it },
                 onNavigation = null,
             )
         }

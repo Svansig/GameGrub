@@ -2,12 +2,20 @@ package app.gamegrub.ui.service
 
 import android.content.Context
 import android.content.Intent
+import androidx.navigation.NavHostController
 import app.gamegrub.gateway.AuthStateGateway
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.ui.data.MainState
+import app.gamegrub.ui.model.MainViewModel
+import app.gamegrub.ui.screen.GameGrubScreen
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
 import timber.log.Timber
@@ -16,22 +24,23 @@ import timber.log.Timber
 class ServiceStartupCoordinator @Inject constructor(
     @ApplicationContext private val context: Context,
     private val authStateGateway: AuthStateGateway,
-//) {
-        viewModelScope: androidx.lifecycle.viewModelScope,
-        viewModel: app.gamegrub.ui.model.MainViewModel,
-        navController: androidx.navigation.NavHostController,
-        state: app.gamegrub.ui.model.MainViewModel.MainUiState,
-        isConnecting: androidx.compose.runtime.MutableState<Boolean>,
-        onNavigation: (() -> Unit)? = null
+) {
+    fun evaluateAndStartServices(
+        viewModel: MainViewModel,
+        navController: NavHostController,
+        state: MainState,
+        isConnecting: Boolean,
+        onConnectingChanged: (Boolean) -> Unit,
+        onNavigation: (() -> Unit)? = null,
     ) {
         // Only attempt reconnection if not already connected/connecting and not in offline mode
         val shouldAttemptReconnect = !state.isSteamConnected &&
-                !isConnecting.value &&
+                !isConnecting &&
                 !SteamService.keepAlive
 
         if (shouldAttemptReconnect) {
             Timber.d("[ServiceStartupCoordinator]: Steam not connected - attempting reconnection")
-            isConnecting.value = true
+            onConnectingChanged(true)
             viewModel.startConnecting()
             context.startForegroundService(Intent(context, SteamService::class.java))
         }
@@ -64,23 +73,39 @@ class ServiceStartupCoordinator @Inject constructor(
 
         // Handle navigation when already logged in (e.g., app resumed with active session)
         // Only navigate if currently on LoginUser screen to avoid disrupting user's current view
-        if (PlatformAuthUtils.isSignedInToAnyPlatform(context) && !SteamService.keepAlive) {
-            val baseRoute = viewModel.getPersistedRoute() ?: app.gamegrub.ui.screen.GameGrubScreen.Home.route
+        if (authStateGateway.getLoggedInStores().isNotEmpty() && !SteamService.keepAlive) {
+            val baseRoute = viewModel.getPersistedRoute() ?: GameGrubScreen.Home.route
             val targetRoute = if (SteamService.isLoggedIn) {
                 baseRoute
             } else {
                 // Non-Steam platforms: ensure offline param for Home
-                if (baseRoute.startsWith(app.gamegrub.ui.screen.GameGrubScreen.Home.route)) {
-                    app.gamegrub.ui.screen.GameGrubScreen.Home.route + "?offline=true"
+                if (baseRoute.startsWith(GameGrubScreen.Home.route)) {
+                    GameGrubScreen.Home.route + "?offline=true"
                 } else {
                     baseRoute
                 }
             }
-            navController.navigateFromLoginIfNeeded(targetRoute, "ResumeSession")
+            navigateFromLoginIfNeeded(navController, targetRoute, "ResumeSession")
         }
 
         // Execute optional navigation callback if provided
         onNavigation?.invoke()
+    }
+
+    private fun navigateFromLoginIfNeeded(
+        navController: NavHostController,
+        targetRoute: String,
+        logTag: String,
+    ) {
+        val currentRoute = navController.currentDestination?.route
+        if (currentRoute == GameGrubScreen.LoginUser.route) {
+            Timber.tag(logTag).i("Navigating from LoginUser to $targetRoute")
+            navController.navigate(targetRoute) {
+                popUpTo(GameGrubScreen.LoginUser.route) {
+                    inclusive = true
+                }
+            }
+        }
     }
 }
 

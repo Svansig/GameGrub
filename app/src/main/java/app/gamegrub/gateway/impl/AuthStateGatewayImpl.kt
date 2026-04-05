@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthStateGatewayImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : AuthStateGateway {
 
     override fun hasStoredCredentials(source: GameSource): Boolean {

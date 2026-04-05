@@ -29,7 +29,7 @@ class AppUpdateCoordinator(
      * @return [UpdateInfo] if an update is available and newer than current version,
      *         null otherwise.
      */
-    fun checkForUpdate(): UpdateInfo? {
+    suspend fun checkForUpdate(): UpdateInfo? {
         val checkedUpdateInfo = UpdateChecker.checkForUpdate(context)
         if (checkedUpdateInfo != null) {
             val appVersionCode = BuildConfig.VERSION_CODE

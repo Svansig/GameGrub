@@ -16,6 +16,15 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-04`
+- **Ticket**: `N/A (warning cleanup pass)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Repeated nullable-body patterns in HTTP call sites create noisy nullability warnings and hide real issues in compile output.
+- **Proposed Action**: Consolidate network response handling around non-null body contracts after `isSuccessful` checks and run warning-focused cleanup in small batches.
+- **Owner**: `Copilot`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-04`
 - **Ticket**: `todo/UI-028.md`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

@@ -9,7 +9,7 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.GameProcessInfo
 import app.gamegrub.data.GameSource
-import app.gamegrub.data.UpdateInfo
+import app.gamegrub.update.UpdateInfo
 import app.gamegrub.di.IAppTheme
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult

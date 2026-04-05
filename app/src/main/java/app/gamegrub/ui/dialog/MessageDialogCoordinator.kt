@@ -8,6 +8,7 @@ import app.gamegrub.Constants
 import app.gamegrub.PrefManager
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
+import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.launch.preLaunchApp
 import app.gamegrub.ui.model.MainViewModel
@@ -37,7 +38,7 @@ class MessageDialogCoordinator(
     private val context: Context,
     private val viewModel: MainViewModel,
     private val navController: NavHostController,
-    private val state: MainViewModel.MainUiState,
+    private val state: MainState,
     private val appUpdateCoordinator: AppUpdateCoordinator,
     private val containerConfigCoordinator: ContainerConfigCoordinator,
     private val gameFeedbackCoordinator: GameFeedbackCoordinator,

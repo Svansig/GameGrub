@@ -97,7 +97,7 @@ class ContainerConfigTransfer @Inject constructor(
                 configJson = configJson,
                 matchType = matchType,
                 applyKnownConfig = true,
-            ) ?: emptyMap()
+            )
 
             if (bestConfigMap.isEmpty()) {
                 SnackbarManager.show(

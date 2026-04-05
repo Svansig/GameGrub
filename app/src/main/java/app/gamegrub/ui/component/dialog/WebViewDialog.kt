@@ -45,7 +45,7 @@ fun WebViewDialog(
         Dialog(
             onDismissRequest = {
                 if (webView?.canGoBack() == true) {
-                    webView!!.goBack()
+                    webView.goBack()
                 } else {
                     webViewState.clear() // Clear the state when we're done.
                     onDismissRequest()

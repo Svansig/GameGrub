@@ -62,7 +62,7 @@ inline fun <T> runGameStoreCatching(block: () -> T): GameStoreResult<T> {
     }
 }
 
-inline fun <T> GameStoreResult<T>.getOrDefault(default: T): T = when (this) {
+fun <T> GameStoreResult<T>.getOrDefault(default: T): T = when (this) {
     is GameStoreResult.Success -> data
     is GameStoreResult.Error -> default
 }

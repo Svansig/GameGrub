@@ -81,12 +81,12 @@ object GOGAuthManager {
             }.use { response ->
                 Timber.tag("GOG").d("Received response: HTTP ${response.code}")
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG").e("Failed to authenticate: HTTP ${response.code} - $errorBody")
                     return Result.failure(Exception("Authentication failed: HTTP ${response.code} - $errorBody"))
                 }
 
-                val responseBody = response.body?.string() ?: return Result.failure(Exception("Empty response"))
+                val responseBody = response.body.string()
                 Timber.tag("GOG").d("Response body received, length: ${responseBody.length}")
                 JSONObject(responseBody)
             }
@@ -277,12 +277,12 @@ object GOGAuthManager {
                 httpClient.newCall(request).execute()
             }.use { response ->
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG").e("Failed to get game token: HTTP ${response.code} - $errorBody")
                     return Result.failure(Exception("Failed to get game-specific token: HTTP ${response.code}"))
                 }
 
-                val responseBody = response.body?.string() ?: return Result.failure(Exception("Empty response"))
+                val responseBody = response.body.string()
                 val json = JSONObject(responseBody)
 
                 // Store the new game-specific credentials
@@ -399,12 +399,12 @@ object GOGAuthManager {
                 httpClient.newCall(request).execute()
             }.use { response ->
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "Unknown error"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG").e("Failed to refresh credentials: HTTP ${response.code} - $errorBody")
                     return Result.failure(Exception("Failed to refresh credentials: HTTP ${response.code}"))
                 }
 
-                val responseBody = response.body?.string() ?: return Result.failure(Exception("Empty response"))
+                val responseBody = response.body.string()
                 JSONObject(responseBody)
             }
 

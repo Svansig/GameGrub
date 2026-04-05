@@ -384,7 +384,7 @@ object SteamAutoCloud {
 
                             withTimeout(SteamService.responseTimeout) {
                                 if (fileDownloadInfo.fileSize != fileDownloadInfo.rawFileSize) {
-                                    response.body?.byteStream()?.use { inputStream ->
+                                    response.body.byteStream().use { inputStream ->
                                         ZipInputStream(inputStream).use { zipInput ->
                                             val entry = zipInput.nextEntry
 
@@ -401,7 +401,7 @@ object SteamAutoCloud {
                                         }
                                     }
                                 } else {
-                                    response.body?.byteStream()?.use { inputStream ->
+                                    response.body.byteStream().use { inputStream ->
                                         copyToFile(inputStream)
                                     }
                                 }
@@ -570,7 +570,7 @@ object SteamAutoCloud {
                                             "Failed to upload part of %s: %s, %s",
                                             file.prefixPath,
                                             response.message,
-                                            response?.body.toString(),
+                                            response.body.toString(),
                                         )
 
                                         uploadFileSuccess = false

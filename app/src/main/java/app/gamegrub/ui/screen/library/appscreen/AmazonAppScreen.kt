@@ -379,7 +379,7 @@ class AmazonAppScreen : BaseAppScreen() {
 
         // If download is already in progress, attach listener immediately
         val existingDownloadInfo = AmazonService.getDownloadInfo(productId)
-        if (existingDownloadInfo != null && (existingDownloadInfo.getProgress() ?: 0f) < 1f) {
+        if (existingDownloadInfo != null && existingDownloadInfo.getProgress() < 1f) {
             Timber.tag(TAG).d("[OBSERVE] Download already in progress for $productId, attaching progress listener")
             val progressListener: (Float) -> Unit = { progress ->
                 onProgressChanged(progress)
@@ -394,7 +394,7 @@ class AmazonAppScreen : BaseAppScreen() {
                     currentDownloadInfo = null
                 }
             }
-            existingDownloadInfo.getProgress()?.let { onProgressChanged(it) }
+            onProgressChanged(existingDownloadInfo.getProgress())
         }
 
         // Listen for download status changes (events use productId.hashCode() as appId)

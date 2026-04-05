@@ -94,7 +94,7 @@ class GOGAppScreenViewModel @Inject constructor(
             val downloadInfo = gogInstallDomain.getDownloadInfo(gameId)
             val wasDownloading = downloadInfo != null &&
                 downloadInfo.isActive() &&
-                (downloadInfo.getProgress() ?: 0f) < 1f
+                downloadInfo.getProgress() < 1f
             downloadInfo?.cancel()
             downloadInfo?.awaitCompletion()
             gogInstallDomain.cleanupDownload(gameId)

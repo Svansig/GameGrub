@@ -291,7 +291,7 @@ class EpicAppScreen : BaseAppScreen() {
 
     override fun isDownloading(context: Context, libraryItem: LibraryItem): Boolean {
         val downloadInfo = EpicService.getDownloadInfo(libraryItem.gameId)
-        val isDownloading = downloadInfo != null && (downloadInfo.getProgress() ?: 0f) < 1f
+        val isDownloading = downloadInfo != null && downloadInfo.getProgress() < 1f
         return isDownloading
     }
 
@@ -321,7 +321,7 @@ class EpicAppScreen : BaseAppScreen() {
 
         val gameId = libraryItem.gameId
         val downloadInfo = EpicService.getDownloadInfo(gameId)
-        val isDownloading = downloadInfo != null && (downloadInfo.getProgress() ?: 0f) < 1f
+        val isDownloading = downloadInfo != null && downloadInfo.getProgress() < 1f
         val installed = isInstalled(context, libraryItem)
 
         Timber.tag(TAG)
@@ -600,7 +600,7 @@ class EpicAppScreen : BaseAppScreen() {
 
         // Check if download is already in progress and attach listener immediately
         val existingDownloadInfo = EpicService.getDownloadInfo(libraryItem.gameId)
-        if (existingDownloadInfo != null && (existingDownloadInfo.getProgress() ?: 0f) < 1f) {
+        if (existingDownloadInfo != null && existingDownloadInfo.getProgress() < 1f) {
             Timber.tag(TAG).d("[OBSERVE] Download already in progress for ${libraryItem.gameId}, attaching progress listener immediately")
             val progressListener: (Float) -> Unit = { progress ->
                 onProgressChanged(progress)
@@ -616,9 +616,7 @@ class EpicAppScreen : BaseAppScreen() {
                 }
             }
             // Report current progress immediately
-            existingDownloadInfo.getProgress()?.let { currentProgress ->
-                onProgressChanged(currentProgress)
-            }
+            onProgressChanged(existingDownloadInfo.getProgress())
         }
 
         // Listen for download status changes

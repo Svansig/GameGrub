@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -29,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -129,7 +129,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
                 val response = NetworkManager.http.newCall(request).execute()
                 if (response.isSuccessful) {
-                    val jsonString = response.body?.string() ?: "{}"
+                    val jsonString = response.body.string()
                     val jsonObject = Json.decodeFromString<JsonObject>(jsonString)
 
                     // Convert to map of String to String
@@ -312,7 +312,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable),
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
                             placeholder = { Text(stringResource(R.string.select_a_driver)) },
                         )
 
@@ -448,7 +448,7 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                             ) {
                                 val meta = driverMeta[id]
                                 val display = buildString {
-                                    if (!meta?.first.isNullOrEmpty()) append(meta?.first) else append(id)
+                                    if (meta != null && meta.first.isNotEmpty()) append(meta.first) else append(id)
                                 }
                                 Text(
                                     text = display,

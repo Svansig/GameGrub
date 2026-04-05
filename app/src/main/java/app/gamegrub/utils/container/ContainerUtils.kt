@@ -798,7 +798,7 @@ object ContainerUtils {
                 val appInfo = SteamService.getAppInfoOf(gameId)
                 if (appInfo != null) {
                     val gameName = appInfo.name
-                    val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown() ?: "Unknown GPU"
+                    val gpuName: String = DeviceQueryProvider.from(context).getGpuRendererOrUnknown()
 
                     // Check cache first (synchronous, fast)
                     // If not cached, make request on background thread (not UI thread)

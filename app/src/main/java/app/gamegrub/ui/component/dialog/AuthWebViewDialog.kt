@@ -58,7 +58,7 @@ fun AuthWebViewDialog(
         Dialog(
             onDismissRequest = {
                 if (webView?.canGoBack() == true) {
-                    webView!!.goBack()
+                    webView?.goBack()
                 } else {
                     webViewState.clear()
                     onDismissRequest()

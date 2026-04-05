@@ -85,27 +85,27 @@ fun EpicGameManagerDialog(
         val baseGame = EpicService.getEpicGameOf(gameId)
         if (baseGame != null) {
             // Fetch manifest to get accurate sizes
-            val sizes = EpicService.fetchManifestSizes(context, baseGame.id ?: 0)
+            val sizes = EpicService.fetchManifestSizes(context, baseGame.id)
             val updatedGame = baseGame.copy(
                 downloadSize = sizes.downloadSize,
                 installSize = sizes.installSize,
             )
             allDownloadableGames.add(updatedGame)
             // Base game is always selected and can't be deselected
-            selectedGameIds[updatedGame.id ?: 0] = true
+            selectedGameIds[updatedGame.id] = true
         }
 
         // Get DLCs and fetch their manifest sizes
         val dlcs = EpicService.getDLCForGame(gameId)
         dlcs.forEach { dlc ->
             // Fetch manifest to get accurate sizes for each DLC
-            val sizes = EpicService.fetchManifestSizes(context, dlc.id ?: 0)
+            val sizes = EpicService.fetchManifestSizes(context, dlc.id)
             val updatedDlc = dlc.copy(
                 downloadSize = sizes.downloadSize,
                 installSize = sizes.installSize,
             )
             allDownloadableGames.add(updatedDlc)
-            selectedGameIds[updatedDlc.id ?: 0] = true
+            selectedGameIds[updatedDlc.id] = true
         }
     }
 
@@ -118,7 +118,7 @@ fun EpicGameManagerDialog(
         }
 
         val selectedGames = allDownloadableGames.filter {
-            selectedGameIds[it.id ?: 0] == true
+            selectedGameIds[it.id] == true
         }
 
         val totalDownloadBytes = selectedGames.sumOf { it.downloadSize }
@@ -272,7 +272,7 @@ fun EpicGameManagerDialog(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             allDownloadableGames.forEach { game ->
-                                val gameIdValue = game.id ?: 0
+                                val gameIdValue = game.id
                                 val checked = selectedGameIds[gameIdValue] ?: false
                                 val isBaseGame = gameIdValue == gameId
 

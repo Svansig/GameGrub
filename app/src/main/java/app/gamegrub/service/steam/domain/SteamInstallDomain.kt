@@ -87,12 +87,11 @@ class SteamInstallDomain @Inject constructor(
 
         // Otherwise it is verifying files
         val dlcAppIds = runBlocking {
-            libraryDomain.getInstalledApp(appId)?.downloadedDepots.orEmpty()?.toMutableList()
-                ?: mutableListOf()
+            libraryDomain.getInstalledApp(appId)?.downloadedDepots.orEmpty().toMutableList()
         }
 
         runBlocking {
-            libraryDomain.getDownloadableDlcAppsOf(appId)?.forEach { dlcApp ->
+            libraryDomain.getDownloadableDlcAppsOf(appId).forEach { dlcApp ->
                 val installedDlcApp = libraryDomain.getAppInfoOf(dlcApp.id)
                 if (installedDlcApp != null) {
                     dlcAppIds.add(installedDlcApp.id)

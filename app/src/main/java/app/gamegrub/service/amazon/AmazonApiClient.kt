@@ -329,10 +329,6 @@ object AmazonApiClient {
             return@withContext null
         }
 
-        if (manifestBytes == null) {
-            Timber.tag("Amazon").e("fetchDownloadSize: empty manifest response")
-            return@withContext null
-        }
 
         try {
             val manifest = AmazonManifest.parse(manifestBytes)

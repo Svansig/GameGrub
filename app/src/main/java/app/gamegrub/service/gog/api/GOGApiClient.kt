@@ -66,8 +66,7 @@ class GOGApiClient @Inject constructor(
                     )
                 }
 
-                val jsonStr = response.body?.string()
-                    ?: return@withContext Result.failure(Exception("Empty response"))
+                val jsonStr = response.body.string()
 
                 val buildsResponse = parser.parseBuilds(jsonStr)
 
@@ -98,8 +97,7 @@ class GOGApiClient @Inject constructor(
                 )
             }
 
-            val jsonStr = response.body?.string()
-                ?: return@withContext Result.failure(Exception("Empty response from dependency repository"))
+            val jsonStr = response.body.string()
 
             val json = JSONObject(jsonStr)
 
@@ -138,8 +136,7 @@ class GOGApiClient @Inject constructor(
                 )
             }
 
-            val jsonStr = response.body?.string()
-                ?: return@withContext Result.failure(Exception("Empty response"))
+            val jsonStr = response.body.string()
 
             val json = JSONObject(jsonStr)
             val urlsArray = json.optJSONArray("urls")
@@ -195,8 +192,7 @@ class GOGApiClient @Inject constructor(
                 )
             }
 
-            val manifestBytes = response.body?.bytes()
-                ?: return@withContext Result.failure(Exception("Empty response"))
+            val manifestBytes = response.body.bytes()
 
             // Decompress based on detected format
             val manifestStr = parser.decompressManifest(manifestBytes)
@@ -239,8 +235,7 @@ class GOGApiClient @Inject constructor(
                     )
                 }
 
-                val manifestBytes = response.body?.bytes()
-                    ?: return@withContext Result.failure(Exception("Empty response"))
+                val manifestBytes = response.body.bytes()
 
                 // Decompress based on detected format
                 val manifestStr = parser.decompressManifest(manifestBytes)
@@ -283,7 +278,7 @@ class GOGApiClient @Inject constructor(
             if (!response.isSuccessful) {
                 return@withContext Result.failure(Exception("Failed to fetch Gen 1 depot manifest: HTTP ${response.code}"))
             }
-            val body = response.body?.string() ?: return@withContext Result.failure(Exception("Empty response"))
+            val body = response.body.string()
             Result.success(body)
         } catch (e: Exception) {
             Timber.tag("GOG").e(e, "Failed to fetch Gen 1 depot manifest")
@@ -322,8 +317,7 @@ class GOGApiClient @Inject constructor(
                     )
                 }
 
-                val depotBytes = response.body?.bytes()
-                    ?: return@withContext Result.failure(Exception("Empty response"))
+                val depotBytes = response.body.bytes()
 
                 // Depot manifests are also compressed
                 val depotStr = parser.decompressManifest(depotBytes)
@@ -375,8 +369,7 @@ class GOGApiClient @Inject constructor(
                 )
             }
 
-            val depotBytes = response.body?.bytes()
-                ?: return@withContext Result.failure(Exception("Empty response"))
+            val depotBytes = response.body.bytes()
 
             // Depot manifests are compressed
             val depotStr = parser.decompressManifest(depotBytes)
@@ -444,8 +437,7 @@ class GOGApiClient @Inject constructor(
                 )
             }
 
-            val jsonStr = response.body?.string()
-                ?: return@withContext Result.failure(Exception("Empty response"))
+            val jsonStr = response.body.string()
 
             // Log the actual response to debug parsing issues
             Timber.tag("GOG").d("Secure link response: $jsonStr")

@@ -632,7 +632,7 @@ class SteamAppScreen(
         val gameId = libraryItem.gameId
         val installDomain = getSteamInstallDomain(context)
         val downloadInfo = installDomain.getAppDownloadInfo(gameId)
-        val isDownloading = downloadInfo != null && (downloadInfo.getProgress() ?: 0f) < 1f
+        val isDownloading = downloadInfo != null && downloadInfo.getProgress() < 1f
         val isInstalled = SteamService.isAppInstalled(gameId)
 
         if (isDownloading) {
@@ -681,7 +681,7 @@ class SteamAppScreen(
         val isInstalled = SteamService.isAppInstalled(gameId)
         val installDomain = getSteamInstallDomain(context)
         val downloadInfo = installDomain.getAppDownloadInfo(gameId)
-        val isDownloading = downloadInfo != null && (downloadInfo.getProgress() ?: 0f) < 1f
+        val isDownloading = downloadInfo != null && downloadInfo.getProgress() < 1f
 
         if (isDownloading || SteamService.hasPartialDownload(gameId)) {
             // Show cancel download dialog when downloading

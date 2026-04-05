@@ -786,7 +786,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 }
 
                 app.gamegrub.service.steam.managers.SteamControllerTemplateRoutingManager.TemplateSource.Manifest -> {
-                    val manifestPath = config.steamInputManifestPath?.trim().orEmpty()
+                    val manifestPath = config.steamInputManifestPath.trim()
                     val appPath = getAppDirPath(appId)
                     val manifestFile = installDomain.resolveSteamInputManifestFile(appPath, manifestPath)
                         ?: return null

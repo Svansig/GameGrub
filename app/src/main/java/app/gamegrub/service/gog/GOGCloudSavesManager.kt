@@ -379,13 +379,13 @@ class GOGCloudSavesManager(
             val response = httpClient.newCall(request).execute()
             response.use {
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "No response body"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG").e("[Cloud Saves] Failed to fetch cloud files: HTTP ${response.code}")
                     Timber.tag("GOG").e("[Cloud Saves] Response body: $errorBody")
                     return@withContext emptyList()
                 }
 
-                val responseBody = response.body?.string() ?: ""
+                val responseBody = response.body.string()
                 if (responseBody.isEmpty()) {
                     Timber.tag("GOG").d("[Cloud Saves] Empty response body from cloud storage API")
                     return@withContext emptyList()
@@ -474,7 +474,7 @@ class GOGCloudSavesManager(
                 if (response.isSuccessful) {
                     Timber.tag("GOG-CloudSaves").i("Successfully uploaded: ${file.relativePath}")
                 } else {
-                    val errorBody = response.body?.string() ?: "No response body"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG-CloudSaves").e("Failed to upload ${file.relativePath}: HTTP ${response.code}")
                     Timber.tag("GOG-CloudSaves").e("Upload error body: $errorBody")
                 }
@@ -510,13 +510,13 @@ class GOGCloudSavesManager(
             val response = httpClient.newCall(request).execute()
             response.use {
                 if (!response.isSuccessful) {
-                    val errorBody = response.body?.string() ?: "No response body"
+                    val errorBody = response.body.string()
                     Timber.tag("GOG-CloudSaves").e("Failed to download ${file.relativePath}: HTTP ${response.code}")
                     Timber.tag("GOG-CloudSaves").e("Download error body: $errorBody")
                     return@withContext
                 }
 
-                val bytes = response.body?.bytes() ?: return@withContext
+                val bytes = response.body.bytes()
                 Timber.tag("GOG-CloudSaves").d("Downloaded ${bytes.size} bytes for ${file.relativePath}")
 
                 // Save to local file

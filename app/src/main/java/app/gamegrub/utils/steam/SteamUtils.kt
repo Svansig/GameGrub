@@ -577,7 +577,7 @@ object SteamUtils {
                 appendedDlcIds.add(it)
             }
 
-            dlcApps?.forEach { dlcApp ->
+            dlcApps.forEach { dlcApp ->
                 val installedDlcApp = SteamService.getInstalledApp(dlcApp.id)
                 if (installedDlcApp != null && !appendedDlcIds.contains(dlcApp.id)) {
                     appendLine("${dlcApp.id}=dlc${dlcApp.id}")
@@ -586,7 +586,7 @@ object SteamUtils {
             }
 
             // only add hidden dlc apps if not found in appendedDlcIds
-            hiddenDlcApps?.forEach { hiddenDlcApp ->
+            hiddenDlcApps.forEach { hiddenDlcApp ->
                 if (!appendedDlcIds.contains(hiddenDlcApp.id) &&
                     // only add hidden dlc apps if it is not a DLC of the main app
                     appInfo!!.depots.filter { (_, depot) -> depot.dlcAppId == hiddenDlcApp.id }.size <= 1

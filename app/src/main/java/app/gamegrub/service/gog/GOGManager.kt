@@ -793,7 +793,7 @@ class GOGManager @Inject constructor(
      * in the same Wine session. Returns empty list if not needed or not available.
      */
     suspend fun getScriptInterpreterPartsForLaunch(appId: String): List<String> {
-        val gameId = ContainerUtils.extractGameIdFromContainerId(appId) ?: return emptyList()
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
         val game = getGameFromDbById(gameId.toString()) ?: return emptyList()
         val computedPath = getGameInstallPath(gameId.toString(), game.title)
         val gameInstallPath = when {
@@ -967,11 +967,7 @@ class GOGManager @Inject constructor(
                 }
                 Timber.tag("GOG").d("[Cloud Saves] Successfully fetched remote config")
 
-                val responseBody = response.body?.string()
-                if (responseBody == null) {
-                    Timber.tag("GOG").w("[Cloud Saves] Empty response body from remote config")
-                    return@withContext null
-                }
+                val responseBody = response.body.string()
                 val configJson = JSONObject(responseBody)
 
                 // Parse response: content.Windows.cloudStorage.locations

@@ -373,7 +373,7 @@ private fun DxWrapperSection(state: ContainerConfigState) {
                 onItemSelected = {
                     state.dxvkVersionIndex.intValue = it
                     val selectedId = itemIds.getOrNull(it).orEmpty()
-                    val isManifestNotInstalled = state.isBionicVariant && itemMuted?.getOrNull(it) == true
+                    val isManifestNotInstalled = state.isBionicVariant && itemMuted.getOrNull(it) == true
                     val manifestEntry = if (state.isBionicVariant) state.dxvkManifestById[selectedId] else null
                     if (isManifestNotInstalled && manifestEntry != null) {
                         state.launchManifestContentInstall(

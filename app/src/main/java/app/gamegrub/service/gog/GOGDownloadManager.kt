@@ -169,7 +169,7 @@ class GOGDownloadManager @Inject constructor(
             Timber.tag("GOG").d("Game Manifest: ${gameManifest.installDirectory}, ${gameManifest.depots.size} depot(s)")
             Timber.tag("GOG").d("Game Manifest baseProductId: ${gameManifest.baseProductId}")
 
-            gameManifest.products?.let { products ->
+            gameManifest.products.let { products ->
                 Timber.tag("GOG").d("Manifest products: ${products.joinToString { "name=${it.name}, id=${it.productId}" }}")
             }
 
@@ -644,7 +644,7 @@ class GOGDownloadManager @Inject constructor(
                 return try {
                     httpClient.newCall(request).execute().use { response ->
                         if (!response.isSuccessful) return Result.failure(Exception("HTTP ${response.code} for ${file.path}"))
-                        val body = response.body ?: return Result.failure(Exception("Empty response"))
+                        val body = response.body
                         val md = MessageDigest.getInstance("MD5")
                         val buffer = ByteArray(256 * 1024) // 256KB
                         val progressInterval = 512L * 1024 // emit progress every 512KB
@@ -1224,8 +1224,7 @@ class GOGDownloadManager @Inject constructor(
                     )
                 }
 
-                val compressedBytes = response.body?.bytes()
-                    ?: return@withContext Result.failure(Exception("Empty response for chunk $chunkMd5"))
+                val compressedBytes = response.body.bytes()
 
                 // Verify compressed MD5
                 val actualMd5 = calculateMd5(compressedBytes)

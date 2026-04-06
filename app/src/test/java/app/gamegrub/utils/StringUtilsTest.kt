@@ -1,5 +1,6 @@
 package app.gamegrub.utils
 
+import app.gamegrub.utils.general.unaccent
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 

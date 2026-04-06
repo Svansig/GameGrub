@@ -242,7 +242,10 @@ class ManifestParseValidationTest {
             val normalizedExpected = normalizeValue(expectedValue)
 
             if (normalizedActual != normalizedExpected) {
-                differences.add("${if (context.isNotEmpty()) "$context: " else ""}Field '$field': Actual='$normalizedActual', Expected='$normalizedExpected'")
+                differences.add(
+                    "${if (context.isNotEmpty()) "$context: " else ""}" +
+                        "Field '$field': Actual='$normalizedActual', Expected='$normalizedExpected'",
+                )
             }
         } catch (e: Exception) {
             differences.add("${if (context.isNotEmpty()) "$context: " else ""}Field '$field': Error comparing - ${e.message}")

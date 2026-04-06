@@ -2,6 +2,8 @@ package app.gamegrub.service.gog
 
 import android.content.Context
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -48,7 +50,7 @@ class GOGAuthManagerTest {
         closeable = MockitoAnnotations.openMocks(this)
         mockWebServer = MockWebServer()
         mockWebServer.start()
-        tempDir = createTempDir("gogtest")
+        tempDir = Files.createTempDirectory("gogtest").toFile()
         `when`(context.filesDir).thenReturn(tempDir)
     }
 

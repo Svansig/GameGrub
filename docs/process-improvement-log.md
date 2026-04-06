@@ -16,6 +16,17 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-06`
+- **Ticket**: `todo/SRV-007.md`, `todo/SRV-024.md`
+- **PR/Commit**: `8ecf7744`
+- **Type**: `Code Quality`
+- **Opportunity**: Domain classes that needed sentinel/capacity values were importing `SteamService` companion constants, inverting the dependency direction. The pattern of adding a `SteamDomainConstants.kt` file in the domain package cleanly breaks this cycle without changing values.
+- **Proposed Action**: Adopt `SteamDomainConstants.kt` as the canonical source for all Steam domain-internal constants. As SRV-015 progresses, migrate the SteamService companion to delegate to these constants rather than declaring its own.
+- **Owner**: `Copilot`
+- **Status**: `In Progress`
+
+
+
+- **Date**: `2026-04-06`
 - **Ticket**: `todo/COH-030.md`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

@@ -57,7 +57,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-027 | P1 | Move custom game scanning/metadata ownership out of utils | `utils/game + custom game domain` | `todo/COH-027.md` |
 | COH-028 | P2 | Move manifest and update flows out of utils | `utils/manifest + update` | `todo/COH-028.md` |
 | COH-029 | P1 | Decompose Steam utilities into Steam domain owners | `utils/steam + service/steam` | `todo/COH-029.md` |
-| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | `utils + ui formatting + policy` | `todo/COH-030.md` |
+| COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | TBD | `todo/COH-030.md` |
 | COH-031 | P1 | Centralize external links and manifest endpoints under shared constants | `Constants + ui links + manifest/update endpoints` | `todo/COH-031.md` |
 | COH-032 | P1 | Decompose `GameGrubApp` startup orchestration into injected initializers | `app startup + di` | `todo/COH-032.md` |
 | COH-033 | P1 | Replace `GameGrubApp` companion runtime globals with lifecycle-owned state holders | `app runtime state + ui/xserver interop` | `todo/COH-033.md` |

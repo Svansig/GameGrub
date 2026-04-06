@@ -3,9 +3,9 @@ package app.gamegrub.utils.container
 import android.content.Context
 import app.gamegrub.R
 import app.gamegrub.data.GameSource
-import app.gamegrub.utils.launchdependencies.GogScriptInterpreterDependency
-import app.gamegrub.utils.launchdependencies.LaunchDependency
-import app.gamegrub.utils.launchdependencies.LaunchDependencyCallbacks
+import app.gamegrub.container.launch.dependency.GogScriptInterpreterDependency
+import app.gamegrub.container.launch.dependency.LaunchDependency
+import app.gamegrub.container.launch.dependency.LaunchDependencyCallbacks
 import com.winlator.container.Container
 
 /**

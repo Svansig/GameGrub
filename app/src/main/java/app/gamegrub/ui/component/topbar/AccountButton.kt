@@ -18,10 +18,10 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.getAvatarURL
 import app.gamegrub.ui.component.dialog.ProfileDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SteamIconImage
-import app.gamegrub.service.steam.getAvatarURL
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import kotlinx.coroutines.launch
 import timber.log.Timber

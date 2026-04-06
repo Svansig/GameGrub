@@ -2,9 +2,9 @@ package app.gamegrub.ui.update
 
 import android.content.Context
 import app.gamegrub.BuildConfig
-import app.gamegrub.update.UpdateInstaller
 import app.gamegrub.update.UpdateChecker
 import app.gamegrub.update.UpdateInfo
+import app.gamegrub.update.UpdateInstaller
 import timber.log.Timber
 
 /**

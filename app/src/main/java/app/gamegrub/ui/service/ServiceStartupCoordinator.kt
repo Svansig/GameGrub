@@ -22,7 +22,7 @@ import timber.log.Timber
 
 @Singleton
 class ServiceStartupCoordinator @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val authStateGateway: AuthStateGateway,
 ) {
     fun evaluateAndStartServices(
@@ -35,8 +35,8 @@ class ServiceStartupCoordinator @Inject constructor(
     ) {
         // Only attempt reconnection if not already connected/connecting and not in offline mode
         val shouldAttemptReconnect = !state.isSteamConnected &&
-                !isConnecting &&
-                !SteamService.keepAlive
+            !isConnecting &&
+            !SteamService.keepAlive
 
         if (shouldAttemptReconnect) {
             Timber.d("[ServiceStartupCoordinator]: Steam not connected - attempting reconnection")
@@ -47,7 +47,7 @@ class ServiceStartupCoordinator @Inject constructor(
 
         // Start GOGService if user has GOG
         if (GOGService.hasStoredCredentials(context) &&
-                !GOGService.isRunning
+            !GOGService.isRunning
         ) {
             Timber.tag("GOG").d("[ServiceStartupCoordinator]: Starting GOGService for logged-in user")
             GOGService.start(context)
@@ -57,7 +57,7 @@ class ServiceStartupCoordinator @Inject constructor(
 
         // Start EpicService if user has Epic credentials
         if (EpicService.hasStoredCredentials(context) &&
-                !EpicService.isRunning
+            !EpicService.isRunning
         ) {
             Timber.d("[ServiceStartupCoordinator]: Starting EpicService for logged-in user")
             EpicService.start(context)
@@ -65,7 +65,7 @@ class ServiceStartupCoordinator @Inject constructor(
 
         // Start AmazonService if user has Amazon credentials
         if (AmazonService.hasStoredCredentials(context) &&
-                !AmazonService.isRunning
+            !AmazonService.isRunning
         ) {
             Timber.d("[ServiceStartupCoordinator]: Starting AmazonService for logged-in user")
             AmazonService.start(context)
@@ -123,6 +123,6 @@ interface ServiceStartupCoordinatorEntryPoint {
  */
 fun Context.getServiceStartupCoordinator(): ServiceStartupCoordinator {
     return EntryPointAccessors
-            .fromApplication(this, ServiceStartupCoordinatorEntryPoint::class.java)
-            .serviceStartupCoordinator()
+        .fromApplication(this, ServiceStartupCoordinatorEntryPoint::class.java)
+        .serviceStartupCoordinator()
 }

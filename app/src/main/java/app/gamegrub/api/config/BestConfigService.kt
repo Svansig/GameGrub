@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.compose.ui.graphics.Color
 import app.gamegrub.PrefManager
 import app.gamegrub.R
-import app.gamegrub.network.NetworkManager
 import app.gamegrub.content.manifest.ManifestComponentHelper
 import app.gamegrub.content.manifest.ManifestContentTypes
 import app.gamegrub.content.manifest.ManifestEntry
 import app.gamegrub.content.manifest.ManifestRepository
+import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.auth.KeyAttestationHelper
 import app.gamegrub.service.auth.PlayIntegrity
 import com.winlator.box86_64.Box86_64PresetManager

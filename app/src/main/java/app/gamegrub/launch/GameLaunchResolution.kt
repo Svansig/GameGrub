@@ -2,12 +2,12 @@ package app.gamegrub.launch
 
 import android.content.Context
 import app.gamegrub.data.GameSource
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.domain.customgame.CustomGameScanner
 
 /**
  * Result model for launch-request app-id resolution and install-state validation.
@@ -100,4 +100,3 @@ fun needsSteamLogin(context: Context, appId: String): Boolean {
         true
     }
 }
-

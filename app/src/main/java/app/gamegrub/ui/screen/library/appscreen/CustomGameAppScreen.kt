@@ -22,6 +22,9 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.steamGridDB.SteamGridDB
 import app.gamegrub.data.LibraryItem
+import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.domain.customgame.ExeIconExtractor
+import app.gamegrub.domain.customgame.GameMetadataManager
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
@@ -29,9 +32,6 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.domain.customgame.CustomGameScanner
-import app.gamegrub.domain.customgame.ExeIconExtractor
-import app.gamegrub.domain.customgame.GameMetadataManager
 import com.winlator.container.ContainerData
 import java.io.File
 import kotlinx.coroutines.CoroutineScope

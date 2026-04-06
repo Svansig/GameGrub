@@ -104,4 +104,3 @@ class XServerInputDeviceCoordinatorTest {
         assertFalse(XServerInputDeviceCoordinator.shouldHideForInternalTouchpad(blockedGuard))
     }
 }
-

@@ -5,10 +5,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.net.toUri
+import app.gamegrub.service.auth.redactUrlForLogging
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.ui.component.dialog.AuthWebViewDialog
 import app.gamegrub.ui.theme.GameGrubTheme
-import app.gamegrub.service.auth.redactUrlForLogging
 import timber.log.Timber
 
 /**

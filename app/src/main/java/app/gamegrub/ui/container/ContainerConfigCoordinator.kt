@@ -1,8 +1,8 @@
 package app.gamegrub.ui.container
 
 import android.content.Context
-import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.launch.IntentLaunchManager
+import app.gamegrub.utils.container.ContainerUtils
 import timber.log.Timber
 
 /**

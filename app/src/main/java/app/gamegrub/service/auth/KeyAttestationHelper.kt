@@ -103,7 +103,7 @@ object KeyAttestationHelper {
         val nonce = fetchNonce(baseUrl)
         val keyAlias = "GameNativeAttestationKey"
 
-        val keyPair = try {
+        try {
             val keyGen = KeyPairGenerator.getInstance(
                 KeyProperties.KEY_ALGORITHM_EC,
                 "AndroidKeyStore",

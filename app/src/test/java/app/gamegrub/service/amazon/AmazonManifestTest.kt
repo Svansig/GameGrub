@@ -95,10 +95,12 @@ class AmazonManifestTest {
             bytes.addAll(varintBytes(((fieldNumber shl 3) or wireType).toLong()).toList())
             when (wireType) {
                 0 -> bytes.addAll(value.toList())
+
                 2 -> {
                     bytes.addAll(varintBytes(value.size.toLong()).toList())
                     bytes.addAll(value.toList())
                 }
+
                 else -> error("Unsupported wire type in test builder: $wireType")
             }
         }

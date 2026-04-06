@@ -1,8 +1,8 @@
 package app.gamegrub.domain.usecase
 
-import app.gamegrub.gateway.CloudSavesGateway
 import app.gamegrub.gateway.CloudSaveResolution
 import app.gamegrub.gateway.CloudSaveSyncStatus
+import app.gamegrub.gateway.CloudSavesGateway
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

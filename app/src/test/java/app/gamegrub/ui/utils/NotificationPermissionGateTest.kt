@@ -36,4 +36,3 @@ class NotificationPermissionGateTest {
         assertFalse(shouldRequest)
     }
 }
-

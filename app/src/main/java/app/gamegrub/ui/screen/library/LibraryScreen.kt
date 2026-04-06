@@ -64,6 +64,7 @@ import app.gamegrub.R
 import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.ui.component.GamepadAction
 import app.gamegrub.ui.component.GamepadActionBar
@@ -93,13 +94,29 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.PlatformAuthUiHelpers
 import app.gamegrub.ui.utils.PlatformLogoutCallbacks
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.domain.customgame.CustomGameScanner
 import java.io.File
 
 private const val DETAIL_EXIT_FOCUS_RESTORE_DELAY_MS = 100L
 private const val TAB_CHANGE_FOCUS_RESTORE_DELAY_MS = 150L
 private const val FOCUS_REQUEST_RETRY_DELAY_MS = 32L
 private const val OVERLAY_CLOSE_FOCUS_RESTORE_DELAY_MS = 50L
+
+internal fun shouldShowLibraryEmptyStateSplash(state: LibraryState): Boolean {
+    return when (state.currentTab) {
+        // Keep cached Steam games visible when offline/logged out.
+        LibraryTab.STEAM -> !state.isSteamLoggedIn && state.appInfoList.isEmpty()
+
+        LibraryTab.GOG -> !state.isGogLoggedIn
+
+        LibraryTab.EPIC -> !state.isEpicLoggedIn
+
+        LibraryTab.AMAZON -> !state.isAmazonLoggedIn
+
+        LibraryTab.LOCAL -> PrefManager.customGamesCount == 0
+
+        else -> false
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -768,14 +785,7 @@ private fun LibraryScreenContent(
             // Use Box to allow content to scroll behind the tab bar
             Box(modifier = Modifier.fillMaxSize()) {
                 // When on Steam/GOG/Epic/Amazon tab and not logged in, or LOCAL tab with no custom games, show splash
-                val showEmptyStateSplash = when (state.currentTab) {
-                    LibraryTab.STEAM -> !state.isSteamLoggedIn
-                    LibraryTab.GOG -> !state.isGogLoggedIn
-                    LibraryTab.EPIC -> !state.isEpicLoggedIn
-                    LibraryTab.AMAZON -> !state.isAmazonLoggedIn
-                    LibraryTab.LOCAL -> PrefManager.customGamesCount == 0
-                    else -> false
-                }
+                val showEmptyStateSplash = shouldShowLibraryEmptyStateSplash(state)
                 if (showEmptyStateSplash) {
                     val (messageResId, buttonResId, onAction) = when (state.currentTab) {
                         LibraryTab.STEAM -> Triple(

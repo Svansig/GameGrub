@@ -33,8 +33,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
-import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.service.auth.redactUrlForLogging
+import app.gamegrub.ui.theme.GameGrubTheme
 import timber.log.Timber
 
 @SuppressLint("SetJavaScriptEnabled")

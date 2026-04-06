@@ -1,5 +1,6 @@
 package app.gamegrub.ui.model
 
+import app.gamegrub.enums.AppType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -54,6 +55,26 @@ class LibraryViewModelOwnerFilterTest {
             itemOwnerAccountIds = listOf(3003),
             currentUserAccountId = 1001,
             sharedFilterEnabled = false,
+        )
+
+        assertFalse(include)
+    }
+
+    @Test
+    fun shouldIncludeForTypeFilter_emptyAllowedTypes_includesAnyType() {
+        val include = shouldIncludeForTypeFilter(
+            itemType = AppType.game,
+            allowedTypes = emptySet(),
+        )
+
+        assertTrue(include)
+    }
+
+    @Test
+    fun shouldIncludeForTypeFilter_nonMatchingType_excludesItem() {
+        val include = shouldIncludeForTypeFilter(
+            itemType = AppType.tool,
+            allowedTypes = setOf(AppType.game, AppType.application),
         )
 
         assertFalse(include)

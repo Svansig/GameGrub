@@ -47,4 +47,3 @@ class GameEventEmitterAdapterTest {
         assertEquals(true, backPressedReceived)
     }
 }
-

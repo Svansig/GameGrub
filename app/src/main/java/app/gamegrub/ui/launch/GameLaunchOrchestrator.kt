@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.R
 import app.gamegrub.api.config.BestConfigService
+import app.gamegrub.content.manifest.ManifestInstaller
 import app.gamegrub.data.GameSource
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
@@ -21,8 +23,6 @@ import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.LaunchDependencies
-import app.gamegrub.domain.customgame.CustomGameScanner
-import app.gamegrub.content.manifest.ManifestInstaller
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
@@ -60,7 +60,6 @@ internal fun shouldRetrySyncInProgress(
 ): Boolean {
     return useTemporaryOverride && retryCount < SYNC_IN_PROGRESS_MAX_RETRIES
 }
-
 
 /**
  * Handles a resolved external launch by setting ViewModel state and running pre-launch setup.

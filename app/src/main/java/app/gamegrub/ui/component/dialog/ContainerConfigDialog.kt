@@ -51,6 +51,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import app.gamegrub.R
+import app.gamegrub.content.manifest.ManifestComponentHelper
+import app.gamegrub.content.manifest.ManifestComponentHelper.VersionOptionList
+import app.gamegrub.content.manifest.ManifestContentTypes
+import app.gamegrub.content.manifest.ManifestData
+import app.gamegrub.content.manifest.ManifestEntry
+import app.gamegrub.content.manifest.ManifestInstaller
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
 import app.gamegrub.ui.component.rememberCustomGameFolderPicker
@@ -59,13 +66,6 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.PaddingUtils
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.domain.customgame.CustomGameScanner
-import app.gamegrub.content.manifest.ManifestComponentHelper
-import app.gamegrub.content.manifest.ManifestComponentHelper.VersionOptionList
-import app.gamegrub.content.manifest.ManifestContentTypes
-import app.gamegrub.content.manifest.ManifestData
-import app.gamegrub.content.manifest.ManifestEntry
-import app.gamegrub.content.manifest.ManifestInstaller
 import com.winlator.box86_64.Box86_64PresetManager
 import com.winlator.container.Container
 import com.winlator.container.ContainerData

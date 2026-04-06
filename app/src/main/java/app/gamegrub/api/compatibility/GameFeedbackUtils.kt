@@ -5,12 +5,12 @@ import app.gamegrub.BuildConfig
 import app.gamegrub.api.ApiResult
 import app.gamegrub.data.GameSource
 import app.gamegrub.device.DeviceQueryProvider
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.domain.customgame.CustomGameScanner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject

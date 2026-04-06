@@ -66,4 +66,3 @@ class StoragePermissionGateTest {
         assertTrue(shouldRequest)
     }
 }
-

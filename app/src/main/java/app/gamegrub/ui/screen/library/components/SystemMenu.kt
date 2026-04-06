@@ -82,13 +82,13 @@ import app.gamegrub.R
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.getAvatarURL
 import app.gamegrub.ui.component.dialog.SupportersDialog
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SteamIconImage
 import app.gamegrub.ui.utils.adaptivePanelWidth
 import app.gamegrub.ui.utils.shouldShowGamepadUI
-import app.gamegrub.service.steam.getAvatarURL
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import kotlinx.coroutines.launch
 import timber.log.Timber

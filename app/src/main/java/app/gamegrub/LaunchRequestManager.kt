@@ -3,8 +3,8 @@ package app.gamegrub
 import android.content.Context
 import android.content.Intent
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.launch.IntentLaunchManager
+import app.gamegrub.ui.utils.SnackbarManager
 import timber.log.Timber
 
 /**

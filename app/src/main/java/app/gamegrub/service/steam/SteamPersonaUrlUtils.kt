@@ -9,4 +9,3 @@ fun String.getAvatarURL(): String =
         ?: Constants.Persona.MISSING_AVATAR_URL
 
 fun Long.getProfileUrl(): String = "${Constants.Persona.PROFILE_URL}$this/"
-

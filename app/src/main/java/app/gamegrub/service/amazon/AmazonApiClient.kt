@@ -329,7 +329,6 @@ object AmazonApiClient {
             return@withContext null
         }
 
-
         try {
             val manifest = AmazonManifest.parse(manifestBytes)
             Timber.tag("Amazon").i("fetchDownloadSize: totalInstallSize = ${manifest.totalInstallSize}")

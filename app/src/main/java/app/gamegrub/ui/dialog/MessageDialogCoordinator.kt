@@ -1,20 +1,15 @@
 package app.gamegrub.ui.dialog
 
 import android.content.Context
-import android.content.Intent
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import app.gamegrub.Constants
 import app.gamegrub.PrefManager
-import app.gamegrub.enums.SaveLocation
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
+import app.gamegrub.ui.container.ContainerConfigCoordinator
 import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.DialogType
-import app.gamegrub.ui.launch.preLaunchApp
+import app.gamegrub.ui.feedback.GameFeedbackCoordinator
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.ui.update.AppUpdateCoordinator
-import app.gamegrub.ui.container.ContainerConfigCoordinator
-import app.gamegrub.ui.feedback.GameFeedbackCoordinator
 
 /**
  * Coordinates message dialog action handling.

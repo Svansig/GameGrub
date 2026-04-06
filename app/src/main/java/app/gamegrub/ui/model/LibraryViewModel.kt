@@ -23,6 +23,8 @@ import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.device.DeviceQueryGateway
+import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.enums.AppType
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.amazon.AmazonService
@@ -35,7 +37,6 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
-import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.utils.general.unaccent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -53,6 +54,59 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+
+internal fun resolveSteamOwnerIds(
+    familyMembers: List<Int>,
+    steamUserAccountId: Int,
+    steam3AccountId: Long?,
+): Set<Int> {
+    return buildSet {
+        addAll(familyMembers.filter { it > 0 })
+        if (steamUserAccountId > 0) {
+            add(steamUserAccountId)
+        }
+        val steam3IdAsInt = steam3AccountId?.toInt() ?: 0
+        if (steam3IdAsInt > 0) {
+            add(steam3IdAsInt)
+        }
+    }
+}
+
+internal fun shouldIncludeForOwnerScope(itemOwnerAccountIds: List<Int>, resolvedOwnerIds: Set<Int>): Boolean {
+    if (resolvedOwnerIds.isEmpty()) {
+        return true
+    }
+    if (itemOwnerAccountIds.isEmpty()) {
+        // Missing owner metadata should not hide otherwise owned apps.
+        return true
+    }
+    return itemOwnerAccountIds.any { it in resolvedOwnerIds }
+}
+
+internal fun shouldIncludeForSharedFilter(
+    itemOwnerAccountIds: List<Int>,
+    currentUserAccountId: Int,
+    sharedFilterEnabled: Boolean,
+): Boolean {
+    if (sharedFilterEnabled) {
+        return true
+    }
+    if (currentUserAccountId == 0) {
+        return true
+    }
+    if (itemOwnerAccountIds.isEmpty()) {
+        // Unknown owner metadata: fail open to avoid collapsing the Steam tab.
+        return true
+    }
+    return itemOwnerAccountIds.contains(currentUserAccountId)
+}
+
+internal fun shouldIncludeForTypeFilter(
+    itemType: AppType,
+    allowedTypes: Set<AppType>,
+): Boolean {
+    return allowedTypes.isEmpty() || itemType in allowedTypes
+}
 
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
@@ -548,31 +602,46 @@ class LibraryViewModel @Inject constructor(
                 return status == GameCompatibilityStatus.COMPATIBLE || status == GameCompatibilityStatus.GPU_COMPATIBLE
             }
 
-            val steamFilteredBeforeCompatibility: List<SteamLibraryApp> = appList
+            val resolvedOwnerIds = resolveSteamOwnerIds(
+                familyMembers = SteamService.familyMembers,
+                steamUserAccountId = PrefManager.steamUserAccountId,
+                steam3AccountId = SteamService.getSteam3AccountId(),
+            )
+            val isSharedFilterEnabled = currentState.appInfoSortType.contains(AppFilter.SHARED)
+
+            val steamOwnerScopedApps = appList
                 .asSequence()
                 .filter { item ->
-                    SteamService.familyMembers.ifEmpty {
-                        SteamService.getSteam3AccountId()?.toInt()?.let { accountId ->
-                            listOf(accountId)
-                        } ?: emptyList()
-                    }.let { owners ->
-                        if (owners.isEmpty()) {
-                            true // no owner info ⇒ don’t filter the item out
-                        } else {
-                            owners.any { item.ownerAccountId.contains(it) }
-                        }
-                    }
+                    shouldIncludeForOwnerScope(
+                        itemOwnerAccountIds = item.ownerAccountId,
+                        resolvedOwnerIds = resolvedOwnerIds,
+                    )
                 }
+                .toList()
+
+            val steamTypeFilteredApps = steamOwnerScopedApps
+                .asSequence()
                 .filter { item ->
-                    currentFilter.any { item.type == it }
+                    shouldIncludeForTypeFilter(
+                        itemType = item.type,
+                        allowedTypes = currentFilter,
+                    )
                 }
+                .toList()
+
+            val steamSharedFilteredApps = steamTypeFilteredApps
+                .asSequence()
                 .filter { item ->
-                    if (currentState.appInfoSortType.contains(AppFilter.SHARED)) {
-                        true
-                    } else {
-                        item.ownerAccountId.contains(PrefManager.steamUserAccountId) || PrefManager.steamUserAccountId == 0
-                    }
+                    shouldIncludeForSharedFilter(
+                        itemOwnerAccountIds = item.ownerAccountId,
+                        currentUserAccountId = PrefManager.steamUserAccountId,
+                        sharedFilterEnabled = isSharedFilterEnabled,
+                    )
                 }
+                .toList()
+
+            val steamFilteredBeforeCompatibility: List<SteamLibraryApp> = steamSharedFilteredApps
+                .asSequence()
                 .filter { item ->
                     if (currentState.searchQuery.isNotEmpty()) {
                         matches(item.name, currentState.searchQuery)
@@ -590,6 +659,20 @@ class LibraryViewModel @Inject constructor(
                     }
                 }
                 .toList()
+
+            Timber.tag("LibraryViewModel").d(
+                "Steam filter stages: raw=%d owner=%d type=%d shared=%d final=%d owners=%s self=%d sharedFilter=%s allowedTypes=%s appTypes=%s",
+                appList.size,
+                steamOwnerScopedApps.size,
+                steamTypeFilteredApps.size,
+                steamSharedFilteredApps.size,
+                steamFilteredBeforeCompatibility.size,
+                resolvedOwnerIds.sorted(),
+                PrefManager.steamUserAccountId,
+                isSharedFilterEnabled,
+                currentFilter,
+                appList.asSequence().map { it.type }.distinct().toList(),
+            )
 
             // Filter Steam apps first (no pagination yet)
             // Note: Don't sort individual lists - we'll sort the combined list for consistent ordering

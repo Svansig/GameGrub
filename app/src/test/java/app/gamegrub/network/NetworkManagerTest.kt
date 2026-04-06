@@ -71,4 +71,3 @@ class NetworkManagerTest {
         assertTrue(mockWebServer.takeRequest().path == "/error")
     }
 }
-

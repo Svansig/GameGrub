@@ -81,4 +81,3 @@ class LibraryAuthResultParserTest {
         assertNull(actual)
     }
 }
-

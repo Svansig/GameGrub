@@ -93,6 +93,7 @@ import app.gamegrub.Constants
 import app.gamegrub.R
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.LoginScreen
+import app.gamegrub.service.auth.PlatformOAuthHandlers
 import app.gamegrub.ui.component.LoadingScreen
 import app.gamegrub.ui.data.UserLoginState
 import app.gamegrub.ui.enums.ConnectionState
@@ -102,7 +103,6 @@ import app.gamegrub.ui.screen.auth.EpicOAuthActivity
 import app.gamegrub.ui.screen.auth.GOGOAuthActivity
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.service.auth.PlatformOAuthHandlers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

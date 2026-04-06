@@ -86,5 +86,3 @@ class OrientationManagerTest {
         assertNotNull(listenerField.get(manager))
     }
 }
-
-

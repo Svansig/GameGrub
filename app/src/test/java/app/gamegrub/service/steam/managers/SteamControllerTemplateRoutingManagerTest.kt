@@ -58,4 +58,3 @@ class SteamControllerTemplateRoutingManagerTest {
         assertFalse(SteamControllerTemplateRoutingManager.requiresWorkshopDownload(2))
     }
 }
-

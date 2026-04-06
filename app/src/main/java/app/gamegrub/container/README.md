@@ -35,7 +35,7 @@ All builders extend `BaseLaunchCommandBuilder`:
 ```kotlin
 internal object SteamLaunchCommandBuilder : BaseLaunchCommandBuilder() {
     override val gameSource: GameSource = GameSource.STEAM
-    
+
     override fun buildStoreCommand(context: LaunchCommandContext): String? {
         // Build Steam-specific launch command
     }

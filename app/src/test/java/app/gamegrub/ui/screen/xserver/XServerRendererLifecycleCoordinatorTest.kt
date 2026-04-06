@@ -46,4 +46,3 @@ class XServerRendererLifecycleCoordinatorTest {
         assertEquals(XServerRendererLifecycleCoordinator.RendererSyncAction.PAUSE, action)
     }
 }
-

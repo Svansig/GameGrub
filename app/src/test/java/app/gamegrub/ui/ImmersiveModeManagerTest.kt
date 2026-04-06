@@ -58,4 +58,3 @@ class ImmersiveModeManagerTest {
         assertFalse(manager.isSystemUIVisible())
     }
 }
-

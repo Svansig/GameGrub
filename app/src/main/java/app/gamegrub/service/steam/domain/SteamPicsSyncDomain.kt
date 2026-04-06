@@ -209,6 +209,8 @@ class SteamPicsSyncDomain @Inject constructor(
                             packages = packageRequests,
                         ).await()
 
+                        val appIdsNeedingPics = linkedSetOf<Int>()
+
                         callback.results.forEach { picsCallback ->
                             if (!SteamService.isLoggedIn) return@forEach
 
@@ -225,10 +227,25 @@ class SteamPicsSyncDomain @Inject constructor(
                                         if (steamApp.packageId != pkg.id) {
                                             appDao.update(steamApp.copy(packageId = pkg.id))
                                         }
+                                        if (!steamApp.receivedPICS) {
+                                            appIdsNeedingPics.add(appid)
+                                        }
                                     } else {
                                         appDao.insert(SteamApp(id = appid, packageId = pkg.id))
+                                        appIdsNeedingPics.add(appid)
                                     }
                                 }
+                            }
+                        }
+
+                        if (appIdsNeedingPics.isNotEmpty()) {
+                            val appRequests = appIdsNeedingPics.map { appId ->
+                                PICSRequest(id = appId)
+                            }
+                            appRequests.chunked(SteamService.MAX_PICS_BUFFER).forEach { chunk ->
+                                ensureActive()
+                                Timber.d("Queued ${chunk.size} app(s) for PICS after package sync")
+                                appPicsChannel.send(chunk)
                             }
                         }
                     }

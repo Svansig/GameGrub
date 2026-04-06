@@ -51,9 +51,9 @@ object GameTestData {
     }
 
     fun mixedGamesList(): List<LibraryItem> {
-        return installedGamesList(GameSource.STEAM) + 
-               installedGamesList(GameSource.GOG) +
-               uninstalledGamesList(GameSource.EPIC)
+        return installedGamesList(GameSource.STEAM) +
+            installedGamesList(GameSource.GOG) +
+            uninstalledGamesList(GameSource.EPIC)
     }
 }
 

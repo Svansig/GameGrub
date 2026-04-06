@@ -279,6 +279,7 @@ class SteamAutoCloudTest {
                     val documents = File(xuser, "Documents")
                     documents.absolutePath
                 }
+
                 else -> tempDir.absolutePath
             }
         }
@@ -462,6 +463,7 @@ class SteamAutoCloudTest {
                     val documents = File(xuser, "Documents")
                     documents.absolutePath
                 }
+
                 else -> tempDir.absolutePath
             }
         }
@@ -595,6 +597,7 @@ class SteamAutoCloudTest {
                     val documents = File(xuser, "Documents")
                     documents.absolutePath
                 }
+
                 else -> tempDir.absolutePath
             }
         }
@@ -851,6 +854,7 @@ class SteamAutoCloudTest {
                     val documents = File(xuser, "Documents")
                     documents.absolutePath
                 }
+
                 else -> tempDir.absolutePath
             }
         }
@@ -991,6 +995,7 @@ class SteamAutoCloudTest {
                 prefix == "GameInstall" -> {
                     saveFilesDir.absolutePath
                 }
+
                 else -> tempDir.absolutePath
             }
         }
@@ -1139,6 +1144,7 @@ class SteamAutoCloudTest {
                 prefix == "GameInstall" -> {
                     saveFilesDir.absolutePath
                 }
+
                 else -> tempDir.absolutePath
             }
         }

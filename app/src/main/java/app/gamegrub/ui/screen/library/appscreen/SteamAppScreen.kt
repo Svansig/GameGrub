@@ -30,6 +30,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.api.compatibility.GameCompatibilityService
 import app.gamegrub.api.config.BestConfigService
+import app.gamegrub.content.manifest.ManifestInstaller
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.enums.Marker
@@ -55,7 +56,6 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.StoragePermissionGate
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
-import app.gamegrub.content.manifest.ManifestInstaller
 import app.gamegrub.utils.steam.SteamUtils
 import com.posthog.PostHog
 import com.winlator.container.ContainerData

@@ -6,26 +6,18 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import app.gamegrub.R
-import app.gamegrub.service.amazon.AmazonService
-import app.gamegrub.service.epic.EpicService
-import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.auth.PlatformOAuthHandlers
 import app.gamegrub.ui.screen.auth.AmazonOAuthActivity
 import app.gamegrub.ui.screen.auth.EpicOAuthActivity
 import app.gamegrub.ui.screen.auth.GOGOAuthActivity
 import app.gamegrub.ui.utils.SnackbarManager
-import app.gamegrub.service.auth.PlatformOAuthHandlers
 import kotlinx.coroutines.launch
 
 /**
@@ -65,7 +57,7 @@ data class PlatformOAuthCallbacks(
 /**
  * Custom hook that provides platform OAuth (GOG, Epic, Amazon) launchers and handles results.
  * This encapsulates all OAuth activity launcher creation and callback handling to keep composables clean.
- * 
+ *
  * @param context Application context for launching OAuth activities.
  * @param callbacks Callbacks for handling OAuth success and error states.
  * @return Pair of launchers map and current OAuth state.
@@ -77,7 +69,7 @@ fun rememberPlatformOAuth(
 ): Pair<Map<String, (Intent) -> Unit>, PlatformOAuthState> {
     val lifecycleScope = rememberCoroutineScope()
     var oauthState by rememberSaveable { mutableStateOf(PlatformOAuthState()) }
-    
+
     val gogOAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -98,7 +90,7 @@ fun rememberPlatformOAuth(
             callbacks.onError(message)
             return@rememberLauncherForActivityResult
         }
-        
+
         oauthState = PlatformOAuthState(isAuthenticating = true)
         lifecycleScope.launch {
             PlatformOAuthHandlers.handleGogAuthentication(
@@ -142,7 +134,7 @@ fun rememberPlatformOAuth(
             callbacks.onError(message)
             return@rememberLauncherForActivityResult
         }
-        
+
         oauthState = PlatformOAuthState(isAuthenticating = true)
         lifecycleScope.launch {
             PlatformOAuthHandlers.handleEpicAuthentication(
@@ -186,7 +178,7 @@ fun rememberPlatformOAuth(
             callbacks.onError(message)
             return@rememberLauncherForActivityResult
         }
-        
+
         oauthState = PlatformOAuthState(isAuthenticating = true)
         lifecycleScope.launch {
             PlatformOAuthHandlers.handleAmazonAuthentication(

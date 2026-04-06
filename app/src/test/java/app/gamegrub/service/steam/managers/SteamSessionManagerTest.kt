@@ -66,4 +66,3 @@ class SteamSessionManagerTest {
         verify { ticketManager.clearAllTickets() }
     }
 }
-

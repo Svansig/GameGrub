@@ -15,6 +15,33 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
+- **Date**: `2026-04-05`
+- **Ticket**: `N/A (Steam package-to-app PICS bridge)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Package PICS sync updated package/license mappings but did not schedule app PICS for unresolved apps, leaving many rows without metadata/type and invisible to library filters.
+- **Proposed Action**: After package sync, queue app PICS requests for app ids with missing app metadata (`receivedPICS == false`).
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-05`
+- **Ticket**: `N/A (Steam owner-filter hardening)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Steam owner filtering could collapse the visible library to zero when `owner_account_id` metadata is missing or family/self ids are incomplete.
+- **Proposed Action**: Resolve owner ids from self + family and treat missing item-owner metadata as unknown (fail-open) instead of dropping rows.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-05`
+- **Ticket**: `N/A (Steam library visibility fix)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Steam tab empty-state logic was tied to auth state only, which hid cached Steam library entries after logout/offline transitions.
+- **Proposed Action**: Gate Steam empty-state splash on both auth state and visible library data presence to preserve cached-library visibility.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
 - **Date**: `2026-04-04`
 - **Ticket**: `N/A (warning cleanup pass)`
 - **PR/Commit**: `TBD`

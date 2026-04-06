@@ -96,4 +96,3 @@ class SteamControllerConfigManagerTest {
         assertNull(resolved)
     }
 }
-

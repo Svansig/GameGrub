@@ -20,4 +20,3 @@ fun trackGameLaunched(appId: String) {
         ),
     )
 }
-

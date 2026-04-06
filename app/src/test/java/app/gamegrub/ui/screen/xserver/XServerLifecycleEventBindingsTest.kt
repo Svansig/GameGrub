@@ -57,4 +57,3 @@ class XServerLifecycleEventBindingsTest {
         assertSame(debugCallback, removedCallback)
     }
 }
-

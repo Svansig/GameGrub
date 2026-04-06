@@ -1,18 +1,6 @@
 package app.gamegrub.service.steam.domain
 
-import android.util.Base64
-import `in`.dragonbra.javasteam.enums.ELicenseFlags
-import `in`.dragonbra.javasteam.enums.ELicenseType
-import `in`.dragonbra.javasteam.enums.EPaymentMethod
-import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientserver
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
-import `in`.dragonbra.javasteam.types.DepotManifest
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
-import java.util.Date
-import java.util.EnumSet
 import org.json.JSONObject
 import timber.log.Timber
 

@@ -45,10 +45,10 @@ import app.gamegrub.R
 import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
+import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.CompatibilityBadge
 import app.gamegrub.ui.utils.ListItemImage
-import app.gamegrub.domain.customgame.CustomGameScanner
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors

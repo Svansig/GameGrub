@@ -8,6 +8,7 @@ import app.gamegrub.data.AmazonCredentials
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.db.dao.AmazonGameDao
+import app.gamegrub.domain.customgame.ExecutableSelectionUtils
 import app.gamegrub.enums.Marker
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
@@ -17,7 +18,6 @@ import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.domain.customgame.ExecutableSelectionUtils
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint

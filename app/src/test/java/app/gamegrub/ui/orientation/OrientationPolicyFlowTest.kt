@@ -43,4 +43,3 @@ class OrientationPolicyFlowTest {
         assertTrue(policy.sessionOverrideOrientations == null)
     }
 }
-

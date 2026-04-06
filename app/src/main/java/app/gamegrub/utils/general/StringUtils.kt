@@ -15,4 +15,3 @@ fun CharSequence.unaccent(): String {
     val temp = Normalizer.normalize(this, Normalizer.Form.NFKD)
     return REGEX_UNACCENT.replace(temp, "")
 }
-

@@ -9,7 +9,6 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.GameProcessInfo
 import app.gamegrub.data.GameSource
-import app.gamegrub.update.UpdateInfo
 import app.gamegrub.di.IAppTheme
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult
@@ -22,6 +21,7 @@ import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.ConnectionState
 import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.screen.GameGrubScreen
+import app.gamegrub.update.UpdateInfo
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.steam.SteamUtils
 import com.materialkolor.PaletteStyle

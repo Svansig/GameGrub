@@ -18,8 +18,8 @@ import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.service.steam.di.SteamLibraryClient
 import app.gamegrub.service.steam.managers.DownloadManager
 import app.gamegrub.service.steam.managers.PicsChangesManager
-import app.gamegrub.utils.steam.LicenseSerializer
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.utils.steam.LicenseSerializer
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
@@ -200,12 +200,22 @@ class SteamLibraryDomain @Inject constructor(
         try {
             val games = libraryClient.getOwnedGames(steamId)
             val steamApps = games.map { game ->
-                SteamApp(
-                    id = game.appId,
-                    name = game.name,
-                    iconHash = game.iconUrl,
-                    logoHash = game.logoUrl,
-                )
+                val existingApp = appDao.findApp(game.appId)
+                if (existingApp != null) {
+                    // Owned-games API returns partial metadata; keep DB-owned fields intact.
+                    existingApp.copy(
+                        name = game.name,
+                        iconHash = game.iconUrl,
+                        logoHash = game.logoUrl,
+                    )
+                } else {
+                    SteamApp(
+                        id = game.appId,
+                        name = game.name,
+                        iconHash = game.iconUrl,
+                        logoHash = game.logoUrl,
+                    )
+                }
             }
             appDao.insertAll(steamApps)
             steamApps.size

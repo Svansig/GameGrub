@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import app.gamegrub.R
 import app.gamegrub.api.config.BestConfigService
-import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.content.manifest.ManifestInstaller
+import app.gamegrub.utils.container.ContainerUtils
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -28,10 +28,10 @@ ui/
 class MyViewModel @Inject constructor(
     private val gateway: MyGateway,
 ) : ViewModel() {
-    
+
     private val _state = MutableStateFlow(MyState())
     val state: StateFlow<MyState> = _state.asStateFlow()
-    
+
     fun onEvent(event: MyEvent) {
         // Handle UI events
     }

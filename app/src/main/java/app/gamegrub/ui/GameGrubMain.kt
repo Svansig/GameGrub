@@ -53,7 +53,6 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.PrefManager
 import app.gamegrub.R
-import app.gamegrub.update.UpdateInfo
 import app.gamegrub.enums.AppTheme
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.SaveLocation
@@ -94,6 +93,7 @@ import app.gamegrub.ui.service.getServiceStartupCoordinator
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.update.AppUpdateCoordinator
 import app.gamegrub.ui.utils.SnackbarManager
+import app.gamegrub.update.UpdateInfo
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
 import kotlinx.coroutines.CoroutineScope
@@ -999,6 +999,8 @@ fun GameGrubMain(
 
             val startDestination = rememberSaveable {
                 when {
+                    !PrefManager.onboardingCompleted -> GameGrubScreen.Onboarding.route
+
                     SteamService.isLoggedIn -> GameGrubScreen.Home.route + "?offline=false"
 
                     // skip login screen if any service has stored credentials
@@ -1016,6 +1018,29 @@ fun GameGrubMain(
                 navController = navController,
                 startDestination = startDestination,
             ) {
+                // Onboarding
+                composable(route = GameGrubScreen.Onboarding.route) {
+                    app.gamegrub.ui.screen.onboarding.OnboardingScreen(
+                        onComplete = {
+                            PrefManager.onboardingCompleted = true
+                            navController.navigate(GameGrubScreen.LoginUser.route) {
+                                popUpTo(GameGrubScreen.Onboarding.route) { inclusive = true }
+                            }
+                        },
+                        onSkip = {
+                            PrefManager.onboardingCompleted = true
+                            navController.navigate(GameGrubScreen.LoginUser.route) {
+                                popUpTo(GameGrubScreen.Onboarding.route) { inclusive = true }
+                            }
+                        },
+                        onLoginWithSteam = {
+                            PrefManager.onboardingCompleted = true
+                            navController.navigate(GameGrubScreen.LoginUser.route) {
+                                popUpTo(GameGrubScreen.Onboarding.route) { inclusive = true }
+                            }
+                        },
+                    )
+                }
                 // Login
                 composable(route = GameGrubScreen.LoginUser.route) {
                     UserLoginScreen(
@@ -1025,7 +1050,7 @@ fun GameGrubMain(
                             navController.navigate(GameGrubScreen.Home.route + "?offline=true")
                         },
                         onPlatformSignedIn = {
-                            navController.navigate(GameGrubScreen.Home.route + "?offline=true") {
+                            navController.navigate(GameGrubScreen.Home.route + "?offline=false") {
                                 popUpTo(GameGrubScreen.LoginUser.route) { inclusive = true }
                             }
                         },

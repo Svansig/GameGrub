@@ -1199,6 +1199,12 @@ object PrefManager {
         get() = getPref(NOTIFICATION_PERMISSION_PROMPTED, false)
         set(value) = setPref(NOTIFICATION_PERMISSION_PROMPTED, value)
 
+    // Tracks whether the user has completed the onboarding flow.
+    private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+    var onboardingCompleted: Boolean
+        get() = getPref(ONBOARDING_COMPLETED, false)
+        set(value) = setPref(ONBOARDING_COMPLETED, value)
+
     // auto-apply known config from BestConfigService on first container creation
     private val AUTO_APPLY_KNOWN_CONFIG = booleanPreferencesKey("auto_apply_known_config")
     var autoApplyKnownConfig: Boolean

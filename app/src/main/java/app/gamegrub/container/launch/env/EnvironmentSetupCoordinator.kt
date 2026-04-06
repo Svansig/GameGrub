@@ -418,17 +418,18 @@ internal object EnvironmentSetupCoordinator {
 
         if (gameSource == GameSource.STEAM) {
             val gameIdInt = ContainerUtils.extractGameIdFromContainerId(appId)
-            val achAppId = SteamService.cachedAchievementsAppId
+            val cloudStats = SteamService.instance?.cloudStatsDomain
+            val achAppId = cloudStats?.cachedAchievementsAppId?.value
             if (achAppId != null) {
                 val watchDirs = SteamService.getGseSaveDirs(context, gameIdInt)
-                val displayNameMap = SteamService.cachedAchievements?.associate { ach ->
+                val displayNameMap = cloudStats.cachedAchievements.value?.associate { ach ->
                     ach.name to (
                         ach.displayName?.get(nonNullContainer.language)
                             ?: ach.displayName?.get("english")
                             ?: ach.name
                         )
                 } ?: emptyMap()
-                val iconUrlMap = SteamService.cachedAchievements?.associate { ach ->
+                val iconUrlMap = cloudStats.cachedAchievements.value?.associate { ach ->
                     ach.name to ach.icon?.let {
                         "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/$achAppId/$it"
                     }

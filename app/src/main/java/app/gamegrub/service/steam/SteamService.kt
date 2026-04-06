@@ -35,7 +35,6 @@ import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.service.steam.managers.LaunchIntentResult
-import app.gamegrub.statsgen.Achievement
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
@@ -208,8 +207,6 @@ class SteamService : Service(), IChallengeUrlChanged {
         const val INVALID_APP_ID: Int = Int.MAX_VALUE
         const val INVALID_PKG_ID: Int = Int.MAX_VALUE
         private const val STEAM_CONTROLLER_CONFIG_FILENAME = "steam_controller.vdf"
-        private val catalogManager: app.gamegrub.service.steam.managers.SteamCatalogManager
-            get() = app.gamegrub.service.steam.managers.SteamCatalogManager
 
         private val installDomain: app.gamegrub.service.steam.domain.SteamInstallDomain
             get() = instance?.installDomain
@@ -241,10 +238,6 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.w("SteamService instance is null - service may not be started")
         }
 
-        var cachedAchievements: List<Achievement>? = null
-            private set
-        var cachedAchievementsAppId: Int? = null
-            private set
 
         val hasWifiOrEthernet: Boolean get() = NetworkManager.hasWifiOrEthernet.value
 
@@ -419,7 +412,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val steamId = userSteamId ?: return emptyMap()
             val ownedGameIds = getOwnedGames(steamId.convertToUInt64()).map { it.appId }.toHashSet()
 
-            return catalogManager.filterOwnedAppDlc(
+            return requireInstance().libraryDomain.filterOwnedAppDlc(
                 appDlcDepots = getAppDlc(appId),
                 invalidAppId = INVALID_APP_ID,
                 ownedGameIds = ownedGameIds,
@@ -430,7 +423,7 @@ class SteamService : Service(), IChallengeUrlChanged {
 
         fun getMainAppDlcIdsWithoutProperDepotDlcIds(appId: Int): MutableList<Int> {
             val hiddenDlcAppIds = getHiddenDlcAppsOf(appId).orEmpty().map { it.id }
-            return catalogManager.resolveMainAppDlcIdsWithoutProperDepotDlcIds(
+            return requireInstance().libraryDomain.resolveMainAppDlcIdsWithoutProperDepotDlcIds(
                 appInfo = getAppInfoOf(appId),
                 hiddenDlcAppIds = hiddenDlcAppIds,
             )
@@ -452,7 +445,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             has64Bit: Boolean,
             preferredLanguage: String,
             ownedDlc: Map<Int, DepotInfo>?,
-        ): Boolean = catalogManager.filterForDownloadableDepots(
+        ): Boolean = requireInstance().libraryDomain.filterForDownloadableDepots(
             depot = depot,
             has64Bit = has64Bit,
             preferredLanguage = preferredLanguage,
@@ -463,7 +456,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val appInfo = getAppInfoOf(appId) ?: return emptyMap()
             val ownedDlc = runBlocking { getOwnedAppDlc(appId) }
 
-            return catalogManager.getMainAppDepots(
+            return requireInstance().libraryDomain.getMainAppDepots(
                 appInfo = appInfo,
                 containerLanguage = containerLanguage,
                 ownedDlc = ownedDlc,
@@ -487,7 +480,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             val appInfo = getAppInfoOf(appId) ?: return emptyMap()
             val ownedDlc = runBlocking { getOwnedAppDlc(appId) }
 
-            return catalogManager.getDownloadableDepots(
+            return requireInstance().libraryDomain.getDownloadableDepots(
                 appInfo = appInfo,
                 preferredLanguage = preferredLanguage,
                 ownedDlc = ownedDlc,
@@ -1308,7 +1301,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         suspend fun checkDlcOwnershipViaPICSBatch(dlcAppIds: Set<Int>): Set<Int> {
             val steamApps = instance?._steamApps ?: return emptySet()
 
-            return catalogManager.checkDlcOwnershipViaPICSBatch(
+            return requireInstance().libraryDomain.checkDlcOwnershipViaPICSBatch(
                 dlcAppIds = dlcAppIds,
                 loadAccessTokens = { appIds ->
                     val tokens = steamApps.picsGetAccessTokens(
@@ -1341,16 +1334,11 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         suspend fun generateAchievements(appId: Int, configDirectory: String) {
-            val mgr = requireInstance().cloudStatsDomain
-            mgr.generateAchievements(appId, configDirectory)
-            cachedAchievements = mgr.cachedAchievements.value
-            cachedAchievementsAppId = mgr.cachedAchievementsAppId.value
+            requireInstance().cloudStatsDomain.generateAchievements(appId, configDirectory)
         }
 
         fun clearCachedAchievements() {
             requireInstance().cloudStatsDomain.clearCachedAchievements()
-            cachedAchievements = null
-            cachedAchievementsAppId = null
         }
 
         fun getGseSaveDirs(context: Context, appId: Int): List<File> {

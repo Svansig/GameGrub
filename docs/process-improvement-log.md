@@ -15,6 +15,17 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
+- **Date**: `2026-04-06`
+- **Ticket**: `todo/COH-030.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: `utils/FormatUtils.kt` became unreachable dead code after the SteamFormatUtils migration but was never deleted, creating confusion about which formatter to use.
+- **Proposed Action**: Confirmed zero callers via static grep, then deleted the file. Add a dead-code sweep step to the COH-02x ticket closure checklist.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+
+
 - **Date**: `2026-04-05`
 - **Ticket**: `N/A (Steam package-to-app PICS bridge)`
 - **PR/Commit**: `TBD`

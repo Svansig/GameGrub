@@ -4,7 +4,7 @@ import app.gamegrub.PrefManager
 import app.gamegrub.data.SteamApp
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.db.dao.SteamLicenseDao
-import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.di.SteamConnection
 import app.gamegrub.utils.steam.generateSteamApp
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
@@ -31,6 +31,7 @@ class SteamPicsSyncDomain @Inject constructor(
     private val appDao: SteamAppDao,
     private val licenseDao: SteamLicenseDao,
     private val libraryDomain: SteamLibraryDomain,
+    private val connection: SteamConnection,
 ) {
     companion object {
         private const val PICS_CHANGES_CHECK_INTERVAL_MS = 60_000L
@@ -58,7 +59,7 @@ class SteamPicsSyncDomain @Inject constructor(
     fun continuousPICSChangesChecker(parentScope: CoroutineScope, steamApps: SteamApps?): Job {
         picsChangesCheckerJob?.cancel()
         return parentScope.launch {
-            while (isActive && SteamService.isLoggedIn) {
+            while (isActive && connection.isLoggedIn) {
                 picsChangesCheck(steamApps)
                 kotlinx.coroutines.delay(PICS_CHANGES_CHECK_INTERVAL_MS)
             }
@@ -97,7 +98,7 @@ class SteamPicsSyncDomain @Inject constructor(
                     changeData.changeNumber != app.lastChangeNumber
                 }
                 .map { PICSRequest(id = it.id) }
-                .chunked(SteamService.MAX_PICS_BUFFER)
+                .chunked(DOMAIN_MAX_PICS_BUFFER)
                 .forEach { chunk ->
                     currentCoroutineContext().ensureActive()
                     Timber.d("onPicsChanges: Queueing ${chunk.size} app(s) for PICS")
@@ -120,7 +121,7 @@ class SteamPicsSyncDomain @Inject constructor(
 
                 pkgsWithChanges
                     .map { PICSRequest(it.id, accessTokens[it.id] ?: 0) }
-                    .chunked(SteamService.MAX_PICS_BUFFER)
+                    .chunked(DOMAIN_MAX_PICS_BUFFER)
                     .forEach { chunk ->
                         Timber.d("onPicsChanges: Queueing ${chunk.size} package(s) for PICS")
                         packagePicsChannel.send(chunk)
@@ -142,12 +143,12 @@ class SteamPicsSyncDomain @Inject constructor(
             launch {
                 appPicsChannel.receiveAsFlow()
                     .filter { it.isNotEmpty() }
-                    .buffer(capacity = SteamService.MAX_PICS_BUFFER, onBufferOverflow = BufferOverflow.SUSPEND)
+                    .buffer(capacity = DOMAIN_MAX_PICS_BUFFER, onBufferOverflow = BufferOverflow.SUSPEND)
                     .collect { appRequests ->
                         Timber.d("Processing ${appRequests.size} app PICS requests")
 
                         ensureActive()
-                        if (!SteamService.isLoggedIn) return@collect
+                        if (!connection.isLoggedIn) return@collect
                         if (steamApps == null) return@collect
 
                         val callback = steamApps.picsGetProductInfo(
@@ -162,9 +163,9 @@ class SteamPicsSyncDomain @Inject constructor(
 
                             val steamAppsMap = picsCallback.apps.values.mapNotNull { app ->
                                 val appFromDb = libraryDomain.findApp(app.id)
-                                val packageId = appFromDb?.packageId ?: SteamService.INVALID_PKG_ID
+                                val packageId = appFromDb?.packageId ?: DOMAIN_INVALID_PKG_ID
                                 val packageFromDb = if (packageId !=
-                                    SteamService.INVALID_PKG_ID
+                                    DOMAIN_INVALID_PKG_ID
                                 ) {
                                     libraryDomain.findLicense(packageId)
                                 } else {
@@ -196,12 +197,12 @@ class SteamPicsSyncDomain @Inject constructor(
             launch {
                 packagePicsChannel.receiveAsFlow()
                     .filter { it.isNotEmpty() }
-                    .buffer(capacity = SteamService.MAX_PICS_BUFFER, onBufferOverflow = BufferOverflow.SUSPEND)
+                    .buffer(capacity = DOMAIN_MAX_PICS_BUFFER, onBufferOverflow = BufferOverflow.SUSPEND)
                     .collect { packageRequests ->
                         Timber.d("Processing ${packageRequests.size} package PICS requests")
 
                         ensureActive()
-                        if (!SteamService.isLoggedIn) return@collect
+                        if (!connection.isLoggedIn) return@collect
                         if (steamApps == null) return@collect
 
                         val callback = steamApps.picsGetProductInfo(
@@ -212,7 +213,7 @@ class SteamPicsSyncDomain @Inject constructor(
                         val appIdsNeedingPics = linkedSetOf<Int>()
 
                         callback.results.forEach { picsCallback ->
-                            if (!SteamService.isLoggedIn) return@forEach
+                            if (!connection.isLoggedIn) return@forEach
 
                             picsCallback.packages.values.forEach { pkg ->
                                 val appIds = pkg.keyValues["appids"].children.map { it.asInteger() }
@@ -242,7 +243,7 @@ class SteamPicsSyncDomain @Inject constructor(
                             val appRequests = appIdsNeedingPics.map { appId ->
                                 PICSRequest(id = appId)
                             }
-                            appRequests.chunked(SteamService.MAX_PICS_BUFFER).forEach { chunk ->
+                            appRequests.chunked(DOMAIN_MAX_PICS_BUFFER).forEach { chunk ->
                                 ensureActive()
                                 Timber.d("Queued ${chunk.size} app(s) for PICS after package sync")
                                 appPicsChannel.send(chunk)

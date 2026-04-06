@@ -263,6 +263,7 @@ class SteamLibraryDomain @Inject constructor(
         if (getDownloadingAppInfo(appId) != null) {
             return true
         }
+        // TODO SRV-024: replace with StoragePathGateway.getAppDirPath(appId)
         val dirPath = SteamService.getAppDirPath(appId)
         return File(dirPath).exists() && !StorageManager.hasMarker(dirPath, Marker.DOWNLOAD_COMPLETE_MARKER)
     }
@@ -275,7 +276,7 @@ class SteamLibraryDomain @Inject constructor(
     suspend fun getDownloadableDepots(appId: Int): Map<Int, DepotInfo> = getMainAppDepots(appId, "english")
     suspend fun getAppDlc(appId: Int): Map<Int, DepotInfo> =
         getMainAppDepots(appId, "english").filterValues { depot ->
-            depot.dlcAppId != SteamService.INVALID_APP_ID
+            depot.dlcAppId != DOMAIN_INVALID_APP_ID
         }
 
     // Download state operations - encapsulate in domain

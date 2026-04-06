@@ -23,6 +23,10 @@ Some comments explain implementation noise rather than intent, or are outdated.
 - [x] Comment cleanup list created for 10+ locations.
 - [ ] At least 5 high-impact comment improvements merged.
 
+## Completed Improvements
+
+1. `gateway/LaunchRequestGateway.kt` line 17: Replaced stale `@see app.gamegrub.utils.general.IntentLaunchManager` with correct `@see app.gamegrub.launch.IntentLaunchManager` (2026-04-06).
+
 ## Validation
 
 - [x] AGENTS.md already provides clear comment guidelines:

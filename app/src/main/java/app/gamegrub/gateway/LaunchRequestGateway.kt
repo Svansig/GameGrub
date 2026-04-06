@@ -14,7 +14,7 @@ import app.gamegrub.launch.IntentLaunchManager
  * - Pending launch request management for cold-start scenarios
  *
  * @see app.gamegrub.LaunchRequestManager
- * @see app.gamegrub.utils.general.IntentLaunchManager
+ * @see app.gamegrub.launch.IntentLaunchManager
  */
 interface LaunchRequestGateway {
 

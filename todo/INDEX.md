@@ -59,6 +59,8 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | COH-029 | P1 | Decompose Steam utilities into Steam domain owners | `utils/steam + service/steam` | `todo/COH-029.md` |
 | COH-030 | P2 | Split shared formatting helpers from feature and policy concerns | `utils + ui formatting + policy` | `todo/COH-030.md` |
 | COH-031 | P1 | Centralize external links and manifest endpoints under shared constants | `Constants + ui links + manifest/update endpoints` | `todo/COH-031.md` |
+| COH-032 | P1 | Decompose `GameGrubApp` startup orchestration into injected initializers | `app startup + di` | `todo/COH-032.md` |
+| COH-033 | P1 | Replace `GameGrubApp` companion runtime globals with lifecycle-owned state holders | `app runtime state + ui/xserver interop` | `todo/COH-033.md` |
 
 ## Backlog - Readability
 
@@ -114,6 +116,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | REL-014 | P3 | Add defensive guards for null/empty platform payload edge cases | `service/platform adapters` | `todo/REL-014.md` |
 | REL-016 | P2 | Add cancellation and explicit fail-state handling for prelaunch pipeline | `ui/GameGrubMain + launch` | `todo/REL-016.md` |
 | REL-017 | P1 | Extract timing and retry literals into named launch/UI policy constants | `ui/model + ui/launch + ui/screen/library + ui/screen/login` | `todo/REL-017.md` |
+| REL-018 | P1 | Harden `GameGrubApp` startup background migration failure handling | `app startup + background migration` | `todo/REL-018.md` |
 
 ## Backlog - Testing
 
@@ -174,6 +177,7 @@ During this phase, defer tickets that primarily expand scope beyond refactor goa
 | SEC-012 | P3 | Add security review checklist for high-risk PRs | `docs + process` | `todo/SEC-012.md` |
 | SEC-013 | P2 | Audit and reduce sensitive fields persisted in local debug artifacts | `storage + debug tooling` | `todo/SEC-013.md` |
 | SEC-014 | P3 | Add hardening checklist for third-party SDK configuration | `build + runtime config` | `todo/SEC-014.md` |
+| SEC-016 | P1 | Gate analytics SDK startup by privacy consent in app initialization | `app startup + analytics/privacy` | `todo/SEC-016.md` |
 
 ## Backlog - Documentation
 

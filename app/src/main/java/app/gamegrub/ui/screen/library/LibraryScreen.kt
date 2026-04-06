@@ -114,7 +114,8 @@ internal fun shouldShowLibraryEmptyStateSplash(state: LibraryState): Boolean {
 
         LibraryTab.LOCAL -> PrefManager.customGamesCount == 0
 
-        else -> false
+        // Installed tab has no login requirement; show empty list naturally when nothing is installed.
+        LibraryTab.ALL, LibraryTab.INSTALLED -> false
     }
 }
 
@@ -815,7 +816,9 @@ private fun LibraryScreenContent(
                             onAddCustomGameClick,
                         )
 
-                        else -> throw IllegalStateException("showEmptyStateSplash is true only for Steam/GOG/Epic/Amazon/LOCAL")
+                        LibraryTab.ALL,
+                        LibraryTab.INSTALLED,
+                        -> throw IllegalStateException("showEmptyStateSplash should not be true for ALL or INSTALLED tabs")
                     }
                     LibrarySourceNotLoggedInSplash(
                         messageResId = messageResId,
@@ -886,6 +889,7 @@ private fun LibraryScreenContent(
                         currentTab = state.currentTab,
                         tabCounts = mapOf(
                             LibraryTab.ALL to state.allCount,
+                            LibraryTab.INSTALLED to state.installedCount,
                             LibraryTab.STEAM to state.steamCount,
                             LibraryTab.GOG to state.gogCount,
                             LibraryTab.EPIC to state.epicCount,

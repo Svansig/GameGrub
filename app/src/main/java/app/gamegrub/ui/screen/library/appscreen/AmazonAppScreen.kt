@@ -128,7 +128,6 @@ class AmazonAppScreen : BaseAppScreen() {
         LaunchedEffect(productId, refreshKey) {
             game = AmazonService.getAmazonGameOf(productId)
             Timber.tag(TAG).d(
-                "%snull",
                 "Loaded game: title=${game?.title}, developer=${game?.developer}, " +
                     "releaseDate=${game?.releaseDate}, artUrl=${game?.artUrl?.take(60)}, " +
                     "heroUrl=${game?.heroUrl?.take(60)}, downloadSize=${game?.downloadSize}, ",

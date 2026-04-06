@@ -41,6 +41,22 @@ interface SteamAppDao {
     ): Flow<List<SteamApp>>
 
     @Query(
+        "SELECT * FROM steam_app AS app " +
+            "WHERE app.id != 480 " +
+            "AND app.package_id != :invalidPkgId " +
+            "AND app.type != 0 " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM steam_license AS license " +
+            "  WHERE license.packageId = app.package_id " +
+            "  AND (license.license_flags & 8 = 0) " +
+            ") " +
+            "ORDER BY LOWER(app.name)",
+    )
+    suspend fun getAllOwnedAppsAsList(
+        invalidPkgId: Int = INVALID_PKG_ID,
+    ): List<SteamApp>
+
+    @Query(
         "SELECT app.id, app.owner_account_id, app.name, app.type, " +
             "app.client_icon_hash, app.library_assets, app.header_image, app.install_dir " +
             "FROM steam_app AS app " +
@@ -57,6 +73,25 @@ interface SteamAppDao {
     fun getAllOwnedLibraryApps(
         invalidPkgId: Int = INVALID_PKG_ID,
     ): Flow<List<SteamLibraryApp>>
+
+    @Query(
+        "SELECT app.id, app.owner_account_id, app.name, app.type, " +
+            "app.client_icon_hash, app.library_assets, app.header_image, app.install_dir " +
+            "FROM steam_app AS app " +
+            "WHERE app.id != 480 " +
+            "AND app.package_id != :invalidPkgId " +
+            "AND app.type != 0 " +
+            "AND EXISTS (" +
+            "  SELECT 1 FROM steam_license AS license " +
+            "  WHERE license.packageId = app.package_id " +
+            "  AND (license.license_flags & 8 = 0) " +
+            ") " +
+            "ORDER BY LOWER(app.name)",
+    )
+    suspend fun getAllOwnedLibraryAppsAsList(
+        invalidPkgId: Int = INVALID_PKG_ID,
+    ): List<SteamLibraryApp>
+
 
     @Query("SELECT * FROM steam_app WHERE received_pics = 0 AND package_id != :invalidPkgId AND owner_account_id = :ownerId")
     fun getAllOwnedAppsWithoutPICS(

@@ -18,15 +18,20 @@ import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.data.SteamLibraryApp
+import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.device.DeviceQueryGateway
 import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.domain.library.policy.resolveSteamOwnerIds
+import app.gamegrub.domain.library.policy.shouldBypassSteamFiltersForInstalledTab
+import app.gamegrub.domain.library.policy.shouldIncludeForOwnerScope
+import app.gamegrub.domain.library.policy.shouldIncludeForSharedFilter
+import app.gamegrub.domain.library.policy.shouldIncludeForTypeFilter
 import app.gamegrub.enums.AppType
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.DownloadService
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
@@ -55,116 +60,207 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-internal fun resolveSteamOwnerIds(
-    familyMembers: List<Int>,
-    steamUserAccountId: Int,
-    steam3AccountId: Long?,
-): Set<Int> {
-    return buildSet {
-        addAll(familyMembers.filter { it > 0 })
-        if (steamUserAccountId > 0) {
-            add(steamUserAccountId)
-        }
-        val steam3IdAsInt = steam3AccountId?.toInt() ?: 0
-        if (steam3IdAsInt > 0) {
-            add(steam3IdAsInt)
-        }
-    }
-}
 
-internal fun shouldIncludeForOwnerScope(itemOwnerAccountIds: List<Int>, resolvedOwnerIds: Set<Int>): Boolean {
-    if (resolvedOwnerIds.isEmpty()) {
-        return true
-    }
-    if (itemOwnerAccountIds.isEmpty()) {
-        // Missing owner metadata should not hide otherwise owned apps.
-        return true
-    }
-    return itemOwnerAccountIds.any { it in resolvedOwnerIds }
-}
-
-internal fun shouldIncludeForSharedFilter(
-    itemOwnerAccountIds: List<Int>,
-    currentUserAccountId: Int,
-    sharedFilterEnabled: Boolean,
-): Boolean {
-    if (sharedFilterEnabled) {
-        return true
-    }
-    if (currentUserAccountId == 0) {
-        return true
-    }
-    if (itemOwnerAccountIds.isEmpty()) {
-        // Unknown owner metadata: fail open to avoid collapsing the Steam tab.
-        return true
-    }
-    return itemOwnerAccountIds.contains(currentUserAccountId)
-}
-
-internal fun shouldIncludeForTypeFilter(
-    itemType: AppType,
-    allowedTypes: Set<AppType>,
-): Boolean {
-    return allowedTypes.isEmpty() || itemType in allowedTypes
-}
-
+/**
+ * ViewModel that orchestrates library UI state for Steam, custom, GOG, Epic, and Amazon entries.
+ *
+ * Responsibilities today:
+ * - Observe per-source data streams and merge into one presentation list.
+ * - Apply search, source toggles, sorting, pagination, ownership filters, and compatibility.
+ * - Bridge UI intents (tab/filter/search/auth flows) into persisted preferences and UI state.
+ *
+ * Why here: this is currently the single composition point for cross-source library behavior.
+ *
+ * Ownership: This class now carries both presentation orchestration and domain filtering.
+ * Refactor target: keep UI intent/state mutations here, but extract filtering/aggregation into
+ * a unified `BuildLibraryPresentationUseCase` with policy helpers under
+ * `app.gamegrub.domain.library`.
+ */
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
+    /**
+     * DAO exposing install metadata used to derive locally downloaded Steam app ids.
+     * Ownership: data access dependency belongs in repository/gateway boundaries.
+     * Refactor target: consume install-state flows through unified `LibraryGateway`.
+     */
+    private val appInfoDao: AppInfoDao,
+    /**
+     * DAO for Steam app metadata and depot size lookups used during sorting.
+     * Ownership: direct DAO dependency in ViewModel is convenient but leaks data concerns.
+     * Refactor target: surface size/metadata through unified `LibraryGateway` capabilities.
+     */
     private val steamAppDao: SteamAppDao,
+    /**
+     * DAO stream for GOG catalog entries.
+     * Ownership: better owned by unified library data boundaries.
+     * Refactor target: consolidate behind `LibraryGateway`.
+     */
     private val gogGameDao: GOGGameDao,
+    /**
+     * DAO stream for Epic catalog entries.
+     * Ownership: better owned by unified library data boundaries.
+     * Refactor target: consolidate behind `LibraryGateway`.
+     */
     private val epicGameDao: EpicGameDao,
+    /**
+     * DAO stream for Amazon catalog entries.
+     * Ownership: better owned by unified library data boundaries.
+     * Refactor target: consolidate behind `LibraryGateway`.
+     */
     private val amazonGameDao: AmazonGameDao,
+    /**
+     * Service that resolves compatibility status for displayed game names.
+     * Ownership: dependency is appropriate for orchestration; batching policy can be extracted.
+     * Refactor target: `FetchLibraryCompatibilityUseCase` for retry/caching policy.
+     */
     private val gameCompatibilityService: GameCompatibilityService,
+    /**
+     * Gateway used to resolve device GPU renderer string for compatibility checks.
+     * Ownership: platform/device querying should stay out of pure domain policies.
+     * Refactor target: resolve compatibility context in data/platform layer and inject result into
+     * `FetchLibraryCompatibilityUseCase`.
+     */
     private val deviceQueryGateway: DeviceQueryGateway,
+    /**
+     * Scanner that converts custom game folders into library entries.
+     * Ownership: domain scanner is appropriate; scan trigger policy can move to use case.
+     * Refactor target: `ScanCustomGamesUseCase`.
+     */
     private val customGameScanner: CustomGameScanner,
+    /**
+     * Application context used by OAuth handlers and service triggers.
+     * Ownership: VM currently invokes services directly; moving auth/sync orchestration into a
+     * coordinator would reduce context-heavy dependencies in this class.
+     */
     @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    /**
+     * Immutable snapshot of login state per platform at one point in time.
+     *
+     * Why: captures auth booleans once so list composition and badge counts use consistent values.
+     * Ownership: simple presentation helper; can stay local to this ViewModel.
+     */
     private data class PlatformAuthState(
+        /** True when Steam has an active signed-in session in app memory. */
         val steamLoggedIn: Boolean,
+
+        /** True when persisted GOG OAuth credentials are present. */
         val gogLoggedIn: Boolean,
+
+        /** True when persisted Epic OAuth credentials are present. */
         val epicLoggedIn: Boolean,
+
+        /** True when persisted Amazon OAuth credentials are present. */
         val amazonLoggedIn: Boolean,
     )
 
+    /**
+     * Backing mutable state for the library screen.
+     * Ownership: ViewModel state container, belongs here.
+     */
     private val _state = MutableStateFlow(LibraryState(isLoading = true))
+
+    /**
+     * Public immutable stream consumed by Compose UI.
+     * Ownership: ViewModel API surface, belongs here.
+     */
     val state: StateFlow<LibraryState> = _state.asStateFlow()
 
-    // Keep the library scroll state. This will last longer as the VM will stay alive.
+    /**
+     * Preserves grid scroll position across recompositions and configuration changes.
+     * Ownership: UI state persistence belongs in the ViewModel.
+     */
     var listState: LazyGridState by mutableStateOf(LazyGridState(0, 0))
 
+    /**
+     * Event handler that re-applies filters when install status changes.
+     * Ownership: event-to-state orchestration belongs here.
+     */
     private val onInstallStatusChanged: (AndroidEvent.LibraryInstallStatusChanged) -> Unit = {
         onFilterApps(paginationCurrentPage)
     }
 
+    /**
+     * Event handler that increments image refresh state and rebuilds the library list.
+     * Ownership: UI refresh orchestration belongs here.
+     */
     private val onCustomGameImagesFetched: (AndroidEvent.CustomGameImagesFetched) -> Unit = {
         // Increment refresh counter and refresh the library list to pick up newly fetched images
         _state.update { it.copy(imageRefreshCounter = it.imageRefreshCounter + 1) }
         onFilterApps(paginationCurrentPage)
     }
 
-    // How many items loaded on one page of results
+    /**
+     * Zero-based page currently requested for incremental loading.
+     * Ownership: pagination presentation state belongs here.
+     */
     @Volatile
     private var paginationCurrentPage: Int = 0
 
+    /**
+     * Zero-based last page index available for the current filter result.
+     * Ownership: pagination presentation state belongs here.
+     */
     @Volatile
     private var lastPageInCurrentFilter: Int = 0
 
-    // Complete and unfiltered app list
+    /**
+     * Latest Steam catalog snapshot from Room before UI filtering.
+     * Ownership: caching raw source lists in VM is workable but heavy.
+     * Refactor target: subscribe to unified aggregated streams exposed by `LibraryGateway`.
+     */
     private var appList: List<SteamLibraryApp> = emptyList()
+
+    /**
+     * Latest GOG catalog snapshot from Room before UI filtering.
+     * Ownership: see `appList` ownership note.
+     */
     private var gogGameList: List<GOGGame> = emptyList()
+
+    /**
+     * Latest Epic catalog snapshot from Room before UI filtering.
+     * Ownership: see `appList` ownership note.
+     */
     private var epicGameList: List<EpicGame> = emptyList()
+
+    /**
+     * Latest Amazon catalog snapshot from Room before UI filtering.
+     * Ownership: see `appList` ownership note.
+     */
     private var amazonGameList: List<AmazonGame> = emptyList()
 
-    // Track if this is the first load to apply minimum load time
+    /**
+     * Cached set of locally downloaded Steam app ids for installed filtering.
+     * Ownership: can remain here until install-state aggregation is extracted.
+     */
+    @Volatile
+    private var downloadedSteamAppIds: Set<Int> = emptySet()
+
+    /**
+     * Tracks first-load behavior for initial UX timing decisions.
+     * Ownership: presentation concern, belongs here.
+     */
     private var isFirstLoad = true
 
-    // Track debounce job for search
+    /**
+     * Active debounce job for search query updates.
+     * Ownership: view intent throttling belongs in ViewModel.
+     */
     private var searchDebounceJob: Job? = null
+
+    /**
+     * Debounce window for search updates.
+     * Ownership: UI tuning parameter, belongs here.
+     */
     private val searchDebounceMs = 500L // 500ms debounce
 
     /**
      * Cached GPU renderer used for compatibility lookups.
+     *
+     * Why: this avoids repeated gateway calls while paging/filtering repeatedly recomputes lists.
+     * Ownership: acceptable temporary cache in VM.
+     * Refactor target: move to a device-profile provider consumed by compatibility use cases.
      */
     private val gpuName: String by lazy {
         try {
@@ -182,6 +278,13 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Subscribes to Room streams and global app events, then triggers initial auth-state sync.
+     *
+     * Why: this screen is source-aggregated and must react to incremental local/remote updates.
+     * Ownership: lifecycle-bound data observation belongs in ViewModel.
+     * Refactor target: split source collectors into a repository/domain stream aggregator.
+     */
     init {
         refreshPlatformAuthState()
 
@@ -193,6 +296,16 @@ class LibraryViewModel @Inject constructor(
                 if (appList != apps) {
                     Timber.tag("LibraryViewModel").d("Collecting ${apps.size} apps")
                     appList = apps
+                    onFilterApps(paginationCurrentPage)
+                }
+            }
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            appInfoDao.observeDownloadedAppIds().collect { ids ->
+                val newSet = ids.toSet()
+                if (downloadedSteamAppIds != newSet) {
+                    downloadedSteamAppIds = newSet
                     onFilterApps(paginationCurrentPage)
                 }
             }
@@ -238,6 +351,12 @@ class LibraryViewModel @Inject constructor(
         GameGrubApp.events.on<AndroidEvent.CustomGameImagesFetched, Unit>(onCustomGameImagesFetched)
     }
 
+    /**
+     * Clears debounced work and unregisters global event listeners.
+     *
+     * Why: this ViewModel subscribes to app-wide events and must detach to prevent leaks.
+     * Ownership: lifecycle cleanup belongs here.
+     */
     override fun onCleared() {
         searchDebounceJob?.cancel()
         GameGrubApp.events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(onInstallStatusChanged)
@@ -245,10 +364,20 @@ class LibraryViewModel @Inject constructor(
         super.onCleared()
     }
 
+    /**
+     * Sets bottom-sheet visibility state for library options UI.
+     * Ownership: pure UI state mutation belongs here.
+     */
     fun onModalBottomSheet(value: Boolean) {
         _state.update { it.copy(modalBottomSheet = value) }
     }
 
+    /**
+     * Enables or disables search mode and clears query when search exits.
+     *
+     * Why: clearing query on exit restores the full catalog and avoids stale filtered state.
+     * Ownership: UI intent handling belongs here.
+     */
     fun onIsSearching(value: Boolean) {
         _state.update { it.copy(isSearching = value) }
         if (!value) {
@@ -256,6 +385,13 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Toggles visibility of a specific game source and persists that preference.
+     *
+     * Why: source visibility survives process restarts through `PrefManager`.
+     * Ownership: intent handling belongs here, but persistence details should move out.
+     * Refactor target: `UpdateLibrarySourceVisibilityUseCase` backed by `PreferencesGateway`.
+     */
     fun onSourceToggle(source: GameSource) {
         val current = _state.value
         when (source) {
@@ -292,21 +428,39 @@ class LibraryViewModel @Inject constructor(
         onFilterApps(paginationCurrentPage)
     }
 
+    /**
+     * Updates sort order preference and triggers list recomputation.
+     * Ownership: intent handling belongs here; persistence can be extracted.
+     */
     fun onSortOptionChanged(sortOption: SortOption) {
         PrefManager.librarySortOption = sortOption
         _state.update { it.copy(currentSortOption = sortOption) }
         onFilterApps()
     }
 
+    /**
+     * Updates the options panel open/closed state.
+     * Ownership: presentation state update belongs here.
+     */
     fun onOptionsPanelToggle(isOpen: Boolean) {
         _state.update { it.copy(isOptionsPanelOpen = isOpen) }
     }
 
+    /**
+     * Switches active tab and resets paging to the first page.
+     *
+     * Why: tab presets change source/install constraints so paging must restart.
+     * Ownership: tab intent handling belongs here.
+     */
     fun onTabChanged(tab: LibraryTab) {
         _state.update { it.copy(currentTab = tab) }
         onFilterApps(0) // Reset to first page and refresh
     }
 
+    /**
+     * Advances to the next tab (controller bumper action).
+     * Ownership: view interaction handling belongs here.
+     */
     fun onNextTab() {
         _state.update { currentState ->
             val nextTab = currentState.currentTab.next()
@@ -316,6 +470,10 @@ class LibraryViewModel @Inject constructor(
         onFilterApps(0)
     }
 
+    /**
+     * Moves to the previous tab (controller bumper action).
+     * Ownership: view interaction handling belongs here.
+     */
     fun onPreviousTab() {
         _state.update { currentState ->
             val previousTab = currentState.currentTab.previous()
@@ -325,6 +483,12 @@ class LibraryViewModel @Inject constructor(
         onFilterApps(0)
     }
 
+    /**
+     * Updates query text immediately and debounces expensive list recomputation.
+     *
+     * Why: immediate echo keeps typing responsive while debounce prevents filter thrash.
+     * Ownership: UI throttling policy belongs here.
+     */
     fun onSearchQuery(value: String) {
         // Update UI immediately for responsive typing
         _state.update { it.copy(searchQuery = value) }
@@ -340,6 +504,12 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Toggles an app filter flag and persists the updated filter set.
+     *
+     * Ownership: UI intent handling belongs here.
+     * Refactor target: `UpdateLibraryFilterUseCase` backed by `PreferencesGateway`.
+     */
     fun onFilterChanged(value: AppFilter) {
         _state.update { currentState ->
             val updatedFilter = EnumSet.copyOf(currentState.appInfoSortType)
@@ -358,6 +528,10 @@ class LibraryViewModel @Inject constructor(
         onFilterApps()
     }
 
+    /**
+     * Changes page index by a relative increment and clamps to valid bounds.
+     * Ownership: pagination presentation logic belongs here.
+     */
     fun onPageChange(pageIncrement: Int) {
         // Amount to change by
         var toPage = max(0, paginationCurrentPage + pageIncrement)
@@ -365,6 +539,14 @@ class LibraryViewModel @Inject constructor(
         onFilterApps(toPage)
     }
 
+    /**
+     * Performs manual refresh of remote ownership/auth-backed libraries and rebuilds UI list.
+     *
+     * Why: pull-to-refresh should force server sync, clear compatibility cache, then re-render.
+     * Ownership: orchestration belongs here, but platform sync branching is a domain concern.
+     * Refactor target: `RefreshLibraryUseCase` orchestrating `LibraryGateway` +
+     * `AuthStateGateway`.
+     */
     fun onRefresh() {
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
@@ -403,6 +585,13 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Adds a user-selected folder to manual custom-game roots if it resolves to a valid entry.
+     *
+     * Why: users can augment auto-detected custom games with explicit folders.
+     * Ownership: command handling belongs here; folder persistence belongs in a gateway.
+     * Refactor target: `RegisterCustomGameFolderUseCase`.
+     */
     fun addCustomGameFolder(path: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val normalizedPath = File(path).absolutePath
@@ -423,6 +612,13 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles GOG OAuth callback payload, updates auth state, and starts post-login sync.
+     *
+     * Ownership: currently UI-driven auth orchestration.
+     * Refactor target: unified OAuth callback coordinator/use case keyed by `GameSource`, sharing
+     * `AuthStateGateway` and refresh orchestration.
+     */
     fun onGogOAuthResult(
         resultCode: Int,
         authCode: String?,
@@ -462,6 +658,11 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles Epic OAuth callback payload, updates auth state, and starts post-login sync.
+     * Ownership: same concerns as `onGogOAuthResult`.
+     * Refactor target: unified OAuth callback coordinator/use case keyed by `GameSource`.
+     */
     fun onEpicOAuthResult(
         resultCode: Int,
         authCode: String?,
@@ -501,6 +702,11 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Handles Amazon OAuth callback payload, updates auth state, and starts post-login sync.
+     * Ownership: same concerns as other OAuth handlers.
+     * Refactor target: unified OAuth callback coordinator/use case keyed by `GameSource`.
+     */
     fun onAmazonOAuthResult(
         resultCode: Int,
         authCode: String?,
@@ -540,6 +746,12 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Refreshes login-state flags exposed to the UI.
+     *
+     * Why: source visibility and badges depend on current auth state.
+     * Ownership: state synchronization belongs here.
+     */
     fun refreshPlatformAuthState() {
         viewModelScope.launch(Dispatchers.IO) {
             val auth = snapshotPlatformAuthState()
@@ -554,6 +766,12 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Clears one-time auth message if the UI confirms handling of the current event id.
+     *
+     * Why: avoids message replay across recompositions.
+     * Ownership: one-shot UI event management belongs here.
+     */
     fun onAuthMessageShown(eventId: Long) {
         _state.update {
             if (it.authMessageEventId == eventId) {
@@ -564,6 +782,10 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Emits an auth toast/snackbar message with monotonically increasing event id.
+     * Ownership: one-shot UI event emission belongs here.
+     */
     private fun postAuthMessage(message: String) {
         _state.update {
             it.copy(
@@ -573,6 +795,12 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Reads platform auth booleans into a stable snapshot.
+     *
+     * Why: filter composition should use one coherent auth view for a single recomputation pass.
+     * Ownership: helper can stay private to ViewModel.
+     */
     private fun snapshotPlatformAuthState(): PlatformAuthState {
         return PlatformAuthState(
             steamLoggedIn = SteamService.isLoggedIn,
@@ -582,6 +810,22 @@ class LibraryViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Rebuilds the visible library by applying filters, merging sources, sorting, and pagination.
+     *
+     * What this method does:
+     * - Applies Steam owner/type/shared constraints with installed-tab bypass.
+     * - Applies search/install/compatibility filters across all platforms.
+     * - Maps raw models into `LibraryItem`, computes badge counts, and updates pagination state.
+     * - Triggers compatibility fetch for currently visible items.
+     *
+     * Why: the screen needs one deterministic pipeline from raw source lists to rendered items.
+     *
+     * Ownership: this is the largest refactor candidate in the file.
+     * Refactor target: split into a `BuildLibraryPresentationUseCase` plus dedicated policies:
+     * `SteamFilterDomain`, `LibrarySourceInclusionPolicy`, `LibraryBadgeCountDomain`,
+     * and `LibraryPaginationDomain`.
+     */
     private fun onFilterApps(paginationPage: Int = 0): Job {
         Timber.tag("LibraryViewModel").d("onFilterApps - appList.size: ${appList.size}, isFirstLoad: $isFirstLoad")
         return viewModelScope.launch(Dispatchers.IO) {
@@ -590,10 +834,22 @@ class LibraryViewModel @Inject constructor(
             val currentState = _state.value
             val currentFilter = AppFilter.getAppType(currentState.appInfoSortType)
 
-            // Fetch download directory apps once on IO thread and cache as a HashSet for O(1) lookups
-            val downloadDirectoryApps = DownloadService.getDownloadDirectoryApps()
-            val downloadDirectorySet = downloadDirectoryApps.toHashSet()
+            val downloadedSteamAppIdsSnapshot = downloadedSteamAppIds
+            val installedTabActive = currentState.currentTab.installedOnly
+            val installedFilterEnabled = currentState.appInfoSortType.contains(AppFilter.INSTALLED)
 
+            // Candidate extraction: move to Steam install-state policy when filter pipeline is split.
+            fun isSteamInstalled(item: SteamLibraryApp): Boolean {
+                return item.id in downloadedSteamAppIdsSnapshot
+            }
+
+            val installedSteamAppIds = appList
+                .asSequence()
+                .filter { item -> isSteamInstalled(item) }
+                .map { it.id }
+                .toSet()
+
+            // Candidate extraction: merge into compatibility filter policy/use case.
             fun passesCompatibleFilter(gameName: String): Boolean {
                 if (!currentState.appInfoSortType.contains(AppFilter.COMPATIBLE)) {
                     return true
@@ -612,6 +868,9 @@ class LibraryViewModel @Inject constructor(
             val steamOwnerScopedApps = appList
                 .asSequence()
                 .filter { item ->
+                    if (shouldBypassSteamFiltersForInstalledTab(item.id, installedTabActive, installedSteamAppIds)) {
+                        return@filter true
+                    }
                     shouldIncludeForOwnerScope(
                         itemOwnerAccountIds = item.ownerAccountId,
                         resolvedOwnerIds = resolvedOwnerIds,
@@ -622,6 +881,9 @@ class LibraryViewModel @Inject constructor(
             val steamTypeFilteredApps = steamOwnerScopedApps
                 .asSequence()
                 .filter { item ->
+                    if (shouldBypassSteamFiltersForInstalledTab(item.id, installedTabActive, installedSteamAppIds)) {
+                        return@filter true
+                    }
                     shouldIncludeForTypeFilter(
                         itemType = item.type,
                         allowedTypes = currentFilter,
@@ -632,6 +894,9 @@ class LibraryViewModel @Inject constructor(
             val steamSharedFilteredApps = steamTypeFilteredApps
                 .asSequence()
                 .filter { item ->
+                    if (shouldBypassSteamFiltersForInstalledTab(item.id, installedTabActive, installedSteamAppIds)) {
+                        return@filter true
+                    }
                     shouldIncludeForSharedFilter(
                         itemOwnerAccountIds = item.ownerAccountId,
                         currentUserAccountId = PrefManager.steamUserAccountId,
@@ -651,9 +916,9 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { item ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        installedFilterEnabled
                     if (installedOnly) {
-                        downloadDirectorySet.contains(item.installDir.ifBlank { item.name })
+                        isSteamInstalled(item)
                     } else {
                         true
                     }
@@ -681,12 +946,16 @@ class LibraryViewModel @Inject constructor(
                 .filter { item -> passesCompatibleFilter(item.name) }
                 .sortedWith(
                     compareByDescending<SteamLibraryApp> {
-                        downloadDirectorySet.contains(it.installDir.ifBlank { it.name })
+                        isSteamInstalled(it)
                     }.thenBy { it.name.lowercase() },
                 )
                 .toList()
 
             // Map Steam apps to UI items
+            /**
+             * Temporary pairing of rendered item and install flag until final mapping/reindex pass.
+             * Ownership: local transformation detail, belongs inside this pipeline.
+             */
             data class LibraryEntry(val item: LibraryItem, val isInstalled: Boolean)
 
             val shouldResolveSteamSize =
@@ -695,7 +964,7 @@ class LibraryViewModel @Inject constructor(
             val steamSizeCache = mutableMapOf<Int, Long>()
 
             val steamEntries: List<LibraryEntry> = filteredSteamApps.map { item ->
-                val isInstalled = downloadDirectorySet.contains(item.installDir.ifBlank { item.name })
+                val isInstalled = isSteamInstalled(item)
                 val totalSizeBytes = if (shouldResolveSteamSize) {
                     steamSizeCache.getOrPut(item.id) {
                         steamAppDao.getAppDepots(item.id)
@@ -748,7 +1017,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        installedFilterEnabled
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -788,7 +1057,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        installedFilterEnabled
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -828,7 +1097,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        currentState.appInfoSortType.contains(AppFilter.INSTALLED)
+                        installedFilterEnabled
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -856,7 +1125,49 @@ class LibraryViewModel @Inject constructor(
                     )
                 }
 
+            // Count baselines should not depend on the active tab preset.
+            val steamCountForBadges = steamSharedFilteredApps
+                .asSequence()
+                .filter { item ->
+                    if (currentState.searchQuery.isNotEmpty()) matches(item.name, currentState.searchQuery) else true
+                }
+                .filter { item ->
+                    if (installedFilterEnabled) isSteamInstalled(item) else true
+                }
+                .count { item -> passesCompatibleFilter(item.name) }
+
+            val gogCountForBadges = gogGameList
+                .asSequence()
+                .filter { game ->
+                    if (currentState.searchQuery.isNotEmpty()) matches(game.title, currentState.searchQuery) else true
+                }
+                .filter { game ->
+                    if (installedFilterEnabled) game.isInstalled else true
+                }
+                .count { game -> passesCompatibleFilter(game.title) }
+
+            val epicCountForBadges = epicGameList
+                .asSequence()
+                .filter { game ->
+                    if (currentState.searchQuery.isNotEmpty()) matches(game.title, currentState.searchQuery) else true
+                }
+                .filter { game ->
+                    if (installedFilterEnabled) game.isInstalled else true
+                }
+                .count { game -> passesCompatibleFilter(game.title) }
+
+            val amazonCountForBadges = amazonGameList
+                .asSequence()
+                .filter { game ->
+                    if (currentState.searchQuery.isNotEmpty()) matches(game.title, currentState.searchQuery) else true
+                }
+                .filter { game ->
+                    if (installedFilterEnabled) game.isInstalled else true
+                }
+                .count { game -> passesCompatibleFilter(game.title) }
+
             // Calculate installed counts
+            val steamInstalledCount = steamEntries.count { it.isInstalled }
             val gogInstalledCount = filteredGOGGames.count { it.isInstalled }
             val epicInstalledCount = filteredEpicGames.count { it.isInstalled }
             val amazonInstalledCount = filteredAmazonGames.count { it.isInstalled }
@@ -895,6 +1206,8 @@ class LibraryViewModel @Inject constructor(
 
             val authState = snapshotPlatformAuthState()
 
+            // For the INSTALLED tab, bypass auth checks: locally installed games are accessible
+            // regardless of current login state.
             val includeGOG = (
                 if (currentTab == LibraryTab.ALL) {
                     currentState.showGOGInLibrary
@@ -902,7 +1215,7 @@ class LibraryViewModel @Inject constructor(
                     currentTab.showGoG
                 }
                 ) &&
-                authState.gogLoggedIn
+                (authState.gogLoggedIn || currentTab.installedOnly)
 
             val includeEpic = (
                 if (currentTab == LibraryTab.ALL) {
@@ -911,7 +1224,7 @@ class LibraryViewModel @Inject constructor(
                     currentTab.showEpic
                 }
                 ) &&
-                authState.epicLoggedIn
+                (authState.epicLoggedIn || currentTab.installedOnly)
 
             val includeAmazon = (
                 if (currentTab == LibraryTab.ALL) {
@@ -920,7 +1233,7 @@ class LibraryViewModel @Inject constructor(
                     currentTab.showAmazon
                 }
                 ) &&
-                authState.amazonLoggedIn
+                (authState.amazonLoggedIn || currentTab.installedOnly)
 
             // Combine both lists and apply sort option
             val sortComparator: Comparator<LibraryEntry> = when (currentState.currentSortOption) {
@@ -987,26 +1300,28 @@ class LibraryViewModel @Inject constructor(
                     isAmazonLoggedIn = authState.amazonLoggedIn,
                     // Per-source counts for tab badges
                     // Use user prefs + auth state only (not current tab) so badges stay stable across tab switches
-                    allCount = (if (currentState.showSteamInLibrary) steamEntries.size else 0) +
+                    allCount = (if (currentState.showSteamInLibrary) steamCountForBadges else 0) +
                         (if (currentState.showCustomGamesInLibrary) customEntries.size else 0) +
-                        (if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogEntries.size else 0) +
-                        (if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicEntries.size else 0) +
+                        (if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogCountForBadges else 0) +
+                        (if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicCountForBadges else 0) +
                         (
                             if (currentState.showAmazonInLibrary &&
                                 authState.amazonLoggedIn
                             ) {
-                                amazonEntries.size
+                                amazonCountForBadges
                             } else {
                                 0
                             }
                             ),
-                    steamCount = if (currentState.showSteamInLibrary) steamEntries.size else 0,
-                    gogCount = if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogEntries.size else 0,
-                    epicCount = if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicEntries.size else 0,
+                    installedCount = steamInstalledCount + gogInstalledCount + epicInstalledCount +
+                        amazonInstalledCount + customEntries.size,
+                    steamCount = if (currentState.showSteamInLibrary) steamCountForBadges else 0,
+                    gogCount = if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogCountForBadges else 0,
+                    epicCount = if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicCountForBadges else 0,
                     amazonCount = if (currentState.showAmazonInLibrary &&
                         authState.amazonLoggedIn
                     ) {
-                        amazonEntries.size
+                        amazonCountForBadges
                     } else {
                         0
                     },
@@ -1019,6 +1334,10 @@ class LibraryViewModel @Inject constructor(
     /**
      * Compares the game name against the search query using an exact match
      * and then again using a normalized form with diacritics removed.
+     *
+     * Why: users expect accent-insensitive search regardless of localized title spelling.
+     * Ownership: text-matching helper is generic.
+     * Refactor target: `app.gamegrub.domain.library.search.LibraryQueryMatcher`.
      */
     private fun matches(gameName: String, searchQuery: String): Boolean {
         return gameName.contains(searchQuery, ignoreCase = true) || gameName.unaccent().contains(searchQuery, ignoreCase = true)
@@ -1027,6 +1346,10 @@ class LibraryViewModel @Inject constructor(
     /**
      * Fetches compatibility information for games in paginated batches.
      * Checks cache first, then fetches uncached games in batches of 50.
+     *
+     * Why: compatibility data is supplemental and should load asynchronously for visible items.
+     * Ownership: async orchestration is valid in VM, but batching/retry belongs in domain layer.
+     * Refactor target: `FetchLibraryCompatibilityUseCase`.
      */
     private fun fetchCompatibilityForPage(gameNames: List<String>) {
         if (gameNames.isEmpty()) {
@@ -1057,6 +1380,9 @@ class LibraryViewModel @Inject constructor(
 
     /**
      * Updates the state with compatibility results.
+     *
+     * Why: state merge avoids discarding previously fetched compatibility entries.
+     * Ownership: state mutation belongs here.
      */
     private fun updateCompatibilityState(
         results: Map<String, GameCompatibilityService.GameCompatibilityResponse>,
@@ -1074,6 +1400,11 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Converts raw API compatibility payload into UI/domain enum used by filters and badges.
+     * Ownership: mapping logic is domain-level and should be reusable.
+     * Refactor target: `CompatibilityStatusMapper` in domain/api compatibility package.
+     */
     private fun compatibilityStatusFor(
         response: GameCompatibilityService.GameCompatibilityResponse,
     ): GameCompatibilityStatus {

@@ -12,7 +12,4 @@ plugins {
     alias(libs.plugins.secrets.gradle) apply false
 }
 
-configurations.configureEach {
-    resolutionStrategy.cacheChangingModulesFor(0, TimeUnit.SECONDS)
-    resolutionStrategy.cacheDynamicVersionsFor(0, TimeUnit.SECONDS)
-}
+

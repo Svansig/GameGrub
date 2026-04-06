@@ -16,6 +16,42 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-06`
+- **Ticket**: `todo/ARCH-022a.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Domain filter policy rules were still colocated in `LibraryViewModel`, making ownership logic harder to reuse and independently test.
+- **Proposed Action**: Keep library ownership/type/install bypass rules under `app.gamegrub.domain.library.policy` and keep ViewModel focused on orchestration.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-06`
+- **Ticket**: `todo/ARCH-022.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Large refactors in one ticket create review and rollback risk when behavior and boundary changes land together.
+- **Proposed Action**: Continue enforcing child-ticket slicing (`ARCH-022a`..`ARCH-022e`) with per-slice validation evidence before starting the next slice.
+- **Owner**: `Copilot`
+- **Status**: `In Progress`
+
+- **Date**: `2026-04-06`
+- **Ticket**: `N/A (store behavior alignment)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: A Steam-only startup cache introduced store-specific behavior drift versus other storefront paths.
+- **Proposed Action**: Use shared marker-based install detection helpers for Steam in the library filter path and keep startup reconciliation focused on persisted-store flags.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-06`
+- **Ticket**: `N/A (startup install-status reconciliation)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Non-Steam library rows preserved stale `is_installed` flags across restarts when no fresh store sync occurred, causing the Installed tab to miss real installs or show removed installs.
+- **Proposed Action**: Run a one-shot startup reconciliation pass that checks marker files for GOG/Epic/Amazon and updates Room install flags before normal library rendering.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-06`
 - **Ticket**: `todo/SRV-007.md`, `todo/SRV-024.md`
 - **PR/Commit**: `8ecf7744`
 - **Type**: `Code Quality`

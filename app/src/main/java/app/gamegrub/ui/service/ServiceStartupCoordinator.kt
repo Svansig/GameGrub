@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.navigation.NavHostController
 import app.gamegrub.gateway.AuthStateGateway
+import app.gamegrub.service.InstalledGamesStartupValidator
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
@@ -18,13 +19,22 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @Singleton
 class ServiceStartupCoordinator @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val authStateGateway: AuthStateGateway,
+    private val installedGamesStartupValidator: InstalledGamesStartupValidator,
 ) {
+    private val startupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    @Volatile
+    private var startupInstallValidationStarted: Boolean = false
+
     fun evaluateAndStartServices(
         viewModel: MainViewModel,
         navController: NavHostController,
@@ -33,6 +43,17 @@ class ServiceStartupCoordinator @Inject constructor(
         onConnectingChanged: (Boolean) -> Unit,
         onNavigation: (() -> Unit)? = null,
     ) {
+        if (!startupInstallValidationStarted) {
+            synchronized(this) {
+                if (!startupInstallValidationStarted) {
+                    startupInstallValidationStarted = true
+                    startupScope.launch {
+                        installedGamesStartupValidator.reconcileInstalledFlagsSafely()
+                    }
+                }
+            }
+        }
+
         // Only attempt reconnection if not already connected/connecting and not in offline mode
         val shouldAttemptReconnect = !state.isSteamConnected &&
             !isConnecting &&

@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import app.gamegrub.data.AppInfo
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppInfoDao {
@@ -24,6 +25,9 @@ interface AppInfoDao {
 
     @Query("SELECT * FROM app_info WHERE id = :appId")
     suspend fun get(appId: Int): AppInfo?
+
+    @Query("SELECT id FROM app_info WHERE is_downloaded = 1")
+    fun observeDownloadedAppIds(): Flow<List<Int>>
 
     @Query("DELETE from app_info WHERE id = :appId")
     suspend fun deleteApp(appId: Int)

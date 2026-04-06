@@ -140,9 +140,9 @@ class SteamInstallDomain @Inject constructor(
     fun getDownloadableDepots(appId: Int, preferredLanguage: String): Map<Int, DepotInfo> {
         val appInfo = runBlocking { libraryDomain.getAppInfoOf(appId) } ?: return emptyMap()
         val ownedDlc = runBlocking { getOwnedAppDlc(appId) }
-        val indirectDlcApps = runBlocking { libraryDomain.getDownloadableDlcAppsOf(appId) }.orEmpty()
+        val indirectDlcApps = runBlocking { libraryDomain.getDownloadableDlcAppsOf(appId) }
 
-        return SteamCatalogManager.getDownloadableDepots(
+        return libraryDomain.getDownloadableDepots(
             appInfo = appInfo,
             preferredLanguage = preferredLanguage,
             ownedDlc = ownedDlc,
@@ -167,7 +167,8 @@ class SteamInstallDomain @Inject constructor(
             libraryDomain.checkDlcOwnership(dlcAppIds)
         }
 
-        return SteamCatalogManager.filterOwnedAppDlc(
+
+        return libraryDomain.filterOwnedAppDlc(
             appDlcDepots = appDlc,
             invalidAppId = SteamService.INVALID_APP_ID,
             ownedGameIds = ownedGameIds,
@@ -199,7 +200,7 @@ class SteamInstallDomain @Inject constructor(
             downloadableDepots = downloadableDepots,
             userSelectedDlcAppIds = userSelectedDlcAppIds,
             mainDepots = getMainAppDepots(appId, containerLanguage),
-            downloadableDlcApps = runBlocking { libraryDomain.getDownloadableDlcAppsOf(appId) }.orEmpty(),
+            downloadableDlcApps = runBlocking { libraryDomain.getDownloadableDlcAppsOf(appId) },
             installedDownloadedDepots = runBlocking { libraryDomain.getInstalledApp(appId) }?.downloadedDepots,
             isUpdateOrVerify = isUpdateOrVerify,
             invalidAppId = Int.MAX_VALUE,
@@ -426,7 +427,7 @@ class SteamInstallDomain @Inject constructor(
 
     fun getMainAppDlcIdsWithoutProperDepotDlcIds(appId: Int): MutableList<Int> {
         val hiddenDlcAppIds = runBlocking {
-            libraryDomain.getHiddenDlcAppsOf(appId).orEmpty().map { it.id }
+            libraryDomain.getHiddenDlcAppsOf(appId).map { it.id }
         }
         val appInfo = runBlocking { libraryDomain.getAppInfoOf(appId) }
 

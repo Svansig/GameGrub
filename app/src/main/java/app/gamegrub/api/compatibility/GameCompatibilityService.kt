@@ -2,6 +2,7 @@ package app.gamegrub.api.compatibility
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import app.gamegrub.Constants
 import app.gamegrub.R
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.auth.KeyAttestationHelper
@@ -126,7 +127,7 @@ class GameCompatibilityService @Inject constructor(
                 requestBody.put("attestationChain", JSONArray(attestation.second))
             }
 
-            val mediaType = "application/json".toMediaType()
+            val mediaType = Constants.Protocol.MIME_APPLICATION_JSON.toMediaType()
             val bodyString = requestBody.toString()
             val body = bodyString.toRequestBody(mediaType)
 
@@ -135,7 +136,7 @@ class GameCompatibilityService @Inject constructor(
             val requestBuilder = Request.Builder()
                 .url(API_BASE_URL)
                 .post(body)
-                .header("Content-Type", "application/json")
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
             if (integrityToken != null) {
                 requestBuilder.header("X-Integrity-Token", integrityToken)
             }

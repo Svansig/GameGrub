@@ -2,6 +2,7 @@ package app.gamegrub.api.config
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import app.gamegrub.Constants
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.content.manifest.ManifestComponentHelper
@@ -105,7 +106,7 @@ class BestConfigService @Inject constructor(
                 requestBody.put("attestationChain", JSONArray(attestation.second))
             }
 
-            val mediaType = "application/json".toMediaType()
+            val mediaType = Constants.Protocol.MIME_APPLICATION_JSON.toMediaType()
             val bodyString = requestBody.toString()
             val body = bodyString.toRequestBody(mediaType)
 
@@ -114,7 +115,7 @@ class BestConfigService @Inject constructor(
             val requestBuilder = Request.Builder()
                 .url(API_BASE_URL)
                 .post(body)
-                .header("Content-Type", "application/json")
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
             if (integrityToken != null) {
                 requestBuilder.header("X-Integrity-Token", integrityToken)
             }

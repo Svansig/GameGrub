@@ -659,7 +659,7 @@ abstract class BaseAppScreen {
 
         val exportConfigLauncher =
             rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.CreateDocument("application/json"),
+                contract = ActivityResultContracts.CreateDocument(Constants.Protocol.MIME_APPLICATION_JSON),
             ) { uri ->
                 if (uri == null) {
                     clearExportConfigRequest(appId)
@@ -731,7 +731,11 @@ abstract class BaseAppScreen {
         LaunchedEffect(importConfigRequested) {
             if (importConfigRequested) {
                 importConfigLauncher.launch(
-                    arrayOf("application/json", "text/json", "text/plain"),
+                    arrayOf(
+                        Constants.Protocol.MIME_APPLICATION_JSON,
+                        "text/json",
+                        Constants.Protocol.MIME_TEXT_PLAIN,
+                    ),
                 )
             }
         }

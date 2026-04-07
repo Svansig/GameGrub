@@ -1,6 +1,7 @@
 package app.gamegrub.service.gog
 
 import android.content.Context
+import app.gamegrub.Constants
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -372,7 +373,7 @@ class GOGCloudSavesManager(
                 .url(url)
                 .header("Authorization", "Bearer $authToken")
                 .header("User-Agent", USER_AGENT)
-                .header("Accept", "application/json")
+                .header("Accept", Constants.Protocol.MIME_APPLICATION_JSON)
                 .header("X-Object-Meta-User-Agent", USER_AGENT)
                 .build()
 

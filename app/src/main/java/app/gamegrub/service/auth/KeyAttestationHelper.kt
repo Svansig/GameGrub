@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import app.gamegrub.Constants
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.ProviderException
@@ -140,7 +141,7 @@ object KeyAttestationHelper {
 
         val request = Request.Builder()
             .url("$baseUrl/api/attestation/verify")
-            .post(requestBody.toRequestBody("application/json".toMediaType()))
+            .post(requestBody.toRequestBody(Constants.Protocol.MIME_APPLICATION_JSON.toMediaType()))
             .build()
 
         val response = httpClient.newCall(request).execute()

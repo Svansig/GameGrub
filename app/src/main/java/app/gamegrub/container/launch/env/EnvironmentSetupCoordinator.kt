@@ -16,7 +16,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.ui.data.XServerState
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.container.PreInstallSteps
+import app.gamegrub.container.launch.preinstall.PreInstallSteps
 import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.alsaserver.ALSAClient
 import com.winlator.container.Container

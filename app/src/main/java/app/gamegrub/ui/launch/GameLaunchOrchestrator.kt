@@ -22,7 +22,7 @@ import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.utils.container.LaunchDependencies
+import app.gamegrub.container.launch.dependency.LaunchDependencies
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager

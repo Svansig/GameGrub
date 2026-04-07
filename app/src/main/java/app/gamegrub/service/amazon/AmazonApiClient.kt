@@ -1,5 +1,6 @@
 package app.gamegrub.service.amazon
 
+import app.gamegrub.Constants
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.network.NetworkManager
 import java.security.MessageDigest
@@ -95,7 +96,7 @@ object AmazonApiClient {
             put("hardwareHash", hardwareHash)
         }
 
-    private val JSON_MEDIA_TYPE = "application/json".toMediaType()
+    private val JSON_MEDIA_TYPE = Constants.Protocol.MIME_APPLICATION_JSON.toMediaType()
 
     private fun postJson(
         url: String,
@@ -112,7 +113,7 @@ object AmazonApiClient {
                 .header("X-Amz-Target", target)
                 .header("x-amzn-token", bearerToken)
                 .header("User-Agent", AmazonConstants.GAMING_USER_AGENT)
-                .header("Content-Type", "application/json")
+                .header("Content-Type", Constants.Protocol.MIME_APPLICATION_JSON)
                 .header("Content-Encoding", "amz-1.0")
                 .build()
 

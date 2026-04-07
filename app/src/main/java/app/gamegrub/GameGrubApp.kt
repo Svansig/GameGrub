@@ -15,6 +15,8 @@ import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.DownloadService
 import app.gamegrub.service.auth.PlayIntegrity
 import app.gamegrub.service.steam.AchievementWatcher
+import app.gamegrub.startup.StartupCoordinator
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerMigrator
 import com.google.android.play.core.splitcompat.SplitCompatApplication
 import com.posthog.PersonProfiles
@@ -64,34 +66,8 @@ class GameGrubApp : SplitCompatApplication() {
             Timber.plant(ReleaseTree())
         }
 
-        NetworkManager.init(this)
-
-        // Init our custom crash handler.
-        CrashHandler.initialize(this)
-
-        // Init our datastore preferences.
-        PrefManager.init(this)
-
-        // Initialize GOGConstants
-        app.gamegrub.service.gog.GOGConstants.init(this)
-
-        DownloadService.populateDownloadService(this)
-
-        appScope.launch {
-            ContainerMigrator.migrateLegacyContainersIfNeeded(
-                context = applicationContext,
-                onProgressUpdate = null,
-                onComplete = null,
-            )
-        }
-
-        // Clear any stale temporary config overrides from previous app sessions
-        try {
-            IntentLaunchManager.clearAllTemporaryOverrides()
-            Timber.d("[GameGrubApp]: Cleared temporary config overrides from previous session")
-        } catch (e: Exception) {
-            Timber.e(e, "[GameGrubApp]: Failed to clear temporary config overrides")
-        }
+        // Delegate startup initialization to coordinator for testability
+        StartupCoordinator().initialize(this)
 
         // Initialize PostHog Analytics
         val postHogConfig = PostHogAndroidConfig(
@@ -108,42 +84,64 @@ class GameGrubApp : SplitCompatApplication() {
 
     companion object {
         @JvmField
+        @Deprecated("Use XServerRuntime.get().events instead", ReplaceWith("XServerRuntime.get().events"))
         val events: EventDispatcher = EventDispatcher()
+
+        @Deprecated("Use XServerRuntime.get() instead")
         internal var onDestinationChangedListener: NavChangedListener? = null
 
         // TODO: find a way to make this saveable, this is terrible (leak that memory baby)
+        @Deprecated("Use XServerRuntime.get().xEnvironment instead")
         internal var xEnvironment: XEnvironment? = null
+
+        @Deprecated("Use XServerRuntime.get().xServerView instead")
         internal var xServerView: XServerView? = null
+
+        @Deprecated("Use XServerRuntime.get().inputControlsView instead")
         var inputControlsView: InputControlsView? = null
+
+        @Deprecated("Use XServerRuntime.get().inputControlsManager instead")
         var inputControlsManager: InputControlsManager? = null
+
+        @Deprecated("Use XServerRuntime.get().touchpadView instead")
         var touchpadView: TouchpadView? = null
+
+        @Deprecated("Use XServerRuntime.get().achievementWatcher instead")
         var achievementWatcher: AchievementWatcher? = null
 
+        @Deprecated("Use XServerRuntime.get().isOverlayPaused instead")
         var isOverlayPaused by mutableStateOf(false)
 
         @Volatile
+        @Deprecated("Use XServerRuntime.get().isActivityInForeground instead")
         var isActivityInForeground: Boolean = true
 
         // Active runtime suspend policy for the current in-game session.
+        @Deprecated("Use XServerRuntime.get().activeSuspendPolicy instead")
         var activeSuspendPolicy: String = Container.SUSPEND_POLICY_MANUAL
             private set
         private var hasInitializedSuspendPolicyState: Boolean = false
 
+        @Deprecated("Use XServerRuntime.get().setActiveSuspendPolicy instead")
         fun setActiveSuspendPolicy(policy: String) {
             activeSuspendPolicy = Container.normalizeSuspendPolicy(policy)
             hasInitializedSuspendPolicyState = true
         }
 
+        @Deprecated("Use XServerRuntime.get().clearActiveSuspendState instead")
         fun clearActiveSuspendState() {
             activeSuspendPolicy = Container.SUSPEND_POLICY_MANUAL
             isOverlayPaused = false
             hasInitializedSuspendPolicyState = false
         }
 
+        @Deprecated("Use XServerRuntime.get().hasValidSuspendPolicyState instead")
         fun hasValidSuspendPolicyState(): Boolean = hasInitializedSuspendPolicyState
 
+        @Deprecated("Use XServerRuntime.get().isNeverSuspendMode instead")
         fun isNeverSuspendMode(): Boolean = activeSuspendPolicy.equals(Container.SUSPEND_POLICY_NEVER, ignoreCase = true)
 
+        @Deprecated("Use XServerRuntime.get().isManualSuspendMode instead")
         fun isManualSuspendMode(): Boolean = activeSuspendPolicy.equals(Container.SUSPEND_POLICY_MANUAL, ignoreCase = true)
     }
 }

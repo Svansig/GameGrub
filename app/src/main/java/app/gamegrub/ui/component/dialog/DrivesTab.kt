@@ -154,7 +154,7 @@ fun DrivesTabContent(state: ContainerConfigState) {
             confirmButton = {
                 TextButton(
                     enabled = state.selectedDriveLetter.value.isNotBlank() &&
-                        state.availableDriveLetters.contains(state.selectedDriveLetter.value),
+                            state.availableDriveLetters.contains(state.selectedDriveLetter.value),
                     onClick = { state.launchFolderPicker() },
                     content = { Text(text = stringResource(R.string.ok)) },
                 )

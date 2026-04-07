@@ -6,13 +6,13 @@ import app.gamegrub.service.steam.SteamService.Companion.getAppDirName
 import app.gamegrub.service.steam.SteamService.Companion.getAppInfoOf
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.name
-import timber.log.Timber
 
 object SteamClientFilesManager {
 
@@ -116,10 +116,10 @@ object SteamClientFilesManager {
 
         val steamApi = files.firstOrNull {
             it.toPath().name.startsWith("steam_api", true) &&
-                (
-                    it.toPath().name.endsWith(".dll", true) ||
-                        it.toPath().name.endsWith(".dll.orig", true)
-                    )
+                    (
+                            it.toPath().name.endsWith(".dll", true) ||
+                                    it.toPath().name.endsWith(".dll.orig", true)
+                            )
         }
 
         if (steamApi != null) {

@@ -28,9 +28,6 @@ import com.materialkolor.PaletteStyle
 import com.winlator.xserver.Window
 import dagger.hilt.android.lifecycle.HiltViewModel
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.AppProcessInfo
-import java.nio.file.Paths
-import javax.inject.Inject
-import kotlin.io.path.name
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -44,13 +41,16 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.nio.file.Paths
+import javax.inject.Inject
+import kotlin.io.path.name
 
 internal fun shouldContinueConnecting(
     elapsedSeconds: Int,
     connectionState: ConnectionState,
 ): Boolean {
     return elapsedSeconds < MainViewModel.CONNECTION_TIMEOUT_SECONDS &&
-        connectionState == ConnectionState.CONNECTING
+            connectionState == ConnectionState.CONNECTING
 }
 
 @HiltViewModel
@@ -518,6 +518,7 @@ class MainViewModel @Inject constructor(
                             Timber.tag("GOG").e(t, "[Cloud Saves] Exception during upload sync for $appId")
                         }
                     }
+
                     GameSource.EPIC -> {
                         Timber.tag("Epic")
                             .i("[Cloud Saves] Epic Game detected for $appId — syncing cloud saves after close")
@@ -539,6 +540,7 @@ class MainViewModel @Inject constructor(
                             Timber.tag("Epic").e(t, "[Cloud Saves] Exception during upload sync for $gameId")
                         }
                     }
+
                     else -> {
                         // For Steam games, sync cloud saves
                         try {

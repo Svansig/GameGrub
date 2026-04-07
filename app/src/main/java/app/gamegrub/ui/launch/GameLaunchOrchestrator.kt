@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.R
 import app.gamegrub.api.config.BestConfigService
+import app.gamegrub.container.launch.dependency.LaunchDependencies
 import app.gamegrub.content.manifest.ManifestInstaller
 import app.gamegrub.data.GameSource
 import app.gamegrub.domain.customgame.CustomGameScanner
@@ -22,7 +23,6 @@ import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.utils.container.ContainerUtils
-import app.gamegrub.container.launch.dependency.LaunchDependencies
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
@@ -34,9 +34,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
-import java.io.File
-import java.util.Date
-import kotlin.reflect.KFunction2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -44,6 +41,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
+import java.io.File
+import java.util.Date
+import kotlin.reflect.KFunction2
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -535,7 +535,7 @@ fun preLaunchApp(
             SyncResult.UnknownFail,
             SyncResult.DownloadFail,
             SyncResult.UpdateFail,
-            -> {
+                -> {
                 setMessageDialogState(
                     MessageDialogState(
                         visible = true,
@@ -552,8 +552,8 @@ fun preLaunchApp(
                     "Pending remote operations:${
                         postSyncInfo.pendingRemoteOperations.joinToString("\n") { pro ->
                             "\n\tmachineName: ${pro.machineName}" +
-                                "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
-                                "\n\toperation: ${pro.operation}"
+                                    "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
+                                    "\n\toperation: ${pro.operation}"
                         }
                     }",
                 )
@@ -654,7 +654,7 @@ fun preLaunchApp(
 
             SyncResult.UpToDate,
             SyncResult.Success,
-            -> onSuccess(context, appId)
+                -> onSuccess(context, appId)
         }
     }
 }

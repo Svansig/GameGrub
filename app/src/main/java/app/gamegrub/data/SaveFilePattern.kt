@@ -2,8 +2,8 @@ package app.gamegrub.data
 
 import app.gamegrub.enums.PathType
 import app.gamegrub.service.steam.SteamService
-import java.io.File
 import kotlinx.serialization.Serializable
+import java.io.File
 
 @Serializable
 data class SaveFilePattern(

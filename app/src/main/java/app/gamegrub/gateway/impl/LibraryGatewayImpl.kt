@@ -5,8 +5,8 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.data.extension.toLibraryItem
 import app.gamegrub.data.repository.GameRepository
-import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.AmazonGameDao
+import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
@@ -17,11 +17,11 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class LibraryGatewayImpl @Inject constructor(

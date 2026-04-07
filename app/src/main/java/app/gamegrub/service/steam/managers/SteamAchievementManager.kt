@@ -11,9 +11,6 @@ import app.gamegrub.statsgen.Achievement
 import app.gamegrub.statsgen.StatsAchievementsGenerator
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.xenvironment.ImageFs
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +19,9 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class SteamAchievementManager @Inject constructor(

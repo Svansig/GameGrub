@@ -12,6 +12,14 @@ import app.gamegrub.service.gog.api.GOGManifestParser
 import app.gamegrub.service.gog.api.V1DepotFile
 import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withContext
+import okhttp3.Request
+import org.json.JSONArray
+import org.json.JSONObject
+import timber.log.Timber
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -22,14 +30,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.Inflater
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.withContext
-import okhttp3.Request
-import org.json.JSONArray
-import org.json.JSONObject
-import timber.log.Timber
 
 /**
  * Custom exception for HTTP status errors with typed status code
@@ -318,10 +318,12 @@ class GOGDownloadManager @Inject constructor(
                         Timber.tag("GOG").d("File ${file.path} has null productId, using depotProductId: $depotProductId")
                         depotProductId
                     }
+
                     "2147483047" -> {
                         Timber.tag("GOG").d("File ${file.path} has placeholder productId, using depotProductId: $depotProductId")
                         depotProductId
                     }
+
                     else -> {
                         Timber.tag("GOG").d("File ${file.path} has productId: ${file.productId}")
                         file.productId
@@ -601,7 +603,7 @@ class GOGDownloadManager @Inject constructor(
                 }
             }
             val totalSize = gameFiles.sumOf { it.file.size } +
-                if (supportDir != null) supportFiles.sumOf { it.file.size } else 0L
+                    if (supportDir != null) supportFiles.sumOf { it.file.size } else 0L
             downloadInfo.setTotalExpectedBytes(totalSize)
             downloadInfo.updateStatusMessage("Downloading files...")
             downloadInfo.setProgress(0f)

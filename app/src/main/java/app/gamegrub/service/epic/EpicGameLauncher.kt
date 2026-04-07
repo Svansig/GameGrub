@@ -3,9 +3,9 @@ package app.gamegrub.service.epic
 import android.content.Context
 import app.gamegrub.data.EpicGame
 import app.gamegrub.data.EpicGameToken
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
-import timber.log.Timber
 
 /**
  * Helper functionality for launching Epic Games with correct execution params for online verification

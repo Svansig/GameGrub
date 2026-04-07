@@ -65,7 +65,7 @@ object Crypto {
 
         require(bytes.size > cipher.blockSize) {
             "Input bytes too short to contain IV and data. " +
-                "Minimum length is ${cipher.blockSize + 1}"
+                    "Minimum length is ${cipher.blockSize + 1}"
         }
 
         val iv = bytes.copyOfRange(0, cipher.blockSize)

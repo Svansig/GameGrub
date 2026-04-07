@@ -1,8 +1,8 @@
 package app.gamegrub.service.gog
 
-import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
 
 object GOGManifestUtils {
     const val MANIFEST_FILE_NAME = "_gog_manifest.json"

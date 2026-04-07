@@ -1,9 +1,9 @@
 package app.gamegrub.service.epic.manifest
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import org.json.JSONArray
 import org.json.JSONObject
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Parser for JSON format Epic Games manifests (older format)

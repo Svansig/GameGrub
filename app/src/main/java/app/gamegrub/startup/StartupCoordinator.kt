@@ -3,7 +3,6 @@ package app.gamegrub.startup
 import android.content.Context
 import app.gamegrub.CrashHandler
 import app.gamegrub.PrefManager
-import app.gamegrub.launch.IntentLaunchManager
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.utils.container.ContainerMigrator
 import timber.log.Timber
@@ -24,7 +23,7 @@ class StartupCoordinator {
 
     fun initialize(context: Context) {
         Timber.d("[StartupCoordinator] Starting app initialization...")
-        
+
         for (initializer in initializers) {
             try {
                 Timber.d("[StartupCoordinator] Running: ${initializer::class.java.simpleName}")
@@ -34,7 +33,7 @@ class StartupCoordinator {
                 initializer.onFailure(context, e)
             }
         }
-        
+
         Timber.d("[StartupCoordinator] App initialization complete")
     }
 }

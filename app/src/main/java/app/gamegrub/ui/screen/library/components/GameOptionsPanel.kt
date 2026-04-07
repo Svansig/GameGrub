@@ -246,8 +246,8 @@ private fun OptionItem(
 
     val icon = getIconForOption(option.optionType)
     val isDestructive = option.optionType == AppOptionMenuType.Uninstall ||
-        option.optionType == AppOptionMenuType.ResetToDefaults ||
-        option.optionType == AppOptionMenuType.ResetDrm
+            option.optionType == AppOptionMenuType.ResetToDefaults ||
+            option.optionType == AppOptionMenuType.ResetDrm
 
     Row(
         modifier = Modifier
@@ -357,7 +357,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.RunContainer,
             AppOptionMenuType.CreateShortcut,
             AppOptionMenuType.ExportFrontend,
-            -> quickActions.add(option)
+                -> quickActions.add(option)
 
             // Game Management
             AppOptionMenuType.Uninstall,
@@ -365,7 +365,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.Update,
             AppOptionMenuType.MoveToExternalStorage,
             AppOptionMenuType.MoveToInternalStorage,
-            -> gameManagement.add(option)
+                -> gameManagement.add(option)
 
             // Container Settings
             AppOptionMenuType.ResetToDefaults,
@@ -373,14 +373,14 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.UseKnownConfig,
             AppOptionMenuType.ImportConfig,
             AppOptionMenuType.ExportConfig,
-            -> containerSettings.add(option)
+                -> containerSettings.add(option)
 
             // Cloud Saves
             AppOptionMenuType.ForceCloudSync,
             AppOptionMenuType.BrowseOnlineSaves,
             AppOptionMenuType.ForceDownloadRemote,
             AppOptionMenuType.ForceUploadLocal,
-            -> cloudSaves.add(option)
+                -> cloudSaves.add(option)
 
             // Help & Info
             AppOptionMenuType.StorePage,
@@ -389,7 +389,7 @@ private fun groupOptions(options: List<AppMenuOption>): Map<OptionCategory, List
             AppOptionMenuType.FetchSteamGridDBImages,
             AppOptionMenuType.TestGraphics,
             AppOptionMenuType.ManageGameContent,
-            -> helpInfo.add(option)
+                -> helpInfo.add(option)
         }
     }
 

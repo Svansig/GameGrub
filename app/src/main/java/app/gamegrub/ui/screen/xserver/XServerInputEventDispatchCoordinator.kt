@@ -29,15 +29,15 @@ internal object XServerInputEventDispatchCoordinator {
     ): Boolean {
         val waitingForManualResume =
             manualResumeState.manualResumeMode &&
-                manualResumeState.isOverlayPaused &&
-                !manualResumeState.showQuickMenu &&
-                !manualResumeState.keepPausedForEditor
+                    manualResumeState.isOverlayPaused &&
+                    !manualResumeState.showQuickMenu &&
+                    !manualResumeState.keepPausedForEditor
 
         if (waitingForManualResume && isGamepad) {
             return when (event.keyCode) {
                 KeyEvent.KEYCODE_BUTTON_A,
                 KeyEvent.KEYCODE_BUTTON_START,
-                -> {
+                    -> {
                     if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
                         onResumeFromManualButton()
                     }
@@ -49,11 +49,11 @@ internal object XServerInputEventDispatchCoordinator {
         }
 
         if ((
-                uiGuardState.showElementEditor ||
-                    uiGuardState.keepPausedForEditor ||
-                    uiGuardState.showQuickMenu ||
-                    uiGuardState.isEditMode
-                ) && (isGamepad || isKeyboard)
+                    uiGuardState.showElementEditor ||
+                            uiGuardState.keepPausedForEditor ||
+                            uiGuardState.showQuickMenu ||
+                            uiGuardState.isEditMode
+                    ) && (isGamepad || isKeyboard)
         ) {
             return false
         }
@@ -96,11 +96,11 @@ internal object XServerInputEventDispatchCoordinator {
         onTryCapturePointer: () -> Unit,
     ): Boolean {
         if ((
-                uiGuardState.showElementEditor ||
-                    uiGuardState.keepPausedForEditor ||
-                    uiGuardState.showQuickMenu ||
-                    uiGuardState.isEditMode
-                ) && isGamepad
+                    uiGuardState.showElementEditor ||
+                            uiGuardState.keepPausedForEditor ||
+                            uiGuardState.showQuickMenu ||
+                            uiGuardState.isEditMode
+                    ) && isGamepad
         ) {
             return false
         }
@@ -147,7 +147,7 @@ internal object XServerInputEventDispatchCoordinator {
             KeyEvent.KEYCODE_BUTTON_R2,
             KeyEvent.KEYCODE_BUTTON_SELECT,
             KeyEvent.KEYCODE_BUTTON_START,
-            -> true
+                -> true
 
             else -> false
         }

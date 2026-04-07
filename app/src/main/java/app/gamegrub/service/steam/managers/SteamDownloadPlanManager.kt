@@ -35,9 +35,9 @@ object SteamDownloadPlanManager {
 
         val dlcAppDepots = downloadableDepots.filter { (_, depot) ->
             !mainAppDepots.keys.contains(depot.depotId) &&
-                userSelectedDlcAppIds.contains(depot.dlcAppId) &&
-                downloadableDlcApps.any { it.id == depot.dlcAppId } &&
-                depot.manifests.isNotEmpty()
+                    userSelectedDlcAppIds.contains(depot.dlcAppId) &&
+                    downloadableDlcApps.any { it.id == depot.dlcAppId } &&
+                    depot.manifests.isNotEmpty()
         }
 
         if (installedDownloadedDepots != null && !isUpdateOrVerify) {

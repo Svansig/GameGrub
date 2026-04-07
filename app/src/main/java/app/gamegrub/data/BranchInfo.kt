@@ -1,9 +1,9 @@
 package app.gamegrub.data
 
 import app.gamegrub.db.serializers.DateSerializer
-import java.util.Date
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
+import java.util.Date
 
 @Serializable
 data class BranchInfo(

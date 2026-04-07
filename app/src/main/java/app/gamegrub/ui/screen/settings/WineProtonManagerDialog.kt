@@ -55,11 +55,6 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.utils.SnackbarManager
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
-import java.io.File
-import java.io.IOException
-import java.net.SocketTimeoutException
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -67,6 +62,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import okhttp3.Request
 import timber.log.Timber
+import java.io.File
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1100,7 +1100,7 @@ private suspend fun loadWineProtonManifest(
             val manifest = jsonObject.entries
                 .filter {
                     it.key.startsWith("wine", ignoreCase = true) ||
-                        it.key.startsWith("proton", ignoreCase = true)
+                            it.key.startsWith("proton", ignoreCase = true)
                 }
                 .associate { it.key to it.value.toString().removeSurrounding("\"") }
 

@@ -47,9 +47,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.gamegrub.ui.theme.GameGrubTheme
+import kotlinx.coroutines.delay
 import kotlin.math.sin
 import kotlin.random.Random
-import kotlinx.coroutines.delay
 
 @Composable
 fun BootingSplash(

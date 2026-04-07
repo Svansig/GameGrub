@@ -58,9 +58,6 @@ import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SnackbarManager
 import com.winlator.contents.AdrenotoolsManager
-import java.io.File
-import java.io.IOException
-import java.net.SocketTimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,6 +65,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import okhttp3.Request
 import timber.log.Timber
+import java.io.File
+import java.io.IOException
+import java.net.SocketTimeoutException
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("LocalContextResourcesRead")

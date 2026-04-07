@@ -1,13 +1,13 @@
 package app.gamegrub.data
 
-import java.io.File
-import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.CopyOnWriteArrayList
 
 data class DownloadInfo(
     val jobCount: Int = 1,

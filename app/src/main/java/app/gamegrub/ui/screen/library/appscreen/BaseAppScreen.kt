@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import app.gamegrub.Constants
 import app.gamegrub.GameGrubApp
@@ -45,7 +46,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.ui.res.stringResource
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -475,7 +475,7 @@ abstract class BaseAppScreen {
      */
     @Composable
     protected fun ResetConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-        val context = LocalContext.current
+        LocalContext.current
         AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text(stringResource(R.string.base_app_reset_container_title)) },

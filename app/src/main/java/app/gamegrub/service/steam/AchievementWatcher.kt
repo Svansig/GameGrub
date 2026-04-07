@@ -2,9 +2,9 @@ package app.gamegrub.service.steam
 
 import android.os.FileObserver
 import app.gamegrub.ui.utils.AchievementNotificationManager
-import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
 
 class AchievementWatcher(
     private val watchDirs: List<File>,

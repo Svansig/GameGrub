@@ -3,9 +3,9 @@ package app.gamegrub.service.amazon
 import android.content.Context
 import android.net.Uri
 import app.gamegrub.PrefManager
+import timber.log.Timber
 import java.io.File
 import java.nio.file.Paths
-import timber.log.Timber
 
 /** Constants for Amazon Games integration. */
 object AmazonConstants {

@@ -59,7 +59,7 @@ fun ConnectionStatusBanner(
     modifier: Modifier = Modifier,
 ) {
     val isVisible = connectionState == ConnectionState.CONNECTING ||
-        connectionState == ConnectionState.DISCONNECTED
+            connectionState == ConnectionState.DISCONNECTED
 
     AnimatedVisibility(
         visible = isVisible,

@@ -2,12 +2,12 @@ package app.gamegrub.service
 
 import android.content.Context
 import app.gamegrub.data.AppInfo
+import app.gamegrub.data.SteamLibraryApp
 import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.AppInfoDao
 import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
-import app.gamegrub.data.SteamLibraryApp
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.amazon.AmazonConstants
 import app.gamegrub.service.epic.EpicConstants
@@ -15,11 +15,11 @@ import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 internal data class StartupInstallValidationSummary(
     val steamUpdated: Int,
@@ -40,7 +40,7 @@ internal fun resolveInstalledPathFromMarkers(candidatePaths: List<String>): Stri
 
     val markerResolvedPath = normalizedPaths.firstOrNull { path ->
         StorageManager.hasMarker(path, Marker.DOWNLOAD_COMPLETE_MARKER) &&
-            !StorageManager.hasMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                !StorageManager.hasMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
     }
     if (markerResolvedPath != null) {
         return markerResolvedPath
@@ -49,7 +49,7 @@ internal fun resolveInstalledPathFromMarkers(candidatePaths: List<String>): Stri
     // Legacy installs may not include marker files; accept real directories unless a download is still in progress.
     return normalizedPaths.firstOrNull { path ->
         java.io.File(path).isDirectory &&
-            !StorageManager.hasMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                !StorageManager.hasMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
     }
 }
 

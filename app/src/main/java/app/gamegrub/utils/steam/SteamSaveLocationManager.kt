@@ -4,9 +4,9 @@ import android.content.Context
 import app.gamegrub.PrefManager
 import app.gamegrub.enums.SpecialGameSaveMapping
 import app.gamegrub.service.steam.SteamService
+import timber.log.Timber
 import java.io.File
 import java.nio.file.Files
-import timber.log.Timber
 
 object SteamSaveLocationManager {
 

@@ -8,6 +8,7 @@ import com.winlator.core.WineRegistryEditor
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
 import `in`.dragonbra.javasteam.types.KeyValue
+import timber.log.Timber
 import java.io.File
 import java.nio.file.Files
 import java.util.zip.CRC32
@@ -16,7 +17,6 @@ import javax.inject.Singleton
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
-import timber.log.Timber
 
 private const val NULL_CHAR = '\u0000'
 private const val TOKEN_EXPIRE_TIME = 86400L

@@ -3,12 +3,12 @@ package app.gamegrub.ui.runtime
 import androidx.compose.runtime.mutableStateOf
 import app.gamegrub.events.EventDispatcher
 import app.gamegrub.service.steam.AchievementWatcher
+import com.winlator.container.Container
 import com.winlator.inputcontrols.InputControlsManager
 import com.winlator.widget.InputControlsView
 import com.winlator.widget.TouchpadView
 import com.winlator.widget.XServerView
 import com.winlator.xenvironment.XEnvironment
-import com.winlator.container.Container
 
 class XServerRuntimeState {
 
@@ -105,11 +105,11 @@ class XServerRuntimeState {
     fun hasValidSuspendPolicyState(): Boolean = hasInitializedSuspendPolicyState
 
     fun isNeverSuspendMode(): Boolean = _activeSuspendPolicy.equals(
-        Container.SUSPEND_POLICY_NEVER, ignoreCase = true
+        Container.SUSPEND_POLICY_NEVER, ignoreCase = true,
     )
 
     fun isManualSuspendMode(): Boolean = _activeSuspendPolicy.equals(
-        Container.SUSPEND_POLICY_MANUAL, ignoreCase = true
+        Container.SUSPEND_POLICY_MANUAL, ignoreCase = true,
     )
 
     fun clear() {

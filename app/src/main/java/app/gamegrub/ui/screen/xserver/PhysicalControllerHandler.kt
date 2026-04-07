@@ -11,11 +11,11 @@ import com.winlator.inputcontrols.ExternalController
 import com.winlator.inputcontrols.ExternalControllerBinding
 import com.winlator.math.Mathf
 import com.winlator.xserver.XServer
+import timber.log.Timber
 import java.util.Timer
 import java.util.TimerTask
 import kotlin.math.abs
 import kotlin.math.sqrt
-import timber.log.Timber
 
 /**
  * Standalone handler for physical controller input that works independently of view visibility.
@@ -97,8 +97,8 @@ class PhysicalControllerHandler(
     private fun hasMotionRange(device: InputDevice?, axis: Int): Boolean {
         if (device == null) return false
         return device.getMotionRange(axis, InputDevice.SOURCE_JOYSTICK) != null ||
-            device.getMotionRange(axis, InputDevice.SOURCE_GAMEPAD) != null ||
-            device.getMotionRange(axis) != null
+                device.getMotionRange(axis, InputDevice.SOURCE_GAMEPAD) != null ||
+                device.getMotionRange(axis) != null
     }
 
     /**

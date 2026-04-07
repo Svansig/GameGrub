@@ -1,8 +1,8 @@
 package app.gamegrub.utils.steam
 
+import timber.log.Timber
 import java.nio.file.Files
 import java.nio.file.Path
-import timber.log.Timber
 
 object SteamControllerVdfUtils {
     private val keymapDigital = mapOf(

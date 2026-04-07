@@ -5,9 +5,9 @@ import app.gamegrub.data.DepotInfo
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.SteamService.Companion.getAppInfoOf
 import com.winlator.xenvironment.ImageFs
+import timber.log.Timber
 import java.io.File
 import java.nio.file.Files
-import timber.log.Timber
 
 object SteamManifestInstaller {
 

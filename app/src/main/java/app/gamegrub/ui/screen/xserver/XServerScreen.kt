@@ -51,23 +51,23 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.gamegrub.PrefManager
 import app.gamegrub.R
-import app.gamegrub.events.AndroidEvent
-import app.gamegrub.ui.data.XServerState
-import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.container.launch.env.EnvironmentSetupCoordinator
 import app.gamegrub.container.launch.manager.ContainerLaunchManager
 import app.gamegrub.container.launch.manager.ContainerLaunchManagerFactory
 import app.gamegrub.container.launch.prep.LaunchPreparationCoordinator
 import app.gamegrub.container.manager.ContainerRuntimeManagerFactory
 import app.gamegrub.data.LaunchInfo
+import app.gamegrub.events.AndroidEvent
 import app.gamegrub.externaldisplay.ExternalDisplayInputController
 import app.gamegrub.externaldisplay.ExternalDisplaySwapController
 import app.gamegrub.externaldisplay.SwapInputOverlayView
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.QuickMenu
 import app.gamegrub.ui.data.PerformanceHudConfig
+import app.gamegrub.ui.data.XServerState
 import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.orientation.OrientationPolicy
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.widget.PerformanceHudView
 import app.gamegrub.utils.container.ContainerUtils
@@ -97,13 +97,13 @@ import com.winlator.xserver.Keyboard
 import com.winlator.xserver.ScreenInfo
 import com.winlator.xserver.Window
 import com.winlator.xserver.XServer
+import kotlinx.coroutines.Job
+import timber.log.Timber
 import java.io.File
 import java.nio.file.Paths
 import java.util.EnumSet
 import java.util.Locale
 import kotlin.io.path.name
-import kotlinx.coroutines.Job
-import timber.log.Timber
 
 // Always re-extract drivers and DXVK on every launch to handle cases of container corruption
 // where games randomly stop working. Set to false once corruption issues are resolved.
@@ -461,8 +461,8 @@ fun XServerScreen(
         val detectedPhysicalMouse = deviceIds.any { id ->
             val device = InputDevice.getDevice(id) ?: return@any false
             val isMouse = device.supportsSource(InputDevice.SOURCE_MOUSE) ||
-                device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
-                device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
+                    device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
+                    device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
             val isExternal = device.isExternal
             isMouse && !device.isVirtual && isExternal
         }
@@ -537,8 +537,8 @@ fun XServerScreen(
                 }
             }
             val isMouse = device.supportsSource(InputDevice.SOURCE_MOUSE) ||
-                device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
-                device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
+                    device.supportsSource(InputDevice.SOURCE_MOUSE_RELATIVE) ||
+                    device.supportsSource(InputDevice.SOURCE_TOUCHPAD)
             if (isMouse) {
                 hasPhysicalMouse = true
                 if (XServerInputDeviceCoordinator.shouldHideForExternalMouse(uiGuardState) && tryCapturePointer()) {
@@ -835,9 +835,9 @@ fun XServerScreen(
                                         hud.getLocationOnScreen(hudLocation)
                                         val insideHud =
                                             event.rawX >= hudLocation[0] &&
-                                                event.rawX <= hudLocation[0] + hud.width &&
-                                                event.rawY >= hudLocation[1] &&
-                                                event.rawY <= hudLocation[1] + hud.height
+                                                    event.rawX <= hudLocation[0] + hud.width &&
+                                                    event.rawY >= hudLocation[1] &&
+                                                    event.rawY <= hudLocation[1] + hud.height
                                         if (insideHud) {
                                             performanceHudTouchDownRawX = event.rawX
                                             performanceHudTouchDownRawY = event.rawY
@@ -869,7 +869,7 @@ fun XServerScreen(
 
                                 MotionEvent.ACTION_POINTER_DOWN,
                                 MotionEvent.ACTION_POINTER_UP,
-                                -> {
+                                    -> {
                                     if (isTrackingPerformanceHudTouch || isDraggingPerformanceHud) {
                                         isTrackingPerformanceHudTouch = false
                                         isDraggingPerformanceHud = false
@@ -959,10 +959,15 @@ fun XServerScreen(
                         renderer.isCursorVisible = false
                         getxServer().renderer = renderer
                         XServerRuntime.get().setTouchpadView(
-                            TouchpadView(context, getxServer(), PrefManager.getBoolean("capture_pointer_on_external_mouse", true))
+                            TouchpadView(context, getxServer(), PrefManager.getBoolean("capture_pointer_on_external_mouse", true)),
                         )
                         frameLayout.addView(XServerRuntime.get().touchpadView)
-                        XServerRuntime.get().touchpadView?.setMoveCursorToTouchpoint(PrefManager.getBoolean("move_cursor_to_touchpoint", false))
+                        XServerRuntime.get().touchpadView?.setMoveCursorToTouchpoint(
+                            PrefManager.getBoolean(
+                                "move_cursor_to_touchpoint",
+                                false,
+                            ),
+                        )
 
                         // Add invisible IME receiver to capture system keyboard input when keyboard is on external display
                         val imeDisplayContext = context.display.let { display ->
@@ -1079,15 +1084,15 @@ fun XServerScreen(
                                         val sharpnessDenoise = container.getExtra("sharpnessDenoise", "100").toDouble()
                                         vkbasaltConfig =
                                             "effects=" + sharpnessEffect.lowercase(Locale.getDefault()) + ";" + "casSharpness=" +
-                                            sharpnessLevel / 100 +
-                                            ";" +
-                                            "dlsSharpness=" +
-                                            sharpnessLevel / 100 +
-                                            ";" +
-                                            "dlsDenoise=" +
-                                            sharpnessDenoise / 100 +
-                                            ";" +
-                                            "enableOnLaunch=True"
+                                                    sharpnessLevel / 100 +
+                                                    ";" +
+                                                    "dlsSharpness=" +
+                                                    sharpnessLevel / 100 +
+                                                    ";" +
+                                                    "dlsDenoise=" +
+                                                    sharpnessDenoise / 100 +
+                                                    ";" +
+                                                    "enableOnLaunch=True"
                                     }
 
                                     Timber.i("Doing things once")
@@ -1107,21 +1112,22 @@ fun XServerScreen(
                                         alwaysReextract = ALWAYS_REEXTRACT,
                                     )
                                     XServerRuntime.get().setXEnvironment(
-                                     setupXEnvironment(
-                                        context,
-                                        appId,
-                                        bootToContainer,
-                                        testGraphics,
-                                        launchManager,
-                                        xServerState,
-                                        envVars,
-                                        container,
-                                        appLaunchInfo,
-                                        xServerView!!.getxServer(),
-                                        containerVariantChanged,
-                                        onGameLaunchError,
-                                        navigateBack,
-                                    ))
+                                        setupXEnvironment(
+                                            context,
+                                            appId,
+                                            bootToContainer,
+                                            testGraphics,
+                                            launchManager,
+                                            xServerState,
+                                            envVars,
+                                            container,
+                                            appLaunchInfo,
+                                            xServerView!!.getxServer(),
+                                            containerVariantChanged,
+                                            onGameLaunchError,
+                                            navigateBack,
+                                        ),
+                                    )
                                     if (!XServerRuntime.get().isActivityInForeground && !neverSuspend) {
                                         XServerRuntime.get().xEnvironment?.onPause()
                                         if (manualResumeMode) {
@@ -1243,7 +1249,7 @@ fun XServerScreen(
                                         when (configuredExternalMode) {
                                             ExternalDisplayInputController.Mode.KEYBOARD,
                                             ExternalDisplayInputController.Mode.HYBRID,
-                                            -> {
+                                                -> {
                                                 overlay.visibility = View.VISIBLE
                                                 overlay.setMode(configuredExternalMode)
                                             }

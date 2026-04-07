@@ -4,11 +4,11 @@ import android.content.Context
 import app.gamegrub.data.AmazonGame
 import app.gamegrub.db.dao.AmazonGameDao
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Amazon library manager and DB bridge. */
 @Singleton

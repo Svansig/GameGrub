@@ -12,10 +12,10 @@ import com.github.penfeizhou.animation.apng.APNGDrawable
 import com.github.penfeizhou.animation.apng.decode.APNGParser
 import com.github.penfeizhou.animation.io.ByteBufferReader
 import com.github.penfeizhou.animation.io.StreamReader
-import java.nio.ByteBuffer
 import okio.BufferedSource
 import okio.ByteString.Companion.toByteString
 import timber.log.Timber
+import java.nio.ByteBuffer
 
 /**
  * Custom [Decoder]'s for the Coil-Kt image loading library

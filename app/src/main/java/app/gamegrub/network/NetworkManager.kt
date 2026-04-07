@@ -6,12 +6,6 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import app.gamegrub.network.NetworkManager.http
-import java.net.InetAddress
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +22,12 @@ import okhttp3.Response
 import okhttp3.dnsoverhttps.DnsOverHttps
 import okio.IOException
 import timber.log.Timber
+import java.net.InetAddress
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Central manager for network infrastructure concerns.
@@ -117,7 +117,7 @@ object NetworkManager {
 
         fun skip(caps: NetworkCapabilities): Boolean {
             return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI_AWARE) ||
-                caps.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN)
+                    caps.hasTransport(NetworkCapabilities.TRANSPORT_LOWPAN)
         }
 
         fun hasVpn(caps: NetworkCapabilities): Boolean {
@@ -135,7 +135,7 @@ object NetworkManager {
             _hasInternet.value = nonVpnValidatedCaps.isNotEmpty() || (hasValidatedVpn && hasAnyNonVpnNetwork)
             _hasWifiOrEthernet.value = nonVpnValidatedCaps.any {
                 it.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                    it.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                        it.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
             }
         }
 
@@ -298,6 +298,6 @@ object NetworkManager {
             return false
         }
         return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-            caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     }
 }

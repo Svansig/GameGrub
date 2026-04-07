@@ -1,7 +1,7 @@
 package app.gamegrub.enums
 
-import java.util.EnumSet
 import timber.log.Timber
+import java.util.EnumSet
 
 enum class AppType(val code: Int) {
     invalid(0),

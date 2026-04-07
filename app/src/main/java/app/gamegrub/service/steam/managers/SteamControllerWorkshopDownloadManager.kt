@@ -1,9 +1,9 @@
 package app.gamegrub.service.steam.managers
 
 import app.gamegrub.data.SteamControllerConfigDetail
-import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
 
 /**
  * Downloads Steam Workshop controller templates used by template index routing.

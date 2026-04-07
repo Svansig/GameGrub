@@ -10,14 +10,9 @@ import androidx.navigation.NavController
 import app.gamegrub.db.dao.AmazonGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.events.EventDispatcher
-import app.gamegrub.launch.IntentLaunchManager
-import app.gamegrub.network.NetworkManager
-import app.gamegrub.service.DownloadService
 import app.gamegrub.service.auth.PlayIntegrity
 import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.startup.StartupCoordinator
-import app.gamegrub.ui.runtime.XServerRuntime
-import app.gamegrub.utils.container.ContainerMigrator
 import com.google.android.play.core.splitcompat.SplitCompatApplication
 import com.posthog.PersonProfiles
 import com.posthog.android.PostHogAndroid
@@ -29,12 +24,11 @@ import com.winlator.widget.TouchpadView
 import com.winlator.widget.XServerView
 import com.winlator.xenvironment.XEnvironment
 import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 typealias NavChangedListener = NavController.OnDestinationChangedListener
 

@@ -85,7 +85,7 @@ fun requestPermissionsForPath(
     storagePermissionLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>?,
 ) {
     val isOutsideSandbox = !path.contains("/Android/data/${context.packageName}") &&
-        !path.contains(context.dataDir.path)
+            !path.contains(context.dataDir.path)
 
     if (!isOutsideSandbox) {
         return

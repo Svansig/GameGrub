@@ -24,6 +24,6 @@ Each ADR follows this structure:
 
 ## Related Documentation
 
-- [ARCHITECTURE.md](../ARCHITECTURE.md) - Main architecture documentation
+- [ARCHITECTURE.md](../../ARCHITECTURE.md) - Main architecture documentation
 - [docs/ui-placement/ui-target-structure-map.md](../ui-placement/ui-target-structure-map.md) - UI placement rules
-- [todo/INDEX.md](../todo/INDEX.md) - All refactoring tickets
+- [todo/INDEX.md](../../todo/INDEX.md) - All refactoring tickets

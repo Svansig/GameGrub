@@ -51,44 +51,28 @@ public class ExternalControllerBinding {
     @Override
     public String toString() {
         short s = this.keyCode;
-        switch (s) {
-            case AXIS_RZ_POSITIVE:
-                return "AXIS RZ+";
-            case AXIS_RZ_NEGATIVE:
-                return "AXIS RZ-";
-            case AXIS_Z_POSITIVE:
-                return "AXIS Z+";
-            case AXIS_Z_NEGATIVE:
-                return "AXIS Z-";
-            case AXIS_Y_POSITIVE:
-                return "AXIS Y+";
-            case AXIS_Y_NEGATIVE:
-                return "AXIS Y-";
-            case AXIS_X_POSITIVE:
-                return "AXIS X+";
-            case AXIS_X_NEGATIVE:
-                return "AXIS X-";
-            default:
-                return KeyEvent.keyCodeToString(s).replace("KEYCODE_", "").replace("_", " ");
-        }
+        return switch (s) {
+            case AXIS_RZ_POSITIVE -> "AXIS RZ+";
+            case AXIS_RZ_NEGATIVE -> "AXIS RZ-";
+            case AXIS_Z_POSITIVE -> "AXIS Z+";
+            case AXIS_Z_NEGATIVE -> "AXIS Z-";
+            case AXIS_Y_POSITIVE -> "AXIS Y+";
+            case AXIS_Y_NEGATIVE -> "AXIS Y-";
+            case AXIS_X_POSITIVE -> "AXIS X+";
+            case AXIS_X_NEGATIVE -> "AXIS X-";
+            default -> KeyEvent.keyCodeToString(s).replace("KEYCODE_", "").replace("_", " ");
+        };
     }
 
     public static int getKeyCodeForAxis(int axis, byte sign) {
-        switch (axis) {
-            case MotionEvent.AXIS_X:
-                return sign > 0 ? AXIS_X_POSITIVE : AXIS_X_NEGATIVE;
-            case MotionEvent.AXIS_Y:
-                return sign > 0 ? AXIS_Y_NEGATIVE : AXIS_Y_POSITIVE;
-            case MotionEvent.AXIS_Z:
-                return sign > 0 ? AXIS_Z_POSITIVE : AXIS_Z_NEGATIVE;
-            case MotionEvent.AXIS_RZ:
-                return sign > 0 ? AXIS_RZ_NEGATIVE : AXIS_RZ_POSITIVE;
-            case MotionEvent.AXIS_HAT_X:
-                return sign > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
-            case MotionEvent.AXIS_HAT_Y:
-                return sign > 0 ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
-            default:
-                return KeyEvent.KEYCODE_UNKNOWN;
-        }
+        return switch (axis) {
+            case MotionEvent.AXIS_X -> sign > 0 ? AXIS_X_POSITIVE : AXIS_X_NEGATIVE;
+            case MotionEvent.AXIS_Y -> sign > 0 ? AXIS_Y_NEGATIVE : AXIS_Y_POSITIVE;
+            case MotionEvent.AXIS_Z -> sign > 0 ? AXIS_Z_POSITIVE : AXIS_Z_NEGATIVE;
+            case MotionEvent.AXIS_RZ -> sign > 0 ? AXIS_RZ_NEGATIVE : AXIS_RZ_POSITIVE;
+            case MotionEvent.AXIS_HAT_X -> sign > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT;
+            case MotionEvent.AXIS_HAT_Y -> sign > 0 ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP;
+            default -> KeyEvent.KEYCODE_UNKNOWN;
+        };
     }
 }

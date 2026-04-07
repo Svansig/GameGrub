@@ -54,10 +54,9 @@ public class WineRegistryEditor implements Closeable {
         }
 
         public boolean equals(Object obj) {
-            if (!(obj instanceof Location)) {
+            if (!(obj instanceof Location other)) {
                 return false;
             }
-            Location other = (Location) obj;
             return this.offset == other.offset && this.start == other.start && this.end == other.end;
         }
     }
@@ -332,9 +331,7 @@ public class WineRegistryEditor implements Closeable {
             BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile), 65536);
             int position = 0;
             try {
-                Iterator<Location> it = valueLocations.iterator();
-                while (it.hasNext()) {
-                    Location valueLocation2 = it.next();
+                for (Location valueLocation2 : valueLocations) {
                     if (valueLocation2.end != i) {
                         int i3 = position;
                         while (true) {
@@ -365,9 +362,7 @@ public class WineRegistryEditor implements Closeable {
                     writer.write(buffer, 0, length2);
                     i5 += length2;
                 }
-                Iterator<Location> it2 = valueLocations.iterator();
-                while (it2.hasNext()) {
-                    Location valueLocation3 = it2.next();
+                for (Location valueLocation3 : valueLocations) {
                     if (valueLocation3.end == -1) {
                         String[] item = (String[]) valueLocation3.tag;
                         StringBuilder sb = new StringBuilder();

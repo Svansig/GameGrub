@@ -32,72 +32,45 @@ public enum Binding {
     @NonNull
     @Override
     public String toString() {
-        switch (this) {
-            case KEY_SHIFT_L:
-                return "L SHIFT";
-            case KEY_SHIFT_R:
-                return "R SHIFT";
-            case KEY_CTRL_L:
-                return "L CTRL";
-            case KEY_CTRL_R:
-                return "R CTRL";
-            case KEY_ALT_L:
-                return "L ALT";
-            case KEY_ALT_R:
-                return "R ALT";
-            case KEY_BRACKET_LEFT:
-                return "[";
-            case KEY_BRACKET_RIGHT:
-                return "]";
-            case KEY_BACKSLASH:
-                return "\\";
-            case KEY_SLASH:
-                return "/";
-            case KEY_SEMICOLON:
-                return ";";
-            case KEY_COMMA:
-                return ",";
-            case KEY_PERIOD:
-                return ".";
-            case KEY_APOSTROPHE:
-                return "'";
-            case KEY_MINUS:
-                return "-";
-            case KEY_KP_ADD:
-                return "+";
-            default:
-                return super.toString().replaceAll("^(MOUSE_)|(KEY_)|(GAMEPAD_)", "").replace("KP_", "NUMPAD_").replace("_", " ");
-        }
+        return switch (this) {
+            case KEY_SHIFT_L -> "L SHIFT";
+            case KEY_SHIFT_R -> "R SHIFT";
+            case KEY_CTRL_L -> "L CTRL";
+            case KEY_CTRL_R -> "R CTRL";
+            case KEY_ALT_L -> "L ALT";
+            case KEY_ALT_R -> "R ALT";
+            case KEY_BRACKET_LEFT -> "[";
+            case KEY_BRACKET_RIGHT -> "]";
+            case KEY_BACKSLASH -> "\\";
+            case KEY_SLASH -> "/";
+            case KEY_SEMICOLON -> ";";
+            case KEY_COMMA -> ",";
+            case KEY_PERIOD -> ".";
+            case KEY_APOSTROPHE -> "'";
+            case KEY_MINUS -> "-";
+            case KEY_KP_ADD -> "+";
+            default -> super.toString().replaceAll("^(MOUSE_)|(KEY_)|(GAMEPAD_)", "").replace("KP_", "NUMPAD_").replace("_", " ");
+        };
     }
 
     public static Binding fromString(String name) {
-        switch (name) {
-            case "KEY_CTRL":
-                return Binding.KEY_CTRL_L;
-            case "KEY_SHIFT":
-                return Binding.KEY_SHIFT_L;
-            case "KEY_ALT":
-                return Binding.KEY_ALT_L;
-            default:
-                return valueOf(name);
-        }
+        return switch (name) {
+            case "KEY_CTRL" -> Binding.KEY_CTRL_L;
+            case "KEY_SHIFT" -> Binding.KEY_SHIFT_L;
+            case "KEY_ALT" -> Binding.KEY_ALT_L;
+            default -> valueOf(name);
+        };
     }
 
     public Pointer.Button getPointerButton() {
-        switch (this) {
-            case MOUSE_LEFT_BUTTON:
-                return Pointer.Button.BUTTON_LEFT;
-            case MOUSE_MIDDLE_BUTTON:
-                return Pointer.Button.BUTTON_MIDDLE;
-            case MOUSE_RIGHT_BUTTON:
-                return Pointer.Button.BUTTON_RIGHT;
-            case MOUSE_SCROLL_UP:
-                return Pointer.Button.BUTTON_SCROLL_UP;
-            case MOUSE_SCROLL_DOWN:
-                return Pointer.Button.BUTTON_SCROLL_DOWN;
-            default:
-                return null;
-        }
+        return switch (this) {
+            case MOUSE_LEFT_BUTTON -> Pointer.Button.BUTTON_LEFT;
+            case MOUSE_MIDDLE_BUTTON -> Pointer.Button.BUTTON_MIDDLE;
+            case MOUSE_RIGHT_BUTTON -> Pointer.Button.BUTTON_RIGHT;
+            case MOUSE_SCROLL_UP -> Pointer.Button.BUTTON_SCROLL_UP;
+            case MOUSE_SCROLL_DOWN -> Pointer.Button.BUTTON_SCROLL_DOWN;
+            default -> null;
+        };
     }
 
     public boolean isMouse() {

@@ -17,18 +17,12 @@ public abstract class MouseEventFlags {
     public static final int ABSOLUTE = 0x8000;
 
     public static int getFlagFor(Pointer.Button button, boolean isActionDown) {
-        switch (button) {
-            case BUTTON_LEFT:
-                return isActionDown ? MouseEventFlags.LEFTDOWN : MouseEventFlags.LEFTUP;
-            case BUTTON_MIDDLE:
-                return isActionDown ? MouseEventFlags.MIDDLEDOWN : MouseEventFlags.MIDDLEUP;
-            case BUTTON_RIGHT:
-                return isActionDown ? MouseEventFlags.RIGHTDOWN : MouseEventFlags.RIGHTUP;
-            case BUTTON_SCROLL_DOWN:
-            case BUTTON_SCROLL_UP:
-                return MouseEventFlags.WHEEL;
-            default:
-                return 0;
-        }
+        return switch (button) {
+            case BUTTON_LEFT -> isActionDown ? MouseEventFlags.LEFTDOWN : MouseEventFlags.LEFTUP;
+            case BUTTON_MIDDLE -> isActionDown ? MouseEventFlags.MIDDLEDOWN : MouseEventFlags.MIDDLEUP;
+            case BUTTON_RIGHT -> isActionDown ? MouseEventFlags.RIGHTDOWN : MouseEventFlags.RIGHTUP;
+            case BUTTON_SCROLL_DOWN, BUTTON_SCROLL_UP -> MouseEventFlags.WHEEL;
+            default -> 0;
+        };
     }
 }

@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Spinner;
-import app.gamegrub.ui.ImmersiveModeManager;
 // import androidx.appcompat.app.AppCompatActivity;
 
 // import com.google.android.material.tabs.TabLayout;

@@ -1,7 +1,5 @@
 package com.winlator.core;
 
-import android.util.Log;
-
 import com.winlator.math.Mathf;
 import com.winlator.xserver.XServer;
 

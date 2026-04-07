@@ -39,7 +39,7 @@ public class GrabManager implements WindowManager.OnWindowModificationListener {
     }
 
     public XClient getClient() {
-        return eventListener != null ? eventListener.client : null;
+        return eventListener != null ? eventListener.client() : null;
     }
 
     public void deactivatePointerGrab() {

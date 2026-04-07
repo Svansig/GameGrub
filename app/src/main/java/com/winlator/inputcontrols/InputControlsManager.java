@@ -5,7 +5,6 @@ import android.content.res.AssetManager;
 import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.JsonReader;
-import android.util.Log;
 
 import com.winlator.PrefManager;
 import com.winlator.core.AppUtils;

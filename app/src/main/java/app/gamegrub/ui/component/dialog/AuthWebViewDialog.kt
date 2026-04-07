@@ -52,7 +52,7 @@ fun AuthWebViewDialog(
         val defaultTitle = stringResource(R.string.auth_webview_title)
         var topBarTitle by rememberSaveable { mutableStateOf(defaultTitle) }
         val startingUrl by rememberSaveable(url) { mutableStateOf(url) }
-        var webView: WebView? = remember { null }
+        val webView: WebView? = remember { null }
         val webViewState = rememberSaveable { Bundle() }
 
         Dialog(

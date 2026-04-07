@@ -48,27 +48,27 @@ All scripts support `--help` for detailed options and `--json` for machine-reada
 
 ### Navigation & Interaction
 
-3. **screen_mapper.py** - Analyze current screen and list interactive elements
+1. **screen_mapper.py** - Analyze current screen and list interactive elements
    - Dump UI hierarchy using `uiautomator`
    - Parse XML to identify buttons, text fields, etc.
    - Options: `--verbose`, `--json`
 
-4. **navigator.py** - Find and interact with elements semantically
+2. **navigator.py** - Find and interact with elements semantically
    - Find by text (fuzzy matching), resource-id, or class name
    - Interactive tapping and text entry
    - Options: `--find-text`, `--find-id`, `--tap`, `--enter-text`, `--json`
 
-5. **gesture.py** - Perform swipes, scrolls, and other gestures
+3. **gesture.py** - Perform swipes, scrolls, and other gestures
    - Swipe up/down/left/right
    - Scroll lists
    - Options: `--swipe`, `--scroll`, `--duration`, `--json`
 
-6. **keyboard.py** - Key events and hardware buttons
+4. **keyboard.py** - Key events and hardware buttons
    - Input key events (Home, Back, Enter, Tab)
    - Type text via ADB
    - Options: `--key`, `--text`, `--json`
 
-7. **app_launcher.py** - App lifecycle management
+5. **app_launcher.py** - App lifecycle management
    - Launch apps (`adb shell am start`)
    - Terminate apps (`adb shell am force-stop`)
    - Install/Uninstall APKs
@@ -77,13 +77,13 @@ All scripts support `--help` for detailed options and `--json` for machine-reada
 
 ### Emulator Lifecycle Management
 
-8. **emulator_manage.py** - Manage Android Virtual Devices (AVDs)
+1. **emulator_manage.py** - Manage Android Virtual Devices (AVDs)
    - List available AVDs
    - Boot emulators
    - Shutdown emulators
    - Options: `--list`, `--boot`, `--shutdown`, `--json`
 
-9. **emu_health_check** - Verify environment is properly configured
+2. **emu_health_check** - Verify environment is properly configured
     - Use `emu_health_check.sh` on macOS/Linux and `emu_health_check.ps1` on Windows
     - Check ADB, Emulator, Java, Gradle, ANDROID_HOME
     - List connected devices

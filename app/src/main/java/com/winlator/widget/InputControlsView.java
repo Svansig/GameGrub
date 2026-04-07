@@ -417,16 +417,12 @@ public class InputControlsView extends View {
     }
 
     private Binding[] getJoystickBindings(String movementType) {
-        switch (movementType) {
-            case "arrow_keys":
-                return new Binding[]{Binding.KEY_UP, Binding.KEY_RIGHT, Binding.KEY_DOWN, Binding.KEY_LEFT};
-            case "gamepad_left_stick":
-                return new Binding[]{Binding.GAMEPAD_LEFT_THUMB_UP, Binding.GAMEPAD_LEFT_THUMB_RIGHT,
-                                     Binding.GAMEPAD_LEFT_THUMB_DOWN, Binding.GAMEPAD_LEFT_THUMB_LEFT};
-            case "wasd":
-            default:
-                return new Binding[]{Binding.KEY_W, Binding.KEY_D, Binding.KEY_S, Binding.KEY_A};
-        }
+        return switch (movementType) {
+            case "arrow_keys" -> new Binding[]{Binding.KEY_UP, Binding.KEY_RIGHT, Binding.KEY_DOWN, Binding.KEY_LEFT};
+            case "gamepad_left_stick" -> new Binding[]{Binding.GAMEPAD_LEFT_THUMB_UP, Binding.GAMEPAD_LEFT_THUMB_RIGHT,
+                    Binding.GAMEPAD_LEFT_THUMB_DOWN, Binding.GAMEPAD_LEFT_THUMB_LEFT};
+            default -> new Binding[]{Binding.KEY_W, Binding.KEY_D, Binding.KEY_S, Binding.KEY_A};
+        };
     }
 
     private void releaseShooterJoystick() {

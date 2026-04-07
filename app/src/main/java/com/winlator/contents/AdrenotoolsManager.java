@@ -4,7 +4,7 @@ import android.content.res.AssetManager;
 import android.net.Uri;
 
 import android.content.Context;
-import android.util.Log;
+
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
 import com.winlator.core.DefaultVersion;

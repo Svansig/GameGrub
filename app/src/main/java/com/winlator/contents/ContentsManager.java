@@ -1,8 +1,10 @@
 package com.winlator.contents;
 
+import static com.winlator.contents.ContentProfile.ContentType.CONTENT_TYPE_PROTON;
+import static com.winlator.contents.ContentProfile.ContentType.CONTENT_TYPE_WINE;
+
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -130,8 +132,8 @@ public class ContentsManager {
                         ContentProfile profile = readProfile(proFile);
                         // Wine and Proton are functionally equivalent - accept both when scanning either type
                         boolean isWineProtonMatch = (profile != null && profile.type == type) ||
-                                (profile != null && type == ContentProfile.ContentType.CONTENT_TYPE_WINE && profile.type == ContentProfile.ContentType.CONTENT_TYPE_PROTON) ||
-                                (profile != null && type == ContentProfile.ContentType.CONTENT_TYPE_PROTON && profile.type == ContentProfile.ContentType.CONTENT_TYPE_WINE);
+                                (profile != null && type == CONTENT_TYPE_WINE && profile.type == CONTENT_TYPE_PROTON) ||
+                                (profile != null && type == CONTENT_TYPE_PROTON && profile.type == CONTENT_TYPE_WINE);
                         if (isWineProtonMatch) {
                             profiles.add(profile);
                         }
@@ -204,7 +206,7 @@ public class ContentsManager {
             }
         }
 
-        if (profile.type == ContentProfile.ContentType.CONTENT_TYPE_WINE || profile.type == ContentProfile.ContentType.CONTENT_TYPE_PROTON) {
+        if (profile.type == CONTENT_TYPE_WINE || profile.type == CONTENT_TYPE_PROTON) {
             File bin = new File(file, profile.wineBinPath);
             File lib = new File(file, profile.wineLibPath);
             File cp = new File(file, profile.winePrefixPack);
@@ -236,8 +238,8 @@ public class ContentsManager {
             return;
         }
         // For Wine/Proton, normalize directory structure and set executable permissions
-        if (profile.type == ContentProfile.ContentType.CONTENT_TYPE_WINE
-                || profile.type == ContentProfile.ContentType.CONTENT_TYPE_PROTON) {
+        if (profile.type == CONTENT_TYPE_WINE
+                || profile.type == CONTENT_TYPE_PROTON) {
             // Normalize lib directory structure: ensure lib/wine/ subdirectory exists
             normalizeWineLibraryStructure(installPath, profile);
 
@@ -270,8 +272,9 @@ public class ContentsManager {
                 fileList.add(contentFile);
             }
             // Both Wine and Proton can use either "wine" or "proton" key in profile.json
-            if (typeName.equals(ContentProfile.ContentType.CONTENT_TYPE_WINE.toString())
-                    || typeName.equals(ContentProfile.ContentType.CONTENT_TYPE_PROTON.toString())) {
+            boolean b = typeName.equals(CONTENT_TYPE_WINE.toString())
+                    || typeName.equals(CONTENT_TYPE_PROTON.toString());
+            if (b) {
                 // Try "proton" key first, then fall back to "wine" key for compatibility
                 JSONObject wineJSONObject = null;
                 if (profileJSONObject.has(ContentProfile.MARK_PROTON)) {
@@ -290,8 +293,7 @@ public class ContentsManager {
             profile.type = ContentProfile.ContentType.getTypeByName(typeName);
 
             // For Wine/Proton, ensure type is included in version name
-            if ((typeName.equals(ContentProfile.ContentType.CONTENT_TYPE_WINE.toString())
-                    || typeName.equals(ContentProfile.ContentType.CONTENT_TYPE_PROTON.toString()))
+            if ((b)
                     && !verName.toLowerCase().startsWith(typeName.toLowerCase())) {
                 profile.verName = typeName.toLowerCase() + "-" + verName;
             } else {
@@ -325,8 +327,8 @@ public class ContentsManager {
     public static File getContentTypeDir(Context context, ContentProfile.ContentType type) {
         // Wine/Proton must be installed inside imagefs/opt/ to run inside proot environment
         // This is required for ARM64EC Wine to handle mmap(PROT_EXEC) calls properly
-        if (type == ContentProfile.ContentType.CONTENT_TYPE_WINE
-                || type == ContentProfile.ContentType.CONTENT_TYPE_PROTON) {
+        if (type == CONTENT_TYPE_WINE
+                || type == CONTENT_TYPE_PROTON) {
             return new File(context.getFilesDir(), "imagefs/opt");
         }
         return new File(getContentDir(context), type.toString());
@@ -581,9 +583,9 @@ public class ContentsManager {
         ContentProfile.ContentType type = null;
         String lowerVersionName = entryName.toLowerCase();
         if (lowerVersionName.contains("proton")) {
-            type = ContentProfile.ContentType.CONTENT_TYPE_PROTON;
+            type = CONTENT_TYPE_PROTON;
         } else if (lowerVersionName.contains("wine")) {
-            type = ContentProfile.ContentType.CONTENT_TYPE_WINE;
+            type = CONTENT_TYPE_WINE;
         } else {
             // Try other types
             int firstDash = entryName.indexOf('-');
@@ -636,8 +638,8 @@ public class ContentsManager {
                 int verCode = Integer.parseInt(verCodeStr);
 
                 // Check Wine list
-                if (profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_WINE) != null) {
-                    for (ContentProfile profile : Objects.requireNonNull(profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_WINE))) {
+                if (profilesMap.get(CONTENT_TYPE_WINE) != null) {
+                    for (ContentProfile profile : Objects.requireNonNull(profilesMap.get(CONTENT_TYPE_WINE))) {
                         if (verName.equals(profile.verName) && verCode == profile.verCode) {
                             return profile;
                         }
@@ -645,8 +647,8 @@ public class ContentsManager {
                 }
 
                 // Check Proton list
-                if (profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_PROTON) != null) {
-                    for (ContentProfile profile : Objects.requireNonNull(profilesMap.get(ContentProfile.ContentType.CONTENT_TYPE_PROTON))) {
+                if (profilesMap.get(CONTENT_TYPE_PROTON) != null) {
+                    for (ContentProfile profile : Objects.requireNonNull(profilesMap.get(CONTENT_TYPE_PROTON))) {
                         if (verName.equals(profile.verName) && verCode == profile.verCode) {
                             return profile;
                         }
@@ -660,7 +662,7 @@ public class ContentsManager {
     }
 
     public boolean applyContent(ContentProfile profile) {
-        if (profile.type != ContentProfile.ContentType.CONTENT_TYPE_WINE && profile.type != ContentProfile.ContentType.CONTENT_TYPE_PROTON) {
+        if (profile.type != CONTENT_TYPE_WINE && profile.type != CONTENT_TYPE_PROTON) {
             Timber.tag("ContentsManager").d("if condition");
             for (ContentProfile.ContentFile contentFile : profile.fileList) {
                 File targetFile = new File(getPathFromTemplate(contentFile.target));

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.util.Log;
 
 import com.winlator.core.FileUtils;
 import com.winlator.core.NetworkHelper;
@@ -61,10 +60,9 @@ public class NetworkInfoUpdateComponent extends EnvironmentComponent {
         String content = "";
         if (!ifAddresses.isEmpty()) {
             for (NetworkHelper.IFAddress ifAddress : ifAddresses) {
-                String sb = content +
+                content = content +
                         (!content.isEmpty() ? "\n" : "") +
                         ifAddress.toString();
-                content = sb;
             }
         } else {
             content = new NetworkHelper.IFAddress().toString();

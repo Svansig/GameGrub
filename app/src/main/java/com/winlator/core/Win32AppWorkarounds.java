@@ -50,12 +50,7 @@ public class Win32AppWorkarounds {
     private interface Workaround {
     }
 
-    private static class MultiWorkaround implements Workaround {
-        private final Workaround[] list;
-
-        public MultiWorkaround(Workaround... list) {
-            this.list = list;
-        }
+    private record MultiWorkaround(Workaround... list) implements Workaround {
     }
 
     public Win32AppWorkarounds(XServer xServer) {

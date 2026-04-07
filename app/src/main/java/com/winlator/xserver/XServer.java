@@ -1,6 +1,5 @@
 package com.winlator.xserver;
 
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.winlator.core.CursorLocker;

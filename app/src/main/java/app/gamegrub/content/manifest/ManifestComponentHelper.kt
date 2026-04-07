@@ -138,7 +138,7 @@ object ManifestComponentHelper {
         val options = LinkedHashMap<String, VersionOption>()
 
         (base + installed).forEach { label ->
-            options[label] = VersionOption(label, label, false, true)
+            options[label] = VersionOption(label, label, isManifest = false, isInstalled = true)
         }
 
         val availableIds = options.keys.toSet()

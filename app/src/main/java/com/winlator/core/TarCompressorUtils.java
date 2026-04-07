@@ -170,7 +170,7 @@ public abstract class TarCompressorUtils {
         try (InputStream inStream = getCompressorInputStream(type, source);
              ArchiveInputStream<TarArchiveEntry> tar = new TarArchiveInputStream(inStream)) {
             TarArchiveEntry entry;
-            while ((entry = (TarArchiveEntry)tar.getNextEntry()) != null) {
+            while ((entry = tar.getNextEntry()) != null) {
                 if (!tar.canReadEntryData(entry)) continue;
 
                 // Skip macOS metadata files (._{filename}) and __MACOSX directories

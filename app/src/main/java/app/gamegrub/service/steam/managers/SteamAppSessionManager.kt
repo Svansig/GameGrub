@@ -72,7 +72,7 @@ class SteamAppSessionManager @Inject constructor() {
             // Wait for PlayingSessionStateCallback to indicate unblocked.
             val deadline = System.currentTimeMillis() + 5000
             while (System.currentTimeMillis() < deadline) {
-                if (_isPlayingBlocked.value == false) {
+                if (!_isPlayingBlocked.value) {
                     return@withContext true
                 }
                 delay(100)

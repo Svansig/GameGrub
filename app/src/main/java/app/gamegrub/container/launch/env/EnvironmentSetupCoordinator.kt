@@ -90,20 +90,25 @@ internal object EnvironmentSetupCoordinator {
         envVars.put("WINEPREFIX", imageFs.wineprefix)
 
         if (nonNullContainer.isSdlControllerAPI) {
-            if (nonNullContainer.inputType == PreferredInputApi.XINPUT.ordinal ||
-                nonNullContainer.inputType == PreferredInputApi.AUTO.ordinal
-            ) {
-                envVars.put("SDL_XINPUT_ENABLED", "1")
-                envVars.put("SDL_DIRECTINPUT_ENABLED", "0")
-                envVars.put("SDL_JOYSTICK_HIDAPI", "1")
-            } else if (nonNullContainer.inputType == PreferredInputApi.DINPUT.ordinal) {
-                envVars.put("SDL_XINPUT_ENABLED", "0")
-                envVars.put("SDL_DIRECTINPUT_ENABLED", "1")
-                envVars.put("SDL_JOYSTICK_HIDAPI", "0")
-            } else if (nonNullContainer.inputType == PreferredInputApi.BOTH.ordinal) {
-                envVars.put("SDL_XINPUT_ENABLED", "1")
-                envVars.put("SDL_DIRECTINPUT_ENABLED", "1")
-                envVars.put("SDL_JOYSTICK_HIDAPI", "1")
+            when (nonNullContainer.inputType) {
+                PreferredInputApi.XINPUT.ordinal, PreferredInputApi.AUTO.ordinal
+                    -> {
+                    envVars.put("SDL_XINPUT_ENABLED", "1")
+                    envVars.put("SDL_DIRECTINPUT_ENABLED", "0")
+                    envVars.put("SDL_JOYSTICK_HIDAPI", "1")
+                }
+
+                PreferredInputApi.DINPUT.ordinal -> {
+                    envVars.put("SDL_XINPUT_ENABLED", "0")
+                    envVars.put("SDL_DIRECTINPUT_ENABLED", "1")
+                    envVars.put("SDL_JOYSTICK_HIDAPI", "0")
+                }
+
+                PreferredInputApi.BOTH.ordinal -> {
+                    envVars.put("SDL_XINPUT_ENABLED", "1")
+                    envVars.put("SDL_DIRECTINPUT_ENABLED", "1")
+                    envVars.put("SDL_JOYSTICK_HIDAPI", "1")
+                }
             }
             envVars.put("SDL_JOYSTICK_WGI", "0")
             envVars.put("SDL_JOYSTICK_RAWINPUT", "0")

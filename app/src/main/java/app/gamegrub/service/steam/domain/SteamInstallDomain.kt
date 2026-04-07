@@ -1,7 +1,6 @@
 package app.gamegrub.service.steam.domain
 
 import android.content.Context
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.DepotInfo
 import app.gamegrub.data.DownloadInfo
@@ -19,6 +18,7 @@ import app.gamegrub.service.steam.managers.SteamInputManager
 import app.gamegrub.service.steam.managers.SteamInstallManager
 import app.gamegrub.service.steam.managers.SteamInstalledExeManager
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.container.ContainerManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import `in`.dragonbra.javasteam.depotdownloader.DepotDownloader
@@ -57,11 +57,11 @@ class SteamInstallDomain @Inject constructor(
     fun getAppDownloadInfo(appId: Int): DownloadInfo? = downloadJobs[appId]
 
     fun notifyDownloadStarted(appId: Int) {
-        GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
+        XServerRuntime.get().events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
     }
 
     private fun notifyDownloadStopped(appId: Int) {
-        GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, false))
+        XServerRuntime.get().events.emit(AndroidEvent.DownloadStatusChanged(appId, false))
     }
 
     fun removeDownloadJob(appId: Int) {
@@ -460,7 +460,7 @@ class SteamInstallDomain @Inject constructor(
             }
 
             libraryDomain.deleteDownloadingApp(downloadInfo.gameId)
-            GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
+            XServerRuntime.get().events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
             downloadInfo.clearPersistedBytesDownloaded(appDirPath)
         }
     }

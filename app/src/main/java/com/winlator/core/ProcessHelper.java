@@ -1,12 +1,10 @@
 package com.winlator.core;
 
 import android.os.Process;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -69,16 +67,7 @@ public abstract class ProcessHelper {
         return exec(command, envp, workingDir, null);
     }
 
-    public static class ProcessInfo {
-        public final int pid;
-        public final int ppid;
-        public final String name;
-
-        public ProcessInfo(int pid, int ppid, String name) {
-            this.pid = pid;
-            this.ppid = ppid;
-            this.name = name;
-        }
+    public record ProcessInfo(int pid, int ppid, String name) {
     }
 
     public static int exec(String command, String[] envp, File workingDir, Callback<Integer> terminationCallback) {
@@ -343,7 +332,6 @@ public abstract class ProcessHelper {
         String[] filters = {"wine", "exe"};
         String[] allPids;
         ArrayList<String> filteredPids = new ArrayList<>();
-        String[] filterList = filters;
         allPids = proc.list((proc1, filename) -> new File(proc1, filename).isDirectory() && filename.matches("[0-9]+"));
 
         for (String allPid : allPids) {
@@ -355,7 +343,7 @@ public abstract class ProcessHelper {
                 data = br.readLine();
             } catch (IOException ignored) {
             }
-            for (String filter : filterList) {
+            for (String filter : filters) {
                 if (data.contains(filter))
                     filteredPids.add(allPid);
             }

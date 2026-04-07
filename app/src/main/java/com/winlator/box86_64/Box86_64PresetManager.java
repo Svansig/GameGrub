@@ -243,16 +243,16 @@ public abstract class Box86_64PresetManager {
         String key = prefix + "_custom_presets";
         PrefManager.init(context);
         String oldCustomPresetsStr = PrefManager.getString(key, "");
-        String newCustomPresetsStr = "";
+        StringBuilder newCustomPresetsStr = new StringBuilder();
 
         String[] customPresets = oldCustomPresetsStr.split(",");
         for (String customPreset : customPresets) {
             String[] preset = customPreset.split("\\|");
             if (!preset[0].equals(id))
-                newCustomPresetsStr += (!newCustomPresetsStr.isEmpty() ? "," : "") + customPreset;
+                newCustomPresetsStr.append((newCustomPresetsStr.length() > 0) ? "," : "").append(customPreset);
         }
 
-        PrefManager.putString(key, newCustomPresetsStr);
+        PrefManager.putString(key, newCustomPresetsStr.toString());
     }
 
     public static void loadSpinner(String prefix, Spinner spinner, String selectedId) {

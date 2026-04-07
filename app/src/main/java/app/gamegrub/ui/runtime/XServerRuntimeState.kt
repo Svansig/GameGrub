@@ -59,6 +59,10 @@ class XServerRuntimeState {
         _xEnvironment.value = value
     }
 
+    fun clearXEnvironment() {
+        _xEnvironment.value = null
+    }
+
     fun setXServerView(value: XServerView?) {
         _xServerView.value = value
     }

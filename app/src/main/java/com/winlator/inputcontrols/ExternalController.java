@@ -5,8 +5,6 @@ import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import java.util.Iterator;
-
 import androidx.annotation.NonNull;
 
 import com.winlator.PrefManager;
@@ -389,35 +387,20 @@ public class ExternalController {
     }
 
     public static int getButtonIdxByKeyCode(int keyCode) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BUTTON_A:
-                return IDX_BUTTON_A;
-            case KeyEvent.KEYCODE_BUTTON_B:
-                return IDX_BUTTON_B;
-            case KeyEvent.KEYCODE_BUTTON_C:
-            case KeyEvent.KEYCODE_BUTTON_Z:
-            default:
-                return -1;
-            case KeyEvent.KEYCODE_BUTTON_X:
-                return IDX_BUTTON_X;
-            case KeyEvent.KEYCODE_BUTTON_Y:
-                return IDX_BUTTON_Y;
-            case KeyEvent.KEYCODE_BUTTON_L1:
-                return IDX_BUTTON_L1;
-            case KeyEvent.KEYCODE_BUTTON_R1:
-                return IDX_BUTTON_R1;
-            case KeyEvent.KEYCODE_BUTTON_L2:
-                return IDX_BUTTON_L2;
-            case KeyEvent.KEYCODE_BUTTON_R2:
-                return IDX_BUTTON_R2;
-            case KeyEvent.KEYCODE_BUTTON_THUMBL:
-                return IDX_BUTTON_L3;
-            case KeyEvent.KEYCODE_BUTTON_THUMBR:
-                return IDX_BUTTON_R3;
-            case KeyEvent.KEYCODE_BUTTON_START:
-                return IDX_BUTTON_START;
-            case KeyEvent.KEYCODE_BUTTON_SELECT:
-                return IDX_BUTTON_SELECT;
-        }
+        return switch (keyCode) {
+            case KeyEvent.KEYCODE_BUTTON_A -> IDX_BUTTON_A;
+            case KeyEvent.KEYCODE_BUTTON_B -> IDX_BUTTON_B;
+            default -> -1;
+            case KeyEvent.KEYCODE_BUTTON_X -> IDX_BUTTON_X;
+            case KeyEvent.KEYCODE_BUTTON_Y -> IDX_BUTTON_Y;
+            case KeyEvent.KEYCODE_BUTTON_L1 -> IDX_BUTTON_L1;
+            case KeyEvent.KEYCODE_BUTTON_R1 -> IDX_BUTTON_R1;
+            case KeyEvent.KEYCODE_BUTTON_L2 -> IDX_BUTTON_L2;
+            case KeyEvent.KEYCODE_BUTTON_R2 -> IDX_BUTTON_R2;
+            case KeyEvent.KEYCODE_BUTTON_THUMBL -> IDX_BUTTON_L3;
+            case KeyEvent.KEYCODE_BUTTON_THUMBR -> IDX_BUTTON_R3;
+            case KeyEvent.KEYCODE_BUTTON_START -> IDX_BUTTON_START;
+            case KeyEvent.KEYCODE_BUTTON_SELECT -> IDX_BUTTON_SELECT;
+        };
     }
 }

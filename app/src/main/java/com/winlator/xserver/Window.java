@@ -268,7 +268,7 @@ public class Window extends XResource {
 
     public void sendEvent(int eventId, Event event, XClient client) {
         for (EventListener eventListener : eventListeners) {
-            if (eventListener.isInterestedIn(eventId) && eventListener.client == client) {
+            if (eventListener.isInterestedIn(eventId) && eventListener.client() == client) {
                 eventListener.sendEvent(event);
             }
         }
@@ -276,7 +276,7 @@ public class Window extends XResource {
 
     public void sendEvent(Bitmask eventMask, Event event, XClient client) {
         for (EventListener eventListener : eventListeners) {
-            if (eventListener.isInterestedIn(eventMask) && eventListener.client == client) {
+            if (eventListener.isInterestedIn(eventMask) && eventListener.client() == client) {
                 eventListener.sendEvent(event);
             }
         }
@@ -385,7 +385,7 @@ public class Window extends XResource {
 
     public Bitmask getAllEventMasks() {
         Bitmask eventMask = new Bitmask();
-        for (EventListener eventListener : eventListeners) eventMask.join(eventListener.eventMask);
+        for (EventListener eventListener : eventListeners) eventMask.join(eventListener.eventMask());
         return eventMask;
     }
 

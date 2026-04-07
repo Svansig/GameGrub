@@ -92,18 +92,12 @@ public class ALSAClient {
     }
 
     public static int getPCMEncoding(DataType dataType) {
-        switch (dataType) {
-            case U8:
-                return 3;  // AudioFormat.ENCODING_PCM_8BIT
-            case S16LE:
-            case S16BE:
-                return 2;  // AudioFormat.ENCODING_PCM_16BIT
-            case FLOATLE:
-            case FLOATBE:
-                return 4;  // AudioFormat.ENCODING_PCM_FLOAT
-            default:
-                return 1;  // AudioFormat.ENCODING_DEFAULT
-        }
+        return switch (dataType) {
+            case U8 -> 3;  // AudioFormat.ENCODING_PCM_8BIT
+            case S16LE, S16BE -> 2;  // AudioFormat.ENCODING_PCM_16BIT
+            case FLOATLE, FLOATBE -> 4;  // AudioFormat.ENCODING_PCM_FLOAT
+            default -> 1;  // AudioFormat.ENCODING_DEFAULT
+        };
     }
 
     /**

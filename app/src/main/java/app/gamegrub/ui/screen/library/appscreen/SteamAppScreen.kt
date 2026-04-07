@@ -1134,7 +1134,7 @@ class SteamAppScreen(
         }
 
         LaunchedEffect(gameId, hasStoragePermission) {
-            if (hasStoragePermission != true) {
+            if (!hasStoragePermission) {
                 installSizeInfo = null
                 return@LaunchedEffect
             }

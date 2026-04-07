@@ -2,7 +2,6 @@ package com.winlator.xenvironment.components;
 
 import android.content.Context;
 import android.os.Process;
-import android.util.Log;
 
 import com.winlator.PrefManager;
 import com.winlator.box86_64.Box86_64Preset;
@@ -79,7 +78,7 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
                 pid = -1;
                 List<ProcessHelper.ProcessInfo> subProcesses = ProcessHelper.listSubProcesses();
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
-                    Process.killProcess(subProcess.pid);
+                    Process.killProcess(subProcess.pid());
                 }
                 SteamService.setKeepAlive(false);
             }

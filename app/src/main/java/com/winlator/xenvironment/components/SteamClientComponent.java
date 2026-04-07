@@ -1,7 +1,5 @@
 package com.winlator.xenvironment.components;
 
-import android.util.Log;
-
 import com.winlator.steampipeserver.SteamPipeServer;
 import com.winlator.xconnector.Client;
 import com.winlator.xconnector.ConnectionHandler;

@@ -1,7 +1,5 @@
 package com.winlator.core;
 
-import android.util.Log;
-
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;

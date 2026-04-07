@@ -49,23 +49,23 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
+import app.gamegrub.events.AndroidEvent
+import app.gamegrub.ui.data.XServerState
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.container.launch.env.EnvironmentSetupCoordinator
 import app.gamegrub.container.launch.manager.ContainerLaunchManager
 import app.gamegrub.container.launch.manager.ContainerLaunchManagerFactory
 import app.gamegrub.container.launch.prep.LaunchPreparationCoordinator
 import app.gamegrub.container.manager.ContainerRuntimeManagerFactory
 import app.gamegrub.data.LaunchInfo
-import app.gamegrub.events.AndroidEvent
 import app.gamegrub.externaldisplay.ExternalDisplayInputController
 import app.gamegrub.externaldisplay.ExternalDisplaySwapController
 import app.gamegrub.externaldisplay.SwapInputOverlayView
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.QuickMenu
 import app.gamegrub.ui.data.PerformanceHudConfig
-import app.gamegrub.ui.data.XServerState
 import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.orientation.OrientationPolicy
 import app.gamegrub.ui.utils.SnackbarManager
@@ -142,7 +142,7 @@ fun XServerScreen(
     }
 
     // GameGrubApp.events.emit(AndroidEvent.SetAppBarVisibility(false))
-    GameGrubApp.events.emit(AndroidEvent.SetSystemUIVisibility(false))
+    XServerRuntime.get().events.emit(AndroidEvent.SetSystemUIVisibility(false))
 
     // seems to be used to indicate when a custom wine is being installed (intent extra "generate_wineprefix")
     // val generateWinePrefix = false
@@ -166,7 +166,7 @@ fun XServerScreen(
     val manualResumeMode = suspendPolicy.equals(Container.SUSPEND_POLICY_MANUAL, ignoreCase = true)
 
     SideEffect {
-        GameGrubApp.setActiveSuspendPolicy(suspendPolicy)
+        XServerRuntime.get().setActiveSuspendPolicy(suspendPolicy)
     }
 
     LaunchedEffect(container.id, container.isPortraitMode) {
@@ -178,7 +178,7 @@ fun XServerScreen(
         } else {
             OrientationPolicy.default(PrefManager.allowedOrientation)
         }
-        GameGrubApp.events.emit(AndroidEvent.SetOrientationPolicy(policy))
+        XServerRuntime.get().events.emit(AndroidEvent.SetOrientationPolicy(policy))
     }
 
     val xServerState = rememberSaveable(stateSaver = XServerState.Saver) {
@@ -233,7 +233,7 @@ fun XServerScreen(
     val currentNavigateBack by rememberUpdatedState(navigateBack)
     val exitRequestCoordinator = XServerExitRequestCoordinator(
         winHandlerProvider = { xServerView?.getxServer()?.winHandler },
-        environmentProvider = { GameGrubApp.xEnvironment },
+        environmentProvider = { XServerRuntime.get().xEnvironment },
         frameRatingProvider = { frameRating },
         appInfoProvider = { currentAppInfo },
         container = container,
@@ -435,9 +435,9 @@ fun XServerScreen(
             !isEditMode &&
             !container.isTouchscreenMode
         ) {
-            GameGrubApp.touchpadView?.postDelayed(
+            XServerRuntime.get().touchpadView?.postDelayed(
                 {
-                    val view = GameGrubApp.touchpadView
+                    val view = XServerRuntime.get().touchpadView
                     if (view != null) {
                         view.requestFocus()
                         view.requestPointerCapture()
@@ -483,7 +483,7 @@ fun XServerScreen(
                 isTouchscreenMode = container.isTouchscreenMode,
             )
         ) {
-            val manager = GameGrubApp.inputControlsManager
+            val manager = XServerRuntime.get().inputControlsManager
             val targetProfile = XServerControlsProfileResolver.resolveCurrentOrFallbackProfile(
                 manager = manager,
                 container = container,
@@ -501,9 +501,9 @@ fun XServerScreen(
                         areControlsVisible = true
                     }
 
-                    GameGrubApp.touchpadView?.postDelayed(
+                    XServerRuntime.get().touchpadView?.postDelayed(
                         {
-                            val view = GameGrubApp.touchpadView
+                            val view = XServerRuntime.get().touchpadView
                             view?.releasePointerCapture()
                         },
                         100,
@@ -561,19 +561,19 @@ fun XServerScreen(
     }
 
     fun openControlsEditor() {
-        val manager = GameGrubApp.inputControlsManager ?: InputControlsManager(context)
+        val manager = XServerRuntime.get().inputControlsManager ?: InputControlsManager(context)
         val activeProfile = XServerControlsProfileResolver.getOrCreateContainerProfile(
             manager = manager,
             container = container,
             gameName = currentAppInfo?.name ?: container.name,
             suffix = "Controls",
             onProfileCreated = { profile ->
-                GameGrubApp.inputControlsView?.profile = profile
+                XServerRuntime.get().inputControlsView?.profile = profile
             },
         )
 
         if (activeProfile != null) {
-            val profile = GameGrubApp.inputControlsView?.profile
+            val profile = XServerRuntime.get().inputControlsView?.profile
             if (profile != null) {
                 val snapshot = mutableMapOf<com.winlator.inputcontrols.ControlElement, Pair<Int, Int>>()
                 profile.elements.forEach { element ->
@@ -583,8 +583,8 @@ fun XServerScreen(
             }
 
             isEditMode = true
-            GameGrubApp.inputControlsView?.setEditMode(true)
-            GameGrubApp.inputControlsView?.let { icView ->
+            XServerRuntime.get().inputControlsView?.setEditMode(true)
+            XServerRuntime.get().inputControlsView?.let { icView ->
                 icView.post {
                     activeProfile.loadElements(icView)
                 }
@@ -689,9 +689,9 @@ fun XServerScreen(
             imeInputReceiver?.hideKeyboard()
             imeInputReceiver = null
             if (!SteamService.keepAlive) {
-                GameGrubApp.clearActiveSuspendState()
+                XServerRuntime.get().clearActiveSuspendState()
             } else if (!manualResumeMode) {
-                GameGrubApp.isOverlayPaused = false
+                XServerRuntime.get().setOverlayPaused(false)
             }
             registerBackAction { }
         } // preserve suspend state across activity recreation while a game is still running
@@ -714,7 +714,7 @@ fun XServerScreen(
             )
             val manualResumeState = XServerInputEventDispatchCoordinator.ManualResumeState(
                 manualResumeMode = manualResumeMode,
-                isOverlayPaused = GameGrubApp.isOverlayPaused,
+                isOverlayPaused = XServerRuntime.get().isOverlayPaused,
                 showQuickMenu = showQuickMenu,
                 keepPausedForEditor = keepPausedForEditor,
             )
@@ -733,7 +733,7 @@ fun XServerScreen(
                     physicalControllerHandler?.onKeyEvent(keyEvent) == true
                 },
                 dispatchGamepadKeyInputControls = { keyEvent ->
-                    GameGrubApp.inputControlsView?.onKeyEvent(keyEvent) == true
+                    XServerRuntime.get().inputControlsView?.onKeyEvent(keyEvent) == true
                 },
                 dispatchKeyboardKey = { keyEvent ->
                     keyboard?.onKeyEvent(keyEvent) == true
@@ -755,8 +755,8 @@ fun XServerScreen(
                 event = event,
                 isGamepad = ExternalController.isGameController(event?.device),
                 uiGuardState = uiGuardState,
-                isOverlayPaused = GameGrubApp.isOverlayPaused,
-                hasPointerCapture = GameGrubApp.touchpadView?.hasPointerCapture() == true,
+                isOverlayPaused = XServerRuntime.get().isOverlayPaused,
+                hasPointerCapture = XServerRuntime.get().touchpadView?.hasPointerCapture() == true,
                 dispatchGamepadMotionRaw = { motionEvent ->
                     requireNotNull(xServerView).getxServer().winHandler.onGenericMotionEvent(motionEvent)
                 },
@@ -764,7 +764,7 @@ fun XServerScreen(
                     physicalControllerHandler?.onGenericMotionEvent(motionEvent) == true
                 },
                 dispatchGamepadMotionInputControls = { motionEvent ->
-                    GameGrubApp.inputControlsView?.onGenericMotionEvent(motionEvent) == true
+                    XServerRuntime.get().inputControlsView?.onGenericMotionEvent(motionEvent) == true
                 },
                 onInternalTouchpadDetected = {
                     hasInternalTouchpad = true
@@ -913,12 +913,12 @@ fun XServerScreen(
                             gameRoot?.dispatchTouchEvent(event)
                         } else {
                             val controlsHandled = if (areControlsVisible) {
-                                GameGrubApp.inputControlsView?.onTouchEvent(event) ?: false
+                                XServerRuntime.get().inputControlsView?.onTouchEvent(event) ?: false
                             } else {
                                 false
                             }
                             if (!controlsHandled) {
-                                GameGrubApp.touchpadView?.onTouchEvent(event)
+                                XServerRuntime.get().touchpadView?.onTouchEvent(event)
                             }
                         }
                         true
@@ -946,7 +946,7 @@ fun XServerScreen(
                     performanceHudHost = frameLayout
                     val appId = appId
                     val existingXServer =
-                        GameGrubApp.xEnvironment
+                        XServerRuntime.get().xEnvironment
                             ?.getComponent(XServerComponent::class.java)
                             ?.xServer
                     val xServerToUse = existingXServer ?: XServer(ScreenInfo(xServerState.value.screenSize))
@@ -958,10 +958,11 @@ fun XServerScreen(
                         val renderer = this.renderer
                         renderer.isCursorVisible = false
                         getxServer().renderer = renderer
-                        GameGrubApp.touchpadView =
+                        XServerRuntime.get().setTouchpadView(
                             TouchpadView(context, getxServer(), PrefManager.getBoolean("capture_pointer_on_external_mouse", true))
-                        frameLayout.addView(GameGrubApp.touchpadView)
-                        GameGrubApp.touchpadView?.setMoveCursorToTouchpoint(PrefManager.getBoolean("move_cursor_to_touchpoint", false))
+                        )
+                        frameLayout.addView(XServerRuntime.get().touchpadView)
+                        XServerRuntime.get().touchpadView?.setMoveCursorToTouchpoint(PrefManager.getBoolean("move_cursor_to_touchpoint", false))
 
                         // Add invisible IME receiver to capture system keyboard input when keyboard is on external display
                         val imeDisplayContext = context.display.let { display ->
@@ -996,7 +997,7 @@ fun XServerScreen(
                         windowLifecycleCoordinator.attach(this)
                         mainRoot.tag = XServerViewReleaseBinding(this, windowLifecycleCoordinator)
 
-                        if (GameGrubApp.xEnvironment == null) {
+                        if (XServerRuntime.get().xEnvironment == null) {
                             // Launch all blocking wine setup operations on a background thread to avoid blocking main thread
                             val setupExecutor = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
                                 Thread(r, "WineSetup-Thread").apply { isDaemon = false }
@@ -1015,12 +1016,12 @@ fun XServerScreen(
                                     handler.setPreferredInputApi(PreferredInputApi.entries[container.inputType])
                                     handler.setDInputMapperType(container.dinputMapperType)
                                     if (container.isDisableMouseInput) {
-                                        GameGrubApp.touchpadView?.setTouchscreenMouseDisabled(true)
+                                        XServerRuntime.get().touchpadView?.setTouchscreenMouseDisabled(true)
                                     } else if (container.isTouchscreenMode) {
-                                        GameGrubApp.touchpadView?.setTouchscreenMode(true)
+                                        XServerRuntime.get().touchpadView?.setTouchscreenMode(true)
                                         // Apply per-game gesture configuration
                                         val gestureConfig = app.gamegrub.data.TouchGestureConfig.fromJson(container.gestureConfig)
-                                        GameGrubApp.touchpadView?.gestureConfig = gestureConfig
+                                        XServerRuntime.get().touchpadView?.gestureConfig = gestureConfig
                                     }
                                     Timber.d(
                                         "WinHandler configured: preferredInputApi=%s, dinputMapperType=0x%02x",
@@ -1105,7 +1106,8 @@ fun XServerScreen(
                                         vkbasaltConfig = vkbasaltConfig,
                                         alwaysReextract = ALWAYS_REEXTRACT,
                                     )
-                                    GameGrubApp.xEnvironment = setupXEnvironment(
+                                    XServerRuntime.get().setXEnvironment(
+                                     setupXEnvironment(
                                         context,
                                         appId,
                                         bootToContainer,
@@ -1119,12 +1121,12 @@ fun XServerScreen(
                                         containerVariantChanged,
                                         onGameLaunchError,
                                         navigateBack,
-                                    )
-                                    if (!GameGrubApp.isActivityInForeground && !neverSuspend) {
-                                        GameGrubApp.xEnvironment?.onPause()
+                                    ))
+                                    if (!XServerRuntime.get().isActivityInForeground && !neverSuspend) {
+                                        XServerRuntime.get().xEnvironment?.onPause()
                                         if (manualResumeMode) {
                                             view.post {
-                                                GameGrubApp.isOverlayPaused = true
+                                                XServerRuntime.get().setOverlayPaused(true)
                                                 Timber.d("Game paused after environment setup while app was backgrounded (manual resume required)")
                                             }
                                         } else {
@@ -1134,11 +1136,11 @@ fun XServerScreen(
                                 } catch (e: Exception) {
                                     Timber.e(e, "Error during wine setup operations")
                                     try {
-                                        GameGrubApp.xEnvironment?.stopEnvironmentComponents()
+                                        XServerRuntime.get().xEnvironment?.stopEnvironmentComponents()
                                     } catch (cleanupEx: Exception) {
                                         Timber.e(cleanupEx, "Error cleaning up environment after setup failure")
                                     }
-                                    GameGrubApp.xEnvironment = null
+                                    XServerRuntime.get().clearXEnvironment()
                                     onGameLaunchError?.invoke("Failed to setup wine: ${e.message}")
                                 } finally {
                                     setupExecutor.shutdown()
@@ -1146,7 +1148,7 @@ fun XServerScreen(
                             }
                         }
                     }
-                    GameGrubApp.xServerView = xServerView
+                    XServerRuntime.get().setXServerView(xServerView)
 
                     val gameHost = FrameLayout(context).apply {
                         layoutParams = FrameLayout.LayoutParams(
@@ -1157,13 +1159,13 @@ fun XServerScreen(
                     frameLayout.addView(gameHost)
                     gameHost.addView(xServerView)
 
-                    GameGrubApp.inputControlsManager = InputControlsManager(context)
+                    XServerRuntime.get().setInputControlsManager(InputControlsManager(context))
 
                     // Store the loaded profile for auto-show logic later (declared outside apply block)
                     var loadedProfile: ControlsProfile? = null
 
                     // Create InputControlsView and add to FrameLayout
-                    val manager = GameGrubApp.inputControlsManager
+                    val manager = XServerRuntime.get().inputControlsManager
                     val startupProfile = XServerPhysicalControllerCoordinator.resolveStartupProfile(
                         manager = manager,
                         container = container,
@@ -1172,7 +1174,7 @@ fun XServerScreen(
 
                     val icView = InputControlsView(context).apply {
                         setXServer(xServerView.getxServer())
-                        touchpadView = GameGrubApp.touchpadView
+                        touchpadView = XServerRuntime.get().touchpadView
                         PrefManager.init(context)
                         profile = startupProfile
                         XServerPhysicalControllerCoordinator.applyInputControlsViewDefaults(this, container)
@@ -1187,9 +1189,9 @@ fun XServerScreen(
                         )
                     }
 
-                    GameGrubApp.inputControlsView = icView
+                    XServerRuntime.get().setInputControlsView(icView)
 
-                    xServerView.getxServer().winHandler.setInputControlsView(GameGrubApp.inputControlsView)
+                    xServerView.getxServer().winHandler.setInputControlsView(XServerRuntime.get().inputControlsView)
 
                     // Add InputControlsView (portrait: inside fixed-height container at bottom; landscape: overlay)
                     if (isPortrait) {
@@ -1219,7 +1221,7 @@ fun XServerScreen(
                             ExternalDisplayInputController(
                                 context = context,
                                 xServer = xServerView.getxServer(),
-                                touchpadViewProvider = { GameGrubApp.touchpadView },
+                                touchpadViewProvider = { XServerRuntime.get().touchpadView },
                             ).apply {
                                 setMode(configuredExternalMode)
                                 start()
@@ -1237,7 +1239,7 @@ fun XServerScreen(
                                 internalGameHostProvider = { gameHost },
                                 onGameOnExternalChanged = { gameOnExternal ->
                                     if (gameOnExternal) {
-                                        GameGrubApp.touchpadView?.setBackgroundColor(surfaceBg)
+                                        XServerRuntime.get().touchpadView?.setBackgroundColor(surfaceBg)
                                         when (configuredExternalMode) {
                                             ExternalDisplayInputController.Mode.KEYBOARD,
                                             ExternalDisplayInputController.Mode.HYBRID,
@@ -1252,7 +1254,7 @@ fun XServerScreen(
                                             }
                                         }
                                     } else {
-                                        GameGrubApp.touchpadView?.setBackgroundColor(Color.TRANSPARENT)
+                                        XServerRuntime.get().touchpadView?.setBackgroundColor(Color.TRANSPARENT)
                                         overlay.visibility = View.GONE
                                         overlay.setMode(ExternalDisplayInputController.Mode.OFF)
                                     }
@@ -1330,7 +1332,7 @@ fun XServerScreen(
                     }
 
                     if (container.isDisableMouseInput) {
-                        GameGrubApp.touchpadView?.setTouchscreenMouseDisabled(true)
+                        XServerRuntime.get().touchpadView?.setTouchscreenMouseDisabled(true)
                     }
 
                     mainRoot
@@ -1352,8 +1354,8 @@ fun XServerScreen(
                     val releaseBinding = view.tag as? XServerViewReleaseBinding
                     releaseBinding?.let { binding ->
                         binding.windowLifecycleCoordinator.detach()
-                        if (GameGrubApp.xServerView === binding.xServerView) {
-                            GameGrubApp.xServerView = null
+                        if (XServerRuntime.get().xServerView === binding.xServerView) {
+                            XServerRuntime.get().setXServerView(null)
                         }
                     }
                     view.tag = null
@@ -1365,32 +1367,32 @@ fun XServerScreen(
         if (isEditMode && areControlsVisible) {
             EditModeToolbar(
                 onAdd = {
-                    if (GameGrubApp.inputControlsView?.addElement() == true) {
+                    if (XServerRuntime.get().inputControlsView?.addElement() == true) {
                         // Element was added, refresh the view
-                        GameGrubApp.inputControlsView?.invalidate()
+                        XServerRuntime.get().inputControlsView?.invalidate()
                     }
                 },
                 onEdit = {
-                    val selectedElement = GameGrubApp.inputControlsView?.selectedElement
+                    val selectedElement = XServerRuntime.get().inputControlsView?.selectedElement
                     if (selectedElement != null) {
                         elementToEdit = selectedElement
                         showElementEditor = true
                     }
                 },
                 onDelete = {
-                    GameGrubApp.inputControlsView?.removeElement()
+                    XServerRuntime.get().inputControlsView?.removeElement()
                 },
                 onSave = {
                     // Save profile changes
-                    GameGrubApp.inputControlsView?.profile?.save()
+                    XServerRuntime.get().inputControlsView?.profile?.save()
                     // Clear snapshot since changes were accepted
                     elementPositionsSnapshot = emptyMap()
                     // Exit edit mode
                     isEditMode = false
-                    GameGrubApp.inputControlsView?.setEditMode(false)
+                    XServerRuntime.get().inputControlsView?.setEditMode(false)
                     // Force redraw on next frame to ensure grid is removed
-                    GameGrubApp.inputControlsView?.post {
-                        GameGrubApp.inputControlsView?.invalidate()
+                    XServerRuntime.get().inputControlsView?.post {
+                        XServerRuntime.get().inputControlsView?.invalidate()
                     }
                     keepPausedForEditor = false
                     resumeIfAllowedAfterOverlay()
@@ -1407,23 +1409,23 @@ fun XServerScreen(
 
                     // Exit edit mode without saving
                     isEditMode = false
-                    GameGrubApp.inputControlsView?.setEditMode(false)
+                    XServerRuntime.get().inputControlsView?.setEditMode(false)
                     // Force redraw on next frame to ensure grid is removed
-                    GameGrubApp.inputControlsView?.post {
-                        GameGrubApp.inputControlsView?.profile?.loadElements(GameGrubApp.inputControlsView)
-                        GameGrubApp.inputControlsView?.profile?.save()
-                        GameGrubApp.inputControlsView?.invalidate()
+                    XServerRuntime.get().inputControlsView?.post {
+                        XServerRuntime.get().inputControlsView?.profile?.loadElements(XServerRuntime.get().inputControlsView)
+                        XServerRuntime.get().inputControlsView?.profile?.save()
+                        XServerRuntime.get().inputControlsView?.invalidate()
                     }
                     keepPausedForEditor = false
                     resumeIfAllowedAfterOverlay()
                 },
                 onDuplicate = { id ->
-                    val manager = GameGrubApp.inputControlsManager
+                    val manager = XServerRuntime.get().inputControlsManager
                     val profile = manager?.getProfile(id)
-                    val currentProfile = GameGrubApp.inputControlsView?.profile
+                    val currentProfile = XServerRuntime.get().inputControlsView?.profile
                     if (profile != null && currentProfile != null) {
                         // Wait for view to be laid out before loading elements
-                        GameGrubApp.inputControlsView?.let { icView ->
+                        XServerRuntime.get().inputControlsView?.let { icView ->
                             icView.post {
                                 // Load Profile 0 elements (with valid dimensions)
                                 profile.loadElements(icView)
@@ -1484,7 +1486,7 @@ fun XServerScreen(
             hasPhysicalController = hasPhysicalController,
         )
 
-        if (manualResumeMode && GameGrubApp.isOverlayPaused && !showQuickMenu && !keepPausedForEditor) {
+        if (manualResumeMode && XServerRuntime.get().isOverlayPaused && !showQuickMenu && !keepPausedForEditor) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1517,10 +1519,10 @@ fun XServerScreen(
     }
 
     // Element Editor Dialog
-    if (showElementEditor && elementToEdit != null && GameGrubApp.inputControlsView != null) {
+    if (showElementEditor && elementToEdit != null && XServerRuntime.get().inputControlsView != null) {
         app.gamegrub.ui.component.dialog.ElementEditorDialog(
             element = elementToEdit!!,
-            view = GameGrubApp.inputControlsView!!,
+            view = XServerRuntime.get().inputControlsView!!,
             onDismiss = {
                 showElementEditor = false
                 // Keep edit mode active so user can edit other elements
@@ -1536,7 +1538,7 @@ fun XServerScreen(
     if (showPhysicalControllerDialog) {
         // Get profile from container settings, not from InputControlsView
         // (InputControlsView.profile is null when on-screen controls are hidden)
-        val manager = GameGrubApp.inputControlsManager ?: InputControlsManager(context)
+        val manager = XServerRuntime.get().inputControlsManager ?: InputControlsManager(context)
         val profile = XServerPhysicalControllerCoordinator.resolveDialogProfile(
             manager = manager,
             container = container,
@@ -1565,8 +1567,8 @@ fun XServerScreen(
                             XServerPhysicalControllerCoordinator.persistDialogProfileChanges(profile, container)
 
                             // Update handler with reloaded profile if on-screen controls are shown
-                            if (GameGrubApp.inputControlsView?.profile != null) {
-                                GameGrubApp.inputControlsView?.profile = profile
+                            if (XServerRuntime.get().inputControlsView?.profile != null) {
+                                XServerRuntime.get().inputControlsView?.profile = profile
                             }
                             physicalControllerHandler = XServerPhysicalControllerCoordinator.createOrUpdateHandler(
                                 existingHandler = physicalControllerHandler,

@@ -1,7 +1,5 @@
 package com.winlator.xserver;
 
-import android.util.Log;
-
 import com.winlator.xconnector.Client;
 import com.winlator.xconnector.RequestHandler;
 import com.winlator.xconnector.XInputStream;
@@ -72,9 +70,9 @@ public class XClientRequestHandler implements RequestHandler {
             outputStream.writeString8(XServer.VENDOR_NAME);
 
             for (PixmapFormat pixmapFormat : client.xServer.pixmapManager.supportedPixmapFormats) {
-                outputStream.writeByte(pixmapFormat.depth);
-                outputStream.writeByte(pixmapFormat.bitsPerPixel);
-                outputStream.writeByte(pixmapFormat.scanlinePad);
+                outputStream.writeByte(pixmapFormat.depth());
+                outputStream.writeByte(pixmapFormat.bitsPerPixel());
+                outputStream.writeByte(pixmapFormat.scanlinePad());
                 outputStream.writePad(5);
             }
 

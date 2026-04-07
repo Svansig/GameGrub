@@ -3,6 +3,7 @@ package app.gamegrub.ui.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -18,11 +19,11 @@ enum class WindowWidthClass {
 
 @Composable
 fun rememberWindowWidthClass(): WindowWidthClass {
-    val configuration = LocalConfiguration.current
-    return remember(configuration.screenWidthDp) {
+    val configuration = LocalWindowInfo.current
+    return remember(configuration.containerSize) {
         when {
-            configuration.screenWidthDp < 600 -> WindowWidthClass.COMPACT
-            configuration.screenWidthDp < 840 -> WindowWidthClass.MEDIUM
+            configuration.containerSize.width < 600 -> WindowWidthClass.COMPACT
+            configuration.containerSize.width < 840 -> WindowWidthClass.MEDIUM
             else -> WindowWidthClass.EXPANDED
         }
     }
@@ -30,8 +31,7 @@ fun rememberWindowWidthClass(): WindowWidthClass {
 
 @Composable
 fun rememberScreenWidthDp(): Int {
-    val configuration = LocalConfiguration.current
-    return configuration.screenWidthDp
+    return LocalWindowInfo.current.containerSize.width
 }
 
 // TODO: Also consider if a gamepad is actually connected

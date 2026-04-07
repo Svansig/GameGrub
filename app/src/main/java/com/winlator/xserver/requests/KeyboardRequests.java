@@ -8,7 +8,6 @@ import com.winlator.xconnector.XOutputStream;
 import com.winlator.xconnector.XStreamLock;
 import com.winlator.xserver.Keyboard;
 import com.winlator.xserver.XClient;
-import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 

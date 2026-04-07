@@ -109,7 +109,7 @@ public class InputDeviceManager implements Pointer.OnPointerMotionListener, Keyb
         if (grabWindow != null && grabWindow.attributes.isEnabled()) {
             EventListener eventListener = xServer.grabManager.getEventListener();
             if (xServer.grabManager.isOwnerEvents() && window != null) {
-                window.sendEvent(eventMask, event, eventListener.client);
+                window.sendEvent(eventMask, event, eventListener.client());
             }
             else if (eventListener.isInterestedIn(eventMask)) {
                 eventListener.sendEvent(event);

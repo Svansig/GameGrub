@@ -3,7 +3,6 @@ package com.winlator.xenvironment.components;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Log;
 
 import com.winlator.PrefManager;
 import com.winlator.xenvironment.EnvironmentComponent;

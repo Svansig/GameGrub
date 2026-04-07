@@ -1,7 +1,6 @@
 package com.winlator.core;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.winlator.container.Container;
 

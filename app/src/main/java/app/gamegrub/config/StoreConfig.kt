@@ -13,9 +13,7 @@ data class StoreConfig(
 )
 
 object StoreConfigProvider {
-    private val defaultConfigs = GameSource.entries.map { source ->
-        source to StoreConfig(source = source)
-    }.toMap().toMutableMap()
+    private val defaultConfigs = GameSource.entries.associateWith { source -> StoreConfig(source = source) }.toMutableMap()
 
     fun getConfig(source: GameSource): StoreConfig {
         return defaultConfigs[source] ?: StoreConfig(source = source)

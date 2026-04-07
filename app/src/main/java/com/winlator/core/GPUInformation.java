@@ -2,7 +2,6 @@ package com.winlator.core;
 
 import android.content.Context;
 import android.opengl.EGL14;
-import android.util.Log;
 
 import androidx.collection.ArrayMap;
 

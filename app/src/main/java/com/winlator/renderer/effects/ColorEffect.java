@@ -53,21 +53,22 @@ public class ColorEffect extends Effect {
         @Override
         protected String getFragmentShader() {
             return
-                "precision highp float;\n" +
-                "uniform sampler2D screenTexture;\n" +
-                "uniform float brightness;\n" +
-                "uniform float contrast;\n" +
-                "uniform float gamma;\n" +
-                "varying vec2 vUV;\n" +
-                "void main() {\n" +
-                "    vec4 texelColor = texture2D(screenTexture, vUV);\n" +
-                "    vec3 color = texelColor.rgb;\n" +
-                "    color = clamp(color + brightness, 0.0, 1.0);\n" +
-                "    color = (color - 0.5) * clamp(contrast + 1.0, 0.5, 2.0) + 0.5;\n" +
-                "    color = clamp(color, 0.0, 1.0);\n" +
-                "    color = pow(color, vec3(1.0 / gamma));\n" +
-                "    gl_FragColor = vec4(color, texelColor.a);\n" +
-                "}";
+                    """
+                            precision highp float;
+                            uniform sampler2D screenTexture;
+                            uniform float brightness;
+                            uniform float contrast;
+                            uniform float gamma;
+                            varying vec2 vUV;
+                            void main() {
+                                vec4 texelColor = texture2D(screenTexture, vUV);
+                                vec3 color = texelColor.rgb;
+                                color = clamp(color + brightness, 0.0, 1.0);
+                                color = (color - 0.5) * clamp(contrast + 1.0, 0.5, 2.0) + 0.5;
+                                color = clamp(color, 0.0, 1.0);
+                                color = pow(color, vec3(1.0 / gamma));
+                                gl_FragColor = vec4(color, texelColor.a);
+                            }""";
         }
     }
 }

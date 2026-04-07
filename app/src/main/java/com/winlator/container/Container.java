@@ -1,7 +1,6 @@
 package com.winlator.container;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.winlator.box86_64.Box86_64Preset;
 import com.winlator.core.DefaultVersion;
@@ -992,15 +991,11 @@ public class Container {
 
     public static String normalizeSuspendPolicy(String suspendPolicy) {
         String normalized = (suspendPolicy == null) ? "" : suspendPolicy.toLowerCase(Locale.ROOT);
-        switch (normalized) {
-            case SUSPEND_POLICY_NEVER:
-                return SUSPEND_POLICY_NEVER;
-            case SUSPEND_POLICY_MANUAL:
-                return SUSPEND_POLICY_MANUAL;
-            case SUSPEND_POLICY_AUTO:
-            default:
-                return SUSPEND_POLICY_AUTO;
-        }
+        return switch (normalized) {
+            case SUSPEND_POLICY_NEVER -> SUSPEND_POLICY_NEVER;
+            case SUSPEND_POLICY_MANUAL -> SUSPEND_POLICY_MANUAL;
+            default -> SUSPEND_POLICY_AUTO;
+        };
     }
 
     public String getSuspendPolicy() {

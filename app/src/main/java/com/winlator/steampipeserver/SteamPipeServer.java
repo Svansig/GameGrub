@@ -1,7 +1,5 @@
 package com.winlator.steampipeserver;
 
-import android.util.Log;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;

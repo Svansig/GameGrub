@@ -130,13 +130,15 @@ public class FrameRating extends FrameLayout implements Runnable {
 
                 // Write JSON format for easy parsing
                 String json = String.format(Locale.ENGLISH,
-                    "{\n" +
-                    "  \"length_sec\": %.2f,\n" +
-                    "  \"avg_fps\": %.1f,\n" +
-                    "  \"max_fps\": %d,\n" +
-                    "  \"min_fps\": %d,\n" +
-                    "  \"readings\": %d\n" +
-                    "}\n",
+                        """
+                                {
+                                  "length_sec": %.2f,
+                                  "avg_fps": %.1f,
+                                  "max_fps": %d,
+                                  "min_fps": %d,
+                                  "readings": %d
+                                }
+                                """,
                     sessionLengthSec, avgFPS, max, min, readingCount);
                 try (FileWriter fw = new FileWriter(fpsLogFile, false)) {
                     fw.write(json);

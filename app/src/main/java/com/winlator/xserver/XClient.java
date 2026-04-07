@@ -146,7 +146,7 @@ public class XClient implements XResourceManager.OnResourceLifecycleListener {
 
     public Bitmask getEventMaskForWindow(Window window) {
         EventListener eventListener = eventListeners.get(window);
-        return eventListener != null ? eventListener.eventMask : new Bitmask();
+        return eventListener != null ? eventListener.eventMask() : new Bitmask();
     }
 
     @Override

@@ -936,9 +936,9 @@ object ContainerUtils {
                     }
 
                     // Set wrapper based on DirectX version
-                    val newDxWrapper = when {
-                        dxVersion == 12 -> "vkd3d"
-                        dxVersion in 1..8 -> "wined3d"
+                    val newDxWrapper = when (dxVersion) {
+                        12 -> "vkd3d"
+                        in 1..8 -> "wined3d"
                         else -> containerData.dxwrapper // Keep existing for DX10/11 or errors
                     }
 

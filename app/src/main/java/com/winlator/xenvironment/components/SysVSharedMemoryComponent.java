@@ -1,7 +1,5 @@
 package com.winlator.xenvironment.components;
 
-import android.util.Log;
-
 import com.winlator.sysvshm.SysVSHMConnectionHandler;
 import com.winlator.sysvshm.SysVSHMRequestHandler;
 import com.winlator.sysvshm.SysVSharedMemory;

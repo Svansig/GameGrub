@@ -87,6 +87,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.gamegrub.PrefManager
 import app.gamegrub.R
@@ -510,7 +511,6 @@ internal fun AppScreenContent(
     onBack: () -> Unit = {},
     vararg optionsMenu: AppMenuOption,
 ) {
-    val context = LocalContext.current
     // reactive — recomposes when network state changes
     val hasInternet by NetworkManager.hasInternet.collectAsState()
     val hasWifiOrEthernet by NetworkManager.hasWifiOrEthernet.collectAsState()
@@ -521,9 +521,6 @@ internal fun AppScreenContent(
 
     // Focus requesters for gamepad navigation
     val playButtonFocusRequester = remember { FocusRequester() }
-
-    // Calculate parallax offset based on scroll
-    val parallaxOffset = scrollState.value * 0.5f
 
     LaunchedEffect(displayInfo.appId) {
         scrollState.animateScrollTo(0)
@@ -649,7 +646,7 @@ internal fun AppScreenContent(
                     modifier = Modifier
                         .matchParentSize()
                         .graphicsLayer {
-                            translationY = parallaxOffset
+                            translationY = scrollState.value * 0.5f
                         },
                 ) {
                     if (displayInfo.heroImageUrl != null) {
@@ -963,6 +960,7 @@ internal fun AppScreenContent(
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
+                val unknownCompatibilityText = stringResource(R.string.library_compatibility_unknown)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -982,7 +980,7 @@ internal fun AppScreenContent(
                                 SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
                                     .format(Date(displayInfo.releaseDate * 1000))
                             } else {
-                                context.getString(R.string.library_compatibility_unknown)
+                                unknownCompatibilityText
                             }
                         },
                         isCompact = true,

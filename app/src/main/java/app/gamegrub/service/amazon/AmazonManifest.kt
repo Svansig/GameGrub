@@ -216,11 +216,11 @@ object AmazonManifest {
             if (tag == -1L) break
             val fieldNumber = (tag ushr 3).toInt()
             val wireType = (tag and 0x7).toInt()
-            when {
-                fieldNumber == 1 && wireType == 2 ->
+            when (fieldNumber) {
+                1 if wireType == 2 ->
                     name = String(readLengthDelimited(stream), Charsets.UTF_8)
 
-                fieldNumber == 2 && wireType == 2 ->
+                2 if wireType == 2 ->
                     files.add(parseFile(readLengthDelimited(stream)))
 
                 else -> skipField(stream, wireType)
@@ -252,14 +252,14 @@ object AmazonManifest {
             if (tag == -1L) break
             val fieldNumber = (tag ushr 3).toInt()
             val wireType = (tag and 0x7).toInt()
-            when {
-                fieldNumber == 1 && wireType == 2 ->
+            when (fieldNumber) {
+                1 if wireType == 2 ->
                     path = String(readLengthDelimited(stream), Charsets.UTF_8)
 
-                fieldNumber == 3 && wireType == 0 ->
+                3 if wireType == 0 ->
                     size = readVarint(stream)
 
-                fieldNumber == 5 && wireType == 2 -> {
+                5 if wireType == 2 -> {
                     val (algo, value) = parseHash(readLengthDelimited(stream))
                     hashAlgo = algo
                     hashValue = value
@@ -287,9 +287,9 @@ object AmazonManifest {
             if (tag == -1L) break
             val fieldNumber = (tag ushr 3).toInt()
             val wireType = (tag and 0x7).toInt()
-            when {
-                fieldNumber == 1 && wireType == 0 -> algorithm = readVarint(stream).toInt()
-                fieldNumber == 2 && wireType == 2 -> value = readLengthDelimited(stream)
+            when (fieldNumber) {
+                1 if wireType == 0 -> algorithm = readVarint(stream).toInt()
+                2 if wireType == 2 -> value = readLengthDelimited(stream)
                 else -> skipField(stream, wireType)
             }
         }

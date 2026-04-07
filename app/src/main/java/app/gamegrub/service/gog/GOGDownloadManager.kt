@@ -313,17 +313,15 @@ class GOGDownloadManager @Inject constructor(
                 // Use depot's productId as fallback when file has null/placeholder productId
 
                 // TODO: Remove this logic and always use the depotProductId.
-                val productId = when {
-                    file.productId == null -> {
+                val productId = when (file.productId) {
+                    null -> {
                         Timber.tag("GOG").d("File ${file.path} has null productId, using depotProductId: $depotProductId")
                         depotProductId
                     }
-
-                    file.productId == "2147483047" -> {
+                    "2147483047" -> {
                         Timber.tag("GOG").d("File ${file.path} has placeholder productId, using depotProductId: $depotProductId")
                         depotProductId
                     }
-
                     else -> {
                         Timber.tag("GOG").d("File ${file.path} has productId: ${file.productId}")
                         file.productId

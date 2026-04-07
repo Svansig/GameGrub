@@ -279,15 +279,15 @@ object IntentLaunchManager {
             execArgs = override.execArgs.ifEmpty { base.execArgs },
             executablePath = override.executablePath.ifEmpty { base.executablePath },
             installPath = override.installPath.ifEmpty { base.installPath },
-            showFPS = if (override.showFPS != false) override.showFPS else base.showFPS,
-            launchRealSteam = if (override.launchRealSteam != false) override.launchRealSteam else base.launchRealSteam,
+            showFPS = if (override.showFPS) override.showFPS else base.showFPS,
+            launchRealSteam = if (override.launchRealSteam) override.launchRealSteam else base.launchRealSteam,
             cpuList = if (override.cpuList != Container.getFallbackCPUList()) override.cpuList else base.cpuList,
             cpuListWoW64 = if (override.cpuListWoW64 != Container.getFallbackCPUListWoW64()) {
                 override.cpuListWoW64
             } else {
                 base.cpuListWoW64
             },
-            wow64Mode = if (override.wow64Mode != true) override.wow64Mode else base.wow64Mode,
+            wow64Mode = if (!override.wow64Mode) override.wow64Mode else base.wow64Mode,
             startupSelection = if (override.startupSelection != Container.STARTUP_SELECTION_ESSENTIAL.toInt().toByte()) {
                 override.startupSelection
             } else {
@@ -298,21 +298,21 @@ object IntentLaunchManager {
             box86Preset = override.box86Preset.ifEmpty { base.box86Preset },
             box64Preset = override.box64Preset.ifEmpty { base.box64Preset },
             desktopTheme = override.desktopTheme.ifEmpty { base.desktopTheme },
-            csmt = if (override.csmt != true) override.csmt else base.csmt,
+            csmt = if (!override.csmt) override.csmt else base.csmt,
             videoPciDeviceID = if (override.videoPciDeviceID != 1728) override.videoPciDeviceID else base.videoPciDeviceID,
             offScreenRenderingMode = if (override.offScreenRenderingMode != "fbo") {
                 override.offScreenRenderingMode
             } else {
                 base.offScreenRenderingMode
             },
-            strictShaderMath = if (override.strictShaderMath != true) override.strictShaderMath else base.strictShaderMath,
+            strictShaderMath = if (!override.strictShaderMath) override.strictShaderMath else base.strictShaderMath,
             videoMemorySize = if (override.videoMemorySize != "2048") override.videoMemorySize else base.videoMemorySize,
             mouseWarpOverride = if (override.mouseWarpOverride != "disable") override.mouseWarpOverride else base.mouseWarpOverride,
-            sdlControllerAPI = if (override.sdlControllerAPI != true) override.sdlControllerAPI else base.sdlControllerAPI,
-            enableXInput = if (override.enableXInput != true) override.enableXInput else base.enableXInput,
-            enableDInput = if (override.enableDInput != true) override.enableDInput else base.enableDInput,
+            sdlControllerAPI = if (!override.sdlControllerAPI) override.sdlControllerAPI else base.sdlControllerAPI,
+            enableXInput = if (!override.enableXInput) override.enableXInput else base.enableXInput,
+            enableDInput = if (!override.enableDInput) override.enableDInput else base.enableDInput,
             dinputMapperType = if (override.dinputMapperType != 1.toByte()) override.dinputMapperType else base.dinputMapperType,
-            disableMouseInput = if (override.disableMouseInput != false) override.disableMouseInput else base.disableMouseInput,
+            disableMouseInput = if (override.disableMouseInput) override.disableMouseInput else base.disableMouseInput,
             suspendPolicy = base.suspendPolicy,
             shaderBackend = if (override.shaderBackend != "glsl") override.shaderBackend else base.shaderBackend,
             useGLSL = if (override.useGLSL != "enabled") override.useGLSL else base.useGLSL,

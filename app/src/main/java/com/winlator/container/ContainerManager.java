@@ -2,7 +2,6 @@ package com.winlator.container;
 
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 
 // import com.winlator.R;
 import app.gamegrub.R;

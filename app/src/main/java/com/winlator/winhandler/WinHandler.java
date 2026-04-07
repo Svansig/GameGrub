@@ -25,7 +25,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -34,7 +33,6 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -869,8 +867,7 @@ public class WinHandler {
         for (int i = 0; i < MAX_PLAYERS; i++) {
             InputDevice device = controllerManager.getAssignedDeviceForSlot(i);
             if (device != null) {
-                ExternalController controller = ExternalController.getController(device.getId());
-                currentController = controller;
+                currentController = ExternalController.getController(device.getId());
                 Timber.tag(TAG).d("Assigned '" + device.getName() + "' to Player 1 at startup.");
             }
         }

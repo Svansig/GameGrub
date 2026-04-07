@@ -20,12 +20,12 @@ public class Property {
         }
 
         public static Format valueOf(int format) {
-            switch (format) {
-                case 8: return BYTE_ARRAY;
-                case 16: return SHORT_ARRAY;
-                case 32: return INT_ARRAY;
-            }
-            return null;
+            return switch (format) {
+                case 8 -> BYTE_ARRAY;
+                case 16 -> SHORT_ARRAY;
+                case 32 -> INT_ARRAY;
+                default -> null;
+            };
         }
     }
     public final int name;

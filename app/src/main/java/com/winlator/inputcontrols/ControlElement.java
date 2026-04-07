@@ -318,21 +318,20 @@ public class ControlElement {
 
         switch (type) {
             case BUTTON:
-                switch (shape) {
-                    case RECT:
-                    case ROUND_RECT:
+                halfHeight = switch (shape) {
+                    case RECT, ROUND_RECT -> {
                         halfWidth = snappingSize * 4;
-                        halfHeight = snappingSize * 2;
-                        break;
-                    case SQUARE:
-                        halfWidth = (int)(snappingSize * 2.5f);
-                        halfHeight = (int)(snappingSize * 2.5f);
-                        break;
-                    case CIRCLE:
+                        yield snappingSize * 2;
+                    }
+                    case SQUARE -> {
+                        halfWidth = (int) (snappingSize * 2.5f);
+                        yield (int) (snappingSize * 2.5f);
+                    }
+                    case CIRCLE -> {
                         halfWidth = snappingSize * 3;
-                        halfHeight = snappingSize * 3;
-                        break;
-                }
+                        yield snappingSize * 3;
+                    }
+                };
                 break;
             case D_PAD: {
                 halfWidth = snappingSize * 7;
@@ -393,21 +392,12 @@ public class ControlElement {
     }
 
     private static String getRangeTextForIndex(Range range, int index) {
-        String text = "";
-        switch (range) {
-            case FROM_A_TO_Z:
-                text = String.valueOf((char)(65 + index));
-                break;
-            case FROM_0_TO_9:
-                text = String.valueOf((index + 1) % 10);
-                break;
-            case FROM_F1_TO_F12:
-                text = "F"+(index + 1);
-                break;
-            case FROM_NP0_TO_NP9:
-                text = "NP"+((index + 1) % 10);
-                break;
-        }
+        String text = switch (range) {
+            case FROM_A_TO_Z -> String.valueOf((char) (65 + index));
+            case FROM_0_TO_9 -> String.valueOf((index + 1) % 10);
+            case FROM_F1_TO_F12 -> "F" + (index + 1);
+            case FROM_NP0_TO_NP9 -> "NP" + ((index + 1) % 10);
+        };
         return text;
     }
 

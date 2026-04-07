@@ -86,20 +86,14 @@ public class NetworkHelper {
     }
 
     public static String formatNetmask(int prefixLength) {
-        switch (prefixLength) {
-            case 8:
-                return "255.0.0.0";
-            case 16:
-                return "255.255.0.0";
-            case 24:
-                return "255.255.255.0";
-            case 32:
-                return "255.255.255.255";
-            case 64:
-                return "ffff:ffff:ffff:ffff::";
-            default:
-                return "";
-        }
+        return switch (prefixLength) {
+            case 8 -> "255.0.0.0";
+            case 16 -> "255.255.0.0";
+            case 24 -> "255.255.255.0";
+            case 32 -> "255.255.255.255";
+            case 64 -> "ffff:ffff:ffff:ffff::";
+            default -> "";
+        };
     }
 
     public boolean isConnected() {

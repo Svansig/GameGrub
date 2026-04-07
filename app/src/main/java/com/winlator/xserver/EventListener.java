@@ -4,14 +4,7 @@ import com.winlator.xserver.events.Event;
 
 import java.io.IOException;
 
-public class EventListener {
-    public final XClient client;
-    public final Bitmask eventMask;
-
-    public EventListener(XClient client, Bitmask eventMask) {
-        this.client = client;
-        this.eventMask = eventMask;
-    }
+public record EventListener(XClient client, Bitmask eventMask) {
 
     public boolean isInterestedIn(int eventId) {
         return eventMask.isSet(eventId);
@@ -24,8 +17,7 @@ public class EventListener {
     public void sendEvent(Event event) {
         try {
             event.send(client.getSequenceNumber(), client.getOutputStream());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

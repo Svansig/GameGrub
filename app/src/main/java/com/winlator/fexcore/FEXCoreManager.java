@@ -34,15 +34,17 @@ public final class FEXCoreManager {
         "steam.exe",
     };
 
-    private static final String APP_CONFIG_CONTENT = "{\n" +
-        "  \"Config\": {\n" +
-        "    \"Multiblock\": \"0\",\n" +
-        "    \"X87ReducedPrecision\": \"1\",\n" +
-        "    \"VectorTSOEnabled\": \"1\",\n" +
-        "    \"HalfBarrierTSOEnabled\": \"1\",\n" +
-        "    \"MonoHacks\": \"0\"\n" +
-        "  }\n" +
-        "}\n";
+    private static final String APP_CONFIG_CONTENT = """
+            {
+              "Config": {
+                "Multiblock": "0",
+                "X87ReducedPrecision": "1",
+                "VectorTSOEnabled": "1",
+                "HalfBarrierTSOEnabled": "1",
+                "MonoHacks": "0"
+              }
+            }
+            """;
 
     FEXCoreManager() {
     }

@@ -1,7 +1,5 @@
 package com.winlator.xenvironment.components;
 
-import android.util.Log;
-
 import com.winlator.xenvironment.EnvironmentComponent;
 import com.winlator.xconnector.XConnectorEpoll;
 import com.winlator.xconnector.UnixSocketConfig;

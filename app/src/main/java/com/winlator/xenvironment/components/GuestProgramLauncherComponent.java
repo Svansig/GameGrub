@@ -3,7 +3,6 @@ package com.winlator.xenvironment.components;
 import android.content.Context;
 import android.icu.util.TimeZone;
 import android.os.Process;
-import android.util.Log;
 
 import com.winlator.PrefManager;
 import com.winlator.box86_64.Box86_64Preset;
@@ -80,10 +79,10 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
                 List<ProcessHelper.ProcessInfo> subProcesses = ProcessHelper.listSubProcesses();
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
                     Timber.tag("GuestProgramLauncherComponent").d("Sub-process still running: "
-                            + subProcess.name + " | "
-                            + subProcess.pid + " | "
-                            + subProcess.ppid + ", stopping...");
-                    Process.killProcess(subProcess.pid);
+                            + subProcess.name() + " | "
+                            + subProcess.pid() + " | "
+                            + subProcess.ppid() + ", stopping...");
+                    Process.killProcess(subProcess.pid());
                 }
             }
         }
@@ -326,18 +325,11 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
         Context context = environment.getContext();
         ImageFs imageFs = ImageFs.find(context);
         File rootDir = imageFs.getRootDir();
-        String assetPath;
-        switch (steamType) {
-            case Container.STEAM_TYPE_LIGHT:
-                assetPath = "box86_64/lightsteam.box64rc";
-                break;
-            case Container.STEAM_TYPE_ULTRALIGHT:
-                assetPath = "box86_64/ultralightsteam.box64rc";
-                break;
-            default:
-                assetPath = "box86_64/default.box64rc";
-                break;
-        }
+        String assetPath = switch (steamType) {
+            case Container.STEAM_TYPE_LIGHT -> "box86_64/lightsteam.box64rc";
+            case Container.STEAM_TYPE_ULTRALIGHT -> "box86_64/ultralightsteam.box64rc";
+            default -> "box86_64/default.box64rc";
+        };
         FileUtils.copy(context, assetPath, new File(rootDir, "/etc/config.box64rc"));
     }
 

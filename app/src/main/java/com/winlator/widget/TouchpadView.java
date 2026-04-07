@@ -3,7 +3,6 @@ package com.winlator.widget;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
@@ -829,11 +828,11 @@ public class TouchpadView extends View implements View.OnCapturedPointerListener
 
     private Pointer.Button actionToButton(String action) {
         if (action == null) return Pointer.Button.BUTTON_LEFT;
-        switch (action) {
-            case TouchGestureConfig.ACTION_RIGHT_CLICK:  return Pointer.Button.BUTTON_RIGHT;
-            case TouchGestureConfig.ACTION_MIDDLE_CLICK: return Pointer.Button.BUTTON_MIDDLE;
-            default:                                     return Pointer.Button.BUTTON_LEFT;
-        }
+        return switch (action) {
+            case TouchGestureConfig.ACTION_RIGHT_CLICK -> Pointer.Button.BUTTON_RIGHT;
+            case TouchGestureConfig.ACTION_MIDDLE_CLICK -> Pointer.Button.BUTTON_MIDDLE;
+            default -> Pointer.Button.BUTTON_LEFT;
+        };
     }
 
     private int buttonToDownFlag(Pointer.Button btn) {

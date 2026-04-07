@@ -26,54 +26,35 @@ public abstract class GeneralComponents {
         }
 
         public String title() {
-            switch (this) {
-                case BOX64:
-                    return "Box64";
-                case TURNIP:
-                    return "Turnip";
-                case DXVK:
-                    return "DXVK";
-                case VKD3D:
-                    return "VKD3D";
-                case WINED3D:
-                    return "WineD3D";
-                case SOUNDFONT:
-                    return "SoundFont";
-                case ADRENOTOOLS_DRIVER:
-                    return "Adrenotools Driver";
-                default:
-                    return "";
-            }
+            return switch (this) {
+                case BOX64 -> "Box64";
+                case TURNIP -> "Turnip";
+                case DXVK -> "DXVK";
+                case VKD3D -> "VKD3D";
+                case WINED3D -> "WineD3D";
+                case SOUNDFONT -> "SoundFont";
+                case ADRENOTOOLS_DRIVER -> "Adrenotools Driver";
+                default -> "";
+            };
         }
 
         private String assetFolder() {
-            switch (this) {
-                case BOX64:
-                    return "box64";
-                case TURNIP:
-                    return "graphics_driver";
-                case DXVK:
-                case VKD3D:
-                case WINED3D:
-                    return "dxwrapper";
-                case SOUNDFONT:
-                    return "soundfont";
-                case ADRENOTOOLS_DRIVER:
-                default:
-                    return "";
-            }
+            return switch (this) {
+                case BOX64 -> "box64";
+                case TURNIP -> "graphics_driver";
+                case DXVK, VKD3D, WINED3D -> "dxwrapper";
+                case SOUNDFONT -> "soundfont";
+                default -> "";
+            };
         }
 
         private File getSource(Context context, String identifier) {
             File componentDir = GeneralComponents.getComponentDir(this, context);
-            switch (this) {
-                case SOUNDFONT:
-                    return new File(componentDir, identifier + ".sf2");
-                case ADRENOTOOLS_DRIVER:
-                    return new File(componentDir, identifier);
-                default:
-                    return new File(componentDir, lowerName() + "-" + identifier + ".tzst");
-            }
+            return switch (this) {
+                case SOUNDFONT -> new File(componentDir, identifier + ".sf2");
+                case ADRENOTOOLS_DRIVER -> new File(componentDir, identifier);
+                default -> new File(componentDir, lowerName() + "-" + identifier + ".tzst");
+            };
         }
 
         public File getDestination(Context context) {
@@ -107,30 +88,15 @@ public abstract class GeneralComponents {
     }
 
     public static ArrayList<String> getBuiltinComponentNames(Type type) {
-        String[] items = new String[0];
-        switch (type) {
-            case BOX64:
-                items = new String[]{"0.3.4", "0.3.6"};
-                break;
-            case TURNIP:
-                items = new String[]{"25.1.0"};
-                break;
-            case DXVK:
-                items = new String[]{"1.10.3", "2.4.1"};
-                break;
-            case VKD3D:
-                items = new String[]{"2.13"};
-                break;
-            case WINED3D:
-                items = new String[]{"9.2"};
-                break;
-            case SOUNDFONT:
-                items = new String[]{"SONiVOX-EAS-GM-Wavetable"};
-                break;
-            case ADRENOTOOLS_DRIVER:
-                items = new String[]{"System"};
-                break;
-        }
+        String[] items = switch (type) {
+            case BOX64 -> new String[]{"0.3.4", "0.3.6"};
+            case TURNIP -> new String[]{"25.1.0"};
+            case DXVK -> new String[]{"1.10.3", "2.4.1"};
+            case VKD3D -> new String[]{"2.13"};
+            case WINED3D -> new String[]{"9.2"};
+            case SOUNDFONT -> new String[]{"SONiVOX-EAS-GM-Wavetable"};
+            case ADRENOTOOLS_DRIVER -> new String[]{"System"};
+        };
         return new ArrayList<>(Arrays.asList(items));
     }
 

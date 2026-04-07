@@ -204,21 +204,18 @@ class SteamLibraryDomain @Inject constructor(
             val games = libraryClient.getOwnedGames(steamId)
             val steamApps = games.map { game ->
                 val existingApp = appDao.findApp(game.appId)
-                if (existingApp != null) {
-                    // Owned-games API returns partial metadata; keep DB-owned fields intact.
-                    existingApp.copy(
-                        name = game.name,
-                        iconHash = game.iconUrl,
-                        logoHash = game.logoUrl,
-                    )
-                } else {
-                    SteamApp(
+                existingApp?.// Owned-games API returns partial metadata; keep DB-owned fields intact.
+                copy(
+                    name = game.name,
+                    iconHash = game.iconUrl,
+                    logoHash = game.logoUrl,
+                )
+                    ?: SteamApp(
                         id = game.appId,
                         name = game.name,
                         iconHash = game.iconUrl,
                         logoHash = game.logoUrl,
                     )
-                }
             }
             appDao.insertAll(steamApps)
             steamApps.size

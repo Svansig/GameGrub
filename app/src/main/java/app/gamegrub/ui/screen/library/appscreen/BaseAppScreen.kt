@@ -45,6 +45,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -477,21 +478,21 @@ abstract class BaseAppScreen {
         val context = LocalContext.current
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text(context.getString(R.string.base_app_reset_container_title)) },
+            title = { Text(stringResource(R.string.base_app_reset_container_title)) },
             text = {
-                Text(context.getString(R.string.steam_reset_container_message))
+                Text(stringResource(R.string.steam_reset_container_message))
             },
             confirmButton = {
                 TextButton(onClick = onConfirm) {
                     Text(
-                        text = context.getString(R.string.base_app_reset_container_confirm),
+                        text = stringResource(R.string.base_app_reset_container_confirm),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismiss) {
-                    Text(context.getString(R.string.cancel))
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )

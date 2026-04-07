@@ -4,7 +4,6 @@ import android.app.Service;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Process;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -97,7 +96,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
                 Timber.tag("BionicProgramLauncherComponent").d("Stopped process " + pid);
                 List<ProcessHelper.ProcessInfo> subProcesses = ProcessHelper.listSubProcesses();
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
-                    Process.killProcess(subProcess.pid);
+                    Process.killProcess(subProcess.pid());
                 }
                 SteamService.setKeepAlive(false);
             }

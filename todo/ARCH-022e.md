@@ -3,7 +3,7 @@
 - **ID**: `ARCH-022e`
 - **Area**: `ui/model`, `domain/library`
 - **Priority**: `P2`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required` - helper extraction
 - **Reviewer**: `TBD`
@@ -30,16 +30,21 @@ Search normalization and compatibility mapping/fetch policies are embedded in `L
 
 ## Acceptance Criteria
 
-- [ ] ViewModel delegates compatibility policy and mapping logic
-- [ ] Search normalization helper is reusable and tested
+- [x] ViewModel delegates compatibility policy and mapping logic
+- [x] Search normalization helper is reusable and tested
 
 ## Validation
 
-- [ ] Unit tests for compatibility mapping and query matching
+- [x] `./gradlew :app:testDebugUnitTest --tests "app.gamegrub.domain.library.search.LibraryQueryMatcherTest" --tests "app.gamegrub.domain.library.compatibility.CompatibilityStatusMapperTest"`
 
 ## Links
 
 - Related docs: `docs/adr/ADR-004-unified-game-store-architecture.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
+
+## Progress Notes
+
+- 2026-04-06: Extracted `LibraryQueryMatcher` and `CompatibilityStatusMapper`.
+- 2026-04-06: Added dedicated tests for search normalization and compatibility mapping.
 

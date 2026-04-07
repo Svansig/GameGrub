@@ -18,23 +18,23 @@ import app.gamegrub.data.GameCompatibilityStatus
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.data.SteamLibraryApp
-import app.gamegrub.db.dao.AppInfoDao
-import app.gamegrub.db.dao.AmazonGameDao
-import app.gamegrub.db.dao.EpicGameDao
-import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.device.DeviceQueryGateway
 import app.gamegrub.domain.customgame.CustomGameScanner
+import app.gamegrub.domain.library.BuildLibraryPresentationUseCase
+import app.gamegrub.domain.library.compatibility.CompatibilityStatusMapper
 import app.gamegrub.domain.library.policy.resolveSteamOwnerIds
 import app.gamegrub.domain.library.policy.shouldBypassSteamFiltersForInstalledTab
 import app.gamegrub.domain.library.policy.shouldIncludeForOwnerScope
 import app.gamegrub.domain.library.policy.shouldIncludeForSharedFilter
 import app.gamegrub.domain.library.policy.shouldIncludeForTypeFilter
+import app.gamegrub.domain.library.search.LibraryQueryMatcher
+import app.gamegrub.domain.usecase.CompleteLibraryOAuthUseCase
+import app.gamegrub.domain.usecase.RefreshLibraryOrchestrationUseCase
 import app.gamegrub.enums.AppType
 import app.gamegrub.events.AndroidEvent
-import app.gamegrub.service.amazon.AmazonService
-import app.gamegrub.service.epic.EpicService
-import app.gamegrub.service.gog.GOGService
+import app.gamegrub.gateway.AuthStateGateway
+import app.gamegrub.gateway.LibraryGateway
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.LibraryState
 import app.gamegrub.ui.enums.AppFilter
@@ -42,7 +42,6 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
-import app.gamegrub.utils.general.unaccent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -79,35 +78,20 @@ import timber.log.Timber
 @HiltViewModel
 class LibraryViewModel @Inject constructor(
     /**
-     * DAO exposing install metadata used to derive locally downloaded Steam app ids.
-     * Ownership: data access dependency belongs in repository/gateway boundaries.
-     * Refactor target: consume install-state flows through unified `LibraryGateway`.
-     */
-    private val appInfoDao: AppInfoDao,
-    /**
      * DAO for Steam app metadata and depot size lookups used during sorting.
      * Ownership: direct DAO dependency in ViewModel is convenient but leaks data concerns.
      * Refactor target: surface size/metadata through unified `LibraryGateway` capabilities.
      */
     private val steamAppDao: SteamAppDao,
     /**
-     * DAO stream for GOG catalog entries.
-     * Ownership: better owned by unified library data boundaries.
-     * Refactor target: consolidate behind `LibraryGateway`.
+     * Unified gateway that publishes source snapshots for library rendering.
+     * Ownership: source aggregation belongs behind this boundary.
      */
-    private val gogGameDao: GOGGameDao,
+    private val libraryGateway: LibraryGateway,
     /**
-     * DAO stream for Epic catalog entries.
-     * Ownership: better owned by unified library data boundaries.
-     * Refactor target: consolidate behind `LibraryGateway`.
+     * Unified read-only auth-state boundary used for platform availability decisions.
      */
-    private val epicGameDao: EpicGameDao,
-    /**
-     * DAO stream for Amazon catalog entries.
-     * Ownership: better owned by unified library data boundaries.
-     * Refactor target: consolidate behind `LibraryGateway`.
-     */
-    private val amazonGameDao: AmazonGameDao,
+    private val authStateGateway: AuthStateGateway,
     /**
      * Service that resolves compatibility status for displayed game names.
      * Ownership: dependency is appropriate for orchestration; batching policy can be extracted.
@@ -127,6 +111,18 @@ class LibraryViewModel @Inject constructor(
      * Refactor target: `ScanCustomGamesUseCase`.
      */
     private val customGameScanner: CustomGameScanner,
+    /**
+     * Builds final library presentation output (source inclusion, sorting, pagination, badges).
+     */
+    private val buildLibraryPresentationUseCase: BuildLibraryPresentationUseCase,
+    /**
+     * Orchestrates refresh behavior across library sources.
+     */
+    private val refreshLibraryOrchestrationUseCase: RefreshLibraryOrchestrationUseCase,
+    /**
+     * Handles OAuth callback completion and post-login sync for supported stores.
+     */
+    private val completeLibraryOAuthUseCase: CompleteLibraryOAuthUseCase,
     /**
      * Application context used by OAuth handlers and service triggers.
      * Ownership: VM currently invokes services directly; moving auth/sync orchestration into a
@@ -289,58 +285,38 @@ class LibraryViewModel @Inject constructor(
         refreshPlatformAuthState()
 
         viewModelScope.launch(Dispatchers.IO) {
-            steamAppDao.getAllOwnedLibraryApps(
-                // ownerIds = SteamService.familyMembers.ifEmpty { listOf((SteamService.getSteam3AccountId() ?: 0L).toInt()) },
-            ).collect { apps ->
-                // Room can emit frequently during sync; only react when payload actually changes.
-                if (appList != apps) {
-                    Timber.tag("LibraryViewModel").d("Collecting ${apps.size} apps")
-                    appList = apps
-                    onFilterApps(paginationCurrentPage)
+            libraryGateway.observeSourceSnapshot().collect { snapshot ->
+                var hasChanges = false
+
+                if (appList != snapshot.steamApps) {
+                    Timber.tag("LibraryViewModel").d("Collecting ${snapshot.steamApps.size} apps")
+                    appList = snapshot.steamApps
+                    hasChanges = true
                 }
-            }
-        }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            appInfoDao.observeDownloadedAppIds().collect { ids ->
-                val newSet = ids.toSet()
-                if (downloadedSteamAppIds != newSet) {
-                    downloadedSteamAppIds = newSet
-                    onFilterApps(paginationCurrentPage)
+                if (downloadedSteamAppIds != snapshot.downloadedSteamAppIds) {
+                    downloadedSteamAppIds = snapshot.downloadedSteamAppIds
+                    hasChanges = true
                 }
-            }
-        }
 
-        // Collect GOG games
-        viewModelScope.launch(Dispatchers.IO) {
-            gogGameDao.getAll().collect { games ->
-                Timber.tag("LibraryViewModel").d("Collecting ${games.size} GOG games")
-                // Check if the list has actually changed before triggering a re-filter
-                if (gogGameList != games) {
-                    gogGameList = games
-                    onFilterApps(paginationCurrentPage)
+                if (gogGameList != snapshot.gogGames) {
+                    Timber.tag("LibraryViewModel").d("Collecting ${snapshot.gogGames.size} GOG games")
+                    gogGameList = snapshot.gogGames
+                    hasChanges = true
                 }
-            }
-        }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            epicGameDao.getAll().collect { games ->
-                Timber.tag("LibraryViewModel").d("Collecting ${games.size} Epic games")
-
-                val hasChanges = epicGameList.size != games.size || epicGameList != games
-                epicGameList = games
-
-                if (hasChanges) {
-                    onFilterApps(paginationCurrentPage)
+                if (epicGameList != snapshot.epicGames) {
+                    Timber.tag("LibraryViewModel").d("Collecting ${snapshot.epicGames.size} Epic games")
+                    epicGameList = snapshot.epicGames
+                    hasChanges = true
                 }
-            }
-        }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            amazonGameDao.getAll().collect { games ->
-                Timber.tag("LibraryViewModel").d("Collecting ${games.size} Amazon games")
-                val hasChanges = amazonGameList.size != games.size || amazonGameList != games
-                amazonGameList = games
+                if (amazonGameList != snapshot.amazonGames) {
+                    Timber.tag("LibraryViewModel").d("Collecting ${snapshot.amazonGames.size} Amazon games")
+                    amazonGameList = snapshot.amazonGames
+                    hasChanges = true
+                }
+
                 if (hasChanges) {
                     onFilterApps(paginationCurrentPage)
                 }
@@ -557,22 +533,9 @@ class LibraryViewModel @Inject constructor(
             gameCompatibilityService.clearCache()
 
             try {
-                val newApps = SteamService.refreshOwnedGamesFromServer()
-                if (newApps > 0) {
-                    Timber.tag("LibraryViewModel").i("Queued $newApps newly owned games for PICS sync")
-                } else {
-                    Timber.tag("LibraryViewModel").d("No newly owned games discovered during refresh")
-                }
-                if (GOGService.hasStoredCredentials(context)) {
-                    Timber.tag("LibraryViewModel").i("Triggering GOG library refresh")
-                    GOGService.triggerLibrarySync(context)
-                }
-                if (AmazonService.hasStoredCredentials(context)) {
-                    Timber.tag("LibraryViewModel").i("Triggering Amazon library refresh")
-                    AmazonService.triggerLibrarySync(context)
-                }
+                refreshLibraryOrchestrationUseCase()
             } catch (e: Exception) {
-                Timber.tag("LibraryViewModel").e(e, "Failed to refresh owned games from server")
+                Timber.tag("LibraryViewModel").e(e, "Failed to refresh library sources")
             } finally {
                 onFilterApps(0).join()
                 // Fetch compatibility for current page after refresh
@@ -639,23 +602,12 @@ class LibraryViewModel @Inject constructor(
         }
 
         val code = authCode ?: return
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = runCatching { GOGService.authenticateWithCode(context, code) }.getOrElse {
-                Timber.tag("LibraryViewModel").e(it, "GOG authentication failed")
-                postAuthMessage(context.getString(R.string.gog_login_cancel))
-                return@launch
-            }
-
-            if (result.isSuccess) {
-                GOGService.start(context)
-                GOGService.triggerLibrarySync(context)
-                postAuthMessage(context.getString(R.string.gog_login_success_title))
-                refreshPlatformAuthState()
-                onFilterApps(paginationCurrentPage)
-            } else {
-                postAuthMessage(result.exceptionOrNull()?.message ?: context.getString(R.string.gog_login_cancel))
-            }
-        }
+        handleOAuthResult(
+            source = GameSource.GOG,
+            authCode = code,
+            successMessage = context.getString(R.string.gog_login_success_title),
+            cancelMessage = context.getString(R.string.gog_login_cancel),
+        )
     }
 
     /**
@@ -683,23 +635,12 @@ class LibraryViewModel @Inject constructor(
         }
 
         val code = authCode ?: return
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = runCatching { EpicService.authenticateWithCode(context, code) }.getOrElse {
-                Timber.tag("LibraryViewModel").e(it, "Epic authentication failed")
-                postAuthMessage(context.getString(R.string.epic_login_cancel))
-                return@launch
-            }
-
-            if (result.isSuccess) {
-                EpicService.start(context)
-                EpicService.triggerLibrarySync(context)
-                postAuthMessage(context.getString(R.string.epic_login_success_title))
-                refreshPlatformAuthState()
-                onFilterApps(paginationCurrentPage)
-            } else {
-                postAuthMessage(result.exceptionOrNull()?.message ?: context.getString(R.string.epic_login_cancel))
-            }
-        }
+        handleOAuthResult(
+            source = GameSource.EPIC,
+            authCode = code,
+            successMessage = context.getString(R.string.epic_login_success_title),
+            cancelMessage = context.getString(R.string.epic_login_cancel),
+        )
     }
 
     /**
@@ -727,23 +668,12 @@ class LibraryViewModel @Inject constructor(
         }
 
         val code = authCode ?: return
-        viewModelScope.launch(Dispatchers.IO) {
-            val result = runCatching { AmazonService.authenticateWithCode(context, code) }.getOrElse {
-                Timber.tag("LibraryViewModel").e(it, "Amazon authentication failed")
-                postAuthMessage(context.getString(R.string.amazon_login_cancel))
-                return@launch
-            }
-
-            if (result.isSuccess) {
-                AmazonService.start(context)
-                AmazonService.triggerLibrarySync(context)
-                postAuthMessage(context.getString(R.string.amazon_login_success_title))
-                refreshPlatformAuthState()
-                onFilterApps(paginationCurrentPage)
-            } else {
-                postAuthMessage(result.exceptionOrNull()?.message ?: context.getString(R.string.amazon_login_cancel))
-            }
-        }
+        handleOAuthResult(
+            source = GameSource.AMAZON,
+            authCode = code,
+            successMessage = context.getString(R.string.amazon_login_success_title),
+            cancelMessage = context.getString(R.string.amazon_login_cancel),
+        )
     }
 
     /**
@@ -795,6 +725,25 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    private fun handleOAuthResult(
+        source: GameSource,
+        authCode: String,
+        successMessage: String,
+        cancelMessage: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val result = completeLibraryOAuthUseCase(source, authCode)
+            if (result.isSuccess) {
+                postAuthMessage(successMessage)
+                refreshPlatformAuthState()
+                onFilterApps(paginationCurrentPage)
+            } else {
+                Timber.tag("LibraryViewModel").e(result.exceptionOrNull(), "OAuth completion failed for $source")
+                postAuthMessage(result.exceptionOrNull()?.message ?: cancelMessage)
+            }
+        }
+    }
+
     /**
      * Reads platform auth booleans into a stable snapshot.
      *
@@ -803,10 +752,10 @@ class LibraryViewModel @Inject constructor(
      */
     private fun snapshotPlatformAuthState(): PlatformAuthState {
         return PlatformAuthState(
-            steamLoggedIn = SteamService.isLoggedIn,
-            gogLoggedIn = GOGService.hasStoredCredentials(context),
-            epicLoggedIn = EpicService.hasStoredCredentials(context),
-            amazonLoggedIn = AmazonService.hasStoredCredentials(context),
+            steamLoggedIn = authStateGateway.isLoggedIn(GameSource.STEAM),
+            gogLoggedIn = authStateGateway.hasStoredCredentials(GameSource.GOG),
+            epicLoggedIn = authStateGateway.hasStoredCredentials(GameSource.EPIC),
+            amazonLoggedIn = authStateGateway.hasStoredCredentials(GameSource.AMAZON),
         )
     }
 
@@ -909,7 +858,7 @@ class LibraryViewModel @Inject constructor(
                 .asSequence()
                 .filter { item ->
                     if (currentState.searchQuery.isNotEmpty()) {
-                        matches(item.name, currentState.searchQuery)
+                        LibraryQueryMatcher.matches(item.name, currentState.searchQuery)
                     } else {
                         true
                     }
@@ -1010,7 +959,7 @@ class LibraryViewModel @Inject constructor(
                 .asSequence()
                 .filter { game ->
                     if (currentState.searchQuery.isNotEmpty()) {
-                        matches(game.title, currentState.searchQuery)
+                        LibraryQueryMatcher.matches(game.title, currentState.searchQuery)
                     } else {
                         true
                     }
@@ -1050,7 +999,7 @@ class LibraryViewModel @Inject constructor(
                 .asSequence()
                 .filter { game ->
                     if (currentState.searchQuery.isNotEmpty()) {
-                        matches(game.title, currentState.searchQuery)
+                        LibraryQueryMatcher.matches(game.title, currentState.searchQuery)
                     } else {
                         true
                     }
@@ -1090,7 +1039,7 @@ class LibraryViewModel @Inject constructor(
                 .asSequence()
                 .filter { game ->
                     if (currentState.searchQuery.isNotEmpty()) {
-                        matches(game.title, currentState.searchQuery)
+                        LibraryQueryMatcher.matches(game.title, currentState.searchQuery)
                     } else {
                         true
                     }
@@ -1129,7 +1078,7 @@ class LibraryViewModel @Inject constructor(
             val steamCountForBadges = steamSharedFilteredApps
                 .asSequence()
                 .filter { item ->
-                    if (currentState.searchQuery.isNotEmpty()) matches(item.name, currentState.searchQuery) else true
+                    if (currentState.searchQuery.isNotEmpty()) LibraryQueryMatcher.matches(item.name, currentState.searchQuery) else true
                 }
                 .filter { item ->
                     if (installedFilterEnabled) isSteamInstalled(item) else true
@@ -1139,7 +1088,7 @@ class LibraryViewModel @Inject constructor(
             val gogCountForBadges = gogGameList
                 .asSequence()
                 .filter { game ->
-                    if (currentState.searchQuery.isNotEmpty()) matches(game.title, currentState.searchQuery) else true
+                    if (currentState.searchQuery.isNotEmpty()) LibraryQueryMatcher.matches(game.title, currentState.searchQuery) else true
                 }
                 .filter { game ->
                     if (installedFilterEnabled) game.isInstalled else true
@@ -1149,7 +1098,7 @@ class LibraryViewModel @Inject constructor(
             val epicCountForBadges = epicGameList
                 .asSequence()
                 .filter { game ->
-                    if (currentState.searchQuery.isNotEmpty()) matches(game.title, currentState.searchQuery) else true
+                    if (currentState.searchQuery.isNotEmpty()) LibraryQueryMatcher.matches(game.title, currentState.searchQuery) else true
                 }
                 .filter { game ->
                     if (installedFilterEnabled) game.isInstalled else true
@@ -1159,7 +1108,7 @@ class LibraryViewModel @Inject constructor(
             val amazonCountForBadges = amazonGameList
                 .asSequence()
                 .filter { game ->
-                    if (currentState.searchQuery.isNotEmpty()) matches(game.title, currentState.searchQuery) else true
+                    if (currentState.searchQuery.isNotEmpty()) LibraryQueryMatcher.matches(game.title, currentState.searchQuery) else true
                 }
                 .filter { game ->
                     if (installedFilterEnabled) game.isInstalled else true
@@ -1189,158 +1138,66 @@ class LibraryViewModel @Inject constructor(
                     )
             }
 
-            // Compute effective source filters based on current tab
-            // ALL tab uses user preferences, other tabs override with their presets
-            // Use captured currentState (not _state.value) to avoid TOCTOU race
-            val currentTab = currentState.currentTab
-            val includeSteam = if (currentTab == LibraryTab.ALL) {
-                currentState.showSteamInLibrary
-            } else {
-                currentTab.showSteam
-            }
-            val includeOpen = if (currentTab == LibraryTab.ALL) {
-                currentState.showCustomGamesInLibrary
-            } else {
-                currentTab.showCustom
-            }
-
             val authState = snapshotPlatformAuthState()
 
-            // For the INSTALLED tab, bypass auth checks: locally installed games are accessible
-            // regardless of current login state.
-            val includeGOG = (
-                if (currentTab == LibraryTab.ALL) {
-                    currentState.showGOGInLibrary
-                } else {
-                    currentTab.showGoG
-                }
-                ) &&
-                (authState.gogLoggedIn || currentTab.installedOnly)
+            val presentation = buildLibraryPresentationUseCase(
+                BuildLibraryPresentationUseCase.Input(
+                    currentState = currentState,
+                    authSteamLoggedIn = authState.steamLoggedIn,
+                    authGogLoggedIn = authState.gogLoggedIn,
+                    authEpicLoggedIn = authState.epicLoggedIn,
+                    authAmazonLoggedIn = authState.amazonLoggedIn,
+                    steamEntries = steamEntries.map { BuildLibraryPresentationUseCase.Entry(it.item, it.isInstalled) },
+                    customEntries = customEntries.map { BuildLibraryPresentationUseCase.Entry(it.item, it.isInstalled) },
+                    gogEntries = gogEntries.map { BuildLibraryPresentationUseCase.Entry(it.item, it.isInstalled) },
+                    epicEntries = epicEntries.map { BuildLibraryPresentationUseCase.Entry(it.item, it.isInstalled) },
+                    amazonEntries = amazonEntries.map { BuildLibraryPresentationUseCase.Entry(it.item, it.isInstalled) },
+                    steamCountForBadges = steamCountForBadges,
+                    gogCountForBadges = gogCountForBadges,
+                    epicCountForBadges = epicCountForBadges,
+                    amazonCountForBadges = amazonCountForBadges,
+                    steamInstalledCount = steamInstalledCount,
+                    gogInstalledCount = gogInstalledCount,
+                    epicInstalledCount = epicInstalledCount,
+                    amazonInstalledCount = amazonInstalledCount,
+                    paginationPage = paginationPage,
+                    pageSize = PrefManager.itemsPerPage,
+                ),
+            )
 
-            val includeEpic = (
-                if (currentTab == LibraryTab.ALL) {
-                    currentState.showEpicInLibrary
-                } else {
-                    currentTab.showEpic
-                }
-                ) &&
-                (authState.epicLoggedIn || currentTab.installedOnly)
-
-            val includeAmazon = (
-                if (currentTab == LibraryTab.ALL) {
-                    currentState.showAmazonInLibrary
-                } else {
-                    currentTab.showAmazon
-                }
-                ) &&
-                (authState.amazonLoggedIn || currentTab.installedOnly)
-
-            // Combine both lists and apply sort option
-            val sortComparator: Comparator<LibraryEntry> = when (currentState.currentSortOption) {
-                SortOption.INSTALLED_FIRST -> compareBy<LibraryEntry> { entry ->
-                    if (entry.isInstalled) 0 else 1
-                }.thenBy { it.item.name.lowercase() }
-
-                SortOption.NAME_ASC -> compareBy { it.item.name.lowercase() }
-
-                SortOption.NAME_DESC -> compareByDescending { it.item.name.lowercase() }
-
-                SortOption.RECENTLY_PLAYED -> compareBy<LibraryEntry> { entry ->
-                    if (entry.isInstalled) 0 else 1
-                }.thenBy { it.item.name.lowercase() }
-
-                SortOption.SIZE_SMALLEST -> compareBy<LibraryEntry> { it.item.sizeBytes }
-                    .thenBy { it.item.name.lowercase() }
-
-                SortOption.SIZE_LARGEST -> compareByDescending<LibraryEntry> { it.item.sizeBytes }
-                    .thenBy { it.item.name.lowercase() }
-            }
-
-            val combined = buildList {
-                if (includeSteam) addAll(steamEntries)
-                if (includeOpen) addAll(customEntries)
-                if (includeGOG) addAll(gogEntries)
-                if (includeEpic) addAll(epicEntries)
-                if (includeAmazon) addAll(amazonEntries)
-            }.sortedWith(sortComparator).mapIndexed { idx, entry ->
-                entry.item.copy(index = idx, isInstalled = entry.isInstalled)
-            }
-
-            // Total count for the current filter
-            val totalFound = combined.size
-
-            // Determine how many pages and slice the list for incremental loading
-            val pageSize = PrefManager.itemsPerPage
-            // Update internal pagination state
             paginationCurrentPage = paginationPage
-            lastPageInCurrentFilter = if (totalFound == 0) 0 else (totalFound - 1) / pageSize
-            // Calculate how many items to show: (pagesLoaded * pageSize)
-            val endIndex = min((paginationPage + 1) * pageSize, totalFound)
-            val pagedList = combined.take(endIndex)
+            lastPageInCurrentFilter = presentation.lastPageInFilter
 
-            Timber.tag("LibraryViewModel").d("Filtered list size (with Custom Games): $totalFound")
+            Timber.tag("LibraryViewModel").d("Filtered list size (with Custom Games): ${presentation.totalFound}")
 
             if (isFirstLoad) {
                 isFirstLoad = false
             }
 
             // Fetch compatibility for current page games
-            fetchCompatibilityForPage(pagedList.map { it.name })
+            fetchCompatibilityForPage(presentation.pagedList.map { it.name })
 
             _state.update {
                 it.copy(
-                    appInfoList = pagedList,
-                    currentPaginationPage = paginationPage + 1, // visual display is not 0 indexed
-                    lastPaginationPage = lastPageInCurrentFilter + 1,
-                    totalAppsInFilter = totalFound,
+                    appInfoList = presentation.pagedList,
+                    currentPaginationPage = presentation.currentPaginationPage,
+                    lastPaginationPage = presentation.lastPageInFilter + 1,
+                    totalAppsInFilter = presentation.totalFound,
                     isLoading = false, // Loading complete
                     isSteamLoggedIn = authState.steamLoggedIn,
                     isGogLoggedIn = authState.gogLoggedIn,
                     isEpicLoggedIn = authState.epicLoggedIn,
                     isAmazonLoggedIn = authState.amazonLoggedIn,
-                    // Per-source counts for tab badges
-                    // Use user prefs + auth state only (not current tab) so badges stay stable across tab switches
-                    allCount = (if (currentState.showSteamInLibrary) steamCountForBadges else 0) +
-                        (if (currentState.showCustomGamesInLibrary) customEntries.size else 0) +
-                        (if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogCountForBadges else 0) +
-                        (if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicCountForBadges else 0) +
-                        (
-                            if (currentState.showAmazonInLibrary &&
-                                authState.amazonLoggedIn
-                            ) {
-                                amazonCountForBadges
-                            } else {
-                                0
-                            }
-                            ),
-                    installedCount = steamInstalledCount + gogInstalledCount + epicInstalledCount +
-                        amazonInstalledCount + customEntries.size,
-                    steamCount = if (currentState.showSteamInLibrary) steamCountForBadges else 0,
-                    gogCount = if (currentState.showGOGInLibrary && authState.gogLoggedIn) gogCountForBadges else 0,
-                    epicCount = if (currentState.showEpicInLibrary && authState.epicLoggedIn) epicCountForBadges else 0,
-                    amazonCount = if (currentState.showAmazonInLibrary &&
-                        authState.amazonLoggedIn
-                    ) {
-                        amazonCountForBadges
-                    } else {
-                        0
-                    },
-                    localCount = if (currentState.showCustomGamesInLibrary) customEntries.size else 0,
+                    allCount = presentation.allCount,
+                    installedCount = presentation.installedCount,
+                    steamCount = presentation.steamCount,
+                    gogCount = presentation.gogCount,
+                    epicCount = presentation.epicCount,
+                    amazonCount = presentation.amazonCount,
+                    localCount = presentation.localCount,
                 )
             }
         }
-    }
-
-    /**
-     * Compares the game name against the search query using an exact match
-     * and then again using a normalized form with diacritics removed.
-     *
-     * Why: users expect accent-insensitive search regardless of localized title spelling.
-     * Ownership: text-matching helper is generic.
-     * Refactor target: `app.gamegrub.domain.library.search.LibraryQueryMatcher`.
-     */
-    private fun matches(gameName: String, searchQuery: String): Boolean {
-        return gameName.contains(searchQuery, ignoreCase = true) || gameName.unaccent().contains(searchQuery, ignoreCase = true)
     }
 
     /**
@@ -1388,7 +1245,7 @@ class LibraryViewModel @Inject constructor(
         results: Map<String, GameCompatibilityService.GameCompatibilityResponse>,
     ) {
         val compatibilityMap = results.mapValues { (_, response) ->
-            compatibilityStatusFor(response)
+            CompatibilityStatusMapper.toStatus(response)
         }
 
         // Update state with compatibility map (merge with existing)
@@ -1400,20 +1257,4 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Converts raw API compatibility payload into UI/domain enum used by filters and badges.
-     * Ownership: mapping logic is domain-level and should be reusable.
-     * Refactor target: `CompatibilityStatusMapper` in domain/api compatibility package.
-     */
-    private fun compatibilityStatusFor(
-        response: GameCompatibilityService.GameCompatibilityResponse,
-    ): GameCompatibilityStatus {
-        return when {
-            response.isNotWorking -> GameCompatibilityStatus.NOT_COMPATIBLE
-            !response.hasBeenTried -> GameCompatibilityStatus.UNKNOWN
-            response.gpuPlayableCount > 0 -> GameCompatibilityStatus.GPU_COMPATIBLE
-            response.totalPlayableCount > 0 -> GameCompatibilityStatus.COMPATIBLE
-            else -> GameCompatibilityStatus.UNKNOWN
-        }
-    }
 }

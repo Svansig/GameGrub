@@ -3,7 +3,7 @@
 - **ID**: `ARCH-022`
 - **Area**: `ui/model`
 - **Priority**: `P1`
-- **Status**: `In Progress`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `Updated` - Added phased child-ticket plan for incremental refactor delivery
 - **Reviewer**: `TBD`
@@ -41,10 +41,10 @@ inside one class.
 
 ## Acceptance Criteria
 
-- [ ] `LibraryViewModel` depends on unified gateway/use-case boundaries, not store-specific DAOs/services
-- [ ] Filtering/aggregation logic is testable outside `LibraryViewModel`
-- [ ] Refresh/auth orchestration is delegated to domain/use-case layer
-- [ ] Existing behavior for all supported stores remains intact
+- [x] `LibraryViewModel` depends on unified gateway/use-case boundaries, not store-specific DAOs/services
+- [x] Filtering/aggregation logic is testable outside `LibraryViewModel`
+- [x] Refresh/auth orchestration is delegated to domain/use-case layer
+- [x] Existing behavior for all supported stores remains intact
 
 ## Links
 
@@ -58,4 +58,11 @@ inside one class.
 - 2026-04-06: Completed `ARCH-022a` by extracting owner/type/install policy helpers to
   `app/src/main/java/app/gamegrub/domain/library/policy/LibraryOwnershipPolicy.kt` and
   validating `LibraryViewModelOwnerFilterTest`.
+- 2026-04-06: Completed `ARCH-022b` by extracting library presentation composition to
+  `BuildLibraryPresentationUseCase`.
+- 2026-04-06: Completed `ARCH-022c` by introducing `LibraryGateway.observeSourceSnapshot()`
+  and removing direct DAO collection from `LibraryViewModel`.
+- 2026-04-06: Completed `ARCH-022d` by delegating refresh/OAuth completion to domain use cases.
+- 2026-04-06: Completed `ARCH-022e` by extracting search matcher and compatibility mapper with
+  dedicated tests.
 

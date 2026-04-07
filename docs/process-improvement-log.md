@@ -16,6 +16,24 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-06`
+- **Ticket**: `todo/ARCH-022b.md`, `todo/ARCH-022c.md`, `todo/ARCH-022d.md`, `todo/ARCH-022e.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: `LibraryViewModel` mixed source data collection, presentation composition, and auth/refresh orchestration in one class.
+- **Proposed Action**: Keep source aggregation behind `LibraryGateway.observeSourceSnapshot()`, move presentation composition to `BuildLibraryPresentationUseCase`, move refresh/OAuth completion to dedicated use cases, and extract reusable search/compatibility helpers.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-06`
+- **Ticket**: `todo/ARCH-022.md`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Refactor tickets can stall when acceptance criteria and validation evidence are updated late.
+- **Proposed Action**: Update each child ticket status/validation in the same commit that introduces its code changes and run targeted tests before closure.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-06`
 - **Ticket**: `todo/ARCH-022a.md`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

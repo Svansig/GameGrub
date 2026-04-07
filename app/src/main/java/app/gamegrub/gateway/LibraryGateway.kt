@@ -5,6 +5,8 @@ import app.gamegrub.data.LibraryItem
 import kotlinx.coroutines.flow.Flow
 
 interface LibraryGateway {
+    fun observeSourceSnapshot(): Flow<LibrarySourceSnapshot>
+
     fun getAllGames(): Flow<List<LibraryItem>>
 
     fun getGamesBySource(source: GameSource): Flow<List<LibraryItem>>

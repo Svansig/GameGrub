@@ -3,7 +3,7 @@
 - **ID**: `ARCH-022b`
 - **Area**: `ui/model`, `domain/library`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required` - internal refactor
 - **Reviewer**: `TBD`
@@ -30,17 +30,22 @@
 
 ## Acceptance Criteria
 
-- [ ] `onFilterApps` delegates core transformation work to a use case
-- [ ] Pipeline behavior remains functionally equivalent
-- [ ] Added/updated unit tests cover extraction seams
+- [x] `onFilterApps` delegates core transformation work to a use case
+- [x] Pipeline behavior remains functionally equivalent
+- [x] Added/updated unit tests cover extraction seams
 
 ## Validation
 
-- [ ] Targeted unit tests for extracted use case and ViewModel integration
+- [x] `./gradlew :app:testDebugUnitTest --tests "app.gamegrub.ui.model.LibraryViewModelOwnerFilterTest" --tests "app.gamegrub.domain.library.search.LibraryQueryMatcherTest" --tests "app.gamegrub.domain.library.compatibility.CompatibilityStatusMapperTest" --tests "app.gamegrub.domain.usecase.RefreshLibraryOrchestrationUseCaseTest"`
 
 ## Links
 
 - Related docs: `docs/adr/ADR-004-unified-game-store-architecture.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
+
+## Progress Notes
+
+- 2026-04-06: Added `BuildLibraryPresentationUseCase` and moved source inclusion, sorting,
+  pagination, and badge composition from `LibraryViewModel.onFilterApps`.
 

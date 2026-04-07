@@ -3,7 +3,7 @@
 - **ID**: `ARCH-022d`
 - **Area**: `ui/model`, `domain/usecase`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required` - orchestration refactor
 - **Reviewer**: `TBD`
@@ -30,16 +30,23 @@
 
 ## Acceptance Criteria
 
-- [ ] ViewModel delegates refresh and OAuth orchestration to use-case/coordinator layer
-- [ ] Auth state + sync behavior remains equivalent
+- [x] ViewModel delegates refresh and OAuth orchestration to use-case/coordinator layer
+- [x] Auth state + sync behavior remains equivalent
 
 ## Validation
 
-- [ ] Unit tests for orchestration success/failure and message mapping paths
+- [x] `./gradlew :app:testDebugUnitTest --tests "app.gamegrub.ui.model.LibraryViewModelOwnerFilterTest" --tests "app.gamegrub.domain.library.search.LibraryQueryMatcherTest" --tests "app.gamegrub.domain.library.compatibility.CompatibilityStatusMapperTest" --tests "app.gamegrub.domain.usecase.RefreshLibraryOrchestrationUseCaseTest"`
 
 ## Links
 
 - Related docs: `docs/adr/ADR-004-unified-game-store-architecture.md`
 - Related PR: `TBD`
 - Related commit(s): `TBD`
+
+## Progress Notes
+
+- 2026-04-06: Added `RefreshLibraryOrchestrationUseCase` and
+  `CompleteLibraryOAuthUseCase`.
+- 2026-04-06: `LibraryViewModel` now delegates refresh/OAuth completion and reads
+  auth state via `AuthStateGateway`.
 

@@ -9,6 +9,13 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Resolver that provides recommendations based on local launch history.
+ *
+ * Queries LaunchRecordStore to find successful launch configurations
+ * and returns them as ranked recommendations. Uses last-known-good
+ * pattern for primary recommendations.
+ */
 @Singleton
 class LocalRecommendationResolver @Inject constructor(
     private val recordStore: LaunchRecordStore,

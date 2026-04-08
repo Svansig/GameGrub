@@ -33,6 +33,15 @@ enum class FallbackLevel {
     EXHAUSTED,
 }
 
+/**
+ * State machine for managing adaptive fallback during game launches.
+ *
+ * Tracks fallback state per session and manages the transition between
+ * fallback levels. Provides bounded retry with automatic progression
+ * through fallback strategies.
+ *
+ * @property maxAttemptsPerLevel Maximum attempts before moving to next fallback level
+ */
 class FallbackStateMachine(
     private val maxAttemptsPerLevel: Int = 2,
 ) {
@@ -129,7 +138,7 @@ class FallbackStateMachine(
                 description = "Final retry with same config",
             )
             FallbackLevel.EXHAUSTED -> FallbackStrategy(
-                action = app.gamegrub.launch.error.RecoveryAction.USER intervention_REQUIRED,
+                action = app.gamegrub.launch.error.RecoveryAction.USER_INTERVENTION_REQUIRED,
                 description = "All fallback attempts exhausted",
             )
         }

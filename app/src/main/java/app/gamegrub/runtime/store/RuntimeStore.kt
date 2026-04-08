@@ -11,6 +11,15 @@ import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Service for managing immutable runtime bundles.
+ *
+ * Provides registration, verification, and retrieval of base, runtime, and driver
+ * bundles. Each bundle is identified by a unique ID and verified via content hash.
+ * Supports concurrent access and atomic operations.
+ *
+ * @property rootDir Root directory for the runtime store
+ */
 @Singleton
 class RuntimeStore @Inject constructor(
     private val rootDir: File,

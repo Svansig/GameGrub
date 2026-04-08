@@ -13,12 +13,26 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Result of a launch execution attempt.
+ *
+ * Sealed type representing successful launch, failure, or cancellation.
+ * Carries session identifier for tracking and debugging.
+ */
 sealed class LaunchResult {
     data class Success(val sessionId: String, val processId: Long? = null) : LaunchResult()
     data class Failure(val sessionId: String, val reason: String, val exitCode: Int? = null) : LaunchResult()
     data class Cancelled(val sessionId: String) : LaunchResult()
 }
 
+/**
+ * Configuration options for launch execution.
+ *
+ * @property dryRun If true, validate but don't actually launch
+ * @property captureOutput If true, capture stdout/stderr
+ * @property timeoutMs Timeout for launch completion
+ * @property spawnDetached If true, spawn process detached from parent
+ */
 data class LaunchOptions(
     val dryRun: Boolean = false,
     val captureOutput: Boolean = false,
@@ -26,6 +40,16 @@ data class LaunchOptions(
     val spawnDetached: Boolean = true,
 )
 
+/**
+ * Engine for executing game launches from a SessionPlan.
+ *
+ * Takes a composed SessionPlan and executes the actual game launch,
+ * handling process spawning, exit monitoring, and milestone recording.
+ * Uses RuntimeStore and ContainerStore for validation.
+ *
+ * @property runtimeStore Store for runtime bundle verification
+ * @property containerStore Store for container state
+ */
 @Singleton
 class LaunchEngine @Inject constructor(
     private val runtimeStore: app.gamegrub.runtime.store.RuntimeStore,

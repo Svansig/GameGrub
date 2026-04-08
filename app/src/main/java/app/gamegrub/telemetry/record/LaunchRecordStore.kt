@@ -1,7 +1,5 @@
 package app.gamegrub.telemetry.record
 
-import app.gamegrub.session.model.LaunchOutcome
-import app.gamegrub.session.model.SessionMilestone
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -11,6 +9,15 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Local persistence store for launch session records.
+ *
+ * Provides CRUD operations for LaunchSessionRecord objects stored as JSON
+ * files in a dedicated directory. Used by recommendation systems and
+ * for launch telemetry analysis.
+ *
+ * @property rootDir Root directory for telemetry data storage
+ */
 @Singleton
 class LaunchRecordStore @Inject constructor(
     private val rootDir: File,

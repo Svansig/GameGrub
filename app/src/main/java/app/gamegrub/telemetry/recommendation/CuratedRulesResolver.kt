@@ -4,6 +4,15 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Resolver providing curated recommendations for known games.
+ *
+ * Contains hardcoded rules for games with known compatibility issues
+ * or special requirements. Used as a fallback when local history
+ * is insufficient.
+ *
+ * @see LocalRecommendationResolver
+ */
 @Singleton
 class CuratedRulesResolver @Inject constructor() {
 

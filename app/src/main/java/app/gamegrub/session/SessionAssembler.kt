@@ -14,6 +14,18 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Assembles a complete launch session from runtime bundles and container state.
+ *
+ * Resolves and composes all required components (base, runtime, driver, container)
+ * into a SessionPlan that captures all paths, environment variables, and mount
+ * mappings needed to launch a game. Uses RuntimeStore and ContainerStore to
+ * retrieve or create necessary components.
+ *
+ * @property runtimeStore Store for runtime bundles
+ * @property containerStore Store for container state
+ * @property cacheController Controller for cache management
+ */
 @Singleton
 class SessionAssembler @Inject constructor(
     private val runtimeStore: RuntimeStore,

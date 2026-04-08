@@ -13,7 +13,7 @@ data class LaunchProfileManifest(
     val driverId: String? = null,
     val environmentVariables: Map<String, String> = emptyMap(),
     val launchArgs: List<String> = emptyList(),
-    val metadata: LaunchProfileMetadata = LaunchProfileMetadata(),
+    val metadata: LaunchProfileMetadata = LaunchProfileMetadata(vkd3dHud = null),
 ) {
     fun validate(): List<String> {
         val errors = mutableListOf<String>()
@@ -42,7 +42,7 @@ data class LaunchProfileMetadata(
     val esyncEnabled: Boolean = false,
     val fsyncEnabled: Boolean = false,
     val dxvkHud: String? = null,
-    val vkd3d Hud: String? = null,
+    val vkd3dHud: String? = null,
     val description: String? = null,
     val author: String? = null,
 )

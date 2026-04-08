@@ -38,7 +38,7 @@ enum class RecoveryAction {
     FALLBACK_RUNTIME,
     FALLBACK_DRIVER,
     CONTAINER_RESET,
-    USER intervention_REQUIRED,
+    USER_INTERVENTION_REQUIRED,
 }
 
 object LaunchFailureClassifier {

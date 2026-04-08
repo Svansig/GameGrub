@@ -10,6 +10,15 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Service for managing per-game container state.
+ *
+ * Provides container lifecycle management including creation, retrieval,
+ * update, and deletion. Each container stores mutable game-specific state
+ * including prefixes, installations, saves, and overrides.
+ *
+ * @property rootDir Root directory for container storage
+ */
 @Singleton
 class ContainerStore @Inject constructor(
     private val rootDir: File,

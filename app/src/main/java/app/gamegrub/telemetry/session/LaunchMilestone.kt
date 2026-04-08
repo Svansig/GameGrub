@@ -2,6 +2,15 @@ package app.gamegrub.telemetry.session
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Milestones representing key stages in the game launch pipeline.
+ *
+ * These markers provide fine-grained timing and sequencing information
+ * for telemetry, debugging, and performance analysis.
+ *
+ * @see MilestoneRecorder
+ * @see MilestoneEmitter
+ */
 @Serializable
 enum class LaunchMilestone {
     LAUNCH_REQUEST_QUEUED,
@@ -17,6 +26,14 @@ enum class LaunchMilestone {
     LAUNCH_FAILED,
 }
 
+/**
+ * A single recorded milestone event.
+ *
+ * @property sessionId The launch session this milestone belongs to
+ * @property milestone The milestone that was reached
+ * @property timestamp Unix epoch milliseconds when the milestone was recorded
+ * @property metadata Additional context about this milestone event
+ */
 @Serializable
 data class MilestoneRecord(
     val sessionId: String,
@@ -25,6 +42,15 @@ data class MilestoneRecord(
     val metadata: Map<String, String> = emptyMap(),
 )
 
+/**
+ * Records milestones for a single launch session.
+ *
+ * Provides in-memory recording of launch milestones with timing information.
+ * Use MilestoneEmitter for global singleton access.
+ *
+ * @see LaunchMilestone
+ * @see MilestoneEmitter
+ */
 class MilestoneRecorder {
     private val milestones = mutableListOf<MilestoneRecord>()
     private var sessionId: String? = null
@@ -68,6 +94,15 @@ class MilestoneRecorder {
     }
 }
 
+/**
+ * Global singleton emitter for launch milestones.
+ *
+ * Provides a convenient facade for recording milestones across the
+ * application without requiring dependency injection of MilestoneRecorder.
+ *
+ * @see LaunchMilestone
+ * @see MilestoneRecorder
+ */
 object MilestoneEmitter {
     private val recorder = MilestoneRecorder()
 

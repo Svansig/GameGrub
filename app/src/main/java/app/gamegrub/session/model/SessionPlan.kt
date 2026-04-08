@@ -8,6 +8,23 @@ import app.gamegrub.runtime.manifest.RuntimeManifest
 import app.gamegrub.telemetry.session.LaunchFingerprint
 import kotlinx.serialization.Serializable
 
+/**
+ * Complete launch session plan containing all components needed to launch a game.
+ *
+ * Represents the assembled configuration for a single game launch, including
+ * references to runtime bundles, container state, mount mappings, environment
+ * variables, and cache handles. Produced by SessionAssembler and consumed
+ * by LaunchEngine.
+ *
+ * @property sessionId Unique identifier for this session
+ * @property metadata Session metadata (game info, timestamps)
+ * @property state Current state in the session lifecycle
+ * @property composition The composed runtime components
+ * @property mountPlan Mount point mappings for the session
+ * @property envPlan Environment variables for the session
+ * @property cacheHandles Cache directories to mount
+ * @property fingerprint Launch fingerprint for telemetry
+ */
 @Serializable
 data class SessionPlan(
     val sessionId: String,

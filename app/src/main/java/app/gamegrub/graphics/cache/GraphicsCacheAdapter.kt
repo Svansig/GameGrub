@@ -2,6 +2,12 @@ package app.gamegrub.graphics.cache
 
 import java.io.File
 
+/**
+ * Capabilities for graphics cache types.
+ *
+ * Identifies which graphics APIs and cache systems are supported
+ * by a given adapter implementation.
+ */
 enum class CacheCapability {
     DXVK_STATE_CACHE,
     VKD3D_SHADER_CACHE,
@@ -9,6 +15,16 @@ enum class CacheCapability {
     GENERIC,
 }
 
+/**
+ * Configuration for graphics cache paths and options.
+ *
+ * @property dxvkStateCachePath Path to DXVK state cache directory
+ * @property vkd3dShaderCachePath Path to VKD3D shader cache directory
+ * @property mesaShaderCachePath Path to Mesa shader cache directory
+ * @property xdgCacheHome XDG-compliant cache home directory
+ * @property enableStateCache Whether to enable DXVK/VKD3D state cache
+ * @property enableAsyncCompute Whether to enable async compute for shaders
+ */
 data class CacheConfiguration(
     val dxvkStateCachePath: String? = null,
     val vkd3dShaderCachePath: String? = null,
@@ -20,6 +36,17 @@ data class CacheConfiguration(
     fun isEnabled(): Boolean = dxvkStateCachePath != null || vkd3dShaderCachePath != null || mesaShaderCachePath != null
 }
 
+/**
+ * Adapter for managing graphics API-specific caches.
+ *
+ * Provides a common interface for configuring and managing caches for
+ * different graphics APIs including DXVK, VKD3D, and Mesa. Each adapter
+ * handles the specific environment variables and cache directories
+ * for its respective graphics API.
+ *
+ * @property capability The cache capability this adapter supports
+ * @property name Human-readable name for this adapter
+ */
 interface GraphicsCacheAdapter {
     val capability: CacheCapability
     val name: String

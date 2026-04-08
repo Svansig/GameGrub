@@ -2,6 +2,15 @@ package app.gamegrub.storage
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Storage policy for game data placement.
+ *
+ * Defines where different types of game data (runtime, cache, installs)
+ * should be stored. Supports hot (internal), cold (external), and
+ * hybrid placement strategies.
+ *
+ * @property location Primary storage location
+ */
 @Serializable
 sealed class StoragePolicy {
     abstract val location: StorageLocation
@@ -23,6 +32,7 @@ sealed class StoragePolicy {
 
     @Serializable
     data class Hybrid(
+        override val location: StorageLocation = StorageLocation.AUTO,
         val prefixLocation: StorageLocation = StorageLocation.INTERNAL,
         val cacheLocation: StorageLocation = StorageLocation.INTERNAL,
         val installLocation: StorageLocation = StorageLocation.EXTERNAL,

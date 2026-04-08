@@ -13,6 +13,15 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Controller for managing shader, translator, and probe caches.
+ *
+ * Provides lifecycle management for various cache types including creation,
+ * invalidation, and garbage collection. Tracks cache manifests for all
+ * managed caches and supports policy-based invalidation.
+ *
+ * @property rootDir Root directory for cache storage
+ */
 @Singleton
 class CacheController @Inject constructor(
     private val rootDir: File,

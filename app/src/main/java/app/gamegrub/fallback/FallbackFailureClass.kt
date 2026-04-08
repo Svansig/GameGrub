@@ -3,6 +3,12 @@ package app.gamegrub.fallback
 import app.gamegrub.launch.error.FailureClass
 import app.gamegrub.launch.error.RecoveryAction
 
+/**
+ * Priority levels for fallback attempts.
+ *
+ * Used to order fallback strategies based on likelihood of success
+ * and severity of the failure.
+ */
 enum class FallbackPriority {
     IMMEDIATE,
     HIGH,
@@ -11,6 +17,15 @@ enum class FallbackPriority {
     LAST_RESORT,
 }
 
+/**
+ * A fallback strategy for handling a specific failure class.
+ *
+ * @property targetRuntime Alternative runtime to try (optional)
+ * @property targetDriver Alternative driver to try (optional)
+ * @property targetProfile Alternative profile to try (optional)
+ * @property action The recovery action to take
+ * @property description Human-readable explanation
+ */
 data class FallbackStrategy(
     val targetRuntime: String? = null,
     val targetDriver: String? = null,
@@ -19,6 +34,15 @@ data class FallbackStrategy(
     val description: String,
 )
 
+/**
+ * Maps launch failure classes to fallback strategies.
+ *
+ * Provides priority ordering and concrete fallback actions for each
+ * type of launch failure defined in the taxonomy.
+ *
+ * @see FailureClass
+ * @see FallbackStateMachine
+ */
 object FallbackFailureClass {
     fun getPriority(failureClass: FailureClass): FallbackPriority {
         return when (failureClass) {
@@ -75,6 +99,6 @@ object FallbackFailureClass {
 
     fun canAutoFallback(failureClass: FailureClass): Boolean {
         val strategy = getFallbackStrategy(failureClass)
-        return strategy.action != RecoveryAction.NONE && strategy.action != RecoveryAction.USER intervention_REQUIRED
+        return strategy.action != RecoveryAction.NONE && strategy.action != RecoveryAction.USER_INTERVENTION_REQUIRED
     }
 }

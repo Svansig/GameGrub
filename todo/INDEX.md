@@ -64,6 +64,15 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | ARCH-050 | Done | Implement Mesa shader cache adapter | `graphics cache` | `todo/ARCH-050.md` |
 | ARCH-051 | Done | Wire XDG cache and pre-launch directory creation | `graphics cache` | `todo/ARCH-051.md` |
 
+### Phase 6: Launch Engine Integration
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-052 | Done | Create LaunchEngine abstraction for session execution | `launch engine` | `todo/ARCH-052.md` |
+| ARCH-053 | Done | Wire SessionPlan consumption in launch orchestrator | `launch engine` | `todo/ARCH-053.md` |
+| ARCH-054 | Done | Integrate env var and path mapping into launcher | `launch engine` | `todo/ARCH-054.md` |
+| ARCH-055 | Done | Add telemetry integration with launch engine | `launch engine` | `todo/ARCH-055.md` |
+
 ## Backlog - UI
 
 | ID | Priority | Title | Area | File |

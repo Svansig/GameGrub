@@ -8,6 +8,44 @@ Current execution is refactor-first. Prioritize tickets that reduce complexity a
 
 During this phase, defer tickets that primarily expand scope beyond refactor goals unless they are required dependencies for active refactor work.
 
+## Backlog - Runtime Architecture Migration (Phases 0-3)
+
+This section tracks the GameNative → GameGrub runtime architecture migration: moving from shared mutable imagefs to composed immutable bundles with explicit caching and container isolation.
+
+### Phase 0: Discovery and Guardrails
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-030 | P0 | Inventory current runtime/container/imagefs launch flow | `launch + container + runtime` | `todo/ARCH-030.md` |
+| ARCH-031 | P0 | Add structured launch fingerprinting and telemetry hooks | `launch + telemetry` | `todo/ARCH-031.md` |
+| ARCH-032 | P0 | Define launch failure taxonomy and recovery phases | `launch + error handling` | `todo/ARCH-032.md` |
+| ARCH-033 | P0 | Define milestones and structured outcome recording for launches | `launch + telemetry` | `todo/ARCH-033.md` |
+
+### Phase 1: Manifest Foundations
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-034 | P1 | Define BaseManifest and RuntimeManifest data models | `manifest + runtime store` | `todo/ARCH-034.md` |
+| ARCH-035 | P1 | Define DriverManifest and LaunchProfileManifest data models | `manifest + runtime store` | `todo/ARCH-035.md` |
+| ARCH-036 | P1 | Define ContainerManifest and CacheManifest data models | `manifest + container store` | `todo/ARCH-036.md` |
+| ARCH-037 | P1 | Implement manifest serialization and validation framework | `manifest + serialization` | `todo/ARCH-037.md` |
+
+### Phase 2: Runtime Store
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-038 | P1 | Design RuntimeStore directory schema and scaffolding | `runtime store + storage` | `todo/ARCH-038.md` |
+| ARCH-039 | P1 | Implement RuntimeStore service for bundle registration and verification | `runtime store` | `todo/ARCH-039.md` |
+| ARCH-040 | P1 | Design ContainerStore directory schema | `container store + storage` | `todo/ARCH-040.md` |
+| ARCH-041 | P1 | Implement ContainerStore service for container lifecycle management | `container store` | `todo/ARCH-041.md` |
+
+### Phase 3: Cache Controller
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-042 | P1 | Design CacheController key derivation and invalidation policy | `cache + storage` | `todo/ARCH-042.md` |
+| ARCH-043 | P1 | Implement CacheController service for cache lifecycle and retrieval | `cache controller` | `todo/ARCH-043.md` |
+
 ## Backlog - UI
 
 | ID | Priority | Title | Area | File |

@@ -94,9 +94,23 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| ARCH-063 | P1 | Define failure classes for fallback | `adaptive fallback` | `todo/ARCH-063.md` |
-| ARCH-064 | P1 | Implement fallback graph/state machine | `adaptive fallback` | `todo/ARCH-064.md` |
-| ARCH-065 | P1 | Add bounded retry policy | `adaptive fallback` | `todo/ARCH-065.md` |
+| ARCH-063 | Done | Define failure classes for fallback | `adaptive fallback` | `todo/ARCH-063.md` |
+| ARCH-064 | Done | Implement fallback graph/state machine | `adaptive fallback` | `todo/ARCH-064.md` |
+| ARCH-065 | Done | Add bounded retry policy | `adaptive fallback` | `todo/ARCH-065.md` |
+
+### Phase 10: Storage Policy and SD Support
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-066 | Done | Define storage policy model | `storage + policy` | `todo/ARCH-066.md` |
+| ARCH-067 | Done | Implement split-root container support | `storage + containers` | `todo/ARCH-067.md` |
+
+### Phase 11: Old-Path Migration Cleanup
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-068 | P1 | Identify remaining shared-runtime mutation points | `migration` | `todo/ARCH-068.md` |
+| ARCH-069 | P1 | Replace mutation with bundle/session composition | `migration` | `todo/ARCH-069.md` |
 
 ## Backlog - UI
 

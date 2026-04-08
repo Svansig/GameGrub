@@ -18,16 +18,16 @@ import com.winlator.core.FileUtils
 import com.winlator.core.envvars.EnvVars
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Data class to hold size information from gogdl info command
@@ -254,12 +254,12 @@ class GOGManager @Inject constructor(
         // Had to put in an extra case for some games not using isSecret but still are amazon prime duplicates...
         val exclude =
             title == "Unknown Game" ||
-                    title.startsWith("product_title_") ||
-                    title == "Unknown" ||
-                    downloadSize == 0L ||
-                    isSecret ||
-                    title.endsWith("Amazon Prime") ||
-                    isDlc
+                title.startsWith("product_title_") ||
+                title == "Unknown" ||
+                downloadSize == 0L ||
+                isSecret ||
+                title.endsWith("Amazon Prime") ||
+                isDlc
 
         return GOGGame(
             id = id,
@@ -609,11 +609,11 @@ class GOGManager @Inject constructor(
         // Check current directory first
         val infoFile = directory.listFiles()?.find {
             it.isFile &&
-                    if (gameId != null) {
-                        it.name == "goggame-$gameId.info"
-                    } else {
-                        it.name.startsWith("goggame-") && it.name.endsWith(".info")
-                    }
+                if (gameId != null) {
+                    it.name == "goggame-$gameId.info"
+                } else {
+                    it.name.startsWith("goggame-") && it.name.endsWith(".info")
+                }
         }
 
         if (infoFile != null) {

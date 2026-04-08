@@ -9,6 +9,9 @@ import app.gamegrub.utils.steam.generateSteamApp
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.SteamApps
+import java.util.EnumSet
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -22,9 +25,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.EnumSet
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamPicsSyncDomain @Inject constructor(

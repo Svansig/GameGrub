@@ -33,13 +33,13 @@ import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 
 /**
  * Custom Game-specific implementation of BaseAppScreen
@@ -79,11 +79,11 @@ class CustomGameAppScreen(
         fun findSteamGridDBImage(folder: File, imageType: String): String? {
             return folder.listFiles()?.firstOrNull { file ->
                 file.name.startsWith("steamgriddb_$imageType") &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.let { Uri.fromFile(it).toString() }
         }
 
@@ -111,12 +111,12 @@ class CustomGameAppScreen(
                 // Find hero image but exclude grid_hero
                 folder.listFiles()?.firstOrNull { file ->
                     file.name.startsWith("steamgriddb_hero") &&
-                            !file.name.contains("grid") &&
-                            (
-                                    file.name.endsWith(".png", ignoreCase = true) ||
-                                            file.name.endsWith(".jpg", ignoreCase = true) ||
-                                            file.name.endsWith(".webp", ignoreCase = true)
-                                    )
+                        !file.name.contains("grid") &&
+                        (
+                            file.name.endsWith(".png", ignoreCase = true) ||
+                                file.name.endsWith(".jpg", ignoreCase = true) ||
+                                file.name.endsWith(".webp", ignoreCase = true)
+                            )
                 }?.let { Uri.fromFile(it).toString() }
             }
         }

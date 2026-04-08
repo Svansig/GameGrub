@@ -4,8 +4,8 @@ import app.gamegrub.db.serializers.OsEnumSetSerializer
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.OSArch
 import app.gamegrub.service.steam.SteamService
-import kotlinx.serialization.Serializable
 import java.util.EnumSet
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class DepotInfo(

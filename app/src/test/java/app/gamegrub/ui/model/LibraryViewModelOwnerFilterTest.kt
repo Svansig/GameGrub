@@ -1,11 +1,11 @@
 package app.gamegrub.ui.model
 
-import app.gamegrub.enums.AppType
 import app.gamegrub.domain.library.policy.resolveSteamOwnerIds
 import app.gamegrub.domain.library.policy.shouldBypassSteamFiltersForInstalledTab
 import app.gamegrub.domain.library.policy.shouldIncludeForOwnerScope
 import app.gamegrub.domain.library.policy.shouldIncludeForSharedFilter
 import app.gamegrub.domain.library.policy.shouldIncludeForTypeFilter
+import app.gamegrub.enums.AppType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

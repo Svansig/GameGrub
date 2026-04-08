@@ -11,8 +11,8 @@ import app.gamegrub.enums.ControllerSupport
 import app.gamegrub.enums.Language
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.ReleaseState
-import kotlinx.serialization.json.Json
 import java.util.EnumSet
+import kotlinx.serialization.json.Json
 
 class AppConverter {
 

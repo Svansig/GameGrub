@@ -11,6 +11,8 @@ import `in`.dragonbra.javasteam.enums.EResult
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
 import `in`.dragonbra.javasteam.steam.authentication.IChallengeUrlChanged
 import `in`.dragonbra.javasteam.steam.authentication.QrAuthSession
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,8 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamAuthService @Inject constructor(
@@ -88,7 +88,7 @@ class SteamAuthService @Inject constructor(
         EResult.InvalidLoginAuthCode, EResult.ExpiredLoginAuthCode,
         EResult.RequirePasswordReEntry, EResult.ParentalControlRestricted,
         EResult.CachedCredentialInvalid,
-            -> true
+        -> true
 
         else -> false
     }

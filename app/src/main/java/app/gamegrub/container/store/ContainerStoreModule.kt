@@ -12,7 +12,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ContainerStoreModule {
-    
+
     @Provides
     @Singleton
     fun provideContainerStoreRootDir(@ApplicationContext context: Context): File {

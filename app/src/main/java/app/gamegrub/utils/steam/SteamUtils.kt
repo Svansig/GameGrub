@@ -17,10 +17,6 @@ import com.winlator.core.TarCompressorUtils
 import com.winlator.core.WineRegistryEditor
 import com.winlator.xenvironment.ImageFs
 import `in`.dragonbra.javasteam.types.KeyValue
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -31,6 +27,10 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.name
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 object SteamUtils {
 
@@ -391,8 +391,8 @@ object SteamUtils {
             if (unpackedExe.exists()) {
                 // Check if files are different (compare size and last modified time for efficiency)
                 val areFilesDifferent = !exe.exists() ||
-                        exe.length() != unpackedExe.length() ||
-                        exe.lastModified() != unpackedExe.lastModified()
+                    exe.length() != unpackedExe.length() ||
+                    exe.lastModified() != unpackedExe.lastModified()
 
                 if (areFilesDifferent) {
                     Files.copy(unpackedExe.toPath(), exe.toPath(), StandardCopyOption.REPLACE_EXISTING)
@@ -530,9 +530,9 @@ object SteamUtils {
         val container = ContainerUtils.getOrCreateContainer(context, appId)
         val language = runCatching {
             (
-                    container.getExtra("language", null)
-                        ?: container.javaClass.getMethod("getLanguage").invoke(container) as? String
-                    )
+                container.getExtra("language", null)
+                    ?: container.javaClass.getMethod("getLanguage").invoke(container) as? String
+                )
                 ?: "english"
         }.getOrDefault("english").lowercase()
         val useSteamInput = container.getExtra("useSteamInput", "false").toBoolean()

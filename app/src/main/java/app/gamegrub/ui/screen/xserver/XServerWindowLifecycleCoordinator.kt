@@ -130,14 +130,14 @@ internal class XServerWindowLifecycleCoordinator(
         if (property != null) {
             val propertyName = property.nameAsString()
             val shouldShowFrameRating = frameRatingWindowId == NO_FRAME_RATING_WINDOW_ID &&
-                    (
-                            propertyName.contains("_UTIL_LAYER") ||
-                                    propertyName.contains("_MESA_DRV") ||
-                                    (
-                                            container.containerVariant.equals(Container.GLIBC) &&
-                                                    propertyName.contains("_NET_WM_SURFACE")
-                                            )
+                (
+                    propertyName.contains("_UTIL_LAYER") ||
+                        propertyName.contains("_MESA_DRV") ||
+                        (
+                            container.containerVariant.equals(Container.GLIBC) &&
+                                propertyName.contains("_NET_WM_SURFACE")
                             )
+                    )
             if (shouldShowFrameRating) {
                 frameRatingWindowId = window.id
                 activity?.runOnUiThread {

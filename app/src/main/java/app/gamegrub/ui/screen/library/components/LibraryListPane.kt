@@ -283,7 +283,7 @@ internal fun LibraryListPane(
                     Timber.tag("LibraryListPane").d(
                         "%snull",
                         "Skeleton calculation - Custom: $customCount, Steam: $steamCount, " +
-                                "GOG installed: $gogInstalledCount, Epic installed: $epicInstalledCount, ",
+                            "GOG installed: $gogInstalledCount, Epic installed: $epicInstalledCount, ",
                     )
                     if (total == 0) 6 else minOf(total, 20)
                 }

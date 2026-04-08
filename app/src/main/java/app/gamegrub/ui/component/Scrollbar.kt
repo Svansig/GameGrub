@@ -43,10 +43,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 private data class ScrollbarMetrics(
     val totalItemsCount: Int,
@@ -200,7 +200,7 @@ fun Scrollbar(
         snapshotFlow {
             val layoutInfo = listState.layoutInfo
             listState.firstVisibleItemIndex to
-                    (listState.firstVisibleItemScrollOffset to (layoutInfo.totalItemsCount > layoutInfo.visibleItemsInfo.size))
+                (listState.firstVisibleItemScrollOffset to (layoutInfo.totalItemsCount > layoutInfo.visibleItemsInfo.size))
         }.collectLatest { (_, scrollInfo) ->
             if (scrollInfo.second) {
                 visibilityState.value = true

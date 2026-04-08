@@ -543,20 +543,20 @@ private fun LibraryScreenContent(
         val canBootstrapContentFocus: () -> Boolean = {
             val now = SystemClock.uptimeMillis()
             selectedAppId == null &&
-                    !isSystemMenuOpen &&
-                    !state.isOptionsPanelOpen &&
-                    !state.isSearching &&
-                    state.appInfoList.isNotEmpty() &&
-                    controllerBootstrapNeeded &&
-                    !rootHasFocus &&
-                    (now - lastBootstrapAtMs) > 250L
+                !isSystemMenuOpen &&
+                !state.isOptionsPanelOpen &&
+                !state.isSearching &&
+                state.appInfoList.isNotEmpty() &&
+                controllerBootstrapNeeded &&
+                !rootHasFocus &&
+                (now - lastBootstrapAtMs) > 250L
         }
         val canNavigateTabsWithoutFocus: () -> Boolean = {
             selectedAppId == null &&
-                    !isSystemMenuOpen &&
-                    !state.isOptionsPanelOpen &&
-                    !state.isSearching &&
-                    !rootHasFocus
+                !isSystemMenuOpen &&
+                !state.isOptionsPanelOpen &&
+                !state.isSearching &&
+                !rootHasFocus
         }
 
         val onGlobalKeyEvent: (AndroidEvent.KeyEvent) -> Boolean = { androidEvent ->
@@ -593,7 +593,7 @@ private fun LibraryScreenContent(
                     KeyEvent.KEYCODE_BUTTON_R2,
                     KeyEvent.KEYCODE_BUTTON_THUMBL,
                     KeyEvent.KEYCODE_BUTTON_THUMBR,
-                        -> {
+                    -> {
                         if (canBootstrapContentFocus()) {
                             requestContentFocusOrDefer()
                             // Do not consume: let normal key routing continue after bootstrap.
@@ -619,9 +619,9 @@ private fun LibraryScreenContent(
                 val leftX = event.getAxisValue(MotionEvent.AXIS_X)
                 val leftY = event.getAxisValue(MotionEvent.AXIS_Y)
                 val hasDirectionalAxis = kotlin.math.abs(hatX) >= 0.5f ||
-                        kotlin.math.abs(hatY) >= 0.5f ||
-                        kotlin.math.abs(leftX) >= 0.6f ||
-                        kotlin.math.abs(leftY) >= 0.6f
+                    kotlin.math.abs(hatY) >= 0.5f ||
+                    kotlin.math.abs(leftX) >= 0.6f ||
+                    kotlin.math.abs(leftY) >= 0.6f
 
                 if (isMoveLike && hasDirectionalAxis) {
                     requestContentFocusOrDefer()
@@ -660,11 +660,11 @@ private fun LibraryScreenContent(
                 if (keyEvent.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
                     val keyCode = keyEvent.nativeKeyEvent.keyCode
                     val canBootstrapContentFocus = selectedAppId == null &&
-                            !state.isOptionsPanelOpen &&
-                            !isSystemMenuOpen &&
-                            !state.isSearching &&
-                            state.appInfoList.isNotEmpty() &&
-                            controllerBootstrapNeeded
+                        !state.isOptionsPanelOpen &&
+                        !isSystemMenuOpen &&
+                        !state.isSearching &&
+                        state.appInfoList.isNotEmpty() &&
+                        controllerBootstrapNeeded
 
                     when (keyCode) {
                         // Navigation keys should bootstrap focus even before any item is selected.
@@ -676,7 +676,7 @@ private fun LibraryScreenContent(
                         KeyEvent.KEYCODE_BUTTON_R2,
                         KeyEvent.KEYCODE_BUTTON_THUMBL,
                         KeyEvent.KEYCODE_BUTTON_THUMBR,
-                            -> {
+                        -> {
                             if (canBootstrapContentFocus) {
                                 requestContentFocusOrDefer()
                                 false
@@ -724,7 +724,7 @@ private fun LibraryScreenContent(
                         // START button - toggle system menu (profile/settings)
                         KeyEvent.KEYCODE_BUTTON_START,
                         KeyEvent.KEYCODE_MENU,
-                            -> {
+                        -> {
                             if (selectedAppId == null && !state.isOptionsPanelOpen) {
                                 isSystemMenuOpen = !isSystemMenuOpen
                                 true
@@ -818,7 +818,7 @@ private fun LibraryScreenContent(
 
                         LibraryTab.ALL,
                         LibraryTab.INSTALLED,
-                            -> throw IllegalStateException("showEmptyStateSplash should not be true for ALL or INSTALLED tabs")
+                        -> throw IllegalStateException("showEmptyStateSplash should not be true for ALL or INSTALLED tabs")
                     }
                     LibrarySourceNotLoggedInSplash(
                         messageResId = messageResId,

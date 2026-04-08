@@ -6,8 +6,8 @@ import app.gamegrub.enums.OSArch
 import app.gamegrub.service.steam.SteamService
 import `in`.dragonbra.javasteam.enums.EDepotFileFlag
 import `in`.dragonbra.javasteam.types.FileData
-import timber.log.Timber
 import java.util.EnumSet
+import timber.log.Timber
 
 /**
  * Encapsulates Steam launch/depot selection heuristics used by SteamService companion APIs.

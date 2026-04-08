@@ -1,7 +1,7 @@
 package app.gamegrub.telemetry.recommendation
 
-import app.gamegrub.telemetry.record.LaunchSessionRecord
 import app.gamegrub.telemetry.record.LaunchOutcome
+import app.gamegrub.telemetry.record.LaunchSessionRecord
 import kotlinx.serialization.Serializable
 
 /**

@@ -7,12 +7,12 @@ import app.gamegrub.cache.manifest.CacheType
 import app.gamegrub.container.store.ContainerStore
 import app.gamegrub.runtime.store.RuntimeStore
 import app.gamegrub.session.model.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /**
  * Assembles a complete launch session from runtime bundles and container state.
@@ -80,6 +80,7 @@ class SessionAssembler @Inject constructor(
                         container = container,
                     )
                 }
+
                 container != null -> {
                     SessionComposition.Partial(
                         base = base,
@@ -92,6 +93,7 @@ class SessionAssembler @Inject constructor(
                         ).filter { it != null }.ifEmpty { listOf("base", "runtime") },
                     )
                 }
+
                 else -> {
                     return@withContext Result.failure(IllegalStateException("No container found and could not create one"))
                 }

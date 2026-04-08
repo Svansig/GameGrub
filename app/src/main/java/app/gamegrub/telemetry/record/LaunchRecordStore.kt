@@ -1,13 +1,13 @@
 package app.gamegrub.telemetry.record
 
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Local persistence store for launch session records.
@@ -42,7 +42,9 @@ class LaunchRecordStore @Inject constructor(
             val file = File(recordsDir, "$sessionId.json")
             if (file.exists()) {
                 json.decodeFromString<LaunchSessionRecord>(file.readText())
-            } else null
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to read launch record: $sessionId")
             null

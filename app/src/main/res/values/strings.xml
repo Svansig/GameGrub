@@ -189,6 +189,7 @@
     <string name="intent_launch_steam_login_failed">Steam login failed — game launch cancelled</string>
     <string name="game_executable_not_found_title">Cannot Launch</string>
     <string name="game_executable_not_found">The executable could not be auto-selected. Please set the executable path in container settings.</string>
+    <string name="game_launch_failed">Launch Failed</string>
     <string name="save_container_settings_title">Save Container Configuration?</string>
     <string name="save_container_settings_message">Temporary container configuration changes were applied for this launch. Do you want to save them?</string>
     <string name="sync_error_title">Sync Error</string>

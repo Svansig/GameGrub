@@ -1,8 +1,8 @@
 package app.gamegrub.telemetry.recommendation
 
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 /**
  * Resolver providing curated recommendations for known games.
@@ -67,7 +67,7 @@ class CuratedRulesResolver @Inject constructor() {
                 score = 1.0f,
                 compatibilityLevel = CompatibilityLevel.EXCELLENT,
                 reason = rule.notes,
-            )
+            ),
         )
 
         if (rule.recommendedDriver == null) {
@@ -80,7 +80,7 @@ class CuratedRulesResolver @Inject constructor() {
                     score = 0.8f,
                     compatibilityLevel = CompatibilityLevel.GOOD,
                     reason = "Alternative: with Turnip driver",
-                )
+                ),
             )
         }
 

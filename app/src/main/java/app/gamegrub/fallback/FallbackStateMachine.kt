@@ -2,8 +2,8 @@ package app.gamegrub.fallback
 
 import app.gamegrub.launch.error.FailureClass
 import app.gamegrub.telemetry.record.LaunchOutcome
-import timber.log.Timber
 import java.util.UUID
+import timber.log.Timber
 
 data class FallbackState(
     val sessionId: String,
@@ -111,32 +111,39 @@ class FallbackStateMachine(
 
         return when (state.currentLevel) {
             FallbackLevel.NONE -> null
+
             FallbackLevel.CACHE_CLEAR -> FallbackStrategy(
                 action = app.gamegrub.launch.error.RecoveryAction.CACHE_INVALIDATION,
                 description = "Clear shader cache and retry",
             )
+
             FallbackLevel.DRIVER_SWITCH -> FallbackStrategy(
                 targetDriver = "mesa-24.0",
                 action = app.gamegrub.launch.error.RecoveryAction.FALLBACK_DRIVER,
                 description = "Switch to Mesa driver",
             )
+
             FallbackLevel.RUNTIME_SWITCH -> FallbackStrategy(
                 targetRuntime = "wine-8.0-glibc2.35",
                 action = app.gamegrub.launch.error.RecoveryAction.FALLBACK_RUNTIME,
                 description = "Switch to stable Wine",
             )
+
             FallbackLevel.PROFILE_SWITCH -> FallbackStrategy(
                 action = app.gamegrub.launch.error.RecoveryAction.FALLBACK_PROFILE,
                 description = "Use different launch profile",
             )
+
             FallbackLevel.CONTAINER_RESET -> FallbackStrategy(
                 action = app.gamegrub.launch.error.RecoveryAction.CONTAINER_RESET,
                 description = "Reset container to defaults",
             )
+
             FallbackLevel.FINAL_RETRY -> FallbackStrategy(
                 action = app.gamegrub.launch.error.RecoveryAction.RETRY_SAME_CONFIG,
                 description = "Final retry with same config",
             )
+
             FallbackLevel.EXHAUSTED -> FallbackStrategy(
                 action = app.gamegrub.launch.error.RecoveryAction.USER_INTERVENTION_REQUIRED,
                 description = "All fallback attempts exhausted",

@@ -26,13 +26,13 @@ import app.gamegrub.storage.StorageManager
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.License
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.PICSRequest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /**
  * Library domain: game metadata, PICS sync, download state, and app info.
@@ -204,12 +204,12 @@ class SteamLibraryDomain @Inject constructor(
             val games = libraryClient.getOwnedGames(steamId)
             val steamApps = games.map { game ->
                 val existingApp = appDao.findApp(game.appId)
-                existingApp?.// Owned-games API returns partial metadata; keep DB-owned fields intact.
-                copy(
-                    name = game.name,
-                    iconHash = game.iconUrl,
-                    logoHash = game.logoUrl,
-                )
+                existingApp // Owned-games API returns partial metadata; keep DB-owned fields intact.
+                    ?.copy(
+                        name = game.name,
+                        iconHash = game.iconUrl,
+                        logoHash = game.logoUrl,
+                    )
                     ?: SteamApp(
                         id = game.appId,
                         name = game.name,

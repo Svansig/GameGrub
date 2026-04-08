@@ -24,11 +24,11 @@ import com.winlator.widget.TouchpadView
 import com.winlator.widget.XServerView
 import com.winlator.xenvironment.XEnvironment
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import timber.log.Timber
-import javax.inject.Inject
 
 typealias NavChangedListener = NavController.OnDestinationChangedListener
 

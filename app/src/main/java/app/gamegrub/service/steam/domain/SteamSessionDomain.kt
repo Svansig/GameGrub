@@ -5,10 +5,10 @@ import app.gamegrub.data.PostSyncInfo
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.GamePlayedInfo
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 
 /**
  * Session domain: launch/close app flow, session files, and ticket lifecycle.

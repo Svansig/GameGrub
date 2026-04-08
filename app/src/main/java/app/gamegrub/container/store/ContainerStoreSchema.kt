@@ -1,10 +1,10 @@
 package app.gamegrub.container.store
 
 import app.gamegrub.container.manifest.ContainerManifest
+import java.io.File
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.File
 
 object ContainerStoreLayout {
     private const val CONTAINER_DIR = "containers"
@@ -69,7 +69,9 @@ object ContainerStoreSchema {
             val path = ContainerStoreLayout.containerManifestPath(rootDir, containerId)
             if (path.exists()) {
                 json.decodeFromString<ContainerManifest>(path.readText())
-            } else null
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to read ContainerManifest for $containerId")
             null

@@ -5,11 +5,11 @@ import app.gamegrub.data.SteamApp
 import app.gamegrub.enums.Marker
 import app.gamegrub.service.DownloadService
 import app.gamegrub.storage.StorageManager
-import timber.log.Timber
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.pathString
+import timber.log.Timber
 
 object SteamPaths {
 

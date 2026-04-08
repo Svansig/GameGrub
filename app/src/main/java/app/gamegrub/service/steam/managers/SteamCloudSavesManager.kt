@@ -6,16 +6,16 @@ import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.service.steam.di.SteamAppInfoClient
 import app.gamegrub.service.steam.di.SteamCloudClient
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import timber.log.Timber
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamCloudSavesManager @Inject constructor(

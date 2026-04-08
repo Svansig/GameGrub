@@ -1,11 +1,11 @@
 package app.gamegrub.service.steam.managers
 
 import app.gamegrub.service.steam.di.SteamTicketClient
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamTicketManager @Inject constructor(

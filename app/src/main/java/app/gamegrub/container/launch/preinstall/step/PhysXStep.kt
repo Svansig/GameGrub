@@ -4,8 +4,8 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
 import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 object PhysXStep : PreInstallStep {
     override val marker: Marker = Marker.PHYSX_INSTALLED
@@ -43,11 +43,11 @@ object PhysXStep : PreInstallStep {
             dir.walkTopDown()
                 .filter { file ->
                     file.isFile &&
-                            file.name.startsWith("PhysX", ignoreCase = true) &&
-                            (
-                                    file.name.endsWith(".msi", ignoreCase = true) ||
-                                            file.name.endsWith(".exe", ignoreCase = true)
-                                    )
+                        file.name.startsWith("PhysX", ignoreCase = true) &&
+                        (
+                            file.name.endsWith(".msi", ignoreCase = true) ||
+                                file.name.endsWith(".exe", ignoreCase = true)
+                            )
                 }
                 .forEach { installerFile ->
                     val relativePath = installerFile

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.MutableState
 import app.gamegrub.container.manager.ContainerRuntimeManager
 import app.gamegrub.ui.data.XServerState
+import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.container.Container
 import com.winlator.contents.ContentProfile
 import com.winlator.contents.ContentsManager
@@ -21,11 +22,10 @@ import com.winlator.core.WineUtils
 import com.winlator.core.envvars.EnvVars
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xserver.ScreenInfo
+import java.io.File
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
-import com.winlator.PrefManager as WinlatorPrefManager
 
 /**
  * Prepares Wine system files and container metadata before environment startup.

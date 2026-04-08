@@ -32,13 +32,13 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
 import com.winlator.core.StringUtils
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 
 // TODO: Verify all tests and do DLC auto-install with base game.
 class EpicAppScreen : BaseAppScreen() {

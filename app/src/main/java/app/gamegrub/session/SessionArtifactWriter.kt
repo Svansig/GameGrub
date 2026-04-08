@@ -1,10 +1,10 @@
 package app.gamegrub.session
 
 import app.gamegrub.session.model.SessionPlan
+import java.io.File
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.File
 
 class SessionArtifactWriter(
     private val outputDir: File,
@@ -39,11 +39,13 @@ class SessionArtifactWriter(
             "containerSavesMount" to sessionPlan.mountPlan.containerSavesMount,
             "containerCacheMount" to sessionPlan.mountPlan.containerCacheMount,
             "tempDirMount" to sessionPlan.mountPlan.tempDirMount,
-            "bindMounts" to sessionPlan.mountPlan.bindMounts.map { mapOf(
-                "source" to it.source,
-                "target" to it.target,
-                "readOnly" to it.readOnly,
-            ) },
+            "bindMounts" to sessionPlan.mountPlan.bindMounts.map {
+                mapOf(
+                    "source" to it.source,
+                    "target" to it.target,
+                    "readOnly" to it.readOnly,
+                )
+            },
         )
         file.writeText(json.encodeToString(mountsData))
         return file
@@ -77,11 +79,13 @@ class SessionArtifactWriter(
                 "driverId" to comp.driver?.id,
                 "containerId" to comp.container.id,
             )
+
             is app.gamegrub.session.model.SessionComposition.Partial -> mapOf(
                 "type" to "Partial",
                 "containerId" to comp.container.id,
                 "missingComponents" to comp.missingComponents,
             )
+
             is app.gamegrub.session.model.SessionComposition.Failed -> mapOf(
                 "type" to "Failed",
                 "reason" to comp.reason,
@@ -100,12 +104,14 @@ class SessionArtifactWriter(
             ),
             "state" to sessionPlan.state.name,
             "composition" to compositionData,
-            "cacheHandles" to sessionPlan.cacheHandles.map { mapOf(
-                "cacheId" to it.cacheId,
-                "cacheType" to it.cacheType,
-                "mountPath" to it.mountPath,
-                "key" to it.key,
-            ) },
+            "cacheHandles" to sessionPlan.cacheHandles.map {
+                mapOf(
+                    "cacheId" to it.cacheId,
+                    "cacheType" to it.cacheType,
+                    "mountPath" to it.mountPath,
+                    "key" to it.key,
+                )
+            },
         )
         file.writeText(json.encodeToString(launchData))
         return file
@@ -116,7 +122,9 @@ class SessionArtifactWriter(
         return try {
             if (launchFile.exists()) {
                 json.decodeFromString<SessionPlan>(launchFile.readText())
-            } else null
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to read session plan: $sessionId")
             null

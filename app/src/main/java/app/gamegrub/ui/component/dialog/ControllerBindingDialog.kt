@@ -78,9 +78,9 @@ fun ControllerBindingDialog(
     // All bindings for cross-category search
     val allBindings = remember {
         keyboardBindings.map { BindingWithCategory(it, 0) } +
-                mouseBindings.map { BindingWithCategory(it, 1) } +
-                gamepadBindings.map { BindingWithCategory(it, 2) } +
-                extraBindings.map { BindingWithCategory(it, 3) }
+            mouseBindings.map { BindingWithCategory(it, 1) } +
+            gamepadBindings.map { BindingWithCategory(it, 2) } +
+            extraBindings.map { BindingWithCategory(it, 3) }
     }
 
     // Filter bindings based on search and selected category

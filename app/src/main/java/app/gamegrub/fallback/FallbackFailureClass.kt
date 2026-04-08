@@ -64,32 +64,39 @@ object FallbackFailureClass {
                 action = RecoveryAction.FALLBACK_DRIVER,
                 description = "Fallback to Mesa driver",
             )
+
             FailureClass.CORRUPTED_CACHE -> FallbackStrategy(
                 action = RecoveryAction.CACHE_INVALIDATION,
                 description = "Clear cache and retry",
             )
+
             FailureClass.GRAPHICS_INIT -> FallbackStrategy(
                 targetDriver = "mesa-24.0",
                 action = RecoveryAction.FALLBACK_DRIVER,
                 description = "Try Mesa instead of Turnip",
             )
+
             FailureClass.BACKEND_INIT -> FallbackStrategy(
                 targetRuntime = "wine-8.0-glibc2.35",
                 action = RecoveryAction.FALLBACK_RUNTIME,
                 description = "Try stable Wine instead",
             )
+
             FailureClass.CONTAINER_SETUP -> FallbackStrategy(
                 action = RecoveryAction.CONTAINER_RESET,
                 description = "Reset container to defaults",
             )
+
             FailureClass.PROCESS_SPAWN -> FallbackStrategy(
                 action = RecoveryAction.RE_EXTRACT,
                 description = "Re-extract runtime",
             )
+
             FailureClass.TIMEOUT -> FallbackStrategy(
                 action = RecoveryAction.RETRY_SAME_CONFIG,
                 description = "Retry with same config",
             )
+
             FailureClass.UNKNOWN -> FallbackStrategy(
                 action = RecoveryAction.NONE,
                 description = "No automatic fallback available",

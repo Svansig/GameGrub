@@ -1,13 +1,13 @@
 package app.gamegrub.service.epic
 
 import app.gamegrub.network.NetworkManager
+import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.Request
 import org.json.JSONObject
 import timber.log.Timber
-import java.time.Instant
 
 data class EpicAuthResponse(
     val accessToken: String,
@@ -191,7 +191,7 @@ object EpicAuthClient {
     ): Result<ByteArray> = withContext(Dispatchers.IO) {
         try {
             val url = "https://${EpicConstants.ECOMMERCE_HOST}/ecommerceintegration/api/public/" +
-                    "platforms/EPIC/identities/$accountId/ownershipToken"
+                "platforms/EPIC/identities/$accountId/ownershipToken"
 
             val nsCatalogItemId = "$namespace:$catalogItemId"
             val requestBody = FormBody.Builder()

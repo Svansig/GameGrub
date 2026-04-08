@@ -56,11 +56,11 @@ import app.gamegrub.ui.data.LibraryState
 import app.gamegrub.ui.enums.PaneType
 import app.gamegrub.ui.utils.AdaptivePadding
 import app.gamegrub.ui.utils.shouldShowGamepadUI
+import kotlin.math.abs
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 private const val CAROUSEL_TILT_ANGLE = 30.061367f
 private const val CAROUSEL_SPACING_RATIO = -0.11f

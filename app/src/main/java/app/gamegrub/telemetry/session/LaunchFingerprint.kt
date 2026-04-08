@@ -1,10 +1,10 @@
 package app.gamegrub.telemetry.session
 
+import java.util.UUID
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.util.UUID
 
 /**
  * Structured context for a single game launch attempt.
@@ -56,8 +56,10 @@ data class LaunchFingerprint(
     }
 
     fun logAtMilestone(milestone: String) {
-        Timber.d("[Fingerprint][%s] session=%s runtime=%s driver=%s container=%s game=%s",
-            milestone, sessionId, runtimeId, driverId, containerId, gameTitle)
+        Timber.d(
+            "[Fingerprint][%s] session=%s runtime=%s driver=%s container=%s game=%s",
+            milestone, sessionId, runtimeId, driverId, containerId, gameTitle,
+        )
     }
 }
 

@@ -22,6 +22,10 @@ import app.gamegrub.device.DeviceQueryProvider
 import app.gamegrub.ui.data.PerformanceHudConfig
 import app.gamegrub.ui.data.PerformanceHudSize
 import app.gamegrub.utils.general.DateTimeUtils.formatRuntimeHours
+import java.util.ArrayDeque
+import java.util.Locale
+import kotlin.math.max
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,10 +34,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.ArrayDeque
-import java.util.Locale
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 /**
  * Lightweight floating HUD shown above the in-game surface.
@@ -312,7 +312,7 @@ class PerformanceHudView(
 
         val runtimeText = when {
             status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                    status == BatteryManager.BATTERY_STATUS_FULL -> {
+                status == BatteryManager.BATTERY_STATUS_FULL -> {
                 smoothedBatteryRuntimeHours = null
                 "LEFT CHG"
             }

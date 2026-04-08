@@ -6,6 +6,10 @@ import app.gamegrub.enums.SyncResult
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.GamePlayedInfo
 import `in`.dragonbra.javasteam.steam.handlers.steamcloud.PendingRemoteOperation
 import `in`.dragonbra.javasteam.steam.steamclient.AsyncJobFailedException
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -14,10 +18,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamAppSessionManager @Inject constructor() {

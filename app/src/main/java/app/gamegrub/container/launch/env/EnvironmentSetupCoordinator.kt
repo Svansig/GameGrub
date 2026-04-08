@@ -17,6 +17,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.ui.data.XServerState
 import app.gamegrub.utils.container.ContainerUtils
+import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.alsaserver.ALSAClient
 import com.winlator.container.Container
 import com.winlator.contents.ContentsManager
@@ -41,13 +42,12 @@ import com.winlator.xenvironment.components.VortekRendererComponent
 import com.winlator.xenvironment.components.WineRequestComponent
 import com.winlator.xenvironment.components.XServerComponent
 import com.winlator.xserver.XServer
+import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
-import java.util.Locale
-import com.winlator.PrefManager as WinlatorPrefManager
 
 /**
  * Builds and starts the runtime XEnvironment used to launch a game container.
@@ -92,7 +92,7 @@ internal object EnvironmentSetupCoordinator {
         if (nonNullContainer.isSdlControllerAPI) {
             when (nonNullContainer.inputType) {
                 PreferredInputApi.XINPUT.ordinal, PreferredInputApi.AUTO.ordinal,
-                    -> {
+                -> {
                     envVars.put("SDL_XINPUT_ENABLED", "1")
                     envVars.put("SDL_DIRECTINPUT_ENABLED", "0")
                     envVars.put("SDL_JOYSTICK_HIDAPI", "1")
@@ -191,18 +191,18 @@ internal object EnvironmentSetupCoordinator {
         guestProgramLauncherComponent.wineInfo = xServerState.value.wineInfo
         gameExecutable =
             "wine explorer /desktop=shell," + xServer.screenInfo + " " +
-                    launchManager.buildWineStartCommand(
-                        context = context,
-                        appId = appId,
-                        container = nonNullContainer,
-                        bootToContainer = bootToContainer,
-                        testGraphics = testGraphics,
-                        appLaunchInfo = appLaunchInfo,
-                        envVars = envVars,
-                        guestProgramLauncherComponent = guestProgramLauncherComponent,
-                        gameSource = gameSource,
-                    ) +
-                    (if (nonNullContainer.execArgs.isNotEmpty()) " " + nonNullContainer.execArgs else "")
+            launchManager.buildWineStartCommand(
+                context = context,
+                appId = appId,
+                container = nonNullContainer,
+                bootToContainer = bootToContainer,
+                testGraphics = testGraphics,
+                appLaunchInfo = appLaunchInfo,
+                envVars = envVars,
+                guestProgramLauncherComponent = guestProgramLauncherComponent,
+                gameSource = gameSource,
+            ) +
+            (if (nonNullContainer.execArgs.isNotEmpty()) " " + nonNullContainer.execArgs else "")
 
         preInstallCommands = PreInstallSteps.getPreInstallCommands(
             nonNullContainer,
@@ -429,10 +429,10 @@ internal object EnvironmentSetupCoordinator {
                 val watchDirs = SteamService.getGseSaveDirs(context, gameIdInt)
                 val displayNameMap = cloudStats.cachedAchievements.value?.associate { ach ->
                     ach.name to (
-                            ach.displayName?.get(nonNullContainer.language)
-                                ?: ach.displayName?.get("english")
-                                ?: ach.name
-                            )
+                        ach.displayName?.get(nonNullContainer.language)
+                            ?: ach.displayName?.get("english")
+                            ?: ach.name
+                        )
                 } ?: emptyMap()
                 val iconUrlMap = cloudStats.cachedAchievements.value?.associate { ach ->
                     ach.name to ach.icon?.let {

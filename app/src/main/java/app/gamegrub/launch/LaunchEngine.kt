@@ -6,12 +6,12 @@ import app.gamegrub.telemetry.session.LaunchFingerprint
 import app.gamegrub.telemetry.session.LaunchFingerprintEmitter
 import app.gamegrub.telemetry.session.LaunchMilestone
 import app.gamegrub.telemetry.session.MilestoneEmitter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /**
  * Result of a launch execution attempt.
@@ -75,7 +75,9 @@ class LaunchEngine @Inject constructor(
             val compose = sessionPlan.composition
             val container = when (compose) {
                 is app.gamegrub.session.model.SessionComposition.Full -> compose.container
+
                 is app.gamegrub.session.model.SessionComposition.Partial -> compose.container
+
                 is app.gamegrub.session.model.SessionComposition.Failed -> {
                     return@withContext LaunchResult.Failure(sessionId, "Session composition failed: ${compose.reason}")
                 }

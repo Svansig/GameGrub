@@ -1,11 +1,11 @@
 package app.gamegrub.service.amazon
 
-import org.tukaani.xz.LZMAInputStream
-import org.tukaani.xz.XZInputStream
-import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import org.tukaani.xz.LZMAInputStream
+import org.tukaani.xz.XZInputStream
+import timber.log.Timber
 
 /** Amazon game manifest parser. */
 object AmazonManifest {

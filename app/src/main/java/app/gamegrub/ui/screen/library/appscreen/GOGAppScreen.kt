@@ -31,9 +31,9 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
 import com.winlator.container.ContainerData
-import timber.log.Timber
 import java.io.File
 import java.util.Locale
+import timber.log.Timber
 
 /**
  * GOG-specific implementation of BaseAppScreen

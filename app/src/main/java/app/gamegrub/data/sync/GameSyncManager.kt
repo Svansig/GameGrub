@@ -7,10 +7,10 @@ import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.db.dao.GOGGameDao
 import app.gamegrub.db.dao.GameDao
 import app.gamegrub.db.dao.SteamAppDao
-import kotlinx.coroutines.flow.first
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
+import timber.log.Timber
 
 @Singleton
 class GameSyncManager @Inject constructor(

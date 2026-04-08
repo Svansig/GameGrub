@@ -99,7 +99,7 @@ class DxvkCacheAdapter : GraphicsCacheAdapter {
 
     override fun configure(envVars: MutableMap<String, String>): CacheConfiguration {
         val dxvkPath = envVars["DXVK_STATE_CACHE"] ?: return CacheConfiguration()
-        
+
         val config = CacheConfiguration(
             dxvkStateCachePath = dxvkPath,
             enableStateCache = true,
@@ -137,7 +137,7 @@ class Vkd3dCacheAdapter : GraphicsCacheAdapter {
 
     override fun configure(envVars: MutableMap<String, String>): CacheConfiguration {
         val vkd3dPath = envVars["VKD3D_SHADER_CACHE"] ?: return CacheConfiguration()
-        
+
         val config = CacheConfiguration(
             vkd3dShaderCachePath = vkd3dPath,
         )
@@ -176,7 +176,7 @@ class MesaCacheAdapter : GraphicsCacheAdapter {
     override fun configure(envVars: MutableMap<String, String>): CacheConfiguration {
         val mesaCache = envVars["MESA_SHADER_CACHE_DIR"]
         val xdgCache = envVars["XDG_CACHE_HOME"]
-        
+
         val config = CacheConfiguration(
             mesaShaderCachePath = mesaCache,
             xdgCacheHome = xdgCache,

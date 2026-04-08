@@ -1,6 +1,7 @@
 package app.gamegrub.service.gog
 
 import android.content.Context
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -8,7 +9,6 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 /**
  * Parsed/Formartted details returned by GOGApiClient.
@@ -315,16 +315,16 @@ object GOGApiClient {
 
                 // Check compression type by magic bytes
                 val isGzipped = manifestBytes.size >= 2 &&
-                        manifestBytes[0] == 0x1f.toByte() &&
-                        manifestBytes[1] == 0x8b.toByte()
+                    manifestBytes[0] == 0x1f.toByte() &&
+                    manifestBytes[1] == 0x8b.toByte()
 
                 val isZlib = manifestBytes.size >= 2 &&
-                        manifestBytes[0] == 0x78.toByte() &&
-                        (
-                                manifestBytes[1] == 0x9c.toByte() ||
-                                        manifestBytes[1] == 0xda.toByte() ||
-                                        manifestBytes[1] == 0x01.toByte()
-                                )
+                    manifestBytes[0] == 0x78.toByte() &&
+                    (
+                        manifestBytes[1] == 0x9c.toByte() ||
+                            manifestBytes[1] == 0xda.toByte() ||
+                            manifestBytes[1] == 0x01.toByte()
+                        )
 
                 Timber.tag("GOG").d("[Cloud Saves] Manifest bytes: ${manifestBytes.size}, isGzipped: $isGzipped, isZlib: $isZlib")
 

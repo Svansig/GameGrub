@@ -2,10 +2,10 @@ package app.gamegrub.service.epic
 
 import android.net.Uri
 import app.gamegrub.PrefManager
-import timber.log.Timber
 import java.io.File
 import java.nio.file.Paths
 import java.security.SecureRandom
+import timber.log.Timber
 
 /**
  * Constants for Epic Games Store integration
@@ -78,9 +78,9 @@ object EpicConstants {
     /** Base URL for OAuth login (append &state=... for CSRF protection). */
     val EPIC_AUTH_LOGIN_URL: String
         get() = "$EPIC_AUTH_BASE_URL/id/login" +
-                "?redirectUrl=$EPIC_REDIRECT_URI" +
-                "%3FclientId%3D$EPIC_CLIENT_ID" +
-                "%26responseType%3Dcode"
+            "?redirectUrl=$EPIC_REDIRECT_URI" +
+            "%3FclientId%3D$EPIC_CLIENT_ID" +
+            "%26responseType%3Dcode"
 
     /**
      * Builds a full OAuth login URL with a fresh state parameter for CSRF protection.

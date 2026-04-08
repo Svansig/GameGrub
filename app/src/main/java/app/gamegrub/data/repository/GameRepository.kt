@@ -3,9 +3,9 @@ package app.gamegrub.data.repository
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.UnifiedGame
 import app.gamegrub.db.dao.GameDao
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
 
 @Singleton
 class GameRepository @Inject constructor(

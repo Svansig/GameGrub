@@ -443,7 +443,7 @@ fun ElementEditorDialog(
 
                             ControlElement.Type.TRACKPAD,
                             ControlElement.Type.RANGE_BUTTON,
-                                -> {
+                            -> {
                                 // Trackpad and Range Button are always rendered as ROUND_RECT
                                 listOf(ControlElement.Shape.ROUND_RECT)
                             }
@@ -570,7 +570,7 @@ fun ElementEditorDialog(
 
                                         ControlElement.Type.D_PAD,
                                         ControlElement.Type.STICK,
-                                            -> {
+                                        -> {
                                             val directionResId = when (i) {
                                                 0 -> R.string.direction_up
                                                 1 -> R.string.direction_right

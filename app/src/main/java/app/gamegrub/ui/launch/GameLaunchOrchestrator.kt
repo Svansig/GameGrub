@@ -12,7 +12,11 @@ import app.gamegrub.domain.customgame.CustomGameScanner
 import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
+import app.gamegrub.launch.LaunchEngine
+import app.gamegrub.launch.LaunchOptions
+import app.gamegrub.launch.LaunchResult
 import app.gamegrub.launch.trackGameLaunched
+import app.gamegrub.session.SessionAssembler
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicCloudSavesManager
 import app.gamegrub.service.epic.EpicService
@@ -53,6 +57,13 @@ import kotlin.reflect.KFunction2
 @InstallIn(SingletonComponent::class)
 private interface BestConfigServiceEntryPoint {
     fun bestConfigService(): BestConfigService
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+private interface SessionEntryPoint {
+    fun sessionAssembler(): SessionAssembler
+    fun launchEngine(): LaunchEngine
 }
 
 private const val SYNC_IN_PROGRESS_MAX_RETRIES = 5
@@ -165,6 +176,44 @@ fun preLaunchApp(
         MilestoneEmitter.startSession(fingerprint.sessionId)
         MilestoneEmitter.record(LaunchMilestone.LAUNCH_REQUEST_QUEUED, mapOf("appId" to appId))
         MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_START, mapOf("wineVersion" to container.wineVersion))
+
+        val sessionAssembler = EntryPointAccessors
+            .fromApplication(context.applicationContext, SessionEntryPoint::class.java)
+            .sessionAssembler()
+        val launchEngine = EntryPointAccessors
+            .fromApplication(context.applicationContext, SessionEntryPoint::class.java)
+            .launchEngine()
+
+        val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
+
+        val sessionPlan = sessionAssembler.assemble(
+            gameId = gameId.toString(),
+            gameTitle = ContainerUtils.resolveGameName(appId),
+            gamePlatform = gameSource.name,
+        ).getOrElse {
+            Timber.e(it, "Failed to assemble session for $appId")
+            MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf("reason" to it.message.orEmpty()))
+            setLoadingDialogVisible(false)
+            setMessageDialogState(
+                MessageDialogState(
+                    visible = true,
+                    type = DialogType.EXECUTABLE_NOT_FOUND,
+                    title = context.getString(R.string.game_launch_failed),
+                    message = it.message ?: "Failed to assemble launch session",
+                    dismissBtnText = context.getString(R.string.ok),
+                ),
+            )
+            return@launch
+        }
+
+        MilestoneEmitter.record(
+            LaunchMilestone.ASSEMBLY_COMPLETE,
+            mapOf(
+                "sessionId" to sessionPlan.sessionId,
+                "runtimeId" to (sessionPlan.composition as? app.gamegrub.session.model.SessionComposition.Full)?.runtime?.id.orEmpty(),
+                "baseId" to (sessionPlan.composition as? app.gamegrub.session.model.SessionComposition.Full)?.base?.id.orEmpty(),
+            ),
+        )
 
         if (!bootToContainer) {
             // Resolve a concrete executable before expensive setup work so we can fail fast.
@@ -688,9 +737,38 @@ fun preLaunchApp(
             SyncResult.UpToDate,
             SyncResult.Success,
                 -> {
-                    fingerprint.logAtMilestone("LAUNCH_SUCCESS")
-                    MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
-                    onSuccess(context, appId)
+                    MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_COMPLETE, mapOf("sessionId" to sessionPlan.sessionId))
+
+                    val launchResult = launchEngine.execute(sessionPlan, LaunchOptions())
+
+                    when (launchResult) {
+                        is LaunchResult.Success -> {
+                            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+                            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
+                            MilestoneEmitter.record(LaunchMilestone.GAME_INTERACTIVE)
+                            onSuccess(context, appId)
+                        }
+                        is LaunchResult.Failure -> {
+                            Timber.e("Launch failed: ${launchResult.reason}")
+                            MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf(
+                                "reason" to launchResult.reason,
+                                "exitCode" to (launchResult.exitCode?.toString() ?: "none"),
+                            ))
+                            setLoadingDialogVisible(false)
+                            setMessageDialogState(
+                                MessageDialogState(
+                                    visible = true,
+                                    type = DialogType.GAME_LAUNCH_FAILED,
+                                    title = context.getString(R.string.game_launch_failed),
+                                    message = launchResult.reason,
+                                    dismissBtnText = context.getString(R.string.ok),
+                                ),
+                            )
+                        }
+                        is LaunchResult.Cancelled -> {
+                            MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf("reason" to "Launch cancelled"))
+                        }
+                    }
                 }
         }
     }

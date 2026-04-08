@@ -6,6 +6,11 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import app.gamegrub.Constants
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.ProviderException
+import java.security.spec.ECGenParameterSpec
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -14,11 +19,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.ProviderException
-import java.security.spec.ECGenParameterSpec
-import java.util.concurrent.TimeUnit
 
 object KeyAttestationHelper {
 

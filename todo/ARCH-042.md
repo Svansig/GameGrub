@@ -3,7 +3,7 @@
 - **ID**: `ARCH-042`
 - **Area**: `cache + storage`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `Creates docs/cache-controller-design.md with key derivation, invalidation policies, and GC strategy.`
 - **Reviewer**: `TBD`

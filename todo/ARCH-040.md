@@ -3,7 +3,7 @@
 - **ID**: `ARCH-040`
 - **Area**: `container store + storage`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `Creates docs/container-store-schema.md with directory layout and seeding strategy.`
 - **Reviewer**: `TBD`

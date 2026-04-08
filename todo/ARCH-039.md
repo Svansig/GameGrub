@@ -3,7 +3,7 @@
 - **ID**: `ARCH-039`
 - **Area**: `runtime store`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Service implementation only.`
 - **Reviewer**: `TBD`

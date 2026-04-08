@@ -34,17 +34,17 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| ARCH-038 | P1 | Design RuntimeStore directory schema and scaffolding | `runtime store + storage` | `todo/ARCH-038.md` |
-| ARCH-039 | P1 | Implement RuntimeStore service for bundle registration and verification | `runtime store` | `todo/ARCH-039.md` |
-| ARCH-040 | P1 | Design ContainerStore directory schema | `container store + storage` | `todo/ARCH-040.md` |
-| ARCH-041 | P1 | Implement ContainerStore service for container lifecycle management | `container store` | `todo/ARCH-041.md` |
+| ARCH-038 | Done | Design RuntimeStore directory schema and scaffolding | `runtime store + storage` | `docs/runtime-store-directory-schema.md` |
+| ARCH-039 | Done | Implement RuntimeStore service for bundle registration and verification | `runtime store` | `todo/ARCH-039.md` |
+| ARCH-040 | Done | Design ContainerStore directory schema | `container store + storage` | `docs/container-store-schema.md` |
+| ARCH-041 | Done | Implement ContainerStore service for container lifecycle management | `container store` | `todo/ARCH-041.md` |
 
 ### Phase 3: Cache Controller
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| ARCH-042 | P1 | Design CacheController key derivation and invalidation policy | `cache + storage` | `todo/ARCH-042.md` |
-| ARCH-043 | P1 | Implement CacheController service for cache lifecycle and retrieval | `cache controller` | `todo/ARCH-043.md` |
+| ARCH-042 | Done | Design CacheController key derivation and invalidation policy | `cache + storage` | `docs/cache-controller-design.md` |
+| ARCH-043 | Done | Implement CacheController service for cache lifecycle and retrieval | `cache controller` | `todo/ARCH-043.md` |
 
 ## Backlog - UI
 

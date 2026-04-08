@@ -3,7 +3,7 @@
 - **ID**: `ARCH-038`
 - **Area**: `runtime store + storage`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `Creates docs/runtime-store-schema.md with directory layout, manifest locations, and migration notes.`
 - **Reviewer**: `TBD`

@@ -3,7 +3,7 @@
 - **ID**: `READ-014`
 - **Area**: `com.winlator + integration points`
 - **Priority**: `P3`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `Sisyphus`
 - **Documentation Impact**: `Expected interop-file intent notes updates.`
 - **Reviewer**: `TBD`

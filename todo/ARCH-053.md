@@ -3,7 +3,7 @@
 - **ID**: `ARCH-053`
 - **Area**: `launch engine`
 - **Priority**: `P1`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Integration only.`
 

@@ -3,7 +3,7 @@
 - **ID**: `ARCH-036`
 - **Area**: `manifest + container store`
 - **Priority**: `P1`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Infrastructure only.`
 - **Reviewer**: `TBD`

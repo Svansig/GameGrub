@@ -16,7 +16,7 @@ data class BaseManifest(
         if (id.isBlank()) errors.add("BaseManifest.id cannot be blank")
         if (version.isBlank()) errors.add("BaseManifest.version cannot be blank")
         if (contentHash.isBlank()) errors.add("BaseManifest.contentHash cannot be blank")
-        if (contentHash.length != 64) errors.add("BaseManifest.contentHash must be SHA256 (64 hex chars)")
+        else if (contentHash.length != 64) errors.add("BaseManifest.contentHash must be SHA256 (64 hex chars)")
         if (rootfsPath.isBlank()) errors.add("BaseManifest.rootfsPath cannot be blank")
         return errors
     }

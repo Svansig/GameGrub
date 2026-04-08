@@ -22,7 +22,7 @@ Wired SessionAssembler and LaunchEngine into GameLaunchOrchestrator:
 
 - [x] SessionAssembler injected into GameLaunchOrchestrator via Hilt
 - [x] SessionAssembler.assemble() called before launch
-- [x] SessionPlan passed to LaunchEngine.execute()
+- [ ] SessionPlan passed to LaunchEngine.execute() — **PARTIAL: `launchEngine.execute()` called only in the `SyncResult.UpToDate`/`SyncResult.Success` Steam branch (line 742). GOG, Epic, Custom Game, and Amazon platforms all bypass `launchEngine.execute()` and call `onSuccess()` directly.**
 - [ ] EnvPlan from SessionPlan flows into launch command builder (deferred to ARCH-054-FOLLOWUP)
 - [x] MilestoneEmitter records LAUNCH_REQUEST_QUEUED, ASSEMBLY_START, ASSEMBLY_COMPLETE, PROCESS_SPAWNED, GAME_INTERACTIVE
 - [x] GameLaunchOrchestrator compiles and runs correctly

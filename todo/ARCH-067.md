@@ -3,7 +3,7 @@
 - **ID**: `ARCH-067`
 - **Area**: `storage + containers`
 - **Priority**: `P1`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Implementation in ContainerStore.`
 
@@ -23,9 +23,9 @@ This can be extended via StoragePolicy integration.
 
 ## Acceptance Criteria
 
-- [x] Separate prefix/cache/install paths
-- [x] Storage location configuration
-- [x] Volume availability checks
+- [x] Separate prefix/cache/install paths — `ContainerStoreSchema` provides distinct `prefixDir`, `cacheDir`, `installDir`, `savesDir`
+- [x] Storage location configuration — `StoragePolicy` sealed class with `HotRuntime`/`ColdBulk`/`Hybrid` variants
+- [ ] Volume availability checks — **FAILED: `StoragePolicyHelper.isLocationAvailable()` is a stub that hardcodes `return location == StorageLocation.INTERNAL`. No Android storage volume APIs (`Environment.getExternalStorageState()`, `StorageManager`) are consulted. External/SD support is non-functional.**
 
 ## Related Files
 

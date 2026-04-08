@@ -3,7 +3,7 @@
 - **ID**: `ARCH-046`
 - **Area**: `session assembler`
 - **Priority**: `P1`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Service implementation only.`
 
@@ -27,7 +27,7 @@ Created `SessionAssembler.kt` with:
 - [x] SessionAssembler composes SessionPlan from stores
 - [x] Resolves environment variables based on composition
 - [x] Resolves mount paths for all components
-- [x] Handles cache handles for shader/translator/probe caches
+- [ ] Handles cache handles for shader/translator/probe caches — **BUG: `resolveCacheHandles()` creates directories but never appends any `CacheHandle` to its list. Always returns `emptyList()`. `CacheHandle.fromManifest()` is never called. `sessionPlan.cacheHandles` is always empty.**
 - [x] Hilt-injectable @Singleton
 
 ## Related Files

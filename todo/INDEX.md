@@ -52,7 +52,7 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 |---|---|---|---|---|
 | ARCH-044 | Done | Define SessionPlan model for launch-time composition | `session assembler` | `todo/ARCH-044.md` |
 | ARCH-045 | Done | Define mount/path mapping and env-var models | `session assembler` | `todo/ARCH-045.md` |
-| ARCH-046 | Done | Implement SessionAssembler service | `session assembler` | `todo/ARCH-046.md` |
+| ARCH-046 | Reopened | Implement SessionAssembler service | `session assembler` | `todo/ARCH-046.md` |
 | ARCH-047 | Done | Add session artifact serialization | `session assembler` | `todo/ARCH-047.md` |
 
 ### Phase 5: Graphics Cache Wiring
@@ -62,23 +62,31 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | ARCH-048 | Done | Define graphics cache adapter abstraction | `graphics cache` | `todo/ARCH-048.md` |
 | ARCH-049 | Done | Implement DXVK and VKD3D cache adapters | `graphics cache` | `todo/ARCH-049.md` |
 | ARCH-050 | Done | Implement Mesa shader cache adapter | `graphics cache` | `todo/ARCH-050.md` |
-| ARCH-051 | Done | Wire XDG cache and pre-launch directory creation | `graphics cache` | `todo/ARCH-051.md` |
+| ARCH-051 | Reopened | Wire XDG cache and pre-launch directory creation | `graphics cache` | `todo/ARCH-051.md` |
 
 ### Phase 6: Launch Engine Integration
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
 | ARCH-052 | Done | Create LaunchEngine abstraction for session execution | `launch engine` | `todo/ARCH-052.md` |
-| ARCH-053 | Done | Wire SessionPlan consumption in launch orchestrator | `launch engine` | `todo/ARCH-053.md` |
-| ARCH-054 | Done | Integrate env var and path mapping into launcher | `launch engine` | `todo/ARCH-054.md` |
-| ARCH-055 | Done | Add telemetry integration with launch engine | `launch engine` | `todo/ARCH-055.md` |
+| ARCH-053 | Reopened | Wire SessionPlan consumption in launch orchestrator | `launch engine` | `todo/ARCH-053.md` |
+| ARCH-054 | Reopened | Integrate env var and path mapping into launcher | `launch engine` | `todo/ARCH-054.md` |
+| ARCH-055 | Reopened | Add telemetry integration with launch engine | `launch engine` | `todo/ARCH-055.md` |
+
+### Phase 6 Follow-ups (Integration)
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-053-FOLLOWUP | Reopened | Wire SessionAssembler and LaunchEngine into GameLaunchOrchestrator | `launch engine` | `todo/ARCH-053-FOLLOWUP.md` |
+| ARCH-054-FOLLOWUP | Done | Integrate EnvPlan from SessionPlan into actual launch command | `launch engine` | `todo/ARCH-054-FOLLOWUP.md` |
+| ARCH-055-FOLLOWUP | Reopened | Wire LaunchEngine execution to trigger telemetry recording | `launch engine` | `todo/ARCH-055-FOLLOWUP.md` |
 
 ### Phase 7: Telemetry and Compatibility Records
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
 | ARCH-056 | Done | Define LaunchSessionRecord schema | `telemetry + records` | `todo/ARCH-056.md` |
-| ARCH-057 | Done | Implement local persistence for launch records | `telemetry + records` | `todo/ARCH-057.md` |
+| ARCH-057 | Reopened | Implement local persistence for launch records | `telemetry + records` | `todo/ARCH-057.md` |
 | ARCH-058 | Done | Add read/query APIs for launch records | `telemetry + records` | `todo/ARCH-058.md` |
 
 ### Phase 8: Recommendation Foundations
@@ -103,7 +111,7 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
 | ARCH-066 | Done | Define storage policy model | `storage + policy` | `todo/ARCH-066.md` |
-| ARCH-067 | Done | Implement split-root container support | `storage + containers` | `todo/ARCH-067.md` |
+| ARCH-067 | Reopened | Implement split-root container support | `storage + containers` | `todo/ARCH-067.md` |
 
 ### Phase 11: Old-Path Migration Cleanup
 

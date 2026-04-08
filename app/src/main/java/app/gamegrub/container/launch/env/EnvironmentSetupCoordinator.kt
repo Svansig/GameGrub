@@ -16,6 +16,7 @@ import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.ui.data.XServerState
+import app.gamegrub.launch.ActiveSessionStore
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.alsaserver.ALSAClient
@@ -217,6 +218,7 @@ internal object EnvironmentSetupCoordinator {
         guestProgramLauncherComponent.setSteamType(nonNullContainer.steamType)
 
         envVars.putAll(nonNullContainer.envVars)
+        applySessionEnvPlan(envVars)
         if (!envVars.has("WINEESYNC")) {
             envVars.put("WINEESYNC", "1")
         }
@@ -413,6 +415,7 @@ internal object EnvironmentSetupCoordinator {
             environment.startEnvironmentComponents()
         } catch (e: Exception) {
             Timber.e(e, "Failed to start environment components, cleaning up")
+            ActiveSessionStore.clearActiveSession()
             try {
                 environment.stopEnvironmentComponents()
             } catch (cleanupEx: Exception) {
@@ -420,6 +423,7 @@ internal object EnvironmentSetupCoordinator {
             }
             throw e
         }
+        ActiveSessionStore.clearActiveSession()
 
         if (gameSource == GameSource.STEAM) {
             val gameIdInt = ContainerUtils.extractGameIdFromContainerId(appId)
@@ -451,5 +455,40 @@ internal object EnvironmentSetupCoordinator {
         envVars.clear()
         xServerState.value = xServerState.value.copy(dxwrapperConfig = null)
         return environment
+    }
+
+    /**
+     * Keys managed exclusively by existing EnvironmentSetupCoordinator logic.
+     *
+     * These are excluded from session plan application to avoid conflicting with
+     * the legacy ImageFs and container-config-driven env var management. Remove
+     * entries from this list as the corresponding paths are migrated to SessionPlan.
+     */
+    private val SESSION_ENV_DENYLIST = setOf(
+        "WINEPREFIX",   // managed by imageFs.wineprefix — migration in progress
+        "WINEDEBUG",    // managed by PrefManager.enableWineDebug
+        "LC_ALL",       // managed by container.lC_ALL
+        "MESA_DEBUG",   // hardcoded
+        "MESA_NO_ERROR", // hardcoded
+    )
+
+    /**
+     * Applies non-conflicting env vars from the active session plan to [envVars].
+     *
+     * Called after container-base env vars are applied so that session plan vars
+     * (cache paths, driver hints, etc.) can supplement or override container defaults.
+     * Keys in [SESSION_ENV_DENYLIST] are skipped to preserve legacy behavior during
+     * the ImageFs-to-SessionPlan migration.
+     */
+    private fun applySessionEnvPlan(envVars: com.winlator.core.envvars.EnvVars) {
+        val envPlan = ActiveSessionStore.getActiveSession()?.envPlan ?: return
+        var applied = 0
+        for ((key, value) in envPlan.environmentVariables) {
+            if (key !in SESSION_ENV_DENYLIST && value.isNotEmpty()) {
+                envVars.put(key, value)
+                applied++
+            }
+        }
+        if (applied > 0) Timber.d("SessionEnvPlan: applied $applied env var(s) from active session")
     }
 }

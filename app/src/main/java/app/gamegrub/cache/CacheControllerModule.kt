@@ -1,21 +1,16 @@
 package app.gamegrub.cache
 
-import android.content.Context
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.io.File
-import javax.inject.Singleton
 
+/**
+ * DI module for CacheController.
+ *
+ * CacheController is constructed via @Inject constructor(rootDir: File).
+ * The File binding is provided centrally by RuntimeStoreModule (all stores
+ * share context.filesDir as their root and use distinct subdirectory names).
+ */
 @Module
 @InstallIn(SingletonComponent::class)
-object CacheControllerModule {
-    
-    @Provides
-    @Singleton
-    fun provideCacheControllerRootDir(@ApplicationContext context: Context): File {
-        return context.filesDir
-    }
-}
+object CacheControllerModule

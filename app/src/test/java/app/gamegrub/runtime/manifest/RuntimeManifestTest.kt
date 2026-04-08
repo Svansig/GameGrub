@@ -120,8 +120,10 @@ class RuntimeManifestTest {
 
     @Test
     fun sha256Validation() {
-        assertTrue(BaseManifest.isValidSha256("abc123def456789012345678901234567890123456789012345678901234"))
+        // 64 valid lowercase hex chars
+        assertTrue(BaseManifest.isValidSha256("abc123def4567890123456789012345678901234567890123456789012345678"))
         assertFalse(BaseManifest.isValidSha256("too_short"))
-        assertFalse(BaseManifest.isValidSha256("zzz123def45678901234567890123456789012345678901234567890123g"))
+        // 64 chars but contains 'z' and 'g' which are not valid hex digits
+        assertFalse(BaseManifest.isValidSha256("zzzz23def456789012345678901234567890123456789012345678901234567g"))
     }
 }

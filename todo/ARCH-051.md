@@ -3,7 +3,7 @@
 - **ID**: `ARCH-051`
 - **Area**: `graphics cache`
 - **Priority**: `P1`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Implementation in ARCH-048.`
 
@@ -20,10 +20,10 @@ The wiring is handled via GraphicsCacheAdapter's setup() method which:
 
 ## Acceptance Criteria
 
-- [x] Cache directories created before launch
-- [x] XDG_CACHE_HOME injected into environment
-- [x] Pre-launch validation of cache paths
-- [x] Integration with SessionAssembler
+- [x] Cache directories created before launch — dirs are created in `SessionAssembler.resolveCacheHandles()` but not via the adapter
+- [x] XDG_CACHE_HOME injected into environment — set directly in `SessionAssembler.resolveEnvironmentVariables()`, not via adapter
+- [ ] Pre-launch validation of cache paths — **NOT DONE: no adapter `configure()` or `setup()` call exists in any launch path**
+- [ ] Integration with SessionAssembler — **NOT DONE: `GraphicsCacheAdapter.createAdapter()` and `createAllAdapters()` have zero call sites outside the class file. The entire adapter layer is dead code in the launch flow.**
 
 ## Related Files
 

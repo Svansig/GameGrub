@@ -3,7 +3,7 @@
 - **ID**: `ARCH-057`
 - **Area**: `telemetry + records`
 - **Priority**: `P1`
-- **Status**: `Done`
+- **Status**: `Reopened`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Service implementation only.`
 
@@ -22,9 +22,9 @@ Created `LaunchRecordStore.kt` with:
 
 ## Acceptance Criteria
 
-- [x] JSON file-based persistence
-- [x] Record creation and storage
-- [x] Directory management
+- [x] JSON file-based persistence — `saveRecord()` uses `Json.encodeToString` + file write; correct implementation
+- [ ] Record creation and storage — **FAILED: `saveRecord()` is never called from any launch path. Zero call sites in the codebase. The API exists but is dead code. No records are ever persisted.**
+- [x] Directory management — `recordsDir` lazy init with `.mkdirs()`
 - [x] Hilt-injectable @Singleton
 
 ## Related Files

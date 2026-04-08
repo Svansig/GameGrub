@@ -67,6 +67,10 @@ class LaunchEngine @Inject constructor(
 
             MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_COMPLETE)
 
+            // Store the session plan so EnvironmentSetupCoordinator can consume it
+            // during XEnvironment setup, which runs after onSuccess() in the UI layer.
+            ActiveSessionStore.setActiveSession(updatedPlan)
+
             if (options.dryRun) {
                 Timber.w("LaunchEngine dry run - not actually launching")
                 return@withContext LaunchResult.Success(sessionId)

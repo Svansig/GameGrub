@@ -18,6 +18,10 @@ import app.gamegrub.service.epic.EpicCloudSavesManager
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.telemetry.session.LaunchFingerprint
+import app.gamegrub.telemetry.session.LaunchFingerprintEmitter
+import app.gamegrub.telemetry.session.LaunchMilestone
+import app.gamegrub.telemetry.session.MilestoneEmitter
 import app.gamegrub.ui.component.dialog.state.MessageDialogState
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
@@ -146,6 +150,21 @@ fun preLaunchApp(
         container.clearSessionMetadata()
 
         val gameSource = ContainerUtils.extractGameSourceFromContainerId(appId)
+
+        val fingerprint = LaunchFingerprint(
+            containerId = appId,
+            containerPath = container.rootDir.absolutePath,
+            gamePlatform = gameSource.name,
+            gameTitle = ContainerUtils.resolveGameName(appId),
+            wineVersion = container.wineVersion,
+            dxwrapper = container.getExtra("dxwrapper"),
+            containerVariant = container.containerVariant,
+        )
+        LaunchFingerprintEmitter.emit(fingerprint)
+        fingerprint.logAtMilestone("LAUNCH_REQUEST_RECEIVED")
+        MilestoneEmitter.startSession(fingerprint.sessionId)
+        MilestoneEmitter.record(LaunchMilestone.LAUNCH_REQUEST_QUEUED, mapOf("appId" to appId))
+        MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_START, mapOf("wineVersion" to container.wineVersion))
 
         if (!bootToContainer) {
             // Resolve a concrete executable before expensive setup work so we can fail fast.
@@ -345,6 +364,8 @@ fun preLaunchApp(
 
         if (!imageFsInstallSuccess) {
             Timber.tag("preLaunchApp").e("ImageFS installation failed")
+            fingerprint.logAtMilestone("IMAGEFS_INSTALL_FAILED")
+            MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf("reason" to "imagefs_install_failed"))
             setLoadingDialogVisible(false)
             setMessageDialogState(
                 MessageDialogState(
@@ -362,6 +383,8 @@ fun preLaunchApp(
         setLoadingProgress(-1f)
 
         containerManager.activateContainer(container)
+        fingerprint.logAtMilestone("CONTAINER_ACTIVATED")
+        MilestoneEmitter.record(LaunchMilestone.CONTAINER_READY, mapOf("containerPath" to container.rootDir.absolutePath))
 
         val isSteamGame = gameSource == GameSource.STEAM
         if (isSteamGame) {
@@ -391,6 +414,8 @@ fun preLaunchApp(
         if (isCustomGame) {
             // Custom games do not participate in store cloud flows.
             Timber.tag("preLaunchApp").i("Custom Game detected for $appId - skipping Steam Cloud sync and launching container")
+            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
             return@launch
@@ -412,6 +437,8 @@ fun preLaunchApp(
                 Timber.tag("GOG").i("[Cloud Saves] Download sync completed successfully for $appId")
             }
 
+            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
             return@launch
@@ -421,6 +448,8 @@ fun preLaunchApp(
         if (isAmazonGame) {
             // Amazon titles currently launch without cloud sync.
             Timber.tag("preLaunchApp").i("Amazon Game detected for $appId - skipping cloud sync and launching container")
+            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
             return@launch
@@ -445,6 +474,8 @@ fun preLaunchApp(
             Timber.tag("Epic").i("[Ownership Tokens] Cleaning up launch tokens for Epic games...")
             EpicService.cleanupLaunchTokens(context)
 
+            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
             return@launch
@@ -452,6 +483,8 @@ fun preLaunchApp(
 
         if (skipCloudSync) {
             Timber.tag("preLaunchApp").w("Skipping Steam Cloud sync for $appId by user request")
+            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
             setLoadingDialogVisible(false)
             onSuccess(context, appId)
             return@launch
@@ -654,7 +687,11 @@ fun preLaunchApp(
 
             SyncResult.UpToDate,
             SyncResult.Success,
-                -> onSuccess(context, appId)
+                -> {
+                    fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+                    MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
+                    onSuccess(context, appId)
+                }
         }
     }
 }

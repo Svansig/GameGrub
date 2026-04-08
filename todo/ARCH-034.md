@@ -3,7 +3,7 @@
 - **ID**: `ARCH-034`
 - **Area**: `manifest + runtime store`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Infrastructure only; manifest schema versioning documented in ARCHITECTURE.md later.`
 - **Reviewer**: `TBD`

@@ -3,7 +3,7 @@
 - **ID**: `ARCH-037`
 - **Area**: `manifest + serialization`
 - **Priority**: `P1`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Infrastructure only.`
 - **Reviewer**: `TBD`

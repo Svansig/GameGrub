@@ -3,7 +3,7 @@
 - **ID**: `ARCH-032`
 - **Area**: `launch + error handling`
 - **Priority**: `P0`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `Creates docs/launch-failure-taxonomy.md classifying failure modes, recovery behaviors, and detection strategies.`
 - **Reviewer**: `TBD`

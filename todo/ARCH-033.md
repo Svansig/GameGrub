@@ -3,7 +3,7 @@
 - **ID**: `ARCH-033`
 - **Area**: `launch + telemetry`
 - **Priority**: `P0`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Infrastructure only; extends ARCH-031 fingerprinting.`
 - **Reviewer**: `TBD`

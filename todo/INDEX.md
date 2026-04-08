@@ -16,19 +16,19 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| ARCH-030 | P0 | Inventory current runtime/container/imagefs launch flow | `launch + container + runtime` | `todo/ARCH-030.md` |
-| ARCH-031 | P0 | Add structured launch fingerprinting and telemetry hooks | `launch + telemetry` | `todo/ARCH-031.md` |
-| ARCH-032 | P0 | Define launch failure taxonomy and recovery phases | `launch + error handling` | `todo/ARCH-032.md` |
-| ARCH-033 | P0 | Define milestones and structured outcome recording for launches | `launch + telemetry` | `todo/ARCH-033.md` |
+| ARCH-030 | Done | Inventory current runtime/container/imagefs launch flow | `launch + container + runtime` | `docs/runtime-launch-flow-current-state.md` |
+| ARCH-031 | Done | Add structured launch fingerprinting and telemetry hooks | `launch + telemetry` | `todo/ARCH-031.md` |
+| ARCH-032 | Done | Define launch failure taxonomy and recovery phases | `launch + error handling` | `docs/launch-failure-taxonomy.md` |
+| ARCH-033 | Done | Define milestones and structured outcome recording for launches | `launch + telemetry` | `todo/ARCH-033.md` |
 
 ### Phase 1: Manifest Foundations
 
 | ID | Priority | Title | Area | File |
 |---|---|---|---|---|
-| ARCH-034 | P1 | Define BaseManifest and RuntimeManifest data models | `manifest + runtime store` | `todo/ARCH-034.md` |
-| ARCH-035 | P1 | Define DriverManifest and LaunchProfileManifest data models | `manifest + runtime store` | `todo/ARCH-035.md` |
-| ARCH-036 | P1 | Define ContainerManifest and CacheManifest data models | `manifest + container store` | `todo/ARCH-036.md` |
-| ARCH-037 | P1 | Implement manifest serialization and validation framework | `manifest + serialization` | `todo/ARCH-037.md` |
+| ARCH-034 | Done | Define BaseManifest and RuntimeManifest data models | `manifest + runtime store` | `todo/ARCH-034.md` |
+| ARCH-035 | Done | Define DriverManifest and LaunchProfileManifest data models | `manifest + runtime store` | `todo/ARCH-035.md` |
+| ARCH-036 | Done | Define ContainerManifest and CacheManifest data models | `manifest + container store` | `todo/ARCH-036.md` |
+| ARCH-037 | Done | Implement manifest serialization and validation framework | `manifest + serialization` | `todo/ARCH-037.md` |
 
 ### Phase 2: Runtime Store
 

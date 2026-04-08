@@ -3,7 +3,7 @@
 - **ID**: `ARCH-031`
 - **Area**: `launch + telemetry`
 - **Priority**: `P0`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `No doc changes required - Infrastructure only; logging conventions documented in existing telemetry guidelines.`
 - **Reviewer**: `TBD`

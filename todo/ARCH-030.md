@@ -3,7 +3,7 @@
 - **ID**: `ARCH-030`
 - **Area**: `launch + container + runtime`
 - **Priority**: `P0`
-- **Status**: `Backlog`
+- **Status**: `Done`
 - **Owner**: `TBD`
 - **Documentation Impact**: `Creates docs/runtime-launch-flow-current-state.md documenting existing paths, mutation points, and driver extraction flow.`
 - **Reviewer**: `TBD`

@@ -73,6 +73,31 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | ARCH-054 | Done | Integrate env var and path mapping into launcher | `launch engine` | `todo/ARCH-054.md` |
 | ARCH-055 | Done | Add telemetry integration with launch engine | `launch engine` | `todo/ARCH-055.md` |
 
+### Phase 7: Telemetry and Compatibility Records
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-056 | Done | Define LaunchSessionRecord schema | `telemetry + records` | `todo/ARCH-056.md` |
+| ARCH-057 | Done | Implement local persistence for launch records | `telemetry + records` | `todo/ARCH-057.md` |
+| ARCH-058 | Done | Add read/query APIs for launch records | `telemetry + records` | `todo/ARCH-058.md` |
+
+### Phase 8: Recommendation Foundations
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-059 | Done | Define compatibility record model | `recommendations` | `todo/ARCH-059.md` |
+| ARCH-060 | Done | Define recommendation result model | `recommendations` | `todo/ARCH-060.md` |
+| ARCH-061 | Done | Implement local last-known-good resolver | `recommendations` | `todo/ARCH-061.md` |
+| ARCH-062 | Done | Add curated rules scaffolding | `recommendations` | `todo/ARCH-062.md` |
+
+### Phase 9: Adaptive Fallback
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-063 | P1 | Define failure classes for fallback | `adaptive fallback` | `todo/ARCH-063.md` |
+| ARCH-064 | P1 | Implement fallback graph/state machine | `adaptive fallback` | `todo/ARCH-064.md` |
+| ARCH-065 | P1 | Add bounded retry policy | `adaptive fallback` | `todo/ARCH-065.md` |
+
 ## Backlog - UI
 
 | ID | Priority | Title | Area | File |

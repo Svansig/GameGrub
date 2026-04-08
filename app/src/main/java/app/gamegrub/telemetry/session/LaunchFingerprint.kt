@@ -39,20 +39,20 @@ data class LaunchFingerprint(
 
 object LaunchFingerprintEmitter {
     private val json = Json { prettyPrint = true }
-    private val fingerprints = mutableListOf<LaunchFingerprint>()
+    private val fingerprints = java.util.concurrent.ConcurrentLinkedQueue<LaunchFingerprint>()
     private const val MAX_CACHED = 100
 
     fun emit(fingerprint: LaunchFingerprint) {
-        fingerprints.add(fingerprint)
-        if (fingerprints.size > MAX_CACHED) {
-            fingerprints.removeAt(0)
+        fingerprints.offer(fingerprint)
+        while (fingerprints.size > MAX_CACHED) {
+            fingerprints.poll()
         }
         Timber.d("Fingerprint emitted: session=%s", fingerprint.sessionId)
         fingerprint.logAtMilestone("EMITTED")
     }
 
     fun getRecent(limit: Int = 10): List<LaunchFingerprint> {
-        return fingerprints.takeLast(limit).reversed()
+        return fingerprints.toList().takeLast(limit).reversed()
     }
 
     fun getBySessionId(sessionId: String): LaunchFingerprint? {

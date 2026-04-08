@@ -46,6 +46,15 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | ARCH-042 | Done | Design CacheController key derivation and invalidation policy | `cache + storage` | `docs/cache-controller-design.md` |
 | ARCH-043 | Done | Implement CacheController service for cache lifecycle and retrieval | `cache controller` | `todo/ARCH-043.md` |
 
+### Phase 4: Session Assembler
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-044 | Done | Define SessionPlan model for launch-time composition | `session assembler` | `todo/ARCH-044.md` |
+| ARCH-045 | Done | Define mount/path mapping and env-var models | `session assembler` | `todo/ARCH-045.md` |
+| ARCH-046 | Done | Implement SessionAssembler service | `session assembler` | `todo/ARCH-046.md` |
+| ARCH-047 | Done | Add session artifact serialization | `session assembler` | `todo/ARCH-047.md` |
+
 ## Backlog - UI
 
 | ID | Priority | Title | Area | File |

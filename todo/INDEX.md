@@ -55,6 +55,15 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | ARCH-046 | Done | Implement SessionAssembler service | `session assembler` | `todo/ARCH-046.md` |
 | ARCH-047 | Done | Add session artifact serialization | `session assembler` | `todo/ARCH-047.md` |
 
+### Phase 5: Graphics Cache Wiring
+
+| ID | Priority | Title | Area | File |
+|---|---|---|---|---|
+| ARCH-048 | Done | Define graphics cache adapter abstraction | `graphics cache` | `todo/ARCH-048.md` |
+| ARCH-049 | Done | Implement DXVK and VKD3D cache adapters | `graphics cache` | `todo/ARCH-049.md` |
+| ARCH-050 | Done | Implement Mesa shader cache adapter | `graphics cache` | `todo/ARCH-050.md` |
+| ARCH-051 | Done | Wire XDG cache and pre-launch directory creation | `graphics cache` | `todo/ARCH-051.md` |
+
 ## Backlog - UI
 
 | ID | Priority | Title | Area | File |

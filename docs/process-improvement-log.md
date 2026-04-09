@@ -16,6 +16,24 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-09`
+- **Ticket**: `N/A (Shovel Knight launch audio + exit-status investigation)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Guest env vars were using host-absolute Unix socket paths (for PulseAudio), which can break IPC when Wine runs in proot rootfs.
+- **Proposed Action**: Standardize guest-facing env socket paths to guest namespace paths (for example `unix:/tmp/.sound/PS0`) and add launch-time socket readiness diagnostics.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-09`
+- **Ticket**: `N/A (Shovel Knight launch audio + exit-status investigation)`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Status `137` signals from app-initiated teardown can be misread as primary launch failures in bug triage.
+- **Proposed Action**: Add an exit-intent flag to termination classification and require triage templates to classify `137` as root-cause only with independent crash/kill evidence.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-09`
 - **Ticket**: `N/A (attestation + compatibility API resilience)`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.OsConstants;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -276,11 +277,19 @@ public abstract class FileUtils {
     }
 
     public static void chmod(File file, int mode) {
+        if (file == null || !file.exists()) {
+            Timber.tag("FileUtils").d("Skipping chmod for missing path: " + (file == null ? "<null>" : file.getAbsolutePath()));
+            return;
+        }
         Timber.tag("FileUtils").d("Attempting to chmod " + file.getAbsolutePath());
         try {
             Os.chmod(file.getAbsolutePath(), mode);
             Timber.tag("FileUtils").d("Successfully chmod-ed " + file.getAbsolutePath());
         } catch (ErrnoException e) {
+            if (e.errno == OsConstants.EROFS) {
+                Timber.tag("FileUtils").d("Skipping chmod on read-only filesystem for " + file.getAbsolutePath());
+                return;
+            }
             Timber.tag("FileUtils").e("Failed to chmod " + file.getAbsolutePath() + ": " + e);
         }
     }

@@ -24,6 +24,8 @@ public class PulseAudioComponent extends EnvironmentComponent {
     private float volume = 1.0f;
     private byte performanceMode = 1;
     private boolean isPaused = false;
+    private static final long SOCKET_READY_TIMEOUT_MS = 1500;
+    private static final long SOCKET_READY_POLL_MS = 50;
 
     public PulseAudioComponent(UnixSocketConfig socketConfig) {
         this.socketConfig = socketConfig;
@@ -35,6 +37,13 @@ public class PulseAudioComponent extends EnvironmentComponent {
         synchronized (lock) {
             stop();
             pid = execPulseAudio();
+            if (pid <= 0) {
+                Timber.tag("PulseAudioComponent").e("PulseAudio failed to start (pid=%d)", pid);
+            } else if (!waitForSocketReady()) {
+                Timber.tag("PulseAudioComponent").w("PulseAudio pid=%d started but socket did not become ready at %s", pid, socketConfig.path);
+            } else {
+                Timber.tag("PulseAudioComponent").d("PulseAudio socket is ready at %s", socketConfig.path);
+            }
             isPaused = false;
         }
     }
@@ -116,12 +125,16 @@ public class PulseAudioComponent extends EnvironmentComponent {
 
         String archName = AppUtils.getArchName();
         File modulesDir = new File(workingDir, "modules");
+        if (!modulesDir.isDirectory()) {
+            Timber.tag("PulseAudioComponent").w("PulseAudio modules directory not found: %s", modulesDir.getAbsolutePath());
+        }
 
         EnvVars envVars = new EnvVars();
         envVars.put("LD_LIBRARY_PATH", "/system/lib64:"+nativeLibraryDir+":"+modulesDir);
         envVars.put("HOME", workingDir);
         envVars.put("TMPDIR", XEnvironment.getTmpDir(context));
 
+        Timber.tag("PulseAudioComponent").d("Launching pulseaudio (arch=%s) with socket=%s", archName, socketConfig.path);
 
         String command = nativeLibraryDir+"/libpulseaudio.so";
         command += " --system=false";
@@ -133,6 +146,23 @@ public class PulseAudioComponent extends EnvironmentComponent {
         command += " --exit-idle-time=-1";
 
         return ProcessHelper.exec(command, envVars.toStringArray(), workingDir);
+    }
+
+    private boolean waitForSocketReady() {
+        File socketFile = new File(socketConfig.path);
+        long deadline = System.currentTimeMillis() + SOCKET_READY_TIMEOUT_MS;
+        while (System.currentTimeMillis() < deadline) {
+            if (socketFile.exists()) {
+                return true;
+            }
+            try {
+                Thread.sleep(SOCKET_READY_POLL_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return socketFile.exists();
     }
 
     private void executePactl(boolean suspend) {

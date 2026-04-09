@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import app.gamegrub.R
 import app.gamegrub.domain.customgame.CustomGameScanner
 import java.io.File
@@ -107,7 +108,7 @@ fun rememberCustomGameFolderPicker(
     onFailure: (String) -> Unit = {},
     onCancel: () -> Unit = {},
 ): CustomGameFolderPicker {
-    val context = LocalContext.current
+    val errorMsg = stringResource(R.string.custom_game_folder_picker_error)
     val pickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree(),
     ) { uri: Uri? ->
@@ -120,7 +121,7 @@ fun rememberCustomGameFolderPicker(
         if (path != null) {
             onPathSelected(path)
         } else {
-            onFailure(context.getString(R.string.custom_game_folder_picker_error))
+            onFailure(errorMsg)
         }
     }
 

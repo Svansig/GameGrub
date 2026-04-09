@@ -84,6 +84,7 @@ fun SettingsGroupInterface(
     onPaletteStyle: (PaletteStyle) -> Unit,
 ) {
     val context = LocalContext.current
+    val gogLoginSuccessMsg = stringResource(R.string.gog_login_success_title)
 
     var openWebLinks by rememberSaveable { mutableStateOf(PrefManager.openWebLinksExternally) }
 
@@ -161,7 +162,7 @@ fun SettingsGroupInterface(
                         }
                     },
                     onSuccess = { count ->
-                        SnackbarManager.show(context.getString(R.string.gog_login_success_title))
+                        SnackbarManager.show(gogLoginSuccessMsg)
                     },
                     onDialogClose = { },
                 )
@@ -461,7 +462,7 @@ fun SettingsGroupInterface(
     LoadingDialog(
         visible = showStatusBarLoadingDialog,
         progress = -1f, // Indeterminate progress
-        message = context.getString(R.string.settings_saving_restarting),
+        message = stringResource(R.string.settings_saving_restarting),
     )
 
     // Language selection dialog

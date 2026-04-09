@@ -137,15 +137,6 @@ fun EpicGameManagerDialog(
         derivedStateOf { getInstallSizeInfo() }
     }
 
-    fun installSizeDisplay(): String {
-        return context.getString(
-            R.string.steam_install_space,
-            installSizeInfo.downloadSize,
-            installSizeInfo.installSize,
-            installSizeInfo.availableSpace,
-        )
-    }
-
     fun installButtonEnabled(): Boolean {
         // Check if there's enough space
         if (installSizeInfo.availableBytes < installSizeInfo.installBytes) {
@@ -338,7 +329,12 @@ fun EpicGameManagerDialog(
                             ) {
                                 Text(
                                     modifier = Modifier.weight(0.5f),
-                                    text = installSizeDisplay(),
+                                    text = stringResource(
+                                        R.string.steam_install_space,
+                                        installSizeInfo.downloadSize,
+                                        installSizeInfo.installSize,
+                                        installSizeInfo.availableSpace,
+                                    ),
                                 )
 
                                 Button(

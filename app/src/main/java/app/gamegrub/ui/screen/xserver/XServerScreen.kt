@@ -137,6 +137,7 @@ fun XServerScreen(
     Timber.i("Starting up XServerScreen")
     val context = LocalContext.current
     val view = LocalView.current
+    val controlsResetMsg = stringResource(R.string.toast_controls_reset)
     val imm = remember(context) {
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
@@ -1473,7 +1474,7 @@ fun XServerScreen(
                                 }
 
                                 icView.invalidate()
-                                SnackbarManager.show(context.getString(R.string.toast_controls_reset))
+                                SnackbarManager.show(controlsResetMsg)
                             }
                         }
                     }

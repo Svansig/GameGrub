@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -115,6 +116,14 @@ fun ContainerConfigDialog(
 ) {
     if (visible) {
         val context = LocalContext.current
+        val resources = LocalResources.current
+        val driveMissingMsg = stringResource(R.string.container_config_drive_letter_missing)
+        val noAvailableDriveLettersMsg = stringResource(R.string.no_available_drive_letters)
+        val invalidDrivePathMsg = stringResource(R.string.container_config_invalid_drive_path)
+        val unsavedChangesTitle = stringResource(R.string.container_config_unsaved_changes_title)
+        val unsavedChangesMsg = stringResource(R.string.container_config_unsaved_changes_message)
+        val discardMsg = stringResource(R.string.discard)
+        val cancelMsg = stringResource(R.string.cancel)
         rememberCoroutineScope()
         val installScope = remember {
             CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -348,7 +357,7 @@ fun ContainerConfigDialog(
             manifestInstallInProgress = true
             showManifestDownloadDialog = true
             manifestDownloadProgress = -1f
-            SnackbarManager.show(context.getString(R.string.manifest_downloading_item, label))
+            SnackbarManager.show(resources.getString(R.string.manifest_downloading_item, label))
             installScope.launch {
                 try {
                     val result = ManifestInstaller.installManifestEntry(
@@ -788,16 +797,16 @@ fun ContainerConfigDialog(
                 SteamService.keepAlive = false
                 val letter = pendingDriveLetter.uppercase(Locale.ENGLISH)
                 if (letter.isBlank()) {
-                    SnackbarManager.show(context.getString(R.string.container_config_drive_letter_missing))
+                    SnackbarManager.show(driveMissingMsg)
                     return@rememberCustomGameFolderPicker
                 }
                 if (!availableDriveLetters.contains(letter)) {
-                    SnackbarManager.show(context.getString(R.string.no_available_drive_letters))
+                    SnackbarManager.show(noAvailableDriveLettersMsg)
                     pendingDriveLetter = ""
                     return@rememberCustomGameFolderPicker
                 }
                 if (path.isBlank() || path.contains(":")) {
-                    SnackbarManager.show(context.getString(R.string.container_config_invalid_drive_path))
+                    SnackbarManager.show(invalidDrivePathMsg)
                     pendingDriveLetter = ""
                     return@rememberCustomGameFolderPicker
                 }
@@ -841,10 +850,10 @@ fun ContainerConfigDialog(
             if (initialConfig != config) {
                 dismissDialogState = MessageDialogState(
                     visible = true,
-                    title = context.getString(R.string.container_config_unsaved_changes_title),
-                    message = context.getString(R.string.container_config_unsaved_changes_message),
-                    confirmBtnText = context.getString(R.string.discard),
-                    dismissBtnText = context.getString(R.string.cancel),
+                    title = unsavedChangesTitle,
+                    message = unsavedChangesMsg,
+                    confirmBtnText = discardMsg,
+                    dismissBtnText = cancelMsg,
                 )
             } else {
                 onDismissRequest()

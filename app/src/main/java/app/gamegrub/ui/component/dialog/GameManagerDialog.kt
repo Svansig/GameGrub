@@ -264,15 +264,6 @@ fun GameManagerDialog(
         derivedStateOf { getInstallSizeInfo() }
     }
 
-    fun installSizeDisplay(): String {
-        return context.getString(
-            R.string.steam_install_space,
-            installSizeInfo.downloadSize,
-            installSizeInfo.installSize,
-            installSizeInfo.availableSpace,
-        )
-    }
-
     fun installButtonEnabled(): Boolean {
         if (installSizeInfo.availableBytes < installSizeInfo.installBytes) {
             return false
@@ -480,7 +471,12 @@ fun GameManagerDialog(
                             ) {
                                 Text(
                                     modifier = Modifier.weight(0.5f),
-                                    text = installSizeDisplay(),
+                                    text = stringResource(
+                                        R.string.steam_install_space,
+                                        installSizeInfo.downloadSize,
+                                        installSizeInfo.installSize,
+                                        installSizeInfo.availableSpace,
+                                    ),
                                 )
 
                                 Button(

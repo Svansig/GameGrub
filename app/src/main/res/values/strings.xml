@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">GameGrub</string>
     <string name="login_user">User Login</string>
     <string name="login_2fa">Two Factor</string>
@@ -189,7 +189,7 @@
     <string name="intent_launch_steam_login_failed">Steam login failed — game launch cancelled</string>
     <string name="game_executable_not_found_title">Cannot Launch</string>
     <string name="game_executable_not_found">The executable could not be auto-selected. Please set the executable path in container settings.</string>
-    <string name="game_launch_failed">Launch Failed</string>
+    <string name="game_launch_failed" tools:ignore="MissingTranslation">Launch Failed</string>
     <string name="save_container_settings_title">Save Container Configuration?</string>
     <string name="save_container_settings_message">Temporary container configuration changes were applied for this launch. Do you want to save them?</string>
     <string name="sync_error_title">Sync Error</string>
@@ -1314,21 +1314,21 @@
     <string name="library_source_no_custom_games">You have not added any custom games.</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_next">Next</string>
-    <string name="onboarding_page1_title">Play Your PC Games on Android</string>
-    <string name="onboarding_page1_desc">Access your Steam, GOG, Epic, and Amazon game libraries and play your favorite PC games directly on your Android device.</string>
-    <string name="onboarding_page2_title">Easy Setup</string>
-    <string name="onboarding_page2_desc">Just sign in to your store accounts, browse your library, and tap to install. It\'s that simple.</string>
-    <string name="onboarding_page3_title">Optimized Performance</string>
-    <string name="onboarding_page3_desc">Tune compatibility settings per game, sync cloud saves, and get the best experience possible on your device.</string>
-    <string name="onboarding_page4_title">Connect Your Accounts</string>
-    <string name="onboarding_page4_desc">Sign in to Steam, GOG, Epic, or Amazon to access your game libraries. You can connect more accounts later in Settings.</string>
-    <string name="onboarding_connect_title">Connect Your Accounts</string>
-    <string name="onboarding_connect_steam">Steam</string>
-    <string name="onboarding_connect_gog">GOG</string>
-    <string name="onboarding_connect_epic">Epic</string>
-    <string name="onboarding_connect_amazon">Amazon</string>
-    <string name="onboarding_skip_account">Skip for now</string>
+    <string name="onboarding_skip" tools:ignore="MissingTranslation">Skip</string>
+    <string name="onboarding_next" tools:ignore="MissingTranslation">Next</string>
+    <string name="onboarding_page1_title" tools:ignore="MissingTranslation">Play Your PC Games on Android</string>
+    <string name="onboarding_page1_desc" tools:ignore="MissingTranslation">Access your Steam, GOG, Epic, and Amazon game libraries and play your favorite PC games directly on your Android device.</string>
+    <string name="onboarding_page2_title" tools:ignore="MissingTranslation">Easy Setup</string>
+    <string name="onboarding_page2_desc" tools:ignore="MissingTranslation">Just sign in to your store accounts, browse your library, and tap to install. It\'s that simple.</string>
+    <string name="onboarding_page3_title" tools:ignore="MissingTranslation">Optimized Performance</string>
+    <string name="onboarding_page3_desc" tools:ignore="MissingTranslation">Tune compatibility settings per game, sync cloud saves, and get the best experience possible on your device.</string>
+    <string name="onboarding_page4_title" tools:ignore="MissingTranslation">Connect Your Accounts</string>
+    <string name="onboarding_page4_desc" tools:ignore="MissingTranslation">Sign in to Steam, GOG, Epic, or Amazon to access your game libraries. You can connect more accounts later in Settings.</string>
+    <string name="onboarding_connect_title" tools:ignore="MissingTranslation">Connect Your Accounts</string>
+    <string name="onboarding_connect_steam" tools:ignore="MissingTranslation">Steam</string>
+    <string name="onboarding_connect_gog" tools:ignore="MissingTranslation">GOG</string>
+    <string name="onboarding_connect_epic" tools:ignore="MissingTranslation">Epic</string>
+    <string name="onboarding_connect_amazon" tools:ignore="MissingTranslation">Amazon</string>
+    <string name="onboarding_skip_account" tools:ignore="MissingTranslation">Skip for now</string>
 
 </resources>

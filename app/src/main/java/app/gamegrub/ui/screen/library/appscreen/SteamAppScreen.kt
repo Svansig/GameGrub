@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import app.gamegrub.GameGrubApp
@@ -973,6 +974,11 @@ class SteamAppScreen(
         onBack: () -> Unit,
     ) {
         val context = LocalContext.current
+        val resources = LocalResources.current
+        val steamStoragePermissionRequiredMsg = stringResource(R.string.steam_storage_permission_required)
+        val settingsNoExternalStorageMsg = stringResource(R.string.settings_interface_no_external_storage)
+        val workingMsg = stringResource(R.string.working)
+        val steamUninstallFailedMsg = stringResource(R.string.steam_uninstall_failed)
         val gameId = libraryItem.gameId
         val appInfo = remember(libraryItem.appId) {
             SteamService.getAppInfoOf(gameId)
@@ -1103,7 +1109,7 @@ class SteamAppScreen(
             val granted = StoragePermissionGate.hasStorageAccess(context, SteamPaths.defaultStoragePath)
             hasStoragePermission = granted
             if (!granted) {
-                SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                SnackbarManager.show(steamStoragePermissionRequiredMsg)
                 hideInstallDialog(gameId)
                 hideGameManagerDialog(gameId)
                 pendingInstallDlcIds = null
@@ -1129,7 +1135,7 @@ class SteamAppScreen(
                 requestManageStorageLauncher.launch(intent)
             } else {
                 pendingInstallDlcIds = null
-                SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                SnackbarManager.show(steamStoragePermissionRequiredMsg)
             }
         }
 
@@ -1176,11 +1182,11 @@ class SteamAppScreen(
                     if (intent != null) {
                         requestManageStorageLauncher.launch(intent)
                     } else {
-                        SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                        SnackbarManager.show(steamStoragePermissionRequiredMsg)
                         hideInstallDialog(gameId)
                     }
                 } else {
-                    SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                    SnackbarManager.show(steamStoragePermissionRequiredMsg)
                     hideInstallDialog(gameId)
                 }
             } else {
@@ -1220,7 +1226,7 @@ class SteamAppScreen(
                     if (intent != null) {
                         requestManageStorageLauncher.launch(intent)
                     } else {
-                        SnackbarManager.show(context.getString(R.string.steam_storage_permission_required))
+                        SnackbarManager.show(steamStoragePermissionRequiredMsg)
                     }
                 }
             }
@@ -1230,9 +1236,9 @@ class SteamAppScreen(
             visible = knownConfigInstallState.visible,
             progress = knownConfigInstallState.progress,
             message = if (knownConfigInstallState.label.isNotEmpty()) {
-                context.getString(R.string.manifest_downloading_item, knownConfigInstallState.label)
+                resources.getString(R.string.manifest_downloading_item, knownConfigInstallState.label)
             } else {
-                context.getString(R.string.working)
+                workingMsg
             },
         )
 
@@ -1352,7 +1358,7 @@ class SteamAppScreen(
                                     onSuccess = {
                                         GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(gameId))
                                         SnackbarManager.show(
-                                            context.getString(
+                                            resources.getString(
                                                 R.string.steam_uninstall_success,
                                                 appInfo?.name ?: libraryItem.name,
                                             ),
@@ -1363,7 +1369,7 @@ class SteamAppScreen(
                                         )
                                     },
                                     onFailure = {
-                                        SnackbarManager.show(context.getString(R.string.steam_uninstall_failed))
+                                        SnackbarManager.show(steamUninstallFailedMsg)
                                     },
                                 )
                             }
@@ -1420,7 +1426,7 @@ class SteamAppScreen(
                     TextButton(
                         onClick = {
                             if (externalStorageDirs.isEmpty()) {
-                                SnackbarManager.show(context.getString(R.string.settings_interface_no_external_storage))
+                                SnackbarManager.show(settingsNoExternalStorageMsg)
                                 return@TextButton
                             }
 

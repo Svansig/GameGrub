@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -74,6 +75,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     if (!open) return
 
     val ctx = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
 
     var isBusy by remember { mutableStateOf(false) }
@@ -171,7 +173,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
         scope.launch {
             isBusy = true
-            statusMessage = ctx.getString(R.string.wine_proton_extracting)
+            statusMessage = resources.getString(R.string.wine_proton_extracting)
 
             // Get filename and detect type
             val filename = ctx.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -187,7 +189,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             }
 
             if (detectedType == null) {
-                statusMessage = ctx.getString(R.string.wine_proton_filename_error)
+                statusMessage = resources.getString(R.string.wine_proton_filename_error)
                 isStatusSuccess = false
                 SnackbarManager.show(statusMessage ?: "")
                 isBusy = false
@@ -204,12 +206,12 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     // Validate file exists and is readable
                     ctx.contentResolver.openInputStream(uri)?.use { stream ->
                         if (stream.available() == 0) {
-                            err = Exception(ctx.getString(R.string.wine_proton_file_empty))
+                            err = Exception(resources.getString(R.string.wine_proton_file_empty))
                             latch.countDown()
                             return@withContext Triple(profile, failReason, err)
                         }
                     } ?: run {
-                        err = Exception(ctx.getString(R.string.wine_proton_cannot_open))
+                        err = Exception(resources.getString(R.string.wine_proton_cannot_open))
                         latch.countDown()
                         return@withContext Triple(profile, failReason, err)
                     }
@@ -246,24 +248,24 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             val (profile, fail, error) = result
             if (profile == null) {
                 val msg = when (fail) {
-                    ContentsManager.InstallFailedReason.ERROR_BADTAR -> ctx.getString(R.string.wine_proton_error_badtar)
+                    ContentsManager.InstallFailedReason.ERROR_BADTAR -> resources.getString(R.string.wine_proton_error_badtar)
 
-                    ContentsManager.InstallFailedReason.ERROR_NOPROFILE -> ctx.getString(R.string.wine_proton_error_noprofile)
+                    ContentsManager.InstallFailedReason.ERROR_NOPROFILE -> resources.getString(R.string.wine_proton_error_noprofile)
 
-                    ContentsManager.InstallFailedReason.ERROR_BADPROFILE -> ctx.getString(R.string.wine_proton_error_badprofile)
+                    ContentsManager.InstallFailedReason.ERROR_BADPROFILE -> resources.getString(R.string.wine_proton_error_badprofile)
 
-                    ContentsManager.InstallFailedReason.ERROR_EXIST -> ctx.getString(R.string.wine_proton_error_exist)
+                    ContentsManager.InstallFailedReason.ERROR_EXIST -> resources.getString(R.string.wine_proton_error_exist)
 
-                    ContentsManager.InstallFailedReason.ERROR_MISSINGFILES -> ctx.getString(R.string.wine_proton_error_missingfiles)
+                    ContentsManager.InstallFailedReason.ERROR_MISSINGFILES -> resources.getString(R.string.wine_proton_error_missingfiles)
 
-                    ContentsManager.InstallFailedReason.ERROR_UNTRUSTPROFILE -> ctx.getString(R.string.wine_proton_error_untrustprofile)
+                    ContentsManager.InstallFailedReason.ERROR_UNTRUSTPROFILE -> resources.getString(R.string.wine_proton_error_untrustprofile)
 
-                    ContentsManager.InstallFailedReason.ERROR_NOSPACE -> ctx.getString(R.string.wine_proton_error_nospace)
+                    ContentsManager.InstallFailedReason.ERROR_NOSPACE -> resources.getString(R.string.wine_proton_error_nospace)
 
                     null -> error?.let { "Error: ${it.javaClass.simpleName} - ${it.message}" }
-                        ?: ctx.getString(R.string.wine_proton_error_unknown)
+                        ?: resources.getString(R.string.wine_proton_error_unknown)
 
-                    else -> ctx.getString(R.string.wine_proton_error_unable_install)
+                    else -> resources.getString(R.string.wine_proton_error_unable_install)
                 }
                 statusMessage = if (error != null && fail != null) {
                     "$msg: ${error.message ?: error.javaClass.simpleName}"
@@ -282,7 +284,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             if (profile.type != ContentProfile.ContentType.CONTENT_TYPE_WINE &&
                 profile.type != ContentProfile.ContentType.CONTENT_TYPE_PROTON
             ) {
-                statusMessage = ctx.getString(R.string.wine_proton_not_wine_or_proton, profile.type)
+                statusMessage = resources.getString(R.string.wine_proton_not_wine_or_proton, profile.type)
                 isStatusSuccess = false
                 SnackbarManager.show(statusMessage ?: "")
                 isBusy = false
@@ -292,7 +294,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
             // Verify detected type matches package type
             if (profile.type != detectedType) {
-                statusMessage = ctx.getString(R.string.wine_proton_type_mismatch, detectedType, profile.type)
+                statusMessage = resources.getString(R.string.wine_proton_type_mismatch, detectedType, profile.type)
                 isStatusSuccess = false
                 SnackbarManager.show(statusMessage ?: "")
                 isBusy = false
@@ -307,7 +309,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
             if (binaryVariant == "glibc") {
                 // Reject glibc builds - not supported in GameNative
-                statusMessage = ctx.getString(R.string.wine_proton_glibc_incompatible)
+                statusMessage = resources.getString(R.string.wine_proton_glibc_incompatible)
                 isStatusSuccess = false
 
                 // Clean up the extracted files from tmp directory
@@ -332,7 +334,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
             untrustedFiles.addAll(files)
             if (untrustedFiles.isNotEmpty()) {
                 showUntrustedConfirm = true
-                statusMessage = ctx.getString(R.string.wine_proton_untrusted_files_detected)
+                statusMessage = resources.getString(R.string.wine_proton_untrusted_files_detected)
                 isStatusSuccess = false
                 isBusy = false
             } else {
@@ -381,7 +383,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 withContext(Dispatchers.Main) {
                     isInstalling = true
                     isBusy = true
-                    statusMessage = ctx.getString(R.string.wine_proton_extracting)
+                    statusMessage = resources.getString(R.string.wine_proton_extracting)
                 }
 
                 Timber.d("WineProtonManagerDialog: Starting install")
@@ -397,7 +399,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 }
 
                 if (detectedType == null) {
-                    val errorMsg = ctx.getString(R.string.wine_proton_filename_error)
+                    val errorMsg = resources.getString(R.string.wine_proton_filename_error)
                     withContext(Dispatchers.Main) {
                         statusMessage = errorMsg
                         isStatusSuccess = false
@@ -440,24 +442,24 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 val (profile, fail, error) = result
                 if (profile == null) {
                     val msg = when (fail) {
-                        ContentsManager.InstallFailedReason.ERROR_BADTAR -> ctx.getString(R.string.wine_proton_error_badtar)
+                        ContentsManager.InstallFailedReason.ERROR_BADTAR -> resources.getString(R.string.wine_proton_error_badtar)
 
-                        ContentsManager.InstallFailedReason.ERROR_NOPROFILE -> ctx.getString(R.string.wine_proton_error_noprofile)
+                        ContentsManager.InstallFailedReason.ERROR_NOPROFILE -> resources.getString(R.string.wine_proton_error_noprofile)
 
-                        ContentsManager.InstallFailedReason.ERROR_BADPROFILE -> ctx.getString(R.string.wine_proton_error_badprofile)
+                        ContentsManager.InstallFailedReason.ERROR_BADPROFILE -> resources.getString(R.string.wine_proton_error_badprofile)
 
-                        ContentsManager.InstallFailedReason.ERROR_EXIST -> ctx.getString(R.string.wine_proton_error_exist)
+                        ContentsManager.InstallFailedReason.ERROR_EXIST -> resources.getString(R.string.wine_proton_error_exist)
 
-                        ContentsManager.InstallFailedReason.ERROR_MISSINGFILES -> ctx.getString(R.string.wine_proton_error_missingfiles)
+                        ContentsManager.InstallFailedReason.ERROR_MISSINGFILES -> resources.getString(R.string.wine_proton_error_missingfiles)
 
-                        ContentsManager.InstallFailedReason.ERROR_UNTRUSTPROFILE -> ctx.getString(R.string.wine_proton_error_untrustprofile)
+                        ContentsManager.InstallFailedReason.ERROR_UNTRUSTPROFILE -> resources.getString(R.string.wine_proton_error_untrustprofile)
 
-                        ContentsManager.InstallFailedReason.ERROR_NOSPACE -> ctx.getString(R.string.wine_proton_error_nospace)
+                        ContentsManager.InstallFailedReason.ERROR_NOSPACE -> resources.getString(R.string.wine_proton_error_nospace)
 
                         null -> error?.let { "Error: ${it.javaClass.simpleName} - ${it.message}" }
-                            ?: ctx.getString(R.string.wine_proton_error_unknown)
+                            ?: resources.getString(R.string.wine_proton_error_unknown)
 
-                        else -> ctx.getString(R.string.wine_proton_error_unable_install)
+                        else -> resources.getString(R.string.wine_proton_error_unable_install)
                     }
                     val errorMessage = if (error != null && fail != null) {
                         "$msg: ${error.message ?: error.javaClass.simpleName}"
@@ -477,7 +479,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 if (profile.type != ContentProfile.ContentType.CONTENT_TYPE_WINE &&
                     profile.type != ContentProfile.ContentType.CONTENT_TYPE_PROTON
                 ) {
-                    val errorMsg = ctx.getString(R.string.wine_proton_not_wine_or_proton, profile.type)
+                    val errorMsg = resources.getString(R.string.wine_proton_not_wine_or_proton, profile.type)
                     withContext(Dispatchers.Main) {
                         statusMessage = errorMsg
                         isStatusSuccess = false
@@ -487,7 +489,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                 }
 
                 if (profile.type != detectedType) {
-                    val errorMsg = ctx.getString(R.string.wine_proton_type_mismatch, detectedType, profile.type)
+                    val errorMsg = resources.getString(R.string.wine_proton_type_mismatch, detectedType, profile.type)
                     withContext(Dispatchers.Main) {
                         statusMessage = errorMsg
                         isStatusSuccess = false
@@ -503,7 +505,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
 
                 // ! We currently are not supporting GLIBC but we will in future.
                 if (binaryVariant == "glibc") {
-                    val errorMsg = ctx.getString(R.string.wine_proton_glibc_incompatible)
+                    val errorMsg = resources.getString(R.string.wine_proton_glibc_incompatible)
                     withContext(Dispatchers.Main) {
                         statusMessage = errorMsg
                         isStatusSuccess = false
@@ -526,7 +528,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     withContext(Dispatchers.Main) {
                         pendingProfile = profile
                         showUntrustedConfirm = true
-                        statusMessage = ctx.getString(R.string.wine_proton_untrusted_files_detected)
+                        statusMessage = resources.getString(R.string.wine_proton_untrusted_files_detected)
                         isStatusSuccess = false
                     }
                 } else {
@@ -782,7 +784,7 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                             importLauncher.launch(arrayOf("application/octet-stream", "*/*"))
                         } catch (e: Exception) {
                             SteamService.isImporting = false
-                            SnackbarManager.show(ctx.getString(R.string.wine_proton_failed_file_picker, e.message ?: ""))
+                            SnackbarManager.show(resources.getString(R.string.wine_proton_failed_file_picker, e.message ?: ""))
                         }
                     },
                     enabled = !isBusy,
@@ -982,11 +984,11 @@ fun WineProtonManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                                 // Refresh on main thread
                                 withContext(Dispatchers.Main) {
                                     refreshInstalled()
-                                    SnackbarManager.show(ctx.getString(R.string.wine_proton_removed_toast, target.verName))
+                                    SnackbarManager.show(resources.getString(R.string.wine_proton_removed_toast, target.verName))
                                 }
                             } catch (e: Exception) {
                                 Timber.tag("WineProtonManagerDialog").e(e, "Delete failed")
-                                SnackbarManager.show(ctx.getString(R.string.wine_proton_remove_failed, e.message ?: ""))
+                                SnackbarManager.show(resources.getString(R.string.wine_proton_remove_failed, e.message ?: ""))
                             }
                         }
                     },

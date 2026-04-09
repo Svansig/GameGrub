@@ -1,7 +1,7 @@
 package app.gamegrub
 
-import android.annotation.SuppressLint
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color.TRANSPARENT

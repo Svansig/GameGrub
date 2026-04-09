@@ -73,6 +73,33 @@ internal fun PhysicalControllerConfigSection(
 ) {
     val context = LocalContext.current
 
+    // Hoisted string resources for use in remember{} blocks
+    val buttonALabel = stringResource(R.string.button_a)
+    val buttonBLabel = stringResource(R.string.button_b)
+    val buttonXLabel = stringResource(R.string.button_x)
+    val buttonYLabel = stringResource(R.string.button_y)
+    val buttonL1Label = stringResource(R.string.button_l1)
+    val buttonR1Label = stringResource(R.string.button_r1)
+    val buttonL2Label = stringResource(R.string.button_l2)
+    val buttonR2Label = stringResource(R.string.button_r2)
+    val buttonStartLabel = stringResource(R.string.button_start)
+    val buttonSelectLabel = stringResource(R.string.button_select)
+    val buttonHomeLabel = stringResource(R.string.button_home)
+    val buttonL3Label = stringResource(R.string.button_l3)
+    val buttonR3Label = stringResource(R.string.button_r3)
+    val dpadUpLabel = stringResource(R.string.dpad_up)
+    val dpadDownLabel = stringResource(R.string.dpad_down)
+    val dpadLeftLabel = stringResource(R.string.dpad_left)
+    val dpadRightLabel = stringResource(R.string.dpad_right)
+    val leftStickUpLabel = stringResource(R.string.left_stick_up)
+    val leftStickDownLabel = stringResource(R.string.left_stick_down)
+    val leftStickLeftLabel = stringResource(R.string.left_stick_left)
+    val leftStickRightLabel = stringResource(R.string.left_stick_right)
+    val rightStickUpLabel = stringResource(R.string.right_stick_up)
+    val rightStickDownLabel = stringResource(R.string.right_stick_down)
+    val rightStickLeftLabel = stringResource(R.string.right_stick_left)
+    val rightStickRightLabel = stringResource(R.string.right_stick_right)
+
     // Ensure a wildcard controller exists for all physical controllers
     val controller = remember {
         var ctrl = profile.getController("*")
@@ -151,69 +178,69 @@ internal fun PhysicalControllerConfigSection(
 
     // Pre-compute all button configurations
     // Face buttons
-    val faceButtons = remember {
+    val faceButtons = remember(buttonALabel, buttonBLabel, buttonXLabel, buttonYLabel) {
         listOf(
-            ButtonConfig(context.getString(R.string.button_a), KeyEvent.KEYCODE_BUTTON_A),
-            ButtonConfig(context.getString(R.string.button_b), KeyEvent.KEYCODE_BUTTON_B),
-            ButtonConfig(context.getString(R.string.button_x), KeyEvent.KEYCODE_BUTTON_X),
-            ButtonConfig(context.getString(R.string.button_y), KeyEvent.KEYCODE_BUTTON_Y),
+            ButtonConfig(buttonALabel, KeyEvent.KEYCODE_BUTTON_A),
+            ButtonConfig(buttonBLabel, KeyEvent.KEYCODE_BUTTON_B),
+            ButtonConfig(buttonXLabel, KeyEvent.KEYCODE_BUTTON_X),
+            ButtonConfig(buttonYLabel, KeyEvent.KEYCODE_BUTTON_Y),
         )
     }
 
     // Shoulder buttons
-    val shoulderButtons = remember {
+    val shoulderButtons = remember(buttonL1Label, buttonR1Label, buttonL2Label, buttonR2Label) {
         listOf(
-            ButtonConfig(context.getString(R.string.button_l1), KeyEvent.KEYCODE_BUTTON_L1),
-            ButtonConfig(context.getString(R.string.button_r1), KeyEvent.KEYCODE_BUTTON_R1),
-            ButtonConfig(context.getString(R.string.button_l2), KeyEvent.KEYCODE_BUTTON_L2),
-            ButtonConfig(context.getString(R.string.button_r2), KeyEvent.KEYCODE_BUTTON_R2),
+            ButtonConfig(buttonL1Label, KeyEvent.KEYCODE_BUTTON_L1),
+            ButtonConfig(buttonR1Label, KeyEvent.KEYCODE_BUTTON_R1),
+            ButtonConfig(buttonL2Label, KeyEvent.KEYCODE_BUTTON_L2),
+            ButtonConfig(buttonR2Label, KeyEvent.KEYCODE_BUTTON_R2),
         )
     }
 
     // Menu buttons
-    val menuButtons = remember {
+    val menuButtons = remember(buttonStartLabel, buttonSelectLabel, buttonHomeLabel) {
         listOf(
-            ButtonConfig(context.getString(R.string.button_start), KeyEvent.KEYCODE_BUTTON_START),
-            ButtonConfig(context.getString(R.string.button_select), KeyEvent.KEYCODE_BUTTON_SELECT),
-            ButtonConfig(context.getString(R.string.button_home), KeyEvent.KEYCODE_BUTTON_MODE),
+            ButtonConfig(buttonStartLabel, KeyEvent.KEYCODE_BUTTON_START),
+            ButtonConfig(buttonSelectLabel, KeyEvent.KEYCODE_BUTTON_SELECT),
+            ButtonConfig(buttonHomeLabel, KeyEvent.KEYCODE_BUTTON_MODE),
         )
     }
 
     // Thumbstick buttons
-    val thumbstickButtons = remember {
+    val thumbstickButtons = remember(buttonL3Label, buttonR3Label) {
         listOf(
-            ButtonConfig(context.getString(R.string.button_l3), KeyEvent.KEYCODE_BUTTON_THUMBL),
-            ButtonConfig(context.getString(R.string.button_r3), KeyEvent.KEYCODE_BUTTON_THUMBR),
+            ButtonConfig(buttonL3Label, KeyEvent.KEYCODE_BUTTON_THUMBL),
+            ButtonConfig(buttonR3Label, KeyEvent.KEYCODE_BUTTON_THUMBR),
         )
     }
 
     // D-Pad
-    val dpadButtons = remember {
+    val dpadButtons = remember(dpadUpLabel, dpadDownLabel, dpadLeftLabel, dpadRightLabel) {
         listOf(
-            ButtonConfig(context.getString(R.string.dpad_up), KeyEvent.KEYCODE_DPAD_UP),
-            ButtonConfig(context.getString(R.string.dpad_down), KeyEvent.KEYCODE_DPAD_DOWN),
-            ButtonConfig(context.getString(R.string.dpad_left), KeyEvent.KEYCODE_DPAD_LEFT),
-            ButtonConfig(context.getString(R.string.dpad_right), KeyEvent.KEYCODE_DPAD_RIGHT),
+            ButtonConfig(dpadUpLabel, KeyEvent.KEYCODE_DPAD_UP),
+            ButtonConfig(dpadDownLabel, KeyEvent.KEYCODE_DPAD_DOWN),
+            ButtonConfig(dpadLeftLabel, KeyEvent.KEYCODE_DPAD_LEFT),
+            ButtonConfig(dpadRightLabel, KeyEvent.KEYCODE_DPAD_RIGHT),
         )
     }
 
     // Left analog stick
-    val leftStickAxes = remember {
+    val leftStickAxes = remember(leftStickUpLabel, leftStickDownLabel, leftStickLeftLabel, leftStickRightLabel) {
         listOf(
-            AnalogConfig(context.getString(R.string.left_stick_up), MotionEvent.AXIS_Y, -1),
-            AnalogConfig(context.getString(R.string.left_stick_down), MotionEvent.AXIS_Y, 1),
-            AnalogConfig(context.getString(R.string.left_stick_left), MotionEvent.AXIS_X, -1),
-            AnalogConfig(context.getString(R.string.left_stick_right), MotionEvent.AXIS_X, 1),
+            AnalogConfig(leftStickUpLabel, MotionEvent.AXIS_Y, -1),
+            AnalogConfig(leftStickDownLabel, MotionEvent.AXIS_Y, 1),
+            AnalogConfig(leftStickLeftLabel, MotionEvent.AXIS_X, -1),
+            AnalogConfig(leftStickRightLabel, MotionEvent.AXIS_X, 1),
         )
     }
 
     // Right analog stick
-    val rightStickAxes = remember {
+    val rightStickAxes = remember(rightStickUpLabel, rightStickDownLabel, rightStickLeftLabel, rightStickRightLabel) {
         listOf(
-            AnalogConfig(context.getString(R.string.right_stick_up), MotionEvent.AXIS_RZ, -1),
-            AnalogConfig(context.getString(R.string.right_stick_down), MotionEvent.AXIS_RZ, 1),
-            AnalogConfig(context.getString(R.string.right_stick_left), MotionEvent.AXIS_Z, -1),
-            AnalogConfig(context.getString(R.string.right_stick_right), MotionEvent.AXIS_Z, 1),
+            AnalogConfig(rightStickUpLabel, MotionEvent.AXIS_RZ, -1),
+            AnalogConfig(rightStickDownLabel, MotionEvent.AXIS_RZ, 1),
+            AnalogConfig(rightStickLeftLabel, MotionEvent.AXIS_Z, -1),
+            AnalogConfig(rightStickRightLabel, MotionEvent.AXIS_Z, 1),
         )
     }
 

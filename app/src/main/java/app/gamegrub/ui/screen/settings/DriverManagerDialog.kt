@@ -47,6 +47,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +76,7 @@ import timber.log.Timber
 fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
     if (!open) return
     val ctx = LocalContext.current
+    val resources = LocalResources.current
     var isImporting by remember { mutableStateOf(false) }
     var isDownloading by remember { mutableStateOf(false) }
     var isInstalling by remember { mutableStateOf(false) }
@@ -142,14 +144,14 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     Timber.d("DriverManagerDialog: Manifest loaded with ${manifest.size} entries")
                 } else {
                     withContext(Dispatchers.Main) {
-                        manifestError = ctx.getString(R.string.driver_error_manifest, response.code)
+                        manifestError = resources.getString(R.string.driver_error_manifest, response.code)
                         isLoadingManifest = false
                     }
                     Timber.w("DriverManagerDialog: Failed to load manifest HTTP=${response.code}")
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    manifestError = ctx.getString(R.string.driver_error_loading, e.message ?: "")
+                    manifestError = resources.getString(R.string.driver_error_loading, e.message ?: "")
                     isLoadingManifest = false
                 }
                 Timber.e(e, "DriverManagerDialog: Error loading driver manifest")
@@ -229,19 +231,19 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                     destFile.delete()
                 }
             } catch (e: SocketTimeoutException) {
-                val errorMessage = ctx.getString(R.string.driver_timeout)
+                val errorMessage = resources.getString(R.string.driver_timeout)
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download timeout")
             } catch (e: IOException) {
                 val errorMessage = if (e.message?.contains("timeout", ignoreCase = true) == true) {
-                    ctx.getString(R.string.driver_timeout)
+                    resources.getString(R.string.driver_timeout)
                 } else {
-                    ctx.getString(R.string.driver_network_error, e.message ?: "")
+                    resources.getString(R.string.driver_network_error, e.message ?: "")
                 }
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download failed with IO error")
             } catch (e: Exception) {
-                val errorMessage = ctx.getString(R.string.driver_download_error, e.message ?: "")
+                val errorMessage = resources.getString(R.string.driver_download_error, e.message ?: "")
                 SnackbarManager.show(errorMessage)
                 Timber.e(e, "DriverManagerDialog: Download failed")
             } finally {
@@ -479,10 +481,10 @@ fun DriverManagerDialog(open: Boolean, onDismiss: () -> Unit) {
                                     onClick = {
                                         try {
                                             AdrenotoolsManager(ctx).removeDriver(id)
-                                            SnackbarManager.show(ctx.getString(R.string.driver_removed, id))
+                                            SnackbarManager.show(resources.getString(R.string.driver_removed, id))
                                             refreshDriverList()
                                         } catch (e: Exception) {
-                                            SnackbarManager.show(ctx.getString(R.string.driver_remove_error, id, e.message ?: ""))
+                                            SnackbarManager.show(resources.getString(R.string.driver_remove_error, id, e.message ?: ""))
                                         }
                                         driverToDelete = null
                                     },

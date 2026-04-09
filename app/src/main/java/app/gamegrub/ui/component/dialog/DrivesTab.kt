@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -35,7 +34,7 @@ import com.winlator.container.Container
 
 @Composable
 fun DrivesTabContent(state: ContainerConfigState) {
-    val context = LocalContext.current
+    val noDriveLettersMsg = stringResource(R.string.no_available_drive_letters)
     val config = state.config.value
     SettingsGroup {
         if (config.drives.isNotEmpty()) {
@@ -94,7 +93,7 @@ fun DrivesTabContent(state: ContainerConfigState) {
             },
             onClick = {
                 if (state.availableDriveLetters.isEmpty()) {
-                    SnackbarManager.show(context.getString(R.string.no_available_drive_letters))
+                    SnackbarManager.show(noDriveLettersMsg)
                     return@SettingsMenuLink
                 }
                 state.selectedDriveLetter.value = state.availableDriveLetters.first()

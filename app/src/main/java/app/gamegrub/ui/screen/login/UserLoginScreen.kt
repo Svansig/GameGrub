@@ -155,20 +155,26 @@ fun UserLoginScreen(
     val lifecycleScope = LocalLifecycleOwner.current.lifecycleScope
     val snackBarHostState = remember { SnackbarHostState() }
     val userLoginState by viewModel.loginState.collectAsState()
+    val gogLoginCancelMsg = stringResource(R.string.gog_login_cancel)
+    val gogLoginSuccessMsg = stringResource(R.string.gog_login_success_title)
+    val epicLoginCancelMsg = stringResource(R.string.epic_login_cancel)
+    val epicLoginSuccessMsg = stringResource(R.string.epic_login_success_title)
+    val amazonLoginCancelMsg = stringResource(R.string.amazon_login_cancel)
+    val amazonLoginSuccessMsg = stringResource(R.string.amazon_login_success_title)
 
     val gogOAuthLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         if (result.resultCode != android.app.Activity.RESULT_OK) {
             val message = result.data?.getStringExtra(GOGOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.gog_login_cancel)
+                ?: gogLoginCancelMsg
             SnackbarManager.show(message)
             return@rememberLauncherForActivityResult
         }
         val code = result.data?.getStringExtra(GOGOAuthActivity.EXTRA_AUTH_CODE)
         if (code == null) {
             val message = result.data?.getStringExtra(GOGOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.gog_login_cancel)
+                ?: gogLoginCancelMsg
             SnackbarManager.show(message)
             return@rememberLauncherForActivityResult
         }
@@ -184,7 +190,7 @@ fun UserLoginScreen(
                     }
                 },
                 onSuccess = {
-                    SnackbarManager.show(context.getString(R.string.gog_login_success_title))
+                    SnackbarManager.show(gogLoginSuccessMsg)
                     onPlatformSignedIn()
                 },
                 onDialogClose = { },
@@ -197,14 +203,14 @@ fun UserLoginScreen(
     ) { result ->
         if (result.resultCode != android.app.Activity.RESULT_OK) {
             val message = result.data?.getStringExtra(EpicOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.epic_login_cancel)
+                ?: epicLoginCancelMsg
             SnackbarManager.show(message)
             return@rememberLauncherForActivityResult
         }
         val code = result.data?.getStringExtra(EpicOAuthActivity.EXTRA_AUTH_CODE)
         if (code == null) {
             val message = result.data?.getStringExtra(EpicOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.epic_login_cancel)
+                ?: epicLoginCancelMsg
             SnackbarManager.show(message)
             return@rememberLauncherForActivityResult
         }
@@ -220,7 +226,7 @@ fun UserLoginScreen(
                     }
                 },
                 onSuccess = {
-                    SnackbarManager.show(context.getString(R.string.epic_login_success_title))
+                    SnackbarManager.show(epicLoginSuccessMsg)
                     onPlatformSignedIn()
                 },
                 onDialogClose = { },
@@ -233,14 +239,14 @@ fun UserLoginScreen(
     ) { result ->
         if (result.resultCode != android.app.Activity.RESULT_OK) {
             val message = result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.amazon_login_cancel)
+                ?: amazonLoginCancelMsg
             SnackbarManager.show(message)
             return@rememberLauncherForActivityResult
         }
         val code = result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_AUTH_CODE)
         if (code == null) {
             val message = result.data?.getStringExtra(AmazonOAuthActivity.EXTRA_ERROR)
-                ?: context.getString(R.string.amazon_login_cancel)
+                ?: amazonLoginCancelMsg
             SnackbarManager.show(message)
             return@rememberLauncherForActivityResult
         }
@@ -256,7 +262,7 @@ fun UserLoginScreen(
                     }
                 },
                 onSuccess = {
-                    SnackbarManager.show(context.getString(R.string.amazon_login_success_title))
+                    SnackbarManager.show(amazonLoginSuccessMsg)
                     onPlatformSignedIn()
                 },
                 onDialogClose = { },

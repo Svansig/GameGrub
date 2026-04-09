@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import app.gamegrub.Constants
@@ -565,6 +566,7 @@ abstract class BaseAppScreen {
         onBack: () -> Unit,
     ) {
         val context = LocalContext.current
+        val resources = LocalResources.current
         val displayInfo = getGameDisplayInfo(context, libraryItem)
         val appId = libraryItem.appId
 
@@ -627,6 +629,8 @@ abstract class BaseAppScreen {
         }
 
         // Export for Frontend launcher
+        val exportedMsg = stringResource(R.string.base_app_exported)
+        val exportCancelledMsg = stringResource(R.string.base_app_export_cancelled)
         val exportFrontendLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
             onResult = { uri ->
@@ -637,12 +641,12 @@ abstract class BaseAppScreen {
                             outputStream.write(content.toByteArray(Charsets.UTF_8))
                             outputStream.flush()
                         }
-                        SnackbarManager.show(context.getString(R.string.base_app_exported))
+                        SnackbarManager.show(exportedMsg)
                     } catch (e: Exception) {
-                        SnackbarManager.show(context.getString(R.string.base_app_export_failed, e.message ?: ""))
+                        SnackbarManager.show(resources.getString(R.string.base_app_export_failed, e.message ?: ""))
                     }
                 } else {
-                    SnackbarManager.show(context.getString(R.string.base_app_export_cancelled))
+                    SnackbarManager.show(exportCancelledMsg)
                 }
             },
         )

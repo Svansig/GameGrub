@@ -65,7 +65,7 @@ internal object XServerExitCoordinator {
         GameGrubApp.clearActiveSuspendState()
         XServerRuntime.get().clearXEnvironment()
         XServerRuntime.get().clearInputControlsView()
-        GameGrubApp.inputControlsManager = null
+        XServerRuntime.get().clearInputControlsManager()
         GameGrubApp.touchpadView = null
         frameRating?.writeSessionSummary()
 

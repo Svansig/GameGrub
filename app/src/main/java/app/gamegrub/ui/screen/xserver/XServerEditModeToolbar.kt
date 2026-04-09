@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.gamegrub.GameGrubApp
 import app.gamegrub.R
+import app.gamegrub.ui.runtime.XServerRuntime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,7 +115,7 @@ internal fun EditModeToolbar(
                     Text(stringResource(R.string.copy_from), color = androidx.compose.ui.graphics.Color.White)
                 }
 
-                val knownProfiles = GameGrubApp.inputControlsManager?.getProfiles(false) ?: emptyList()
+                val knownProfiles = XServerRuntime.get().inputControlsManager?.getProfiles(false) ?: emptyList()
                 if (knownProfiles.isNotEmpty()) {
                     DropdownMenu(
                         expanded = duplicateProfileOpen,

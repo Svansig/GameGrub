@@ -257,7 +257,7 @@ internal object XServerOverlayActionCoordinator {
         } else {
             PostHog.capture(event = "onscreen_controller_enabled")
             val targetProfile = XServerControlsProfileResolver.resolveCurrentOrFallbackProfile(
-                manager = GameGrubApp.inputControlsManager,
+                manager = XServerRuntime.get().inputControlsManager,
                 container = container,
             )
             if (targetProfile != null) {

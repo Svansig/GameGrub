@@ -79,6 +79,10 @@ class XServerRuntimeState {
         _inputControlsManager.value = value
     }
 
+    fun clearInputControlsManager() {
+        _inputControlsManager.value = null
+    }
+
     fun setTouchpadView(value: TouchpadView?) {
         _touchpadView.value = value
     }

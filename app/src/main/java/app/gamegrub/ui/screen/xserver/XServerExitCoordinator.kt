@@ -61,7 +61,7 @@ internal object XServerExitCoordinator {
         winHandler?.stop()
         environment?.stopEnvironmentComponents()
         app.gamegrub.service.steam.SteamService.keepAlive = false
-        GameGrubApp.clearActiveSuspendState()
+        XServerRuntime.get().clearActiveSuspendState()
         XServerRuntime.get().clearXEnvironment()
         XServerRuntime.get().clearInputControlsView()
         XServerRuntime.get().clearInputControlsManager()

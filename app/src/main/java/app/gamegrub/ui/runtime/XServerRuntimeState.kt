@@ -9,6 +9,7 @@ import com.winlator.widget.InputControlsView
 import com.winlator.widget.TouchpadView
 import com.winlator.widget.XServerView
 import com.winlator.xenvironment.XEnvironment
+import timber.log.Timber
 
 class XServerRuntimeState {
 
@@ -43,6 +44,46 @@ class XServerRuntimeState {
     private val _isOverlayPaused = mutableStateOf(false)
     val isOverlayPaused: Boolean
         get() = _isOverlayPaused.value
+
+
+
+    fun pauseOverlay() {
+        if (isNeverSuspendMode()){
+            Timber.d("Not pausing overlay due to suspend policy=never")
+            return
+        }
+        if (!isOverlayPaused) {
+            _xEnvironment.value?.onPause()
+            _isOverlayPaused.value = true
+        }
+    }
+
+    fun resumeOverlay() {
+        if (isNeverSuspendMode()){
+            Timber.d("Not resuming overlay due to suspend policy=never")
+            return
+        }
+        if (isManualSuspendMode() ) {
+            Timber.d("Manual Mode: Keeping game suspended until Resume is pressed")
+            return
+        }
+        if (isOverlayPaused) {
+            _xEnvironment.value?.onResume()
+            _isOverlayPaused.value = false
+        }
+    }
+
+    fun forceResumeOverlay() {
+        if (isNeverSuspendMode()){
+            Timber.d("Not resuming overlay due to suspend policy=never")
+            return
+        }
+        if (isOverlayPaused) {
+            Timber.d("Force resuming overlay (bypassing manual suspend)")
+            _xEnvironment.value?.onResume()
+            _isOverlayPaused.value = false
+        }
+    }
 
     @Volatile
     private var _isActivityInForeground = true
@@ -100,9 +141,6 @@ class XServerRuntimeState {
         _achievementWatcher.value = null
     }
 
-    fun setOverlayPaused(paused: Boolean) {
-        _isOverlayPaused.value = paused
-    }
 
     fun setActivityInForeground(inForeground: Boolean) {
         _isActivityInForeground = inForeground

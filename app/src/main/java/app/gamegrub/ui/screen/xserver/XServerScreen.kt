@@ -163,8 +163,6 @@ fun XServerScreen(
     }
 
     val suspendPolicy = remember(container.id) { container.suspendPolicy }
-    val neverSuspend = suspendPolicy.equals(Container.SUSPEND_POLICY_NEVER, ignoreCase = true)
-    val manualResumeMode = suspendPolicy.equals(Container.SUSPEND_POLICY_MANUAL, ignoreCase = true)
 
     SideEffect {
         XServerRuntime.get().setActiveSuspendPolicy(suspendPolicy)
@@ -414,14 +412,12 @@ fun XServerScreen(
 
     fun resumeIfAllowedAfterOverlay() {
         XServerOverlayActionCoordinator.resumeIfAllowedAfterOverlay(
-            neverSuspend = neverSuspend,
-            manualResumeMode = manualResumeMode,
+
         )
     }
 
     fun resumeFromManualButton() {
         XServerOverlayActionCoordinator.resumeFromManualButton(
-            neverSuspend = neverSuspend,
             onKeepPausedForEditorChanged = { keepPausedForEditor = it },
         )
     }
@@ -607,8 +603,6 @@ fun XServerScreen(
             imeInputReceiver = imeInputReceiver,
             keyboardRequestedFromOverlay = keyboardRequestedFromOverlay,
             keepPausedForEditor = keepPausedForEditor,
-            manualResumeMode = manualResumeMode,
-            neverSuspend = neverSuspend,
             onKeyboardRequestedFromOverlayChanged = { },
             onShowQuickMenuChanged = { showQuickMenu = it },
         )
@@ -627,7 +621,6 @@ fun XServerScreen(
             onAreControlsVisibleChanged = { areControlsVisible = it },
             isPerformanceHudEnabled = isPerformanceHudEnabled,
             onPerformanceHudEnabledChanged = { isPerformanceHudEnabled = it },
-            neverSuspend = neverSuspend,
             onKeepPausedForEditorChanged = { keepPausedForEditor = it },
             onKeyboardRequestedFromOverlayChanged = { keyboardRequestedFromOverlay = it },
             onTogglePerformanceHud = ::updatePerformanceHud,
@@ -644,7 +637,6 @@ fun XServerScreen(
             anchorView = view,
             imeInputReceiver = imeInputReceiver,
             showQuickMenu = showQuickMenu,
-            neverSuspend = neverSuspend,
             onDismissOverlayMenu = dismissOverlayMenu,
             onKeyboardRequestedFromOverlayChanged = { keyboardRequestedFromOverlay = it },
             onShowQuickMenuChanged = { showQuickMenu = it },
@@ -691,8 +683,8 @@ fun XServerScreen(
             imeInputReceiver = null
             if (!SteamService.keepAlive) {
                 XServerRuntime.get().clearActiveSuspendState()
-            } else if (!manualResumeMode) {
-                XServerRuntime.get().setOverlayPaused(false)
+            } else  {
+                XServerRuntime.get().resumeOverlay()
             }
             registerBackAction { }
         } // preserve suspend state across activity recreation while a game is still running
@@ -714,7 +706,7 @@ fun XServerScreen(
                 hasUpdatedScreenGamepad = hasUpdatedScreenGamepad,
             )
             val manualResumeState = XServerInputEventDispatchCoordinator.ManualResumeState(
-                manualResumeMode = manualResumeMode,
+                manualResumeMode = XServerRuntime.get().isManualSuspendMode(),
                 isOverlayPaused = XServerRuntime.get().isOverlayPaused,
                 showQuickMenu = showQuickMenu,
                 keepPausedForEditor = keepPausedForEditor,
@@ -1129,16 +1121,9 @@ fun XServerScreen(
                                             navigateBack,
                                         ),
                                     )
-                                    if (!XServerRuntime.get().isActivityInForeground && !neverSuspend) {
-                                        XServerRuntime.get().xEnvironment?.onPause()
-                                        if (manualResumeMode) {
-                                            view.post {
-                                                XServerRuntime.get().setOverlayPaused(true)
-                                                Timber.d("Game paused after environment setup while app was backgrounded (manual resume required)")
-                                            }
-                                        } else {
-                                            Timber.d("Game paused after environment setup while app was backgrounded")
-                                        }
+                                    if (!XServerRuntime.get().isActivityInForeground) {
+                                        XServerRuntime.get().pauseOverlay()
+
                                     }
                                 } catch (e: Exception) {
                                     Timber.e(e, "Error during wine setup operations")
@@ -1493,7 +1478,7 @@ fun XServerScreen(
             hasPhysicalController = hasPhysicalController,
         )
 
-        if (manualResumeMode && XServerRuntime.get().isOverlayPaused && !showQuickMenu && !keepPausedForEditor) {
+        if (XServerRuntime.get().isManualSuspendMode() && XServerRuntime.get().isOverlayPaused && !showQuickMenu && !keepPausedForEditor) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

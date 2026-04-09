@@ -184,21 +184,7 @@ class MainActivity : ComponentActivity() {
     override fun onPause() {
         XServerRuntime.get().setActivityInForeground(false)
         if (hasReadyGameLifecycleState("pause")) {
-            when {
-                XServerRuntime.get().isNeverSuspendMode() -> {
-                    Timber.d("Game pause skipped due to suspend policy=never")
-                }
-
-                else -> {
-                    XServerRuntime.get().xEnvironment?.onPause()
-                    if (XServerRuntime.get().isManualSuspendMode()) {
-                        XServerRuntime.get().setOverlayPaused(true)
-                        Timber.d("Game paused due to app backgrounded (manual resume required)")
-                    } else {
-                        Timber.d("Game paused due to app backgrounded")
-                    }
-                }
-            }
+            XServerRuntime.get().pauseOverlay()
         }
         PostHog.capture(event = "app_backgrounded")
         super.onPause()

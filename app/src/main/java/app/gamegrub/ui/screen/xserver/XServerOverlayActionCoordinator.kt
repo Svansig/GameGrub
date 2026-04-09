@@ -6,7 +6,6 @@ import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.externaldisplay.IMEInputReceiver
 import app.gamegrub.ui.component.QuickMenuAction
@@ -22,62 +21,45 @@ import timber.log.Timber
  * ownership in XServerScreen through the supplied callbacks.
  */
 internal object XServerOverlayActionCoordinator {
-    fun pauseForOverlayIfAllowed(neverSuspend: Boolean) {
-        if (neverSuspend) {
-            Timber.d("Skipping overlay suspend due to suspend policy=never")
-            return
-        }
-        XServerRuntime.get().xEnvironment?.onPause()
-        GameGrubApp.isOverlayPaused = true
+     fun pauseForOverlayIfAllowed() {
+        XServerRuntime.get().pauseOverlay()
     }
 
-    fun resumeIfAllowedAfterOverlay(neverSuspend: Boolean, manualResumeMode: Boolean) {
-        if (!GameGrubApp.isOverlayPaused) {
-            return
-        }
-        if (neverSuspend) {
-            clearOverlayPauseState()
-            return
-        }
-        if (manualResumeMode) {
-            Timber.d("Keeping game suspended until Resume is pressed")
-            return
-        }
-        XServerRuntime.get().xEnvironment?.onResume()
-        clearOverlayPauseState()
+     fun resumeIfAllowedAfterOverlay() {
+        XServerRuntime.get().resumeOverlay()
     }
 
-    fun resumeFromManualButton(neverSuspend: Boolean, onKeepPausedForEditorChanged: (Boolean) -> Unit) {
-        if (!GameGrubApp.isOverlayPaused) {
-            return
-        }
-        if (!neverSuspend) {
-            XServerRuntime.get().xEnvironment?.onResume()
-        }
+     fun resumeFromManualButton( onKeepPausedForEditorChanged: (Boolean) -> Unit) {
+            XServerRuntime.get().resumeOverlay()
         onKeepPausedForEditorChanged(false)
-        clearOverlayPauseState()
     }
+
+    //    private fun clearOverlayPauseState() {
+//        XServerRuntime.get().isOverlayPaused = false
+//    }
+
+//    private fun forceResumeIfSuspended(neverSuspend: Boolean) {
+//        if (XServerRuntime.get().isOverlayPaused && !neverSuspend) {
+//            XServerRuntime.get().xEnvironment?.onResume()
+//        }
+//    }
 
     fun dismissOverlayMenu(
         imeInputReceiver: IMEInputReceiver?,
         keyboardRequestedFromOverlay: Boolean,
         keepPausedForEditor: Boolean,
-        manualResumeMode: Boolean,
-        neverSuspend: Boolean,
+//        manualResumeMode: Boolean,
+//        neverSuspend: Boolean,
         onKeyboardRequestedFromOverlayChanged: (Boolean) -> Unit,
         onShowQuickMenuChanged: (Boolean) -> Unit,
     ) {
         if (!keyboardRequestedFromOverlay) {
             imeInputReceiver?.hideKeyboard()
         }
-        val resumeImmediatelyForKeyboard = keyboardRequestedFromOverlay && manualResumeMode
+
         onKeyboardRequestedFromOverlayChanged(false)
         if (!keepPausedForEditor) {
-            if (resumeImmediatelyForKeyboard) {
-                forceResumeIfSuspended(neverSuspend)
-            } else {
-                resumeIfAllowedAfterOverlay(neverSuspend, manualResumeMode)
-            }
+                resumeIfAllowedAfterOverlay()
         }
         onShowQuickMenuChanged(false)
     }
@@ -94,7 +76,7 @@ internal object XServerOverlayActionCoordinator {
         onAreControlsVisibleChanged: (Boolean) -> Unit,
         isPerformanceHudEnabled: Boolean,
         onPerformanceHudEnabledChanged: (Boolean) -> Unit,
-        neverSuspend: Boolean,
+//        neverSuspend: Boolean,
         onKeepPausedForEditorChanged: (Boolean) -> Unit,
         onKeyboardRequestedFromOverlayChanged: (Boolean) -> Unit,
         onTogglePerformanceHud: (Boolean) -> Unit,
@@ -153,7 +135,7 @@ internal object XServerOverlayActionCoordinator {
                     ),
                 )
                 imeInputReceiver?.hideKeyboard()
-                forceResumeIfSuspended(neverSuspend)
+                resumeIfAllowedAfterOverlay()
                 onExitRequested()
                 true
             }
@@ -166,7 +148,7 @@ internal object XServerOverlayActionCoordinator {
         anchorView: View,
         imeInputReceiver: IMEInputReceiver?,
         showQuickMenu: Boolean,
-        neverSuspend: Boolean,
+//        neverSuspend: Boolean,
         onDismissOverlayMenu: () -> Unit,
         onKeyboardRequestedFromOverlayChanged: (Boolean) -> Unit,
         onShowQuickMenuChanged: (Boolean) -> Unit,
@@ -190,7 +172,7 @@ internal object XServerOverlayActionCoordinator {
         }
 
         Timber.i("BackHandler")
-        pauseForOverlayIfAllowed(neverSuspend)
+        pauseForOverlayIfAllowed()
         onKeyboardRequestedFromOverlayChanged(false)
 
         val controllerManager = com.winlator.inputcontrols.ControllerManager.getInstance()
@@ -207,16 +189,7 @@ internal object XServerOverlayActionCoordinator {
         onShowQuickMenuChanged(true)
     }
 
-    private fun clearOverlayPauseState() {
-        GameGrubApp.isOverlayPaused = false
-    }
 
-    private fun forceResumeIfSuspended(neverSuspend: Boolean) {
-        if (GameGrubApp.isOverlayPaused && !neverSuspend) {
-            XServerRuntime.get().xEnvironment?.onResume()
-        }
-        clearOverlayPauseState()
-    }
 
     @Suppress("DEPRECATION")
     private fun showKeyboard(

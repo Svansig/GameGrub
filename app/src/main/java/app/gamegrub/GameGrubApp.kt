@@ -82,39 +82,8 @@ class GameGrubApp : SplitCompatApplication() {
     }
 
     companion object {
-        @Deprecated("Use XServerRuntime.get().isOverlayPaused instead")
-        var isOverlayPaused by mutableStateOf(false)
-
         @Volatile
         @Deprecated("Use XServerRuntime.get().isActivityInForeground instead")
         var isActivityInForeground: Boolean = true
-
-        // Active runtime suspend policy for the current in-game session.
-        @Deprecated("Use XServerRuntime.get().activeSuspendPolicy instead")
-        var activeSuspendPolicy: String = Container.SUSPEND_POLICY_MANUAL
-            private set
-        private var hasInitializedSuspendPolicyState: Boolean = false
-
-        @Deprecated("Use XServerRuntime.get().setActiveSuspendPolicy instead")
-        fun setActiveSuspendPolicy(policy: String) {
-            activeSuspendPolicy = Container.normalizeSuspendPolicy(policy)
-            hasInitializedSuspendPolicyState = true
-        }
-
-        @Deprecated("Use XServerRuntime.get().clearActiveSuspendState instead")
-        fun clearActiveSuspendState() {
-            activeSuspendPolicy = Container.SUSPEND_POLICY_MANUAL
-            isOverlayPaused = false
-            hasInitializedSuspendPolicyState = false
-        }
-
-        @Deprecated("Use XServerRuntime.get().hasValidSuspendPolicyState instead")
-        fun hasValidSuspendPolicyState(): Boolean = hasInitializedSuspendPolicyState
-
-        @Deprecated("Use XServerRuntime.get().isNeverSuspendMode instead")
-        fun isNeverSuspendMode(): Boolean = activeSuspendPolicy.equals(Container.SUSPEND_POLICY_NEVER, ignoreCase = true)
-
-        @Deprecated("Use XServerRuntime.get().isManualSuspendMode instead")
-        fun isManualSuspendMode(): Boolean = activeSuspendPolicy.equals(Container.SUSPEND_POLICY_MANUAL, ignoreCase = true)
     }
 }

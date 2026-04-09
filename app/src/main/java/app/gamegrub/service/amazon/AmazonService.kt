@@ -80,7 +80,9 @@ class AmazonService : GameStoreService() {
             instance?.stopSelf()
         }
 
-        fun getInstance(): AmazonService? = instance
+        internal fun getInstance(): AmazonService? = instance
+
+        suspend fun getBearerToken(): String? = getInstance()?.amazonManager?.getBearerToken()
 
         fun hasStoredCredentials(context: Context): Boolean =
             AmazonAuthManager.hasStoredCredentials(context)

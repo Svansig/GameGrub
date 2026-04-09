@@ -122,7 +122,10 @@ class EpicService : GameStoreService() {
             return instance?.syncInProgress ?: false || hasActiveDownload()
         }
 
-        fun getInstance(): EpicService? = instance
+        internal fun getInstance(): EpicService? = instance
+
+        suspend fun getInstalledExe(gameId: Int): String =
+            getInstance()?.epicManager?.getInstalledExe(gameId) ?: ""
 
         // ==========================================================================
         // DOWNLOAD OPERATIONS - Delegate to instance EpicManager

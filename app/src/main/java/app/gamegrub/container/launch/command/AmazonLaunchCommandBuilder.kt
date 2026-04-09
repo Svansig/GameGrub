@@ -179,7 +179,7 @@ internal object AmazonLaunchCommandBuilder : BaseLaunchCommandBuilder() {
             File(prefixProgramData, "Amazon Games Services/AmazonGamesSDK").mkdirs()
 
             val sdkToken = runBlocking(Dispatchers.IO) {
-                AmazonService.getInstance()?.amazonManager?.getBearerToken()
+                AmazonService.getBearerToken()
             }
             if (sdkToken != null) {
                 val cached = runBlocking(Dispatchers.IO) {

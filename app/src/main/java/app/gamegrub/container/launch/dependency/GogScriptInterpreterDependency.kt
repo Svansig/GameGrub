@@ -29,11 +29,6 @@ object GogScriptInterpreterDependency : LaunchDependency {
         gameId: Int,
     ) {
         if (isRedistInstalled(gameId.toString())) return
-        val downloadManager = GOGService.getInstance()?.gogDownloadManager
-            ?: run {
-                Timber.tag("GOG").w("GOG service not available for redist download")
-                return
-            }
         Timber.tag("GOG").d("Downloading script interpreter (ISI) for GOG game")
         val installPath = GOGService.getInstallPath(gameId.toString())
         if (installPath == null) {
@@ -41,7 +36,7 @@ object GogScriptInterpreterDependency : LaunchDependency {
             return
         }
         val redistDir = File(installPath, "_CommonRedist")
-        val result = downloadManager.downloadDependenciesWithProgress(
+        val result = GOGService.downloadDependencies(
             gameId = "redist",
             dependencies = listOf("ISI"),
             gameDir = redistDir,

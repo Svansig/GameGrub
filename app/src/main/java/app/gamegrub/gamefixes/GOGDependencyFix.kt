@@ -29,10 +29,9 @@ class GOGDependencyFix(
         container: Container,
     ): Boolean {
         if (isSatisfied(installPath)) return true
-        val downloadManager = GOGService.getInstance()?.gogDownloadManager ?: return false
         val commonRedist = File(installPath, "_CommonRedist")
         return runBlocking(Dispatchers.IO) {
-            downloadManager.downloadDependenciesWithProgress(
+            GOGService.downloadDependencies(
                 gameId = gameId,
                 dependencies = dependencyIds,
                 gameDir = File(installPath),

@@ -142,7 +142,24 @@ class GOGService : GameStoreService() {
         // SYNC & OPERATIONS
         // ==========================================================================
 
-        fun getInstance(): GOGService? = instance
+        internal fun getInstance(): GOGService? = instance
+
+        fun getScriptInterpreterPartsForLaunch(appId: String): List<String>? =
+            getInstance()?.gogManager?.getScriptInterpreterPartsForLaunchSync(appId)
+
+        suspend fun downloadDependencies(
+            gameId: String,
+            dependencies: List<String>,
+            gameDir: java.io.File,
+            supportDir: java.io.File,
+            onProgress: ((Float) -> Unit) = {},
+        ): Result<Unit> = getInstance()?.gogDownloadManager?.downloadDependenciesWithProgress(
+            gameId = gameId,
+            dependencies = dependencies,
+            gameDir = gameDir,
+            supportDir = supportDir,
+            onProgress = onProgress,
+        ) ?: Result.failure(Exception("GOG service not available"))
 
         // ==========================================================================
         // DOWNLOAD OPERATIONS - Delegate to instance GOGManager

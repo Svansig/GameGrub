@@ -15,7 +15,7 @@ internal object EpicLaunchCommandBuilder : BaseLaunchCommandBuilder() {
     override fun buildStoreCommand(context: LaunchCommandContext): String {
         Timber.tag("XServerScreen").i("Launching Epic game: ${context.gameId}")
         val game = runBlocking {
-            EpicService.getInstance()?.epicManager?.getGameById(context.gameId)
+            EpicService.getEpicGameOf(context.gameId)
         }
 
         if (game == null || !game.isInstalled || game.installPath.isEmpty()) {
@@ -25,7 +25,7 @@ internal object EpicLaunchCommandBuilder : BaseLaunchCommandBuilder() {
 
         val exePath = context.container.executablePath.ifEmpty {
             val detectedPath = runBlocking {
-                EpicService.getInstance()?.epicManager?.getInstalledExe(game.id) ?: ""
+                EpicService.getInstalledExe(game.id)
             }
             if (detectedPath.isNotEmpty()) {
                 context.container.executablePath = detectedPath

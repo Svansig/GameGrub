@@ -27,8 +27,7 @@ object GogScriptInterpreterStep : PreInstallStep {
         gameDir: File,
         gameDirPath: String,
     ): String? {
-        val parts = GOGService.getInstance()?.gogManager
-            ?.getScriptInterpreterPartsForLaunchSync(appId) ?: return null
+        val parts = GOGService.getScriptInterpreterPartsForLaunch(appId) ?: return null
         return if (parts.isEmpty()) null else parts.joinToString(" & ")
     }
 }

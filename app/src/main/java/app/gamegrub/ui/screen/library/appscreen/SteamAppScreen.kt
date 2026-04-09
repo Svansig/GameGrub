@@ -1200,17 +1200,21 @@ class SteamAppScreen(
             }
         }
 
-        LaunchedEffect(gameManagerDialogState.visible, hasStoragePermission) {
+        LaunchedEffect(gameManagerDialogState.visible, hasStoragePermission, storageLocationConfirmedForInstall) {
             if (!gameManagerDialogState.visible) return@LaunchedEffect
 
             val isFreshInstall = !SteamService.isAppInstalled(gameId)
             if (isFreshInstall && !storageLocationConfirmedForInstall && pendingInstallDlcIds == null) {
+                // First time showing GameManagerDialog for a fresh install:
+                // Hide the dialog immediately and show storage location selector instead
                 hideGameManagerDialog(gameId)
                 if (externalStorageDirs.isNotEmpty()) {
                     showStorageLocationDialog = true
                 } else {
+                    // No external storage available, use internal
                     PrefManager.useExternalStorage = false
                     storageLocationConfirmedForInstall = true
+                    // Re-show the GameManagerDialog now that storage is configured
                     showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
                 }
                 return@LaunchedEffect
@@ -1402,6 +1406,7 @@ class SteamAppScreen(
         if (showStorageLocationDialog) {
             AlertDialog(
                 onDismissRequest = {
+                    showStorageLocationDialog = false
                     storageLocationConfirmedForInstall = false
                     pendingInstallDlcIds = null
                 },
@@ -1412,6 +1417,7 @@ class SteamAppScreen(
                         onClick = {
                             PrefManager.useExternalStorage = false
                             storageLocationConfirmedForInstall = true
+                            showStorageLocationDialog = false
                             if (pendingInstallDlcIds == null) {
                                 showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
                             } else {
@@ -1437,6 +1443,7 @@ class SteamAppScreen(
                             }
 
                             storageLocationConfirmedForInstall = true
+                            showStorageLocationDialog = false
                             if (pendingInstallDlcIds == null) {
                                 showGameManagerDialog(gameId, GameManagerDialogState(visible = true))
                             } else {
@@ -1463,8 +1470,10 @@ class SteamAppScreen(
                     if (storageLocationConfirmedForInstall) {
                         showPendingInstallDialog()
                     } else if (externalStorageDirs.isNotEmpty()) {
+                        showStorageLocationDialog = true
                     } else {
                         PrefManager.useExternalStorage = false
+                        storageLocationConfirmedForInstall = true
                         showPendingInstallDialog()
                     }
                 },

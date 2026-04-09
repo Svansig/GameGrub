@@ -15,36 +15,85 @@ import timber.log.Timber
  *
  * Manages download directory paths for Steam, GOG, Epic, and Amazon games.
  * This is a singleton object (no instance needed).
+ *
+ * IMPORTANT: Call [populateDownloadService] on app startup (e.g., in Application.onCreate())
+ * before using any path accessors to ensure paths are initialized.
  */
 object DownloadService {
     private var lastUpdateTime: Long = 0
     private var downloadDirectoryApps: MutableList<String>? = null
-    var baseDataDirPath: String = ""
-        private set
-    var baseCacheDirPath: String = ""
-        private set
+
+    private var _baseDataDirPath: String = ""
+    private var _baseCacheDirPath: String = ""
+    private var _baseExternalAppDirPath: String = ""
+    private var _externalVolumePaths: List<String> = emptyList()
+
+    @Volatile
+    private var isInitialized: Boolean = false
+
+    val baseDataDirPath: String
+        get() {
+            if (_baseDataDirPath.isBlank()) {
+                Timber.e("baseDataDirPath not initialized - populateDownloadService() must be called on app startup")
+            }
+            return _baseDataDirPath
+        }
+
+    val baseCacheDirPath: String
+        get() {
+            if (_baseCacheDirPath.isBlank()) {
+                Timber.e("baseCacheDirPath not initialized - populateDownloadService() must be called on app startup")
+            }
+            return _baseCacheDirPath
+        }
 
     // Base path to the app-specific external storage directory (Android/data/<package>)
-    var baseExternalAppDirPath: String = ""
-        private set
+    val baseExternalAppDirPath: String
+        get() {
+            if (_baseExternalAppDirPath.isBlank()) {
+                Timber.w("baseExternalAppDirPath not initialized or unavailable")
+            }
+            return _baseExternalAppDirPath
+        }
 
     // all mounted non-primary external volumes (SD cards, USB), discovered at init
-    var externalVolumePaths: List<String> = emptyList()
-        private set
+    val externalVolumePaths: List<String>
+        get() = _externalVolumePaths
+
+    fun isInitialized(): Boolean = isInitialized
 
     fun populateDownloadService(context: Context) {
-        baseDataDirPath = context.dataDir.path
-        baseCacheDirPath = context.cacheDir.path
+        if (isInitialized) {
+            Timber.d("DownloadService already initialized, skipping re-initialization")
+            return
+        }
+
+        _baseDataDirPath = context.dataDir.path
+        _baseCacheDirPath = context.cacheDir.path
+
         // Prefer the parent of external files dir (Android/data/<package>) so we can create siblings of /files
         val extFiles = context.getExternalFilesDir(null)
-        baseExternalAppDirPath = extFiles?.parentFile?.path ?: ""
+        _baseExternalAppDirPath = extFiles?.parentFile?.path ?: ""
 
         val sm = context.getSystemService(android.os.storage.StorageManager::class.java)
-        externalVolumePaths = context.getExternalFilesDirs(null)
+        _externalVolumePaths = context.getExternalFilesDirs(null)
             .filterNotNull()
             .filter { Environment.getExternalStorageState(it) == Environment.MEDIA_MOUNTED }
             .filter { sm.getStorageVolume(it)?.isPrimary != true }
             .map { it.absolutePath }
+
+        isInitialized = true
+
+        Timber.i("DownloadService initialized:")
+        Timber.i("  baseDataDirPath: $_baseDataDirPath")
+        Timber.i("  baseCacheDirPath: $_baseCacheDirPath")
+        Timber.i("  baseExternalAppDirPath: $_baseExternalAppDirPath")
+        Timber.i("  externalVolumePaths: ${_externalVolumePaths.size} paths")
+
+        // Validate that at least one path is usable
+        if (_baseDataDirPath.isBlank() && _baseCacheDirPath.isBlank()) {
+            Timber.e("WARNING: No valid base paths available! Data storage may not work.")
+        }
     }
 
     fun getDownloadDirectoryApps(): MutableList<String> {

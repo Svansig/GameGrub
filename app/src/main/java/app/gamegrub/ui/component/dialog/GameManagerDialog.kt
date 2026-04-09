@@ -62,6 +62,7 @@ import com.skydoves.landscapist.coil.CoilImage
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import timber.log.Timber
 
 data class InstallSizeInfo(
     val downloadSize: String,
@@ -201,7 +202,21 @@ fun GameManagerDialog(
     }
 
     fun getInstallSizeInfo(): InstallSizeInfo {
-        val availableBytes = StorageManager.getAvailableSpace(SteamPaths.defaultStoragePath)
+        val storagePath = SteamPaths.defaultStoragePath
+        val availableBytes = try {
+            if (storagePath.isBlank()) {
+                Timber.e("defaultStoragePath returned blank - no valid storage available")
+                0L
+            } else {
+                StorageManager.getAvailableSpace(storagePath)
+            }
+        } catch (e: IllegalArgumentException) {
+            Timber.e(e, "Storage path is invalid, cannot calculate available space")
+            0L
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get available space")
+            0L
+        }
 
         // For Base Game
         val baseGameInstallBytes = if (installedApp == null) {

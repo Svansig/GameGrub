@@ -83,15 +83,25 @@ object StorageManager {
     /**
      * Resolve available bytes for a filesystem path.
      * @param path Filesystem path.
-     * @return Available bytes.
+     * @return Available bytes. Returns 0L if path is invalid/inaccessible.
+     * @throws IllegalArgumentException only if path is blank (programming error, not runtime).
      */
     fun getAvailableSpace(path: String): Long {
+        if (path.isBlank()) {
+            throw IllegalArgumentException("getAvailableSpace called with blank path - caller must provide valid path")
+        }
         val file = File(path)
         if (!file.exists()) {
-            throw IllegalArgumentException("Invalid path: $path")
+            Timber.w("getAvailableSpace: path does not exist: $path")
+            return 0L
         }
-        val stat = StatFs(path)
-        return stat.blockSizeLong * stat.availableBlocksLong
+        return try {
+            val stat = StatFs(path)
+            stat.blockSizeLong * stat.availableBlocksLong
+        } catch (e: Exception) {
+            Timber.e(e, "getAvailableSpace failed for path: $path")
+            0L
+        }
     }
 
     /**

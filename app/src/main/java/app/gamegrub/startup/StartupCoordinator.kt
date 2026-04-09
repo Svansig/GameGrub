@@ -4,6 +4,7 @@ import android.content.Context
 import app.gamegrub.CrashHandler
 import app.gamegrub.PrefManager
 import app.gamegrub.network.NetworkManager
+import app.gamegrub.service.DownloadService
 import app.gamegrub.utils.container.ContainerMigrator
 import timber.log.Timber
 
@@ -14,6 +15,7 @@ import timber.log.Timber
 class StartupCoordinator {
 
     private val initializers: List<AppInitializer> = listOf(
+        DownloadServiceInitializer(),
         NetworkInitializer(),
         CrashHandlerInitializer(),
         PreferencesInitializer(),
@@ -42,6 +44,12 @@ interface AppInitializer {
     fun initialize(context: Context)
     fun onFailure(context: Context, error: Exception) {
         Timber.e(error, "Initializer ${this::class.java.simpleName} failed")
+    }
+}
+
+class DownloadServiceInitializer : AppInitializer {
+    override fun initialize(context: Context) {
+        DownloadService.populateDownloadService(context)
     }
 }
 

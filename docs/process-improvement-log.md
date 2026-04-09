@@ -15,6 +15,15 @@ Use this running log to capture opportunities discovered while implementing or r
 
 ## Entries
 
+- **Date**: `2026-04-09`
+- **Ticket**: `N/A (attestation + compatibility API resilience)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Attestation key generation failures (`ProviderException` / keystore `-67`) retried every call, and compatibility API `429` responses were retried immediately.
+- **Proposed Action**: Add attestation retry cooldown after provider/generic failures and add `Retry-After` aware in-memory API backoff for compatibility fetches.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
 - **Date**: `2026-04-06`
 - **Ticket**: `todo/ARCH-022b.md`, `todo/ARCH-022c.md`, `todo/ARCH-022d.md`, `todo/ARCH-022e.md`
 - **PR/Commit**: `TBD`

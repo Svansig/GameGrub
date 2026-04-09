@@ -112,6 +112,11 @@ class GameCompatibilityService @Inject constructor(
         gameNames: List<String>,
         gpuName: String,
     ): Map<String, GameCompatibilityResponse>? = withContext(Dispatchers.IO) {
+        if (isRateLimited()) {
+            Timber.tag("GameCompatibilityService").d("Skipping compatibility fetch while API backoff is active")
+            return@withContext null
+        }
+
         try {
             val requestBody = JSONObject().apply {
                 put("gameNames", JSONArray(gameNames))
@@ -144,6 +149,13 @@ class GameCompatibilityService @Inject constructor(
 
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
+                    if (response.code == 429) {
+                        val retryAfterMs = parseRetryAfterToMillis(response.header("Retry-After"))
+                        val cooldownMs = retryAfterMs.coerceAtLeast(DEFAULT_RATE_LIMIT_BACKOFF_MS)
+                        rateLimitedUntilMs = System.currentTimeMillis() + cooldownMs
+                        Timber.tag("GameCompatibilityService")
+                            .w("API request rate-limited (429); backing off for ${cooldownMs / 1000}s")
+                    }
                     Timber.tag("GameCompatibilityService").w("API request failed - HTTP ${response.code}")
                     return@withContext null
                 }
@@ -181,5 +193,22 @@ class GameCompatibilityService @Inject constructor(
 
     companion object {
         private const val API_BASE_URL = "https://api.gamenative.app/api/game-runs"
+        private const val DEFAULT_RATE_LIMIT_BACKOFF_MS = 60_000L
+
+        @Volatile
+        private var rateLimitedUntilMs: Long = 0L
+
+        private fun isRateLimited(): Boolean {
+            return System.currentTimeMillis() < rateLimitedUntilMs
+        }
+
+        private fun parseRetryAfterToMillis(retryAfterHeader: String?): Long {
+            val retryAfterSeconds = retryAfterHeader?.trim()?.toLongOrNull()
+            return if (retryAfterSeconds != null && retryAfterSeconds > 0L) {
+                retryAfterSeconds * 1000L
+            } else {
+                0L
+            }
+        }
     }
 }

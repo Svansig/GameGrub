@@ -82,9 +82,6 @@ class GameGrubApp : SplitCompatApplication() {
     }
 
     companion object {
-        @Deprecated("Use XServerRuntime.get().achievementWatcher instead")
-        var achievementWatcher: AchievementWatcher? = null
-
         @Deprecated("Use XServerRuntime.get().isOverlayPaused instead")
         var isOverlayPaused by mutableStateOf(false)
 

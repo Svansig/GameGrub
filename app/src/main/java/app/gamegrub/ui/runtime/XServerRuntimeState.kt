@@ -95,6 +95,11 @@ class XServerRuntimeState {
         _achievementWatcher.value = value
     }
 
+    fun stopAndClearAchievementWatcher() {
+        _achievementWatcher.value?.stop()
+        _achievementWatcher.value = null
+    }
+
     fun setOverlayPaused(paused: Boolean) {
         _isOverlayPaused.value = paused
     }

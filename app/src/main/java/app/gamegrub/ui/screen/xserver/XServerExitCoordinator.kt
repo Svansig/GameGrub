@@ -54,8 +54,7 @@ internal object XServerExitCoordinator {
             container.saveData()
         }
 
-        GameGrubApp.achievementWatcher?.stop()
-        GameGrubApp.achievementWatcher = null
+        XServerRuntime.get().stopAndClearAchievementWatcher()
         app.gamegrub.service.steam.SteamService.clearCachedAchievements()
 
         XServerRuntime.get().touchpadView?.releasePointerCapture()

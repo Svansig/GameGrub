@@ -3,7 +3,6 @@ package app.gamegrub.ui.model
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.gamegrub.GameGrubApp
 import app.gamegrub.enums.LoginResult
 import app.gamegrub.enums.LoginScreen
 import app.gamegrub.events.AndroidEvent
@@ -13,7 +12,6 @@ import app.gamegrub.ui.data.UserLoginState
 import app.gamegrub.ui.runtime.XServerRuntime
 import com.posthog.PostHog
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
-import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,6 +20,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.concurrent.CompletableFuture
 
 class UserLoginViewModel : ViewModel() {
     private val _loginState = MutableStateFlow(UserLoginState())

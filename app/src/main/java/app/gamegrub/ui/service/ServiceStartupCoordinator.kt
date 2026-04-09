@@ -17,13 +17,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class ServiceStartupCoordinator @Inject constructor(
@@ -57,8 +57,8 @@ class ServiceStartupCoordinator @Inject constructor(
 
         // Only attempt reconnection if not already connected/connecting and not in offline mode
         val shouldAttemptReconnect = !state.isSteamConnected &&
-            !isConnecting &&
-            !SteamService.keepAlive
+                !isConnecting &&
+                !SteamService.keepAlive
 
         if (shouldAttemptReconnect) {
             Timber.d("[ServiceStartupCoordinator]: Steam not connected - attempting reconnection")

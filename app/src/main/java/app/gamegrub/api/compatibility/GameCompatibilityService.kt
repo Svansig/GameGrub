@@ -8,8 +8,6 @@ import app.gamegrub.network.NetworkManager
 import app.gamegrub.service.auth.KeyAttestationHelper
 import app.gamegrub.service.auth.PlayIntegrity
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -18,6 +16,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class GameCompatibilityService @Inject constructor(

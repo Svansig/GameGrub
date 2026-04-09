@@ -76,7 +76,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.gamegrub.Constants
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.data.SteamFriend

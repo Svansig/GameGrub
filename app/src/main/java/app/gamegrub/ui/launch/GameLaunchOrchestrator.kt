@@ -25,7 +25,6 @@ import app.gamegrub.session.SessionAssembler
 import app.gamegrub.telemetry.record.LaunchOutcome
 import app.gamegrub.telemetry.record.LaunchRecordStore
 import app.gamegrub.telemetry.record.SessionMilestone
-import app.gamegrub.telemetry.record.createSessionMilestone
 import app.gamegrub.telemetry.session.LaunchFingerprint
 import app.gamegrub.telemetry.session.LaunchFingerprintEmitter
 import app.gamegrub.telemetry.session.LaunchMilestone
@@ -46,9 +45,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
-import java.io.File
-import java.util.Date
-import kotlin.reflect.KFunction2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -56,6 +52,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
+import java.io.File
+import java.util.Date
+import kotlin.reflect.KFunction2
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -625,7 +624,7 @@ fun preLaunchApp(
             SyncResult.UnknownFail,
             SyncResult.DownloadFail,
             SyncResult.UpdateFail,
-            -> {
+                -> {
                 setMessageDialogState(
                     MessageDialogState(
                         visible = true,
@@ -642,8 +641,8 @@ fun preLaunchApp(
                     "Pending remote operations:${
                         postSyncInfo.pendingRemoteOperations.joinToString("\n") { pro ->
                             "\n\tmachineName: ${pro.machineName}" +
-                                "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
-                                "\n\toperation: ${pro.operation}"
+                                    "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
+                                    "\n\toperation: ${pro.operation}"
                         }
                     }",
                 )
@@ -744,7 +743,7 @@ fun preLaunchApp(
 
             SyncResult.UpToDate,
             SyncResult.Success,
-            -> {
+                -> {
                 MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_COMPLETE, mapOf("sessionId" to sessionPlan.sessionId))
 
                 val launchStartTime = System.currentTimeMillis()

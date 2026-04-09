@@ -1,7 +1,5 @@
 package app.gamegrub.container.manifest
 
-import app.gamegrub.runtime.manifest.DriverManifest
-import app.gamegrub.runtime.manifest.RuntimeManifest
 import kotlinx.serialization.Serializable
 
 @Serializable

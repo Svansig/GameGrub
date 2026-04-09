@@ -21,16 +21,16 @@ import timber.log.Timber
  * ownership in XServerScreen through the supplied callbacks.
  */
 internal object XServerOverlayActionCoordinator {
-     fun pauseForOverlayIfAllowed() {
+    fun pauseForOverlayIfAllowed() {
         XServerRuntime.get().pauseOverlay()
     }
 
-     fun resumeIfAllowedAfterOverlay() {
+    fun resumeIfAllowedAfterOverlay() {
         XServerRuntime.get().resumeOverlay()
     }
 
-     fun resumeFromManualButton( onKeepPausedForEditorChanged: (Boolean) -> Unit) {
-            XServerRuntime.get().resumeOverlay()
+    fun resumeFromManualButton(onKeepPausedForEditorChanged: (Boolean) -> Unit) {
+        XServerRuntime.get().resumeOverlay()
         onKeepPausedForEditorChanged(false)
     }
 
@@ -59,7 +59,7 @@ internal object XServerOverlayActionCoordinator {
 
         onKeyboardRequestedFromOverlayChanged(false)
         if (!keepPausedForEditor) {
-                resumeIfAllowedAfterOverlay()
+            resumeIfAllowedAfterOverlay()
         }
         onShowQuickMenuChanged(false)
     }
@@ -188,7 +188,6 @@ internal object XServerOverlayActionCoordinator {
 
         onShowQuickMenuChanged(true)
     }
-
 
 
     @Suppress("DEPRECATION")

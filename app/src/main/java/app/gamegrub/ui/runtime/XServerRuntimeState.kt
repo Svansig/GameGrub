@@ -46,9 +46,8 @@ class XServerRuntimeState {
         get() = _isOverlayPaused.value
 
 
-
     fun pauseOverlay() {
-        if (isNeverSuspendMode()){
+        if (isNeverSuspendMode()) {
             Timber.d("Not pausing overlay due to suspend policy=never")
             return
         }
@@ -59,11 +58,11 @@ class XServerRuntimeState {
     }
 
     fun resumeOverlay() {
-        if (isNeverSuspendMode()){
+        if (isNeverSuspendMode()) {
             Timber.d("Not resuming overlay due to suspend policy=never")
             return
         }
-        if (isManualSuspendMode() ) {
+        if (isManualSuspendMode()) {
             Timber.d("Manual Mode: Keeping game suspended until Resume is pressed")
             return
         }
@@ -74,7 +73,7 @@ class XServerRuntimeState {
     }
 
     fun forceResumeOverlay() {
-        if (isNeverSuspendMode()){
+        if (isNeverSuspendMode()) {
             Timber.d("Not resuming overlay due to suspend policy=never")
             return
         }

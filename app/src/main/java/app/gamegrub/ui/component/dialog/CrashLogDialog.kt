@@ -80,7 +80,7 @@ fun CrashLogDialog(
                             .padding(
                                 top =
                                     PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
-                                        paddingValues.calculateTopPadding(),
+                                            paddingValues.calculateTopPadding(),
                                 bottom = 24.dp + paddingValues.calculateBottomPadding(),
                                 start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                                 end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),

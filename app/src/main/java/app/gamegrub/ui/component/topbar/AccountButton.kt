@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
-import app.gamegrub.GameGrubApp
 import app.gamegrub.data.SteamFriend
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.SteamService

@@ -1,7 +1,6 @@
 package app.gamegrub.ui.screen.xserver
 
 import android.view.View
-import app.gamegrub.GameGrubApp
 import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.container.Container
 import com.winlator.inputcontrols.ControllerManager

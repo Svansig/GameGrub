@@ -2,12 +2,11 @@ package app.gamegrub.telemetry.recommendation
 
 import app.gamegrub.telemetry.record.LaunchOutcome
 import app.gamegrub.telemetry.record.LaunchRecordStore
-import app.gamegrub.telemetry.record.LaunchSessionRecord
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Resolver that provides recommendations based on local launch history.
@@ -77,7 +76,9 @@ class LocalRecommendationResolver @Inject constructor(
                 profileId = record.profileId,
                 score = score,
                 compatibilityLevel = compatibility.compatibilityLevel,
-                reason = "Successful run on ${java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date(record.endTime))}",
+                reason = "Successful run on ${
+                    java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date(record.endTime))
+                }",
             )
         }
     }

@@ -2,11 +2,11 @@ package app.gamegrub.data
 
 import app.gamegrub.enums.PathType
 import app.gamegrub.service.steam.SteamService
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.pathString
-import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserFileInfo(

@@ -1,8 +1,6 @@
 package app.gamegrub.fallback
 
 import app.gamegrub.launch.error.FailureClass
-import app.gamegrub.telemetry.record.LaunchOutcome
-import java.util.UUID
 import timber.log.Timber
 
 data class FallbackState(

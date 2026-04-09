@@ -8,7 +8,7 @@ import app.gamegrub.utils.general.unaccent
 object LibraryQueryMatcher {
     fun matches(gameName: String, searchQuery: String): Boolean {
         return gameName.contains(searchQuery, ignoreCase = true) ||
-            gameName.unaccent().contains(searchQuery, ignoreCase = true)
+                gameName.unaccent().contains(searchQuery, ignoreCase = true)
     }
 }
 

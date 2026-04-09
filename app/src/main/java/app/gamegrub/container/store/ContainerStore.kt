@@ -2,13 +2,13 @@ package app.gamegrub.container.store
 
 import app.gamegrub.container.manifest.ContainerConfiguration
 import app.gamegrub.container.manifest.ContainerManifest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 /**
  * Service for managing per-game container state.
@@ -99,20 +99,23 @@ class ContainerStore @Inject constructor(
         }
     }
 
-    suspend fun updateConfiguration(containerId: String, configuration: ContainerConfiguration): Result<ContainerManifest> = withContext(Dispatchers.IO) {
-        val existing = getContainer(containerId) ?: return@withContext Result.failure(IllegalArgumentException("Container not found: $containerId"))
-        val updated = existing.copy(
-            configuration = configuration,
-            lastModified = System.currentTimeMillis(),
-        )
-        if (!ContainerStoreSchema.writeManifest(updated, rootDir)) {
-            return@withContext Result.failure(IllegalStateException("Failed to update configuration"))
+    suspend fun updateConfiguration(containerId: String, configuration: ContainerConfiguration): Result<ContainerManifest> =
+        withContext(Dispatchers.IO) {
+            val existing = getContainer(containerId)
+                ?: return@withContext Result.failure(IllegalArgumentException("Container not found: $containerId"))
+            val updated = existing.copy(
+                configuration = configuration,
+                lastModified = System.currentTimeMillis(),
+            )
+            if (!ContainerStoreSchema.writeManifest(updated, rootDir)) {
+                return@withContext Result.failure(IllegalStateException("Failed to update configuration"))
+            }
+            Result.success(updated)
         }
-        Result.success(updated)
-    }
 
     suspend fun addUserOverride(containerId: String, key: String, value: String): Result<ContainerManifest> = withContext(Dispatchers.IO) {
-        val existing = getContainer(containerId) ?: return@withContext Result.failure(IllegalArgumentException("Container not found: $containerId"))
+        val existing =
+            getContainer(containerId) ?: return@withContext Result.failure(IllegalArgumentException("Container not found: $containerId"))
         val updated = existing.copy(
             userOverrides = existing.userOverrides + (key to value),
             lastModified = System.currentTimeMillis(),
@@ -124,7 +127,8 @@ class ContainerStore @Inject constructor(
     }
 
     suspend fun removeUserOverride(containerId: String, key: String): Result<ContainerManifest> = withContext(Dispatchers.IO) {
-        val existing = getContainer(containerId) ?: return@withContext Result.failure(IllegalArgumentException("Container not found: $containerId"))
+        val existing =
+            getContainer(containerId) ?: return@withContext Result.failure(IllegalArgumentException("Container not found: $containerId"))
         val updated = existing.copy(
             userOverrides = existing.userOverrides - key,
             lastModified = System.currentTimeMillis(),

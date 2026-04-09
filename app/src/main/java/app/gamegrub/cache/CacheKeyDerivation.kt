@@ -1,8 +1,6 @@
 package app.gamegrub.cache
 
 import app.gamegrub.cache.manifest.CacheManifest
-import app.gamegrub.cache.manifest.CacheType
-import java.io.File
 import timber.log.Timber
 
 data class CacheKey(

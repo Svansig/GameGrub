@@ -3,7 +3,6 @@ package app.gamegrub.storage
 import android.content.Context
 import android.os.Environment
 import android.os.StatFs
-import android.os.storage.StorageManager
 import kotlinx.serialization.Serializable
 import timber.log.Timber
 
@@ -116,7 +115,7 @@ object StoragePolicyHelper {
 
             StorageLocation.AUTO -> {
                 isLocationAvailable(StorageLocation.INTERNAL, context) ||
-                    isLocationAvailable(StorageLocation.EXTERNAL, context)
+                        isLocationAvailable(StorageLocation.EXTERNAL, context)
             }
         }
     }

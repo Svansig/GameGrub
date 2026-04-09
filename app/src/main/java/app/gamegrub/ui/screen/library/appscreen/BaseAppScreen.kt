@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import app.gamegrub.Constants
-import app.gamegrub.GameGrubApp
 import app.gamegrub.R
 import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem

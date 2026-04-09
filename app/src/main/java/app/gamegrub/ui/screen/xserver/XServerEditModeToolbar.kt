@@ -38,7 +38,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.gamegrub.GameGrubApp
 import app.gamegrub.R
 import app.gamegrub.ui.runtime.XServerRuntime
 

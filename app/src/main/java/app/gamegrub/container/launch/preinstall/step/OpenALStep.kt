@@ -4,8 +4,8 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
 import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
-import java.io.File
 import timber.log.Timber
+import java.io.File
 
 object OpenALStep : PreInstallStep {
     override val marker: Marker = Marker.OPENAL_INSTALLED
@@ -43,11 +43,11 @@ object OpenALStep : PreInstallStep {
             dir.walkTopDown()
                 .filter { file ->
                     file.isFile &&
-                        (
-                            file.name.equals("oalinst.exe", ignoreCase = true) ||
-                                file.name.startsWith("OpenAL", ignoreCase = true)
-                            ) &&
-                        file.name.endsWith(".exe", ignoreCase = true)
+                            (
+                                    file.name.equals("oalinst.exe", ignoreCase = true) ||
+                                            file.name.startsWith("OpenAL", ignoreCase = true)
+                                    ) &&
+                            file.name.endsWith(".exe", ignoreCase = true)
                 }
                 .forEach { exeFile ->
                     val relativePath = exeFile

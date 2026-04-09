@@ -1,18 +1,24 @@
 package app.gamegrub.session
 
 import app.gamegrub.cache.CacheController
-import app.gamegrub.cache.CacheKey
 import app.gamegrub.cache.CacheKeyDerivation
 import app.gamegrub.cache.manifest.CacheType
 import app.gamegrub.container.store.ContainerStore
 import app.gamegrub.runtime.store.RuntimeStore
-import app.gamegrub.session.model.*
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
+import app.gamegrub.session.model.BindMount
+import app.gamegrub.session.model.CacheHandle
+import app.gamegrub.session.model.EnvPlan
+import app.gamegrub.session.model.MountPlan
+import app.gamegrub.session.model.SessionComposition
+import app.gamegrub.session.model.SessionMetadata
+import app.gamegrub.session.model.SessionPlan
+import app.gamegrub.session.model.SessionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Assembles a complete launch session from runtime bundles and container state.

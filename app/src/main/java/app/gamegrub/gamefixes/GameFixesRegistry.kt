@@ -8,8 +8,8 @@ import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
-import java.io.File
 import timber.log.Timber
+import java.io.File
 
 object GameFixesRegistry {
     private const val GAME_DRIVE_LETTER = "A"

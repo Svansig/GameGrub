@@ -3,15 +3,14 @@ package app.gamegrub.cache
 import app.gamegrub.cache.manifest.CacheManifest
 import app.gamegrub.cache.manifest.CacheManifestStore
 import app.gamegrub.cache.manifest.CacheType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import timber.log.Timber
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import timber.log.Timber
 
 /**
  * Controller for managing shader, translator, and probe caches.

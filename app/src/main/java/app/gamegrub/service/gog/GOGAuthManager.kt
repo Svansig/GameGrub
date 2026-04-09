@@ -3,12 +3,12 @@ package app.gamegrub.service.gog
 import android.content.Context
 import app.gamegrub.data.GOGCredentials
 import app.gamegrub.network.NetworkManager
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
 
 /**
  * Manages GOG authentication and account operations.

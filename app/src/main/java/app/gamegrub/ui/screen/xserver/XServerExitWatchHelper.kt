@@ -1,6 +1,5 @@
 package app.gamegrub.ui.screen.xserver
 
-import app.gamegrub.GameGrubApp
 import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.container.Container
 import com.winlator.widget.FrameRating

@@ -9,7 +9,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.gamegrub.R
 import app.gamegrub.domain.customgame.CustomGameScanner
@@ -86,7 +85,7 @@ fun requestPermissionsForPath(
     storagePermissionLauncher: ManagedActivityResultLauncher<Array<String>, Map<String, Boolean>>?,
 ) {
     val isOutsideSandbox = !path.contains("/Android/data/${context.packageName}") &&
-        !path.contains(context.dataDir.path)
+            !path.contains(context.dataDir.path)
 
     if (!isOutsideSandbox) {
         return

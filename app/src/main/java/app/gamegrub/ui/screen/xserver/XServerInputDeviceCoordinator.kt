@@ -26,10 +26,10 @@ internal object XServerInputDeviceCoordinator {
         isTouchscreenMode: Boolean,
     ): Boolean {
         return !hasInternalTouchpad &&
-            !presence.hasPhysicalMouse &&
-            !presence.hasPhysicalKeyboard &&
-            !presence.hasPhysicalController &&
-            !isTouchscreenMode
+                !presence.hasPhysicalMouse &&
+                !presence.hasPhysicalKeyboard &&
+                !presence.hasPhysicalController &&
+                !isTouchscreenMode
     }
 
     fun shouldHideForExternalKeyboard(uiGuardState: UiGuardState): Boolean {
@@ -46,18 +46,18 @@ internal object XServerInputDeviceCoordinator {
 
     fun shouldHideForInternalTouchpad(uiGuardState: UiGuardState): Boolean {
         return !uiGuardState.showElementEditor &&
-            !uiGuardState.keepPausedForEditor &&
-            !uiGuardState.showQuickMenu &&
-            !uiGuardState.isEditMode &&
-            !uiGuardState.hasUpdatedScreenGamepad
+                !uiGuardState.keepPausedForEditor &&
+                !uiGuardState.showQuickMenu &&
+                !uiGuardState.isEditMode &&
+                !uiGuardState.hasUpdatedScreenGamepad
     }
 
     private fun canProcessExternalTransition(uiGuardState: UiGuardState): Boolean {
         return !uiGuardState.showElementEditor &&
-            !uiGuardState.keepPausedForEditor &&
-            !uiGuardState.showQuickMenu &&
-            !uiGuardState.isEditMode &&
-            !uiGuardState.isTouchscreenMode &&
-            !uiGuardState.hasUpdatedScreenGamepad
+                !uiGuardState.keepPausedForEditor &&
+                !uiGuardState.showQuickMenu &&
+                !uiGuardState.isEditMode &&
+                !uiGuardState.isTouchscreenMode &&
+                !uiGuardState.hasUpdatedScreenGamepad
     }
 }

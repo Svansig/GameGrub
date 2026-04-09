@@ -1,10 +1,9 @@
 package app.gamegrub.container.store
 
 import app.gamegrub.container.manifest.ContainerManifest
-import java.io.File
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
+import java.io.File
 
 object ContainerStoreLayout {
     private const val CONTAINER_DIR = "containers"

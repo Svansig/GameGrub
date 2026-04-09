@@ -1,6 +1,5 @@
 package app.gamegrub.container.launch.unpack
 
-import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.runtime.XServerRuntime
@@ -8,11 +7,11 @@ import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
-import timber.log.Timber
 
 /**
  * Runs launch-time unpacking and redistributable preparation.
@@ -181,7 +180,7 @@ internal object UnpackExecutionCoordinator {
             } else {
                 Timber.i(
                     "Skipping Steamless (launchRealSteam=${container.isLaunchRealSteam}, " +
-                        "useLegacyDRM=${container.isUseLegacyDRM}, unpackFiles=${container.isUnpackFiles})",
+                            "useLegacyDRM=${container.isUseLegacyDRM}, unpackFiles=${container.isUnpackFiles})",
                 )
             }
 

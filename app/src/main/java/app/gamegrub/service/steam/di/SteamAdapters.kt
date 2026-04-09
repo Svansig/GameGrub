@@ -1,6 +1,5 @@
 package app.gamegrub.service.steam.di
 
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.EncryptedAppTicket
 import app.gamegrub.db.dao.AppInfoDao
@@ -18,8 +17,6 @@ import `in`.dragonbra.javasteam.steam.authentication.IChallengeUrlChanged
 import `in`.dragonbra.javasteam.steam.handlers.steamuser.SteamUser
 import `in`.dragonbra.javasteam.steam.steamclient.SteamClient
 import `in`.dragonbra.javasteam.types.SteamID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +26,8 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class SteamConnectionAdapter @Inject constructor(

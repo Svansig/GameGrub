@@ -5,7 +5,6 @@ import android.os.Process
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.data.GameProcessInfo
 import app.gamegrub.data.GameSource
@@ -29,9 +28,6 @@ import com.materialkolor.PaletteStyle
 import com.winlator.xserver.Window
 import dagger.hilt.android.lifecycle.HiltViewModel
 import `in`.dragonbra.javasteam.steam.handlers.steamapps.AppProcessInfo
-import java.nio.file.Paths
-import javax.inject.Inject
-import kotlin.io.path.name
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -45,13 +41,16 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.nio.file.Paths
+import javax.inject.Inject
+import kotlin.io.path.name
 
 internal fun shouldContinueConnecting(
     elapsedSeconds: Int,
     connectionState: ConnectionState,
 ): Boolean {
     return elapsedSeconds < MainViewModel.CONNECTION_TIMEOUT_SECONDS &&
-        connectionState == ConnectionState.CONNECTING
+            connectionState == ConnectionState.CONNECTING
 }
 
 @HiltViewModel

@@ -2,7 +2,6 @@ package app.gamegrub.telemetry.recommendation
 
 import javax.inject.Inject
 import javax.inject.Singleton
-import timber.log.Timber
 
 /**
  * Resolver providing curated recommendations for known games.

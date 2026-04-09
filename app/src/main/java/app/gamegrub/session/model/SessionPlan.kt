@@ -1,6 +1,5 @@
 package app.gamegrub.session.model
 
-import app.gamegrub.cache.manifest.CacheManifest
 import app.gamegrub.container.manifest.ContainerManifest
 import app.gamegrub.runtime.manifest.BaseManifest
 import app.gamegrub.runtime.manifest.DriverManifest

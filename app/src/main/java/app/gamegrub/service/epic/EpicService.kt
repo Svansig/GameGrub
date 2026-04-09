@@ -3,7 +3,6 @@ package app.gamegrub.service.epic
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import app.gamegrub.GameGrubApp
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.EpicCredentials
 import app.gamegrub.data.EpicGame
@@ -16,10 +15,6 @@ import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
 
 /**
  * Epic Games Service - thin coordinator that delegates to other Epic managers.

@@ -10,7 +10,6 @@ import android.net.NetworkRequest
 import android.os.IBinder
 import androidx.room.withTransaction
 import app.gamegrub.BuildConfig
-import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.R
 import app.gamegrub.data.AppInfo
@@ -88,19 +87,6 @@ import `in`.dragonbra.javasteam.types.FileData
 import `in`.dragonbra.javasteam.types.SteamID
 import `in`.dragonbra.javasteam.util.log.LogListener
 import `in`.dragonbra.javasteam.util.log.LogManager
-import java.io.Closeable
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.EnumSet
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import kotlin.io.path.pathString
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -117,6 +103,19 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
+import java.io.Closeable
+import java.io.File
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.EnumSet
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import kotlin.io.path.pathString
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Steam foreground service - handles all Steam integration.
@@ -609,12 +608,12 @@ class SteamService : Service(), IChallengeUrlChanged {
             val imageFs = ImageFs.find(context)
             return if (variant == Container.BIONIC) {
                 File(imageFs.filesDir, "imagefs_bionic.txz").exists() ||
-                    context.assets.list("")
-                        ?.contains("imagefs_bionic.txz") == true
+                        context.assets.list("")
+                            ?.contains("imagefs_bionic.txz") == true
             } else {
                 File(imageFs.filesDir, "imagefs_gamenative.txz").exists() ||
-                    context.assets.list("")
-                        ?.contains("imagefs_gamenative.txz") == true
+                        context.assets.list("")
+                            ?.contains("imagefs_gamenative.txz") == true
             }
         }
 
@@ -1028,8 +1027,8 @@ class SteamService : Service(), IChallengeUrlChanged {
                             pendingRemoteOperations = pendingRemoteOperations,
                             hasAppSessionActiveOperation = pendingRemoteOperations.any {
                                 it.operation ==
-                                    SteammessagesClientObjects.ECloudPendingRemoteOperation
-                                        .k_ECloudPendingRemoteOperationAppSessionActive
+                                        SteammessagesClientObjects.ECloudPendingRemoteOperation
+                                            .k_ECloudPendingRemoteOperationAppSessionActive
                             },
                         )
                     }
@@ -1213,7 +1212,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             EResult.RequirePasswordReEntry,
             EResult.ParentalControlRestricted,
             EResult.CachedCredentialInvalid,
-            -> true
+                -> true
 
             else -> false
         }
@@ -1407,7 +1406,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 val activeNet = connectivityManager.activeNetwork ?: return false
                 val caps = connectivityManager.getNetworkCapabilities(activeNet) ?: return false
                 return caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                    caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                        caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
             }
 
             // no transition guard needed — if Wi-Fi already down, downloadJobs is empty (no-op)

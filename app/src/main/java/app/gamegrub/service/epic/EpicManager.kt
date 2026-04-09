@@ -4,10 +4,6 @@ import android.content.Context
 import app.gamegrub.data.EpicGame
 import app.gamegrub.db.dao.EpicGameDao
 import app.gamegrub.network.NetworkManager
-import java.io.File
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
@@ -16,6 +12,10 @@ import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * EpicManager handles Epic Games library management
@@ -420,8 +420,8 @@ class EpicManager @Inject constructor(
 
             // ! We should expertiment with the country to see what affects language downloads
             val url = "${EpicConstants.EPIC_CATALOG_API_URL}/shared/namespace/${game.namespace}/bulk/items" +
-                "?id=${game.catalogItemId}&includeDLCDetails=true&includeMainGameDetails=true" +
-                "&country=$country"
+                    "?id=${game.catalogItemId}&includeDLCDetails=true&includeMainGameDetails=true" +
+                    "&country=$country"
 
             Timber.tag("Epic").d("fetching game info for ${game.appName} - url: $url")
 
@@ -587,7 +587,7 @@ class EpicManager @Inject constructor(
         ).firstOrNull() ?: ""
 
         val isEaManaged = parsedAttributes.thirdPartyManagedApp != null &&
-            parsedAttributes.thirdPartyManagedApp.lowercase() in listOf("origin", "the ea app")
+                parsedAttributes.thirdPartyManagedApp.lowercase() in listOf("origin", "the ea app")
 
         Timber.d("Game $libraryAppName - CloudSaveFolder: $saveFolder, CloudIncludeList: ${parsedAttributes.cloudIncludeList}, CanRunOffline: $canRunOffline")
 
@@ -788,8 +788,8 @@ class EpicManager @Inject constructor(
 
             // Fetch manifest URL from Epic API
             val manifestUrl = "${EpicConstants.EPIC_LAUNCHER_API_URL}/launcher/api/public/assets/v2/platform" +
-                "/Windows/namespace/$namespace/catalogItem/$catalogItemId/app" +
-                "/$appName/label/Live"
+                    "/Windows/namespace/$namespace/catalogItem/$catalogItemId/app" +
+                    "/$appName/label/Live"
 
             Timber.tag("Epic").d("Fetching manifest metadata from: $manifestUrl")
 
@@ -960,11 +960,11 @@ class EpicManager @Inject constructor(
             )
             Timber.tag("Epic").d(
                 "Manifest stats for $appName: version=${manifest.version}, featureLevel=${manifest.meta?.featureLevel}, " +
-                    "buildVersion=${manifest.meta?.buildVersion}, buildId=${manifest.meta?.buildId}",
+                        "buildVersion=${manifest.meta?.buildVersion}, buildId=${manifest.meta?.buildId}",
             )
             Timber.tag("Epic").d(
                 "Manifest stats for $appName: files=${manifest.fileManifestList?.count}, " +
-                    "chunks=${manifest.chunkDataList?.count}",
+                        "chunks=${manifest.chunkDataList?.count}",
             )
             Timber.tag("Epic").d("Install size for $appName: $installSize bytes")
             Timber.tag("Epic").d("Download size for $appName: $downloadSize bytes")

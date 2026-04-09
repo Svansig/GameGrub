@@ -8,6 +8,20 @@ Current execution is refactor-first. Prioritize tickets that reduce complexity a
 
 During this phase, defer tickets that primarily expand scope beyond refactor goals unless they are required dependencies for active refactor work.
 
+## Architecture Assessment Execution (2026-04-09)
+
+Primary plan: `todo/ARCH-ASSESSMENT-2026-04-09-WORKLIST.md`
+Assessment source: `docs/architecture-assessment-2026-04-09.md`
+
+### Horizon Summary
+
+| Horizon | Primary Goal | Priority Ticket Groups |
+|---|---|---|
+| 0-30 days | Close migration risk and release-safety gaps | `ARCH-046`, `ARCH-053-FOLLOWUP`, `ARCH-055-FOLLOWUP`, `ARCH-067`, `ARCH-069`, `SEC-003`, `SEC-006`, `SEC-011`, `SEC-016`, `TEST-001`, `TEST-002`, `TEST-004`, `TEST-013` (+ verify `CI-001`/`CI-004`) |
+| 31-90 days | Complete high-churn boundary cleanup | `SRV-001`, `SRV-004`, `SRV-014`, `SRV-017`, `SRV-018`, `SRV-024`, `UI-001`, `UI-002`, `UI-003`, `UI-017`, `COH-015`, `COH-016`, `COH-024`..`COH-030`, `REL-005`, `REL-007`, `REL-010`, `REL-013`, `REL-016`, `REL-018` |
+| 90-180 days | Build scale foundations and performance/security loops | `COH-007`, `ARCH-016`, `ARCH-017`, `ARCH-020`, `PERF-001`, `PERF-002`, `PERF-004`, `PERF-005`, `PERF-012`, `SEC-001`, `SEC-004`, `SEC-007`, `SEC-009`, `SEC-013`, `DOC-009`, `DOC-013`, `DOC-015` |
+| 180+ days | Complete best-in-class architecture program | `ARCH-001`..`ARCH-020` (child tickets first), `CI-006`, `CI-009`, `CI-010`, `CI-014`, `CI-015` |
+
 ## Backlog - Runtime Architecture Migration (Phases 0-3)
 
 This section tracks the GameNative → GameGrub runtime architecture migration: moving from shared mutable imagefs to composed immutable bundles with explicit caching and container isolation.

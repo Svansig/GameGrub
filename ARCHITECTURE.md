@@ -363,3 +363,4 @@ When adding new features:
 
 - [AGENTS.md](./AGENTS.md) - Developer commands and conventions
 - [README.md](./README.md) - Project overview
+- [Architecture Assessment (2026-04-09)](./docs/architecture-assessment-2026-04-09.md) - Current architecture scorecard and roadmap

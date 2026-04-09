@@ -2,6 +2,7 @@ package app.gamegrub.ui.screen.xserver
 
 import android.view.View
 import app.gamegrub.GameGrubApp
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.container.Container
 import com.winlator.inputcontrols.ControllerManager
 import com.winlator.inputcontrols.ControlsProfile
@@ -72,7 +73,7 @@ internal object XServerInputControlsOverlayHelper {
         GameGrubApp.touchpadView?.isEnabled?.let {
             if (!it) {
                 GameGrubApp.touchpadView?.isEnabled = true
-                GameGrubApp.xServerView?.renderer?.setCursorVisible(true)
+                XServerRuntime.get().xServerView?.renderer?.setCursorVisible(true)
             }
         }
         GameGrubApp.inputControlsView?.invalidate()

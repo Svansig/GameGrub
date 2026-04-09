@@ -231,6 +231,15 @@ class SessionAssembler @Inject constructor(
             val shaderDir = cacheController.getCacheDir(CacheType.SHADER, shaderKey)
             shaderDir.mkdirs()
 
+            val shaderManifest = cacheController.createCache(
+                cacheType = CacheType.SHADER,
+                key = shaderKey,
+                metadata = mapOf("baseId" to base.id, "runtimeId" to runtime.id, "driverId" to (driver?.id ?: "")),
+            ).getOrNull()
+            shaderManifest?.let {
+                handles.add(CacheHandle.fromManifest(it, shaderDir.absolutePath))
+            }
+
             val translatorKey = profileId?.let {
                 CacheKeyDerivation.deriveTranslatorCacheKey(
                     baseId = base.id,
@@ -239,9 +248,17 @@ class SessionAssembler @Inject constructor(
                     exeHash = "",
                 )
             }
-            translatorKey?.let {
-                val translatorDir = cacheController.getCacheDir(CacheType.TRANSLATOR, it)
+            translatorKey?.let { key ->
+                val translatorDir = cacheController.getCacheDir(CacheType.TRANSLATOR, key)
                 translatorDir.mkdirs()
+                val translatorManifest = cacheController.createCache(
+                    cacheType = CacheType.TRANSLATOR,
+                    key = key,
+                    metadata = mapOf("baseId" to base.id, "runtimeId" to runtime.id, "profileId" to profileId!!),
+                ).getOrNull()
+                translatorManifest?.let {
+                    handles.add(CacheHandle.fromManifest(it, translatorDir.absolutePath))
+                }
             }
 
             val probeKey = CacheKeyDerivation.deriveProbeCacheKey(
@@ -250,6 +267,14 @@ class SessionAssembler @Inject constructor(
             )
             val probeDir = cacheController.getCacheDir(CacheType.PROBE, probeKey)
             probeDir.mkdirs()
+            val probeManifest = cacheController.createCache(
+                cacheType = CacheType.PROBE,
+                key = probeKey,
+                metadata = mapOf("baseId" to base.id, "runtimeId" to runtime.id),
+            ).getOrNull()
+            probeManifest?.let {
+                handles.add(CacheHandle.fromManifest(it, probeDir.absolutePath))
+            }
         }
 
         return handles

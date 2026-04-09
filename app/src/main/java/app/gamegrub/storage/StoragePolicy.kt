@@ -1,6 +1,11 @@
 package app.gamegrub.storage
 
+import android.content.Context
+import android.os.Environment
+import android.os.StatFs
+import android.os.storage.StorageManager
 import kotlinx.serialization.Serializable
+import timber.log.Timber
 
 /**
  * Storage policy for game data placement.
@@ -76,9 +81,47 @@ object StoragePolicyHelper {
         }
     }
 
-    fun isLocationAvailable(location: StorageLocation): Boolean {
-        return location == StorageLocation.INTERNAL
+    fun isLocationAvailable(location: StorageLocation, context: Context? = null): Boolean {
+        return when (location) {
+            StorageLocation.INTERNAL -> {
+                try {
+                    val internalDir = context?.filesDir ?: Environment.getDataDirectory()
+                    val stat = StatFs(internalDir.path)
+                    stat.availableBlocks * stat.blockSize > MIN_SPACE_BYTES
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to check internal storage availability")
+                    false
+                }
+            }
+
+            StorageLocation.EXTERNAL -> {
+                val state = Environment.getExternalStorageState()
+                if (state != Environment.MEDIA_MOUNTED) {
+                    Timber.d("External storage not mounted: $state")
+                    return false
+                }
+
+                try {
+                    val externalDir = context?.getExternalFilesDir(null) ?: return false
+                    if (!externalDir.exists()) {
+                        return false
+                    }
+                    val stat = StatFs(externalDir.path)
+                    stat.availableBlocks * stat.blockSize > MIN_SPACE_BYTES
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to check external storage availability")
+                    false
+                }
+            }
+
+            StorageLocation.AUTO -> {
+                isLocationAvailable(StorageLocation.INTERNAL, context) ||
+                    isLocationAvailable(StorageLocation.EXTERNAL, context)
+            }
+        }
     }
+
+    private const val MIN_SPACE_BYTES = 256L * 1024 * 1024
 
     fun getRecommendedPolicy(): StoragePolicy = StoragePolicy.DEFAULT
 }

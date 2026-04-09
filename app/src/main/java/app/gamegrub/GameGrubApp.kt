@@ -63,15 +63,20 @@ class GameGrubApp : SplitCompatApplication() {
         // Delegate startup initialization to coordinator for testability
         StartupCoordinator().initialize(this)
 
-        // Initialize PostHog Analytics
-        val postHogConfig = PostHogAndroidConfig(
-            apiKey = BuildConfig.POSTHOG_API_KEY,
-            host = BuildConfig.POSTHOG_HOST,
-        ).apply {
-            /* turn every event into an identified one */
-            personProfiles = PersonProfiles.ALWAYS
+        // Initialize PostHog Analytics - gated by privacy consent
+        if (PrefManager.analyticsConsent) {
+            val postHogConfig = PostHogAndroidConfig(
+                apiKey = BuildConfig.POSTHOG_API_KEY,
+                host = BuildConfig.POSTHOG_HOST,
+            ).apply {
+                /* turn every event into an identified one */
+                personProfiles = PersonProfiles.ALWAYS
+            }
+            PostHogAndroid.setup(this, postHogConfig)
+            Timber.i("PostHog analytics initialized (consent granted)")
+        } else {
+            Timber.i("PostHog analytics not initialized (no consent)")
         }
-        PostHogAndroid.setup(this, postHogConfig)
 
         PlayIntegrity.warmUp(this)
     }

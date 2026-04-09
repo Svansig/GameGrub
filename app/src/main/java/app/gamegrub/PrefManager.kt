@@ -1241,4 +1241,9 @@ object PrefManager {
         set(value) {
             setPref(GOG_AMAZON_PATH_MIGRATED, value)
         }
+
+    private val ANALYTICS_CONSENT = booleanPreferencesKey("analytics_consent")
+    var analyticsConsent: Boolean
+        get() = getPref(ANALYTICS_CONSENT, false)
+        set(value) = setPref(ANALYTICS_CONSENT, value)
 }

@@ -22,6 +22,10 @@ import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.session.SessionAssembler
+import app.gamegrub.telemetry.record.LaunchOutcome
+import app.gamegrub.telemetry.record.LaunchRecordStore
+import app.gamegrub.telemetry.record.SessionMilestone
+import app.gamegrub.telemetry.record.createSessionMilestone
 import app.gamegrub.telemetry.session.LaunchFingerprint
 import app.gamegrub.telemetry.session.LaunchFingerprintEmitter
 import app.gamegrub.telemetry.session.LaunchMilestone
@@ -64,6 +68,7 @@ private interface BestConfigServiceEntryPoint {
 private interface SessionEntryPoint {
     fun sessionAssembler(): SessionAssembler
     fun launchEngine(): LaunchEngine
+    fun launchRecordStore(): LaunchRecordStore
 }
 
 private const val SYNC_IN_PROGRESS_MAX_RETRIES = 5
@@ -183,6 +188,9 @@ fun preLaunchApp(
         val launchEngine = EntryPointAccessors
             .fromApplication(context.applicationContext, SessionEntryPoint::class.java)
             .launchEngine()
+        val launchRecordStore = EntryPointAccessors
+            .fromApplication(context.applicationContext, SessionEntryPoint::class.java)
+            .launchRecordStore()
 
         val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
 
@@ -739,13 +747,29 @@ fun preLaunchApp(
             -> {
                 MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_COMPLETE, mapOf("sessionId" to sessionPlan.sessionId))
 
+                val launchStartTime = System.currentTimeMillis()
                 val launchResult = launchEngine.execute(sessionPlan, LaunchOptions())
+                val launchEndTime = System.currentTimeMillis()
 
                 when (launchResult) {
                     is LaunchResult.Success -> {
                         fingerprint.logAtMilestone("LAUNCH_SUCCESS")
                         MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
                         MilestoneEmitter.record(LaunchMilestone.GAME_INTERACTIVE)
+
+                        CoroutineScope(Dispatchers.IO).launch {
+                            saveLaunchRecord(
+                                recordStore = launchRecordStore,
+                                sessionId = sessionPlan.sessionId,
+                                titleId = gameId.toString(),
+                                titleName = sessionPlan.metadata.gameTitle,
+                                sessionPlan = sessionPlan,
+                                outcome = LaunchOutcome.SUCCESS,
+                                exitCode = launchResult.processId?.toInt(),
+                                startTime = launchStartTime,
+                                endTime = launchEndTime,
+                            )
+                        }
                         onSuccess(context, appId)
                     }
 
@@ -758,6 +782,21 @@ fun preLaunchApp(
                                 "exitCode" to (launchResult.exitCode?.toString() ?: "none"),
                             ),
                         )
+
+                        CoroutineScope(Dispatchers.IO).launch {
+                            saveLaunchRecord(
+                                recordStore = launchRecordStore,
+                                sessionId = sessionPlan.sessionId,
+                                titleId = gameId.toString(),
+                                titleName = sessionPlan.metadata.gameTitle,
+                                sessionPlan = sessionPlan,
+                                outcome = LaunchOutcome.FAILURE,
+                                exitCode = launchResult.exitCode,
+                                startTime = launchStartTime,
+                                endTime = launchEndTime,
+                                errorMessage = launchResult.reason,
+                            )
+                        }
                         setLoadingDialogVisible(false)
                         setMessageDialogState(
                             MessageDialogState(
@@ -772,9 +811,65 @@ fun preLaunchApp(
 
                     is LaunchResult.Cancelled -> {
                         MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf("reason" to "Launch cancelled"))
+
+                        CoroutineScope(Dispatchers.IO).launch {
+                            saveLaunchRecord(
+                                recordStore = launchRecordStore,
+                                sessionId = sessionPlan.sessionId,
+                                titleId = gameId.toString(),
+                                titleName = sessionPlan.metadata.gameTitle,
+                                sessionPlan = sessionPlan,
+                                outcome = LaunchOutcome.CANCELLED,
+                                startTime = launchStartTime,
+                                endTime = launchEndTime,
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private suspend fun saveLaunchRecord(
+    recordStore: LaunchRecordStore,
+    sessionId: String,
+    titleId: String,
+    titleName: String,
+    sessionPlan: app.gamegrub.session.model.SessionPlan,
+    outcome: LaunchOutcome,
+    exitCode: Int? = null,
+    startTime: Long,
+    endTime: Long,
+    errorMessage: String? = null,
+) {
+    val milestones = MilestoneEmitter.getRecorder().getMilestones().map { record ->
+        SessionMilestone(
+            milestone = record.milestone.name,
+            timestamp = record.timestamp,
+            metadata = record.metadata,
+        )
+    }
+
+    val fullComposition = sessionPlan.composition as? app.gamegrub.session.model.SessionComposition.Full
+
+    val record = app.gamegrub.telemetry.record.LaunchSessionRecord(
+        sessionId = sessionId,
+        titleId = titleId,
+        titleName = titleName,
+        deviceClass = android.os.Build.MODEL,
+        baseId = fullComposition?.base?.id,
+        runtimeId = fullComposition?.runtime?.id,
+        driverId = fullComposition?.driver?.id,
+        profileId = null,
+        outcome = outcome,
+        exitCode = exitCode,
+        startTime = startTime,
+        endTime = endTime,
+        durationMs = endTime - startTime,
+        milestones = milestones,
+        errorMessage = errorMessage,
+    )
+
+    recordStore.saveRecord(record)
 }

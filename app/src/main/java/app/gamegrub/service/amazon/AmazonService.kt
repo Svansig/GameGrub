@@ -61,7 +61,6 @@ class AmazonService : GameStoreService() {
 
     companion object {
         private var instance: AmazonService? = null
-        private var isSyncInProgress: Boolean = false
 
         val isRunning: Boolean
             get() = instance != null
@@ -140,7 +139,7 @@ class AmazonService : GameStoreService() {
 
         /** Returns true when sync or download work is still active. */
         fun hasActiveOperations(): Boolean {
-            return isSyncInProgress || hasActiveDownload()
+            return instance?.syncInProgress ?: false || hasActiveDownload()
         }
 
         // ── Install queries ───────────────────────────────────────────────────
@@ -741,19 +740,12 @@ class AmazonService : GameStoreService() {
 
     override fun getServiceTag(): String = "AMAZON"
 
-    override fun performSync(context: Context, isManual: Boolean) {
-        Timber.i("[Amazon] Starting library sync (manual=$isManual)")
-        if (isSyncInProgress) {
-            Timber.i("[Amazon] Sync already in progress - skipping")
-            return
-        }
-        isSyncInProgress = true
+    override suspend fun performSync(context: Context, isManual: Boolean) {
         try {
-            runBlocking(Dispatchers.IO) {
-                syncLibrary()
-            }
-        } finally {
-            isSyncInProgress = false
+            amazonManager.refreshLibrary()
+            Timber.i("[Amazon] Sync complete — next auto-sync in 15 minutes")
+        } catch (e: Exception) {
+            Timber.e(e, "[Amazon] Library sync failed")
         }
     }
 
@@ -828,12 +820,4 @@ class AmazonService : GameStoreService() {
     /** Instance-method accessor for callers using [getInstance]?. */
     suspend fun getInstalledGamePath(gameId: String): String? = getInstallPath(gameId)
 
-    private suspend fun syncLibrary() {
-        try {
-            amazonManager.refreshLibrary()
-            Timber.i("[Amazon] Sync complete — next auto-sync in 15 minutes")
-        } catch (e: Exception) {
-            Timber.e(e, "[Amazon] Library sync failed")
-        }
-    }
 }

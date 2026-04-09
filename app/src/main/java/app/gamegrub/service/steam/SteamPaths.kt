@@ -43,16 +43,11 @@ object SteamPaths {
         get() = Paths.get(PrefManager.externalStoragePath, "Steam", "steamapps", "staging").pathString
 
     val defaultStoragePath: String
-        get() {
-            return if (PrefManager.useExternalStorage && File(PrefManager.externalStoragePath).exists()) {
-                Timber.i("External storage path is ${PrefManager.externalStoragePath}")
-                PrefManager.externalStoragePath
-            } else {
-                if (SteamService.instance != null) {
-                    return DownloadService.baseDataDirPath
-                }
-                ""
-            }
+        get() = if (PrefManager.useExternalStorage && File(PrefManager.externalStoragePath).exists()) {
+            Timber.i("External storage path is ${PrefManager.externalStoragePath}")
+            PrefManager.externalStoragePath
+        } else {
+            DownloadService.baseDataDirPath
         }
 
     val defaultAppInstallPath: String

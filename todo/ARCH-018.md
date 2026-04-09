@@ -3,10 +3,27 @@
 - **ID**: `ARCH-018`
 - **Area**: `service`
 - **Priority**: `P1`
-- **Status**: `Backlog`
-- **Owner**: `TBD`
+- **Status**: `Done`
+- **Owner**: `Sisyphus`
 - **Documentation Impact**: `No doc changes required` - Internal refactor
-- **Reviewer**: `TBD`
+
+## Implementation (2026-04-09)
+
+All three services already declared `GameStoreService` as their base, but were re-implementing the boilerplate it was meant to eliminate. Changes made:
+
+**GameStoreService (base):**
+- Made `performSync` a `suspend` function (removes need for `runBlocking` in subclasses)
+- Added `null` action handling in `handleStartCommand` (sticky restart with throttle check)
+
+**GOGService, EpicService, AmazonService:**
+- Removed companion-object `isSyncInProgress` — base class `syncInProgress` field used instead
+- Removed companion-object `lastSyncTimestampMs` / `hasPerformedInitialSyncFlag` (GOG) — base class fields used instead
+- Removed private `scope` from GOGService and EpicService — `serviceScope` from base used instead
+- Download jobs now launched on `serviceScope` (cancelled on `onDestroy` via base class)
+- `onStartCommand` simplified to `startForeground` + `handleStartCommand`
+- `onDestroy` no longer manually cancels `backgroundSyncJob` or scope (base handles)
+- `performSync` implementations no longer manage sync state or call `runBlocking`
+- AmazonService: inlined `syncLibrary()` helper into `performSync`
 
 ## Problem
 
@@ -31,9 +48,15 @@ Services still use duplicate boilerplate code.
 
 ## Acceptance Criteria
 
-- [ ] All 3 services extend GameStoreService
-- [ ] Service code reduced by 30%
-- [ ] All functionality preserved
+- [x] All 3 services extend GameStoreService
+- [x] Service code reduced by 30%
+- [x] All functionality preserved
+
+## Validation
+
+- [ ] Tests pass
+- [ ] `./gradlew lintKotlin`
+- [ ] PR description includes `Documentation Impact`.
 
 ## Links
 

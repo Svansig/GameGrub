@@ -29,7 +29,7 @@ abstract class GameStoreService : Service() {
 
     protected abstract fun getServiceTag(): String
 
-    protected abstract fun performSync(context: Context, isManual: Boolean)
+    protected abstract suspend fun performSync(context: Context, isManual: Boolean)
 
     protected abstract fun getNotificationTitle(): String
 
@@ -69,6 +69,15 @@ abstract class GameStoreService : Service() {
         when (intent?.action) {
             ACTION_SYNC_LIBRARY -> runSync(isManual = false)
             ACTION_MANUAL_SYNC -> runSync(isManual = true)
+            null -> {
+                // Service restarted by Android (START_STICKY): sync only if throttle has passed
+                val timeSinceLastSync = System.currentTimeMillis() - lastSyncTimestamp
+                if (!hasPerformedInitialSync || timeSinceLastSync >= SYNC_THROTTLE_MILLIS) {
+                    runSync(isManual = false)
+                } else {
+                    Timber.tag(getServiceTag()).d("Service restarted by Android — skipping sync (throttled)")
+                }
+            }
         }
     }
 

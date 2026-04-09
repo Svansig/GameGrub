@@ -15,9 +15,7 @@ import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -35,7 +33,6 @@ class EpicService : GameStoreService() {
 
     companion object {
         private var instance: EpicService? = null
-        private var isSyncInProgress: Boolean = false
 
         val isRunning: Boolean
             get() = instance != null
@@ -122,7 +119,7 @@ class EpicService : GameStoreService() {
         // ==========================================================================
 
         fun hasActiveOperations(): Boolean {
-            return isSyncInProgress || hasActiveDownload()
+            return instance?.syncInProgress ?: false || hasActiveDownload()
         }
 
         fun getInstance(): EpicService? = instance
@@ -302,7 +299,7 @@ class EpicService : GameStoreService() {
             downloadInfo.setActive(true)
 
             // Start download in background
-            val job = instance.scope.launch {
+            val job = instance.serviceScope.launch {
                 try {
                     val commonRedistDir = File(installPath, "_CommonRedist")
                     Timber.tag("Epic").i("Starting download for game: ${game.title}, gameId: ${game.id}")
@@ -381,8 +378,6 @@ class EpicService : GameStoreService() {
     @Inject
     lateinit var epicDownloadManager: EpicDownloadManager
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
     // Track active downloads by GameNative Int ID
     private val activeDownloads = ConcurrentHashMap<Int, DownloadInfo>()
 
@@ -400,20 +395,11 @@ class EpicService : GameStoreService() {
 
     override fun getServiceTag(): String = "EPIC"
 
-    override fun performSync(context: Context, isManual: Boolean) {
-        Timber.tag("EPIC").i("Starting library sync (manual=$isManual)")
-        if (isSyncInProgress) {
-            Timber.tag("EPIC").d("Sync already in progress, skipping")
-            return
-        }
-        isSyncInProgress = true
-        val result = runBlocking(Dispatchers.IO) { epicManager.startBackgroundSync(context) }
+    override suspend fun performSync(context: Context, isManual: Boolean) {
+        val result = epicManager.startBackgroundSync(context)
         if (result.isFailure) {
-            Timber.w("Background sync failed: ${result.exceptionOrNull()?.message}")
-        } else {
-            Timber.tag("EPIC").i("Background library sync completed successfully")
+            Timber.tag("EPIC").w("Background sync failed: ${result.exceptionOrNull()?.message}")
         }
-        isSyncInProgress = false
     }
 
     override fun getNotificationTitle(): String = "Epic Games"
@@ -421,19 +407,13 @@ class EpicService : GameStoreService() {
     override fun getNotificationContent(): String = "Connected"
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Timber.tag("EPIC").d("onStartCommand() - action: ${intent?.action}")
-
-        getInstance()
         startForeground(1, notificationHelper.createForegroundNotification("Connected"))
-
         handleStartCommand(intent)
-
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Timber.tag("Epic").i("[EpicService] Service destroyed")
         XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()

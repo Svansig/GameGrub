@@ -82,9 +82,6 @@ class GameGrubApp : SplitCompatApplication() {
     }
 
     companion object {
-        @Deprecated("Use XServerRuntime.get().touchpadView instead")
-        var touchpadView: TouchpadView? = null
-
         @Deprecated("Use XServerRuntime.get().achievementWatcher instead")
         var achievementWatcher: AchievementWatcher? = null
 

@@ -63,6 +63,10 @@ class XServerRuntimeState {
         _xEnvironment.value = null
     }
 
+    fun clearTouchpadView() {
+        _touchpadView.value = null
+    }
+
     fun setXServerView(value: XServerView?) {
         _xServerView.value = value
     }

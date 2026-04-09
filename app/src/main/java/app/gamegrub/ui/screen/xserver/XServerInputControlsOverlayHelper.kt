@@ -51,8 +51,8 @@ internal object XServerInputControlsOverlayHelper {
             }
         }
 
-        GameGrubApp.touchpadView?.setSensitivity(profile.cursorSpeed * 1.0f)
-        GameGrubApp.touchpadView?.setPointerButtonRightEnabled(false)
+        XServerRuntime.get().touchpadView?.setSensitivity(profile.cursorSpeed * 1.0f)
+        XServerRuntime.get().touchpadView?.setPointerButtonRightEnabled(false)
 
         if (container.containerVariant.equals(Container.BIONIC) && profile.isVirtualGamepad) {
             val controllerManager = ControllerManager.getInstance()
@@ -67,12 +67,12 @@ internal object XServerInputControlsOverlayHelper {
         XServerRuntime.get().inputControlsView?.visibility = View.GONE
         XServerRuntime.get().inputControlsView?.profile = null
 
-        GameGrubApp.touchpadView?.setSensitivity(1.0f)
-        GameGrubApp.touchpadView?.setPointerButtonLeftEnabled(true)
-        GameGrubApp.touchpadView?.setPointerButtonRightEnabled(true)
-        GameGrubApp.touchpadView?.isEnabled?.let {
+        XServerRuntime.get().touchpadView?.setSensitivity(1.0f)
+        XServerRuntime.get().touchpadView?.setPointerButtonLeftEnabled(true)
+        XServerRuntime.get().touchpadView?.setPointerButtonRightEnabled(true)
+        XServerRuntime.get().touchpadView?.isEnabled?.let {
             if (!it) {
-                GameGrubApp.touchpadView?.isEnabled = true
+                XServerRuntime.get().touchpadView?.isEnabled = true
                 XServerRuntime.get().xServerView?.renderer?.setCursorVisible(true)
             }
         }

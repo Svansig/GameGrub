@@ -58,7 +58,7 @@ internal object XServerExitCoordinator {
         GameGrubApp.achievementWatcher = null
         app.gamegrub.service.steam.SteamService.clearCachedAchievements()
 
-        GameGrubApp.touchpadView?.releasePointerCapture()
+        XServerRuntime.get().touchpadView?.releasePointerCapture()
         winHandler?.stop()
         environment?.stopEnvironmentComponents()
         app.gamegrub.service.steam.SteamService.keepAlive = false
@@ -66,7 +66,7 @@ internal object XServerExitCoordinator {
         XServerRuntime.get().clearXEnvironment()
         XServerRuntime.get().clearInputControlsView()
         XServerRuntime.get().clearInputControlsManager()
-        GameGrubApp.touchpadView = null
+        XServerRuntime.get().clearTouchpadView()
         frameRating?.writeSessionSummary()
 
         if (LaunchRequestManager.wasLaunchedViaExternalIntent) {

@@ -196,9 +196,9 @@ internal object XServerOverlayActionCoordinator {
         val controllerManager = com.winlator.inputcontrols.ControllerManager.getInstance()
         controllerManager.scanForDevices()
         onHasPhysicalControllerChanged(controllerManager.detectedDevices.isNotEmpty())
-        GameGrubApp.touchpadView?.postDelayed(
+        XServerRuntime.get().touchpadView?.postDelayed(
             {
-                val touchpadView = GameGrubApp.touchpadView
+                val touchpadView = XServerRuntime.get().touchpadView
                 touchpadView?.releasePointerCapture()
             },
             100,

@@ -34,8 +34,8 @@ import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import com.winlator.core.AppUtils
 import com.winlator.inputcontrols.ControllerManager
 import dagger.hilt.android.AndroidEntryPoint
-import timber.log.Timber
 import javax.inject.Inject
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,6 +45,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var launchRequestGateway: LaunchRequestGateway
+
+    @Inject
+    lateinit var serviceLifecycleManager: ServiceLifecycleManager
 
     private lateinit var immersiveModeManager: ImmersiveModeManager
     private lateinit var orientationManager: OrientationManager
@@ -133,7 +136,7 @@ class MainActivity : ComponentActivity() {
         XServerRuntime.get().events.off<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
         XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
-        ServiceLifecycleManager.onDestroy(isChangingConfigurations)
+        serviceLifecycleManager.onDestroy(isChangingConfigurations)
         super.onDestroy()
     }
 
@@ -176,7 +179,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        ServiceLifecycleManager.onResume(this)
+        serviceLifecycleManager.onResume()
 
         PostHog.capture(event = "app_foregrounded")
     }
@@ -200,7 +203,7 @@ class MainActivity : ComponentActivity() {
         orientationManager.stopOrientator()
         SteamService.autoStopWhenIdle = true
 
-        ServiceLifecycleManager.onStop(isChangingConfigurations)
+        serviceLifecycleManager.onStop(isChangingConfigurations)
     }
 
     @SuppressLint("RestrictedApi")

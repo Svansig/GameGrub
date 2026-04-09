@@ -77,14 +77,14 @@ import com.winlator.core.KeyValueSet
 import com.winlator.core.StringUtils
 import com.winlator.core.envvars.EnvVars
 import com.winlator.fexcore.FEXCorePresetManager
+import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.util.Locale
 
 /**
  * Gets the component title for Win Components settings group.
@@ -294,11 +294,11 @@ fun ContainerConfigDialog(
 
         val bionicWineManifest = remember(manifestWine, manifestProton) {
             ManifestComponentHelper.filterManifestByVariant(manifestWine, "bionic") +
-                    ManifestComponentHelper.filterManifestByVariant(manifestProton, "bionic")
+                ManifestComponentHelper.filterManifestByVariant(manifestProton, "bionic")
         }
         val glibcWineManifest = remember(manifestWine, manifestProton) {
             ManifestComponentHelper.filterManifestByVariant(manifestWine, "glibc") +
-                    ManifestComponentHelper.filterManifestByVariant(manifestProton, "glibc")
+                ManifestComponentHelper.filterManifestByVariant(manifestProton, "glibc")
         }
         val bionicWineOptions = remember(bionicWineEntriesBase, installedWine, installedProton, bionicWineManifest) {
             ManifestComponentHelper.buildVersionOptionList(bionicWineEntriesBase, installedWine + installedProton, bionicWineManifest)
@@ -635,9 +635,9 @@ fun ContainerConfigDialog(
             val driverType = StringUtils.parseIdentifier(graphicsDrivers[graphicsDriverIndex])
             val isVortekLike =
                 config.containerVariant == Container.GLIBC &&
-                        driverType == "vortek" ||
-                        driverType == "adreno" ||
-                        driverType == "sd-8-elite"
+                    driverType == "vortek" ||
+                    driverType == "adreno" ||
+                    driverType == "sd-8-elite"
             return if (isVortekLike) "2.6" else "2.14.1"
         }
 
@@ -717,7 +717,7 @@ fun ContainerConfigDialog(
             if (wrapperIsDxvk) {
                 // Check if we need to update - only if current version doesn't match selected version
                 val needsUpdate = currentVersion.isEmpty() ||
-                        (currentVersion != version && StringUtils.parseIdentifier(currentVersion) != StringUtils.parseIdentifier(version))
+                    (currentVersion != version && StringUtils.parseIdentifier(currentVersion) != StringUtils.parseIdentifier(version))
                 if (needsUpdate) {
                     kvs.put("version", version)
                 }
@@ -1068,7 +1068,7 @@ fun ContainerConfigDialog(
                             .padding(
                                 top =
                                     PaddingUtils.statusBarAwarePadding().calculateTopPadding() +
-                                            paddingValues.calculateTopPadding(),
+                                        paddingValues.calculateTopPadding(),
                                 bottom = 32.dp + paddingValues.calculateBottomPadding(),
                                 start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                                 end = paddingValues.calculateEndPadding(LayoutDirection.Ltr),

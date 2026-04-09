@@ -2,14 +2,14 @@ package app.gamegrub.service.gog.api
 
 import app.gamegrub.Constants
 import app.gamegrub.service.gog.GOGConstants
-import org.json.JSONObject
-import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.Inflater
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.json.JSONObject
+import timber.log.Timber
 
 /**
  * Handles parsing of GOG manifest data
@@ -464,16 +464,16 @@ class GOGManifestParser @Inject constructor() {
     fun decompressManifest(data: ByteArray): String {
         // Check compression type by magic bytes
         val isGzipped = data.size >= 2 &&
-                data[0] == 0x1f.toByte() &&
-                data[1] == 0x8b.toByte()
+            data[0] == 0x1f.toByte() &&
+            data[1] == 0x8b.toByte()
 
         val isZlib = data.size >= 2 &&
-                data[0] == 0x78.toByte() &&
-                (
-                        data[1] == 0x9c.toByte() ||
-                                data[1] == 0x01.toByte() ||
-                                data[1] == 0xda.toByte()
-                        )
+            data[0] == 0x78.toByte() &&
+            (
+                data[1] == 0x9c.toByte() ||
+                    data[1] == 0x01.toByte() ||
+                    data[1] == 0xda.toByte()
+                )
 
         return when {
             isGzipped -> {

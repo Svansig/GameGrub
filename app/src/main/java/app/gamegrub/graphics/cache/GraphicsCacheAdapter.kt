@@ -161,7 +161,7 @@ class MesaCacheAdapter : GraphicsCacheAdapter {
     override val name = "Mesa"
 
     override fun isSupported(): Boolean {
-        return System.getProperty("os.name").lowercase().contains("linux")
+        return System.getProperty("os.name")?.lowercase()?.contains("linux") ?: false
     }
 
     override fun setup(cacheDir: File): CacheConfiguration {

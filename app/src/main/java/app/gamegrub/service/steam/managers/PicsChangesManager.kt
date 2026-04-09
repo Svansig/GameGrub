@@ -3,10 +3,10 @@ package app.gamegrub.service.steam.managers
 import app.gamegrub.db.dao.ChangeNumbersDao
 import app.gamegrub.db.dao.FileChangeListsDao
 import app.gamegrub.service.steam.di.SteamPicsClient
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Singleton
 class PicsChangesManager @Inject constructor(

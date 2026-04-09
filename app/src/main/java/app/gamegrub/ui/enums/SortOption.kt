@@ -23,11 +23,6 @@ enum class SortOption(
             return entries.find { it.key == key } ?: INSTALLED_FIRST
         }
 
-        @Deprecated("Use fromKey for stable persistence", replaceWith = ReplaceWith("fromKey(key)"))
-        fun fromOrdinal(ordinal: Int): SortOption {
-            return entries.getOrElse(ordinal) { INSTALLED_FIRST }
-        }
-
         fun next(current: SortOption): SortOption {
             val nextIndex = (current.ordinal + 1) % entries.size
             return entries[nextIndex]

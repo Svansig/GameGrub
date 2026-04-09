@@ -19,9 +19,9 @@ import app.gamegrub.data.GameSource
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import java.util.Arrays
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.Arrays
 
 private fun createAdaptiveIconBitmap(context: Context, src: Bitmap): Bitmap {
     val density = context.resources.displayMetrics.density

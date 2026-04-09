@@ -2,8 +2,8 @@ package app.gamegrub.service.steam.managers
 
 import app.gamegrub.data.SteamControllerConfigDetail
 import `in`.dragonbra.javasteam.types.KeyValue
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 /**
  * Encapsulates Steam Input controller template and manifest/config file resolution.
@@ -25,7 +25,7 @@ object SteamControllerConfigManager {
             for (controllerType in controllerPriority) {
                 val match = details.firstOrNull { detail ->
                     detail.controllerType.equals(controllerType, ignoreCase = true) &&
-                            detail.enabledBranches.any { it.equals(branch, ignoreCase = true) }
+                        detail.enabledBranches.any { it.equals(branch, ignoreCase = true) }
                 }
                 if (match != null) {
                     return match

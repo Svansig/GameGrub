@@ -2,10 +2,10 @@ package app.gamegrub.gateway.impl
 
 import app.gamegrub.PrefManager
 import app.gamegrub.gateway.PreferencesGateway
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Singleton
 class PreferencesGatewayImpl @Inject constructor(

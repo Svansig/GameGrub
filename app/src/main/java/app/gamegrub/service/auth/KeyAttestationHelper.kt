@@ -6,6 +6,11 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import app.gamegrub.Constants
+import java.security.KeyPairGenerator
+import java.security.KeyStore
+import java.security.ProviderException
+import java.security.spec.ECGenParameterSpec
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -14,11 +19,6 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
-import java.security.KeyPairGenerator
-import java.security.KeyStore
-import java.security.ProviderException
-import java.security.spec.ECGenParameterSpec
-import java.util.concurrent.TimeUnit
 
 object KeyAttestationHelper {
 
@@ -26,9 +26,11 @@ object KeyAttestationHelper {
     private const val STRONGBOX_UNKNOWN = -1
     private const val STRONGBOX_UNSUPPORTED = 0
     private const val STRONGBOX_SUPPORTED = 1
+
     // Why: provider failures are frequently device/firmware specific and can repeat for long periods.
     // A long cooldown avoids hammering keystore and keeps background API paths responsive.
     private const val PROVIDER_FAILURE_RETRY_COOLDOWN_MS = 6 * 60 * 60 * 1000L
+
     // Why: generic failures (network races, transient keystore state) can recover quickly,
     // so we still back off, but for a shorter window.
     private const val GENERIC_FAILURE_RETRY_COOLDOWN_MS = 30 * 60 * 1000L

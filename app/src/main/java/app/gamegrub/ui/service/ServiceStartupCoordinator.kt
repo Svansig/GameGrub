@@ -3,11 +3,10 @@ package app.gamegrub.ui.service
 import android.content.Context
 import android.content.Intent
 import androidx.navigation.NavHostController
+import app.gamegrub.data.GameSource
 import app.gamegrub.gateway.AuthStateGateway
 import app.gamegrub.service.InstalledGamesStartupValidator
-import app.gamegrub.service.amazon.AmazonService
-import app.gamegrub.service.epic.EpicService
-import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.base.GameStoreCoordinator
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.model.MainViewModel
@@ -17,24 +16,32 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class ServiceStartupCoordinator @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val authStateGateway: AuthStateGateway,
     private val installedGamesStartupValidator: InstalledGamesStartupValidator,
+    private val storeCoordinators: Set<@JvmSuppressWildcards GameStoreCoordinator>,
 ) {
     private val startupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Volatile
     private var startupInstallValidationStarted: Boolean = false
+
+    private val nonSteamCoordinators: List<GameStoreCoordinator>
+        get() = storeCoordinators.filter { it.gameSource != GameSource.STEAM }
+
+    private fun getCoordinator(gameSource: GameSource): GameStoreCoordinator? {
+        return storeCoordinators.find { it.gameSource == gameSource }
+    }
 
     fun evaluateAndStartServices(
         viewModel: MainViewModel,
@@ -57,8 +64,8 @@ class ServiceStartupCoordinator @Inject constructor(
 
         // Only attempt reconnection if not already connected/connecting and not in offline mode
         val shouldAttemptReconnect = !state.isSteamConnected &&
-                !isConnecting &&
-                !SteamService.keepAlive
+            !isConnecting &&
+            !SteamService.keepAlive
 
         if (shouldAttemptReconnect) {
             Timber.d("[ServiceStartupCoordinator]: Steam not connected - attempting reconnection")
@@ -67,30 +74,16 @@ class ServiceStartupCoordinator @Inject constructor(
             context.startForegroundService(Intent(context, SteamService::class.java))
         }
 
-        // Start GOGService if user has GOG
-        if (GOGService.hasStoredCredentials(context) &&
-            !GOGService.isRunning
-        ) {
-            Timber.tag("GOG").d("[ServiceStartupCoordinator]: Starting GOGService for logged-in user")
-            GOGService.start(context)
-        } else {
-            Timber.tag("GOG").d("GOG SERVICE Not going to start: ${GOGService.isRunning}")
-        }
-
-        // Start EpicService if user has Epic credentials
-        if (EpicService.hasStoredCredentials(context) &&
-            !EpicService.isRunning
-        ) {
-            Timber.d("[ServiceStartupCoordinator]: Starting EpicService for logged-in user")
-            EpicService.start(context)
-        }
-
-        // Start AmazonService if user has Amazon credentials
-        if (AmazonService.hasStoredCredentials(context) &&
-            !AmazonService.isRunning
-        ) {
-            Timber.d("[ServiceStartupCoordinator]: Starting AmazonService for logged-in user")
-            AmazonService.start(context)
+        // Start non-Steam services if they have stored credentials but aren't running
+        nonSteamCoordinators.forEach { coordinator ->
+            val hasCredentials = coordinator.hasStoredCredentials()
+            val isRunning = coordinator.isRunning
+            if (hasCredentials && !isRunning) {
+                Timber.d("[ServiceStartupCoordinator]: Starting ${coordinator.gameSource}Service for logged-in user")
+                coordinator.start()
+            } else {
+                Timber.tag(coordinator.gameSource.name).d("${coordinator.gameSource}Service not going to start: isRunning=$isRunning")
+            }
         }
 
         // Handle navigation when already logged in (e.g., app resumed with active session)

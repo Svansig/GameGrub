@@ -117,11 +117,11 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -555,9 +555,9 @@ internal fun AppScreenContent(
     // Download progress texts hoisted here so they can be shown inside the button
     val downloadStatusMessageFlow = remember(downloadInfo) { downloadInfo?.getStatusMessageFlow() }
     val downloadStatusMessage by (
-            downloadStatusMessageFlow?.collectAsState(initial = downloadStatusMessageFlow.value)
-                ?: remember { mutableStateOf(null) }
-            )
+        downloadStatusMessageFlow?.collectAsState(initial = downloadStatusMessageFlow.value)
+            ?: remember { mutableStateOf(null) }
+        )
     val downloadingLabel = stringResource(R.string.downloading)
     val downloadTimeLeftText = remember(displayInfo.appId, downloadProgress, downloadInfo, isDownloading, downloadStatusMessage) {
         val etaMs = downloadInfo?.getEstimatedTimeRemaining()

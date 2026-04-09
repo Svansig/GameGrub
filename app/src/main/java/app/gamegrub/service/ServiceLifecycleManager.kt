@@ -1,9 +1,12 @@
 package app.gamegrub.service
 
 import android.content.Context
-import app.gamegrub.service.epic.EpicService
-import app.gamegrub.service.gog.GOGService
+import app.gamegrub.data.GameSource
+import app.gamegrub.service.base.GameStoreCoordinator
 import app.gamegrub.service.steam.SteamService
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import timber.log.Timber
 
 /**
@@ -11,7 +14,18 @@ import timber.log.Timber
  * Handles starting, stopping, and auto-stop logic based on app state
  * and active operations.
  */
-object ServiceLifecycleManager {
+@Singleton
+class ServiceLifecycleManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val storeCoordinators: Set<@JvmSuppressWildcards GameStoreCoordinator>,
+) {
+
+    private val nonSteamCoordinators: List<GameStoreCoordinator>
+        get() = storeCoordinators.filter { it.gameSource != GameSource.STEAM }
+
+    private fun getCoordinator(gameSource: GameSource): GameStoreCoordinator? {
+        return storeCoordinators.find { it.gameSource == gameSource }
+    }
 
     /**
      * Stop services when app is being destroyed.
@@ -25,14 +39,11 @@ object ServiceLifecycleManager {
             SteamService.stop()
         }
 
-        if (GOGService.isRunning && !isChangingConfigurations) {
-            Timber.i("Stopping GOG Service")
-            GOGService.stop()
-        }
-
-        if (EpicService.isRunning && !isChangingConfigurations) {
-            Timber.i("Stopping EpicService - app destroyed")
-            EpicService.stop()
+        nonSteamCoordinators.forEach { coordinator ->
+            if (coordinator.isRunning && !isChangingConfigurations) {
+                Timber.i("Stopping ${coordinator.gameSource} Service")
+                coordinator.stop()
+            }
         }
     }
 
@@ -53,21 +64,15 @@ object ServiceLifecycleManager {
             SteamService.stop()
         }
 
-        // Stop GOGService if running and no downloads in progress
-        if (GOGService.isRunning && !isChangingConfigurations) {
-            if (!GOGService.hasActiveOperations()) {
-                Timber.i("Stopping GOG Service - no active operations")
-                GOGService.stop()
-            }
-        }
-
-        // Stop EpicService if running, unless there are active downloads or sync operations
-        if (EpicService.isRunning && !isChangingConfigurations) {
-            if (!EpicService.hasActiveOperations()) {
-                Timber.i("Stopping EpicService - no active operations")
-                EpicService.stop()
-            } else {
-                Timber.d("EpicService kept running - has active operations")
+        // Stop non-Steam coordinators if running and no active operations
+        nonSteamCoordinators.forEach { coordinator ->
+            if (coordinator.isRunning && !isChangingConfigurations) {
+                if (!coordinator.hasActiveOperations()) {
+                    Timber.i("Stopping ${coordinator.gameSource} Service - no active operations")
+                    coordinator.stop()
+                } else {
+                    Timber.d("${coordinator.gameSource} Service kept running - has active operations")
+                }
             }
         }
     }
@@ -76,17 +81,15 @@ object ServiceLifecycleManager {
      * Handle app coming to foreground.
      * Restarts services that may have been stopped while backgrounded.
      */
-    fun onResume(context: Context) {
-        // Restart GOG service if it went down
-        if (GOGService.hasStoredCredentials(context) && !GOGService.isRunning) {
-            Timber.i("GOG service was down on resume - restarting")
-            GOGService.start(context)
-        }
-
-        // Restart EpicService if it went down and user is authenticated
-        if (EpicService.hasStoredCredentials(context) && !EpicService.isRunning) {
-            Timber.i("EpicService was down on resume - restarting")
-            EpicService.start(context)
+    fun onResume() {
+        // Restart non-Steam services if they went down but have stored credentials
+        nonSteamCoordinators.forEach { coordinator ->
+            val hasCredentials = coordinator.hasStoredCredentials()
+            val isRunning = coordinator.isRunning
+            if (hasCredentials && !isRunning) {
+                Timber.i("${coordinator.gameSource} service was down on resume - restarting")
+                coordinator.start()
+            }
         }
     }
 

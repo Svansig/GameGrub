@@ -1,9 +1,9 @@
 package app.gamegrub.session
 
 import app.gamegrub.session.model.SessionPlan
+import java.io.File
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.File
 
 class SessionArtifactWriter(
     private val outputDir: File,

@@ -13,9 +13,9 @@ import com.winlator.core.TarCompressorUtils
 import com.winlator.core.envvars.EnvVars
 import com.winlator.xconnector.UnixSocketConfig
 import com.winlator.xenvironment.ImageFs
-import timber.log.Timber
 import java.io.File
 import java.util.Locale
+import timber.log.Timber
 
 /**
  * Handles graphics-driver payload extraction and related runtime env vars.

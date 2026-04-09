@@ -1,9 +1,9 @@
 package app.gamegrub.telemetry.session
 
+import java.util.UUID
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.util.UUID
 
 /**
  * Structured context for a single game launch attempt.

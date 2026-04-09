@@ -3,8 +3,8 @@ package app.gamegrub.container.launch.command
 import app.gamegrub.data.GameSource
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.utils.steam.SteamUtils
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 /**
  * Handles Steam-specific prelaunch side effects and command generation.
@@ -42,7 +42,7 @@ internal object SteamLaunchCommandBuilder : BaseLaunchCommandBuilder() {
     private fun buildSteamArgs(context: LaunchCommandContext): String {
         if (context.container.isLaunchRealSteam) {
             return "\"C:\\\\Program Files (x86)\\\\Steam\\\\steam.exe\" -silent -vgui -tcp " +
-                    "-nobigpicture -nofriendsui -nochatui -nointro -applaunch ${context.gameId}"
+                "-nobigpicture -nofriendsui -nochatui -nointro -applaunch ${context.gameId}"
         }
 
         val executablePath = context.container.executablePath.ifEmpty {

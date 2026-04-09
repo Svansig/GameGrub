@@ -5,14 +5,15 @@ import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.GOGGame
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.service.gog.GOGService
+import app.gamegrub.service.gog.GOGStoreCoordinator
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import timber.log.Timber
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -34,10 +35,11 @@ fun getGOGInstallDomain(context: Context): GOGInstallDomain {
 @Singleton
 class GOGInstallDomain @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    private val gogStoreCoordinator: GOGStoreCoordinator,
 ) {
     private val TAG = "GOGInstallDomain"
 
-    fun getDownloadInfo(gameId: String): DownloadInfo? = GOGService.getDownloadInfo(gameId)
+    fun getDownloadInfo(gameId: String): DownloadInfo? = gogStoreCoordinator.getDownloadInfoByGameId(gameId)
 
     fun downloadGame(
         gameId: String,
@@ -45,17 +47,17 @@ class GOGInstallDomain @Inject constructor(
         containerLanguage: String,
     ): Result<DownloadInfo?> {
         Timber.tag(TAG).d("downloadGame: gameId=$gameId, installPath=$installPath, language=$containerLanguage")
-        return GOGService.downloadGame(context, gameId, installPath, containerLanguage)
+        return gogStoreCoordinator.downloadGame(gameId, installPath, containerLanguage)
     }
 
     fun cancelDownload(gameId: String): Boolean {
         Timber.tag(TAG).i("cancelDownload: gameId=$gameId")
-        return GOGService.cancelDownload(gameId)
+        return gogStoreCoordinator.cancelDownloadByGameId(gameId)
     }
 
     fun cleanupDownload(gameId: String) {
         Timber.tag(TAG).d("cleanupDownload: gameId=$gameId")
-        GOGService.cleanupDownload(gameId)
+        gogStoreCoordinator.cleanupDownload(gameId)
     }
 
     fun isGameInstalled(gameId: String): Boolean = GOGService.isGameInstalled(gameId)
@@ -69,7 +71,7 @@ class GOGInstallDomain @Inject constructor(
         return GOGService.deleteGame(context, libraryItem)
     }
 
-    fun getCurrentlyDownloadingGame(): String? = GOGService.getCurrentlyDownloadingGame()
+    fun getCurrentlyDownloadingGame(): String? = gogStoreCoordinator.getCurrentlyDownloadingGame()
 
-    fun hasActiveDownload(): Boolean = GOGService.hasActiveDownload()
+    fun hasActiveDownload(): Boolean = gogStoreCoordinator.hasActiveDownload()
 }

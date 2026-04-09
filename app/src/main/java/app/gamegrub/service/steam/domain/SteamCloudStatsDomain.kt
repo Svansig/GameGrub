@@ -6,12 +6,12 @@ import app.gamegrub.enums.SaveLocation
 import app.gamegrub.service.steam.managers.SteamAchievementManager
 import app.gamegrub.service.steam.managers.SteamCloudSavesManager
 import app.gamegrub.statsgen.Achievement
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.flow.StateFlow
 
 @Singleton
 class SteamCloudStatsDomain @Inject constructor(

@@ -6,11 +6,11 @@ import app.gamegrub.service.steam.managers.SteamAuthService
 import app.gamegrub.service.steam.managers.SteamDeviceIdentityManager
 import app.gamegrub.service.steam.managers.SteamFriendsManager
 import app.gamegrub.service.steam.managers.SteamUserManager
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Account domain: authentication, user identity, persona, and device identity concerns.

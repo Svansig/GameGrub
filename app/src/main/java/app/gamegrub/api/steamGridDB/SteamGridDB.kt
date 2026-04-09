@@ -4,12 +4,6 @@ import android.graphics.BitmapFactory
 import app.gamegrub.BuildConfig
 import app.gamegrub.PrefManager
 import app.gamegrub.domain.customgame.GameMetadataManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import org.json.JSONObject
-import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URLEncoder
@@ -17,6 +11,12 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
+import timber.log.Timber
 
 /**
  * Utility class for fetching game images from SteamGridDB API.
@@ -412,40 +412,40 @@ class SteamGridDB @Inject constructor() {
         // Heroes are saved as hero (for header)
         val existingGridHero = gameFolder.listFiles { file ->
             file.isFile &&
-                    file.name.startsWith("steamgriddb_grid_hero", ignoreCase = true) &&
-                    (
-                            file.name.endsWith(".png", ignoreCase = true) ||
-                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                    file.name.endsWith(".webp", ignoreCase = true)
-                            )
+                file.name.startsWith("steamgriddb_grid_hero", ignoreCase = true) &&
+                (
+                    file.name.endsWith(".png", ignoreCase = true) ||
+                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                        file.name.endsWith(".webp", ignoreCase = true)
+                    )
         }?.isNotEmpty() == true
         val existingGridCapsule = gameFolder.listFiles { file ->
             file.isFile &&
-                    file.name.startsWith("steamgriddb_grid_capsule", ignoreCase = true) &&
-                    (
-                            file.name.endsWith(".png", ignoreCase = true) ||
-                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                    file.name.endsWith(".webp", ignoreCase = true)
-                            )
+                file.name.startsWith("steamgriddb_grid_capsule", ignoreCase = true) &&
+                (
+                    file.name.endsWith(".png", ignoreCase = true) ||
+                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                        file.name.endsWith(".webp", ignoreCase = true)
+                    )
         }?.isNotEmpty() == true
         val existingHero = gameFolder.listFiles { file ->
             file.isFile &&
-                    file.name.startsWith("steamgriddb_hero", ignoreCase = true) &&
-                    !file.name.contains("grid_", ignoreCase = true) &&
-                    (
-                            file.name.endsWith(".png", ignoreCase = true) ||
-                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                    file.name.endsWith(".webp", ignoreCase = true)
-                            )
+                file.name.startsWith("steamgriddb_hero", ignoreCase = true) &&
+                !file.name.contains("grid_", ignoreCase = true) &&
+                (
+                    file.name.endsWith(".png", ignoreCase = true) ||
+                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                        file.name.endsWith(".webp", ignoreCase = true)
+                    )
         }?.isNotEmpty() == true
         val existingLogo = gameFolder.listFiles { file ->
             file.isFile &&
-                    file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
-                    (
-                            file.name.endsWith(".png", ignoreCase = true) ||
-                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                    file.name.endsWith(".webp", ignoreCase = true)
-                            )
+                file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
+                (
+                    file.name.endsWith(".png", ignoreCase = true) ||
+                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                        file.name.endsWith(".webp", ignoreCase = true)
+                    )
         }?.isNotEmpty() == true
 
         if (existingGridHero && existingGridCapsule && existingHero && existingLogo) {
@@ -453,40 +453,40 @@ class SteamGridDB @Inject constructor() {
                 .d("All images already exist for '$gameName', skipping fetch")
             val gridHeroFile = gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_grid_hero", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_grid_hero", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()
             val gridCapsuleFile = gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_grid_capsule", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_grid_capsule", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()
             val heroFile = gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_hero", ignoreCase = true) &&
-                        !file.name.contains("grid_", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_hero", ignoreCase = true) &&
+                    !file.name.contains("grid_", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()
             val logoFile = gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()
             return@withContext ImageFetchResult(
                 gridPath = gridHeroFile?.absolutePath, // Hero path (horizontal grid)
@@ -512,21 +512,21 @@ class SteamGridDB @Inject constructor() {
         } else {
             val gridHeroFile = gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_grid_hero", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_grid_hero", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()
             val gridCapsuleFile = gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_grid_capsule", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_grid_capsule", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()
             Pair(gridHeroFile?.absolutePath, gridCapsuleFile?.absolutePath)
         }
@@ -537,13 +537,13 @@ class SteamGridDB @Inject constructor() {
         } else {
             gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_hero", ignoreCase = true) &&
-                        !file.name.contains("grid_", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_hero", ignoreCase = true) &&
+                    !file.name.contains("grid_", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()?.absolutePath
         }
 
@@ -553,12 +553,12 @@ class SteamGridDB @Inject constructor() {
         } else {
             gameFolder.listFiles { file ->
                 file.isFile &&
-                        file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
-                        (
-                                file.name.endsWith(".png", ignoreCase = true) ||
-                                        file.name.endsWith(".jpg", ignoreCase = true) ||
-                                        file.name.endsWith(".webp", ignoreCase = true)
-                                )
+                    file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
+                    (
+                        file.name.endsWith(".png", ignoreCase = true) ||
+                            file.name.endsWith(".jpg", ignoreCase = true) ||
+                            file.name.endsWith(".webp", ignoreCase = true)
+                        )
             }?.firstOrNull()?.absolutePath
         }
 

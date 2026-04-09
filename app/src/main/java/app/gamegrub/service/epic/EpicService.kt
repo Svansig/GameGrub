@@ -12,18 +12,14 @@ import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.runtime.XServerRuntime
-import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
 
 /**
  * Epic Games Service - thin coordinator that delegates to other Epic managers.
@@ -124,20 +120,20 @@ class EpicService : GameStoreService() {
 
         internal fun getInstance(): EpicService? = instance
 
+        // Set by onCreate/onDestroy to give companion access to coordinator's download state.
+        @Volatile
+        internal var coordinator: EpicStoreCoordinator? = null
+
         suspend fun getInstalledExe(gameId: Int): String =
             getInstance()?.epicManager?.getInstalledExe(gameId) ?: ""
 
         // ==========================================================================
-        // DOWNLOAD OPERATIONS - Delegate to instance EpicManager
+        // DOWNLOAD OPERATIONS - Delegate to EpicStoreCoordinator
         // ==========================================================================
 
-        fun hasActiveDownload(): Boolean {
-            return getInstance()?.activeDownloads?.isNotEmpty() ?: false
-        }
+        fun hasActiveDownload(): Boolean = coordinator?.hasActiveDownload() ?: false
 
-        fun getDownloadInfo(appId: Int): DownloadInfo? {
-            return getInstance()?.activeDownloads?.get(appId)
-        }
+        fun getDownloadInfo(appId: Int): DownloadInfo? = coordinator?.getDownloadInfo(appId)
 
         suspend fun deleteGame(context: Context, appId: Int): Result<Unit> {
             val instance = getInstance() ?: return Result.failure(Exception("Service not available"))
@@ -191,7 +187,7 @@ class EpicService : GameStoreService() {
                     StorageManager.removeMarker(path, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
                 }
             }
-            getInstance()?.activeDownloads?.remove(appId)
+            coordinator?.cleanupDownload(context, appId)
         }
 
         // ==========================================================================
@@ -278,78 +274,9 @@ class EpicService : GameStoreService() {
             dlcGameIds: List<Int>,
             installPath: String,
             containerLanguage: String,
-        ): Result<DownloadInfo> {
-            val instance = getInstance() ?: return Result.failure(Exception("Service not available"))
-
-            val game = runBlocking { instance.epicManager.getGameById(appId) }
-                ?: return Result.failure(Exception("Game not found for appId: $appId"))
-            val gameId = game.id
-
-            // Check if already downloading
-            if (instance.activeDownloads.containsKey(appId)) {
-                Timber.tag("Epic").w("Download already in progress for $appId")
-                return Result.success(instance.activeDownloads[appId]!!)
-            }
-
-            // Create DownloadInfo before launching coroutine to avoid race condition
-            val downloadInfo = DownloadInfo(
-                jobCount = 1,
-                gameId = appId,
-                downloadingAppIds = CopyOnWriteArrayList<Int>(),
-            )
-
-            instance.activeDownloads[appId] = downloadInfo
-            downloadInfo.setActive(true)
-
-            // Start download in background
-            val job = instance.serviceScope.launch {
-                try {
-                    val commonRedistDir = File(installPath, "_CommonRedist")
-                    Timber.tag("Epic").i("Starting download for game: ${game.title}, gameId: ${game.id}")
-
-                    val result = instance.epicDownloadManager.downloadGame(
-                        context,
-                        game,
-                        installPath,
-                        downloadInfo,
-                        containerLanguage,
-                        dlcGameIds,
-                        commonRedistDir,
-                    )
-
-                    Timber.tag("Epic")
-                        .d("Download result: ${if (result.isSuccess) "SUCCESS" else "FAILURE: ${result.exceptionOrNull()?.message}"}")
-
-                    if (result.isSuccess) {
-                        Timber.i("[Download] Completed successfully for game $gameId")
-                        downloadInfo.setProgress(1.0f)
-                        downloadInfo.setActive(false)
-
-                        SnackbarManager.show("Download completed successfully!")
-                    } else {
-                        val error = result.exceptionOrNull()
-                        Timber.e(error, "[Download] Failed for game $gameId")
-                        downloadInfo.setProgress(-1.0f)
-                        downloadInfo.setActive(false)
-
-                        SnackbarManager.show("Download failed: ${error?.message ?: "Unknown error"}")
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "[Download] Exception for game $gameId")
-                    downloadInfo.setProgress(-1.0f)
-                    downloadInfo.setActive(false)
-
-                    SnackbarManager.show("Download error: ${e.message ?: "Unknown error"}")
-                } finally {
-                    instance.activeDownloads.remove(appId)
-                    Timber.d("[Download] Finished for game $gameId, progress: ${downloadInfo.getProgress()}, active: ${downloadInfo.isActive()}")
-                }
-            }
-            downloadInfo.setDownloadJob(job)
-
-            // Return the DownloadInfo immediately so caller can track progress
-            return Result.success(downloadInfo)
-        }
+        ): Result<DownloadInfo> =
+            coordinator?.downloadGame(appId, dlcGameIds, installPath, containerLanguage)
+                ?: Result.failure(Exception("Epic service not available"))
 
         // ==========================================================================
         // Game Launcher Helpers
@@ -381,14 +308,16 @@ class EpicService : GameStoreService() {
     @Inject
     lateinit var epicDownloadManager: EpicDownloadManager
 
-    // Track active downloads by GameNative Int ID
-    private val activeDownloads = ConcurrentHashMap<Int, DownloadInfo>()
+    @Inject
+    lateinit var epicStoreCoordinator: EpicStoreCoordinator
 
     private val onEndProcess: (AndroidEvent.EndProcess) -> Unit = { stop() }
 
     override fun onCreate() {
         super.onCreate()
         instance = this
+        coordinator = epicStoreCoordinator
+        epicStoreCoordinator.onServiceStarted()
         Timber.tag("Epic").i("[EpicService] Service created")
 
         // Initialize notification helper for foreground service
@@ -420,6 +349,8 @@ class EpicService : GameStoreService() {
         XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
+        epicStoreCoordinator.onServiceStopped()
+        coordinator = null
         instance = null
     }
 

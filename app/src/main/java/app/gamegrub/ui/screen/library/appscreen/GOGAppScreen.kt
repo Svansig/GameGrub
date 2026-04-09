@@ -25,6 +25,7 @@ import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
+import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.CancelDownloadResult
 import app.gamegrub.ui.model.GOGAppScreenViewModel
 import app.gamegrub.ui.runtime.XServerRuntime
@@ -32,9 +33,9 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
 import com.winlator.container.ContainerData
-import timber.log.Timber
 import java.io.File
 import java.util.Locale
+import timber.log.Timber
 
 /**
  * GOG-specific implementation of BaseAppScreen
@@ -256,7 +257,7 @@ class GOGAppScreen(
             )
             val state = app.gamegrub.ui.component.dialog.state.MessageDialogState(
                 visible = true,
-                type = app.gamegrub.ui.enums.DialogType.INSTALL_APP,
+                type = DialogType.INSTALL_APP,
                 title = context.getString(R.string.gog_install_game_title),
                 message = message,
                 confirmBtnText = context.getString(R.string.download),
@@ -319,7 +320,7 @@ class GOGAppScreen(
                 libraryItem.appId,
                 app.gamegrub.ui.component.dialog.state.MessageDialogState(
                     visible = true,
-                    type = app.gamegrub.ui.enums.DialogType.CANCEL_APP_DOWNLOAD,
+                    type = DialogType.CANCEL_APP_DOWNLOAD,
                     title = context.getString(R.string.cancel_download_prompt_title),
                     message = context.getString(R.string.library_delete_download_message),
                     confirmBtnText = context.getString(R.string.yes),
@@ -555,14 +556,14 @@ class GOGAppScreen(
                 hideInstallDialog(appId)
             }
             val onConfirmClick: (() -> Unit)? = when (installDialogState.type) {
-                app.gamegrub.ui.enums.DialogType.INSTALL_APP -> {
+                DialogType.INSTALL_APP -> {
                     {
                         hideInstallDialog(appId)
                         performDownload(context, libraryItem) {}
                     }
                 }
 
-                app.gamegrub.ui.enums.DialogType.CANCEL_APP_DOWNLOAD -> {
+                DialogType.CANCEL_APP_DOWNLOAD -> {
                     {
                         hideInstallDialog(appId)
                         val gameId = libraryItem.gameId.toString()

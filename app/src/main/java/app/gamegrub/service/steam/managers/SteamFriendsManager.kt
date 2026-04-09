@@ -8,12 +8,12 @@ import app.gamegrub.service.steam.di.SteamPersona
 import app.gamegrub.service.steam.di.SteamPreferences
 import app.gamegrub.service.steam.di.SteamUserClient
 import `in`.dragonbra.javasteam.enums.EPersonaState
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class SteamFriendsManager @Inject constructor(

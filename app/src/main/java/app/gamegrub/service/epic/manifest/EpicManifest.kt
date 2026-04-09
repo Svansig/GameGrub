@@ -1,11 +1,11 @@
 package app.gamegrub.service.epic.manifest
 
-import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.MessageDigest
 import java.util.zip.Inflater
+import timber.log.Timber
 
 /**
  * Base class for Epic Games manifest parsing.
@@ -176,8 +176,8 @@ class BinaryManifest : EpicManifest() {
         fileManifestList?.let { fml ->
             size += fml.elements.sumOf { fm ->
                 fm.filename.length + fm.symlinkTarget.length + 100 +
-                        fm.installTags.sumOf { it.length + 4 } +
-                        fm.chunkParts.size * 28
+                    fm.installTags.sumOf { it.length + 4 } +
+                    fm.chunkParts.size * 28
             }
         }
         // Custom fields estimate
@@ -225,8 +225,8 @@ class BinaryManifest : EpicManifest() {
         fileManifestList?.let { fml ->
             val needed = fml.elements.sumOf {
                 it.filename.length + it.symlinkTarget.length + 100 +
-                        it.installTags.sumOf { t -> t.length + 4 } +
-                        it.chunkParts.size * 28
+                    it.installTags.sumOf { t -> t.length + 4 } +
+                    it.chunkParts.size * 28
             }
             ensureSpace(needed + 1_000)
             fml.write(bodyBuffer)

@@ -3,8 +3,8 @@ package app.gamegrub.domain.usecase
 import app.gamegrub.gateway.CloudSaveResolution
 import app.gamegrub.gateway.CloudSaveSyncStatus
 import app.gamegrub.gateway.CloudSavesGateway
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 
 class SyncCloudSavesUseCase @Inject constructor(
     private val cloudSavesGateway: CloudSavesGateway,

@@ -14,8 +14,8 @@ import androidx.core.net.toUri
 import app.gamegrub.service.amazon.AmazonAuthManager
 import app.gamegrub.ui.component.dialog.AuthWebViewDialog
 import app.gamegrub.ui.theme.GameGrubTheme
-import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
+import timber.log.Timber
 
 /**
  * Amazon OAuth Activity — hosts a WebView for the PKCE sign-in flow.
@@ -136,7 +136,7 @@ private fun AmazonAuthWebView(
  */
 private fun isAmazonRedirect(url: String): Boolean {
     return (url.startsWith("https://www.amazon.com/") || url.startsWith("https://amazon.com/")) &&
-            url.contains("openid.assoc_handle=amzn_sonic_games_launcher")
+        url.contains("openid.assoc_handle=amzn_sonic_games_launcher")
 }
 
 private fun extractAuthCode(url: String): String? {

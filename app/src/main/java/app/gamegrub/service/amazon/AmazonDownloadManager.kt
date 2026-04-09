@@ -5,6 +5,11 @@ import app.gamegrub.data.AmazonGame
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.enums.Marker
 import app.gamegrub.storage.StorageManager
+import java.io.File
+import java.security.MessageDigest
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -14,11 +19,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
-import java.io.File
-import java.security.MessageDigest
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Handles native downloading of Amazon games. */
 @Singleton
@@ -215,7 +215,7 @@ class AmazonDownloadManager @Inject constructor(
                 val backoffMs = RETRY_DELAY_MS * (1 shl attempt) // 1s, 2s, 4s
                 Timber.tag(TAG).w(
                     "File ${file.unixPath} failed (attempt ${attempt + 1}/$MAX_RETRIES): " +
-                            "${lastException?.message}. Retrying in ${backoffMs}ms…",
+                        "${lastException?.message}. Retrying in ${backoffMs}ms…",
                 )
                 delay(backoffMs)
             }

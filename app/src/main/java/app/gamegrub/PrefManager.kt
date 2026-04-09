@@ -18,11 +18,13 @@ import app.gamegrub.ui.enums.AppFilter
 import app.gamegrub.ui.enums.HomeDestination
 import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.enums.PaneType
+import app.gamegrub.ui.enums.SortOption
 import com.materialkolor.PaletteStyle
 import com.winlator.box86_64.Box86_64Preset
 import com.winlator.container.Container
 import com.winlator.core.DefaultVersion
 import `in`.dragonbra.javasteam.enums.EPersonaState
+import java.util.EnumSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,7 +33,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.util.EnumSet
 
 /**
  * A universal Preference Manager that can be used anywhere within gamenative.
@@ -846,17 +847,11 @@ object PrefManager {
 
     private val LIBRARY_SORT_KEY = stringPreferencesKey("library_sort_key")
     private val LIBRARY_SORT_LEGACY = intPreferencesKey("library_sort")
-    var librarySortOption: app.gamegrub.ui.enums.SortOption
+    var librarySortOption: SortOption
         get() {
             // Try string key first, fall back to legacy ordinal for migration
-            val keyValue = getPref(LIBRARY_SORT_KEY, "")
-            return if (keyValue.isNotEmpty()) {
-                app.gamegrub.ui.enums.SortOption.fromKey(keyValue)
-            } else {
-                val ordinal = getPref(LIBRARY_SORT_LEGACY, app.gamegrub.ui.enums.SortOption.INSTALLED_FIRST.ordinal)
-                @Suppress("DEPRECATION")
-                app.gamegrub.ui.enums.SortOption.fromOrdinal(ordinal)
-            }
+            val keyValue = getPref(LIBRARY_SORT_KEY, SortOption.INSTALLED_FIRST.key)
+            return SortOption.fromKey(keyValue)
         }
         set(value) {
             setPref(LIBRARY_SORT_KEY, value.key)

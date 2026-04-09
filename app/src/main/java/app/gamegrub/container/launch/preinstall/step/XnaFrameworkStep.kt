@@ -4,8 +4,8 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.enums.Marker
 import app.gamegrub.storage.StorageManager
 import com.winlator.container.Container
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 object XnaFrameworkStep : PreInstallStep {
     override val marker: Marker = Marker.XNA_INSTALLED
@@ -43,8 +43,8 @@ object XnaFrameworkStep : PreInstallStep {
             dir.walkTopDown()
                 .filter { file ->
                     file.isFile &&
-                            file.name.startsWith("xna", ignoreCase = true) &&
-                            file.name.endsWith(".msi", ignoreCase = true)
+                        file.name.startsWith("xna", ignoreCase = true) &&
+                        file.name.endsWith(".msi", ignoreCase = true)
                 }
                 .forEach { msiFile ->
                     val relativePath = msiFile

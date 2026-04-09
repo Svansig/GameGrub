@@ -4,11 +4,11 @@ import app.gamegrub.session.model.SessionPlan
 import app.gamegrub.session.model.SessionState
 import app.gamegrub.telemetry.session.LaunchMilestone
 import app.gamegrub.telemetry.session.MilestoneEmitter
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Result of a launch execution attempt.

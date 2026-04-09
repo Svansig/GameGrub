@@ -2,11 +2,11 @@ package app.gamegrub.service.amazon
 
 import android.content.Context
 import app.gamegrub.network.NetworkManager
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Request
 import timber.log.Timber
-import java.io.File
 
 /** Manages cached Amazon SDK files needed for DRM authentication. */
 object AmazonSdkManager {

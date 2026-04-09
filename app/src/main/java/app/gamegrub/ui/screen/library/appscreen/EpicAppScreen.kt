@@ -28,18 +28,19 @@ import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
+import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
 import com.winlator.core.StringUtils
+import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 
 // TODO: Verify all tests and do DLC auto-install with base game.
 class EpicAppScreen : BaseAppScreen() {
@@ -334,7 +335,7 @@ class EpicAppScreen : BaseAppScreen() {
                 libraryItem.appId,
                 app.gamegrub.ui.component.dialog.state.MessageDialogState(
                     visible = true,
-                    type = app.gamegrub.ui.enums.DialogType.CANCEL_APP_DOWNLOAD,
+                    type = DialogType.CANCEL_APP_DOWNLOAD,
                     title = context.getString(R.string.cancel_download_prompt_title),
                     message = context.getString(R.string.epic_cancel_download_message),
                     confirmBtnText = context.getString(R.string.yes),
@@ -442,7 +443,7 @@ class EpicAppScreen : BaseAppScreen() {
                 libraryItem.appId,
                 app.gamegrub.ui.component.dialog.state.MessageDialogState(
                     visible = true,
-                    type = app.gamegrub.ui.enums.DialogType.CANCEL_APP_DOWNLOAD,
+                    type = DialogType.CANCEL_APP_DOWNLOAD,
                     title = context.getString(R.string.cancel_download_prompt_title),
                     message = context.getString(R.string.epic_delete_download_message),
                     confirmBtnText = context.getString(R.string.yes),
@@ -745,14 +746,14 @@ class EpicAppScreen : BaseAppScreen() {
                 BaseAppScreen.hideInstallDialog(appId)
             }
             val onConfirmClick: (() -> Unit)? = when (installDialogState.type) {
-                app.gamegrub.ui.enums.DialogType.INSTALL_APP -> {
+                DialogType.INSTALL_APP -> {
                     {
                         BaseAppScreen.hideInstallDialog(appId)
                         performDownload(scope, context, libraryItem, listOf(libraryItem.gameId)) {}
                     }
                 }
 
-                app.gamegrub.ui.enums.DialogType.CANCEL_APP_DOWNLOAD -> {
+                DialogType.CANCEL_APP_DOWNLOAD -> {
                     {
                         Timber.tag(TAG).i("Cancelling/deleting Epic download for: $gameId")
                         val downloadInfo = EpicService.getDownloadInfo(gameId)

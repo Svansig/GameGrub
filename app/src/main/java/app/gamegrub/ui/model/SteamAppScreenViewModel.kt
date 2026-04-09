@@ -17,11 +17,11 @@ import com.winlator.container.ContainerManager
 import com.winlator.xenvironment.ImageFsInstaller
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 /**
  * ViewModel for Steam game screen operations.

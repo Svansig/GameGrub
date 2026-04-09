@@ -16,22 +16,18 @@ import app.gamegrub.service.amazon.AmazonService.Companion.getInstance
 import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.runtime.XServerRuntime
-import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
 
 /** Amazon Games foreground service. */
 @AndroidEntryPoint
@@ -53,11 +49,8 @@ class AmazonService : GameStoreService() {
     @Inject
     lateinit var amazonDownloadManager: AmazonDownloadManager
 
-    // Active downloads keyed by Amazon product ID (e.g. "amzn1.adg.product.XXXX")
-    val activeDownloads = ConcurrentHashMap<String, DownloadInfo>()
-
-    // Active install paths keyed by Amazon product ID (used for robust partial-download detection)
-    val activeDownloadPaths = ConcurrentHashMap<String, String>()
+    @Inject
+    lateinit var amazonStoreCoordinator: AmazonStoreCoordinator
 
     companion object {
         private var instance: AmazonService? = null
@@ -202,7 +195,7 @@ class AmazonService : GameStoreService() {
         suspend fun getExpectedInstallPathByAppId(context: Context, appId: Int): String? {
             val game = getAmazonGameByAppId(appId) ?: return null
 
-            instance?.activeDownloadPaths?.get(game.productId)?.let { return it }
+            coordinator?.getExpectedInstallPath(game.appId)?.let { return it }
 
             val title = game.title.ifBlank { return null }
             return AmazonConstants.getGameInstallPath(context, title)
@@ -250,7 +243,7 @@ class AmazonService : GameStoreService() {
                     Marker.DOWNLOAD_COMPLETE_MARKER.fileName,
                     Marker.DOWNLOAD_IN_PROGRESS_MARKER.fileName,
                     ".DownloadInfo",
-                        -> {
+                    -> {
                         child.isDirectory && (child.listFiles()?.any { it.isFile && it.length() > 0L } == true)
                     }
 
@@ -350,21 +343,19 @@ class AmazonService : GameStoreService() {
 
         // ── Download management ───────────────────────────────────────────────
 
+        // Set by onCreate/onDestroy to give companion access to coordinator's download state.
+        @Volatile
+        internal var coordinator: AmazonStoreCoordinator? = null
+
         /** Returns the active [DownloadInfo] for [productId], or null if not downloading. */
         fun getDownloadInfo(productId: String): DownloadInfo? =
-            getInstance()?.activeDownloads?.get(productId)
+            coordinator?.getDownloadInfoByProductId(productId)
 
         /** Returns the active [DownloadInfo] for [appId], or null if not downloading. */
-        fun getDownloadInfoByAppId(appId: Int): DownloadInfo? {
-            val productId = getProductIdByAppId(appId) ?: return null
-            return getDownloadInfo(productId)
-        }
+        fun getDownloadInfoByAppId(appId: Int): DownloadInfo? = coordinator?.getDownloadInfo(appId)
 
         /** Cancel an in-progress download by [appId]. */
-        fun cancelDownloadByAppId(appId: Int): Boolean {
-            val productId = getProductIdByAppId(appId) ?: return false
-            return cancelDownload(productId)
-        }
+        fun cancelDownloadByAppId(appId: Int): Boolean = coordinator?.cancelDownload(appId) ?: false
 
         /** Check whether an installed game (by appId) has an update available. */
         suspend fun isUpdatePendingByAppId(appId: Int): Boolean {
@@ -373,107 +364,20 @@ class AmazonService : GameStoreService() {
         }
 
         /** Returns true if there is at least one active download. */
-        fun hasActiveDownload(): Boolean =
-            getInstance()?.activeDownloads?.isNotEmpty() == true
+        fun hasActiveDownload(): Boolean = coordinator?.hasActiveDownload() ?: false
 
         /** Begin downloading [productId] to [installPath]. */
         suspend fun downloadGame(
             context: Context,
             productId: String,
             installPath: String,
-        ): Result<DownloadInfo> {
-            val instance = getInstance()
-                ?: return Result.failure(Exception("Amazon service is not running"))
-
-            // Already downloading?
-            instance.activeDownloads[productId]?.let { existing ->
-                Timber.tag("Amazon").w("Download already in progress for $productId")
-                return Result.success(existing)
-            }
-
-            val game = withContext(Dispatchers.IO) {
-                instance.amazonManager.getGameById(productId)
-            } ?: return Result.failure(Exception("Game not found: $productId"))
-
-            val downloadInfo = DownloadInfo(
-                jobCount = 1,
-                gameId = game.appId,
-                downloadingAppIds = CopyOnWriteArrayList(),
-            )
-            downloadInfo.setPersistencePath(installPath)
-
-            val persistedBytes = downloadInfo.loadPersistedBytesDownloaded(installPath)
-            if (persistedBytes > 0L) {
-                downloadInfo.initializeBytesDownloaded(persistedBytes)
-            }
-
-            downloadInfo.setActive(true)
-            instance.activeDownloads[productId] = downloadInfo
-            instance.activeDownloadPaths[productId] = installPath
-
-            // Fresh install/update run should clear stale completion marker before starting
-            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-
-            XServerRuntime.get().events.emitJava(
-                AndroidEvent.DownloadStatusChanged(game.appId, true),
-            )
-
-            val job = instance.serviceScope.launch {
-                try {
-                    val result = instance.amazonDownloadManager.downloadGame(
-                        context = context,
-                        game = game,
-                        installPath = installPath,
-                        downloadInfo = downloadInfo,
-                    )
-
-                    if (result.isSuccess) {
-                        Timber.tag("Amazon").i("Download succeeded for $productId")
-                        downloadInfo.setActive(false)
-                        downloadInfo.clearPersistedBytesDownloaded(installPath)
-                        SnackbarManager.show("Download completed: ${game.title}")
-                        XServerRuntime.get().events.emitJava(
-                            AndroidEvent.LibraryInstallStatusChanged(game.appId),
-                        )
-                    } else {
-                        val error = result.exceptionOrNull()
-                        Timber.tag("Amazon").e(error, "Download failed for $productId")
-                        downloadInfo.setActive(false)
-                        instance.cleanupFailedInstall(context, game, installPath)
-                        SnackbarManager.show("Download failed: ${error?.message ?: "Unknown error"}")
-                    }
-                } catch (e: Exception) {
-                    if (e is java.util.concurrent.CancellationException) {
-                        Timber.tag("Amazon").d("Download cancelled for $productId")
-                    } else {
-                        Timber.tag("Amazon").e(e, "Download exception for $productId")
-                        instance.cleanupFailedInstall(context, game, installPath)
-                    }
-                    downloadInfo.setActive(false)
-                } finally {
-                    instance.activeDownloads.remove(productId)
-                    instance.activeDownloadPaths.remove(productId)
-                    XServerRuntime.get().events.emitJava(
-                        AndroidEvent.DownloadStatusChanged(game.appId, false),
-                    )
-                }
-            }
-
-            downloadInfo.setDownloadJob(job)
-            return Result.success(downloadInfo)
-        }
+        ): Result<DownloadInfo> =
+            coordinator?.downloadGame(productId, installPath)
+                ?: Result.failure(Exception("Amazon service is not running"))
 
         /** Cancel an in-progress download for [productId]. */
-        fun cancelDownload(productId: String): Boolean {
-            val instance = getInstance() ?: return false
-            val downloadInfo = instance.activeDownloads[productId] ?: run {
-                Timber.tag("Amazon").w("No active download for $productId")
-                return false
-            }
-            Timber.tag("Amazon").i("Cancelling download for $productId")
-            downloadInfo.cancel()
-            return true
-        }
+        fun cancelDownload(productId: String): Boolean =
+            coordinator?.cancelDownloadByProductId(productId) ?: false
 
         suspend fun deleteGame(context: Context, productId: String): Result<Unit> {
             val instance = getInstance()
@@ -561,7 +465,7 @@ class AmazonService : GameStoreService() {
                             val amazonRoot = File(AmazonConstants.defaultAmazonGamesPath(context)).canonicalFile
                             val installCanonical = installDir.canonicalFile
                             val isUnderAmazonRoot = installCanonical.path == amazonRoot.path ||
-                                    installCanonical.path.startsWith("${amazonRoot.path}${File.separator}")
+                                installCanonical.path.startsWith("${amazonRoot.path}${File.separator}")
 
                             if (isUnderAmazonRoot) {
                                 installCanonical.deleteRecursively()
@@ -721,7 +625,7 @@ class AmazonService : GameStoreService() {
                         Timber.tag("Amazon").w(
                             "%snull",
                             "Verification FAILED: ${result.verifiedOk}/${result.totalFiles} OK, " +
-                                    "${result.missingFiles} missing, ${result.sizeMismatch} size mismatch, ",
+                                "${result.missingFiles} missing, ${result.sizeMismatch} size mismatch, ",
                         )
                     }
 
@@ -758,6 +662,8 @@ class AmazonService : GameStoreService() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        coordinator = amazonStoreCoordinator
+        amazonStoreCoordinator.onServiceStarted()
         XServerRuntime.get().events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
         Timber.i("[Amazon] Service created")
     }
@@ -772,6 +678,8 @@ class AmazonService : GameStoreService() {
         XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
+        amazonStoreCoordinator.onServiceStopped()
+        coordinator = null
         instance = null
         super.onDestroy()
         Timber.i("[Amazon] Service destroyed")
@@ -789,37 +697,8 @@ class AmazonService : GameStoreService() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private suspend fun cleanupFailedInstall(context: Context, game: AmazonGame, installPath: String) {
-        withContext(Dispatchers.IO) {
-            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
-            StorageManager.removeMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
-
-            runCatching {
-                val dir = File(installPath)
-                if (dir.exists()) {
-                    dir.deleteRecursively()
-                }
-            }.onFailure {
-                Timber.tag("Amazon").w(it, "Failed to clean partial install dir for ${game.productId}")
-            }
-
-            runCatching {
-                amazonManager.markUninstalled(game.productId)
-            }.onFailure {
-                Timber.tag("Amazon").w(it, "Failed to mark game uninstalled after failed install: ${game.productId}")
-            }
-        }
-
-        withContext(Dispatchers.Main) {
-            ContainerUtils.deleteContainer(context, "AMAZON_${game.appId}")
-        }
-
-        XServerRuntime.get().events.emitJava(AndroidEvent.LibraryInstallStatusChanged(game.appId))
-    }
-
     // ── Instance helpers (for callers that hold a direct reference) ───────────
 
     /** Instance-method accessor for callers using [getInstance]?. */
     suspend fun getInstalledGamePath(gameId: String): String? = getInstallPath(gameId)
-
 }

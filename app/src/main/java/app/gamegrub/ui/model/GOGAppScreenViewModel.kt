@@ -8,12 +8,12 @@ import app.gamegrub.service.gog.domain.GOGInstallDomain
 import app.gamegrub.storage.StorageManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
 
 /**
  * ViewModel for GOG game screen operations.
@@ -93,8 +93,8 @@ class GOGAppScreenViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             val downloadInfo = gogInstallDomain.getDownloadInfo(gameId)
             val wasDownloading = downloadInfo != null &&
-                    downloadInfo.isActive() &&
-                    downloadInfo.getProgress() < 1f
+                downloadInfo.isActive() &&
+                downloadInfo.getProgress() < 1f
             downloadInfo?.cancel()
             downloadInfo?.awaitCompletion()
             gogInstallDomain.cleanupDownload(gameId)

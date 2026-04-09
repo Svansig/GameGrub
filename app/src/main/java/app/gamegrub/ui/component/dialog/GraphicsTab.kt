@@ -253,7 +253,7 @@ fun GraphicsTabContent(state: ContainerConfigState) {
                     StringUtils.parseIdentifier(state.graphicsDrivers.value.getOrNull(state.graphicsDriverIndex.intValue).orEmpty())
                 val isVortekLike =
                     config.containerVariant == Container.GLIBC &&
-                            (driverType == "vortek" || driverType == "adreno" || driverType == "sd-8-elite")
+                        (driverType == "vortek" || driverType == "adreno" || driverType == "sd-8-elite")
                 if (isVortekLike) {
                     val vkVersions = listOf("1.0", "1.1", "1.2", "1.3")
                     SettingsListDropdown(
@@ -420,7 +420,7 @@ private fun DxWrapperSection(state: ContainerConfigState) {
                 StringUtils.parseIdentifier(state.graphicsDrivers.value.getOrNull(state.graphicsDriverIndex.intValue).orEmpty())
             val isVortekLike =
                 config.containerVariant == Container.GLIBC &&
-                        (driverType == "vortek" || driverType == "adreno" || driverType == "sd-8-elite")
+                    (driverType == "vortek" || driverType == "adreno" || driverType == "sd-8-elite")
             val version = if (isVortekLike) "1.10.3" else "2.4.1"
             val currentConfig = KeyValueSet(config.dxwrapperConfig)
             currentConfig.put("version", version)

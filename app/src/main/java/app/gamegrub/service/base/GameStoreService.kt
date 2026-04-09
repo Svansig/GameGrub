@@ -68,7 +68,9 @@ abstract class GameStoreService : Service() {
     protected fun handleStartCommand(intent: Intent?) {
         when (intent?.action) {
             ACTION_SYNC_LIBRARY -> runSync(isManual = false)
+
             ACTION_MANUAL_SYNC -> runSync(isManual = true)
+
             null -> {
                 // Service restarted by Android (START_STICKY): sync only if throttle has passed
                 val timeSinceLastSync = System.currentTimeMillis() - lastSyncTimestamp

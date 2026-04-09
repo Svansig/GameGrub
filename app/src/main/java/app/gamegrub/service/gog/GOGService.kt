@@ -12,18 +12,14 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.ui.runtime.XServerRuntime
-import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
 
 /**
  * GOG Service - thin abstraction layer that delegates to managers.
@@ -144,6 +140,10 @@ class GOGService : GameStoreService() {
 
         internal fun getInstance(): GOGService? = instance
 
+        // Set by onCreate/onDestroy to give companion access to coordinator's download state.
+        @Volatile
+        internal var coordinator: GOGStoreCoordinator? = null
+
         fun getScriptInterpreterPartsForLaunch(appId: String): List<String>? =
             getInstance()?.gogManager?.getScriptInterpreterPartsForLaunchSync(appId)
 
@@ -162,40 +162,23 @@ class GOGService : GameStoreService() {
         ) ?: Result.failure(Exception("GOG service not available"))
 
         // ==========================================================================
-        // DOWNLOAD OPERATIONS - Delegate to instance GOGManager
+        // DOWNLOAD OPERATIONS - Delegate to GOGStoreCoordinator
         // ==========================================================================
 
-        fun hasActiveDownload(): Boolean {
-            return getInstance()?.activeDownloads?.isNotEmpty() ?: false
-        }
+        fun hasActiveDownload(): Boolean = coordinator?.hasActiveDownload() ?: false
 
-        fun getCurrentlyDownloadingGame(): String? {
-            return getInstance()?.activeDownloads?.keys?.firstOrNull()
-        }
+        fun getCurrentlyDownloadingGame(): String? = coordinator?.getCurrentlyDownloadingGame()
 
-        fun getDownloadInfo(gameId: String): DownloadInfo? {
-            return getInstance()?.activeDownloads?.get(gameId)
-        }
+        fun getDownloadInfo(gameId: String): DownloadInfo? = coordinator?.getDownloadInfoByGameId(gameId)
 
-        fun cleanupDownload(gameId: String) {
-            getInstance()?.activeDownloads?.remove(gameId)
-        }
+        fun cleanupDownload(gameId: String) = coordinator?.cleanupDownload(gameId)
 
-        fun cancelDownload(gameId: String): Boolean {
-            val instance = getInstance()
-            val downloadInfo = instance?.activeDownloads?.get(gameId)
+        fun cancelDownload(gameId: String): Boolean =
+            coordinator?.cancelDownloadByGameId(gameId) ?: false
 
-            return if (downloadInfo != null) {
-                Timber.i("Cancelling download for game: $gameId")
-                downloadInfo.cancel()
-                instance.activeDownloads.remove(gameId)
-                Timber.d("Download cancelled for game: $gameId")
-                true
-            } else {
-                Timber.w("No active download found for game: $gameId")
-                false
-            }
-        }
+        fun downloadGame(context: Context, gameId: String, installPath: String, containerLanguage: String): Result<DownloadInfo?> =
+            coordinator?.downloadGame(gameId, installPath, containerLanguage)
+                ?: Result.failure(Exception("GOG service not available"))
 
         // ==========================================================================
         // GAME & LIBRARY OPERATIONS - Delegate to instance GOGManager
@@ -284,59 +267,6 @@ class GOGService : GameStoreService() {
         suspend fun refreshLibrary(context: Context): Result<Int> {
             return getInstance()?.gogManager?.refreshLibrary(context)
                 ?: Result.failure(Exception("Service not available"))
-        }
-
-        fun downloadGame(context: Context, gameId: String, installPath: String, containerLanguage: String): Result<DownloadInfo?> {
-            val instance = getInstance() ?: return Result.failure(Exception("Service not available"))
-
-            // Create DownloadInfo for progress tracking
-            val downloadInfo = DownloadInfo(jobCount = 1, gameId = 0, downloadingAppIds = CopyOnWriteArrayList<Int>())
-
-            // Track in activeDownloads first
-            instance.activeDownloads[gameId] = downloadInfo
-
-            // Launch download in service scope so it runs independently
-            val job = instance.serviceScope.launch {
-                try {
-                    Timber.d("[Download] Starting download for game $gameId")
-                    val commonRedistDir = File(installPath, "_CommonRedist")
-                    Timber.tag("GOG").d("Will install dependencies to _CommonRedist")
-
-                    val result = instance.gogDownloadManager.downloadGame(
-                        gameId, File(installPath),
-                        downloadInfo, containerLanguage, true, commonRedistDir,
-                    )
-
-                    if (result.isFailure) {
-                        val error = result.exceptionOrNull()
-                        Timber.e(error, "[Download] Failed for game $gameId")
-                        downloadInfo.setProgress(-1.0f)
-                        downloadInfo.setActive(false)
-
-                        SnackbarManager.show("Download failed: ${error?.message ?: "Unknown error"}")
-                    } else {
-                        Timber.i("[Download] Completed successfully for game $gameId")
-                        downloadInfo.setProgress(1.0f)
-                        downloadInfo.setActive(false)
-
-                        SnackbarManager.show("Download completed successfully!")
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "[Download] Exception for game $gameId")
-                    downloadInfo.setProgress(-1.0f)
-                    downloadInfo.setActive(false)
-
-                    SnackbarManager.show("Download error: ${e.message ?: "Unknown error"}")
-                } finally {
-                    // Remove from activeDownloads for both success and failure
-                    // so UI knows download is complete and to prevent stale entries
-                    instance.activeDownloads.remove(gameId)
-                    Timber.d("[Download] Finished for game $gameId, progress: ${downloadInfo.getProgress()}, active: ${downloadInfo.isActive()}")
-                }
-            }
-            downloadInfo.setDownloadJob(job)
-
-            return Result.success(downloadInfo)
         }
 
         suspend fun refreshSingleGame(gameId: String, context: Context): Result<GOGGame?> {
@@ -542,15 +472,16 @@ class GOGService : GameStoreService() {
     @Inject
     lateinit var gogDownloadManager: GOGDownloadManager
 
-    // Track active downloads by game ID
-    private val activeDownloads = ConcurrentHashMap<String, DownloadInfo>()
+    @Inject
+    lateinit var gogStoreCoordinator: GOGStoreCoordinator
 
     private val onEndProcess: (AndroidEvent.EndProcess) -> Unit = { stop() }
 
-    // GOGManager is injected by Hilt
     override fun onCreate() {
         super.onCreate()
         instance = this
+        coordinator = gogStoreCoordinator
+        gogStoreCoordinator.onServiceStarted()
 
         // Initialize notification helper for foreground service
         notificationHelper = NotificationHelper(applicationContext)
@@ -568,6 +499,8 @@ class GOGService : GameStoreService() {
         XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
+        gogStoreCoordinator.onServiceStopped()
+        coordinator = null
         instance = null
     }
 

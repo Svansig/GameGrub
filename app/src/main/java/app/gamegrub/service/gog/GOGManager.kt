@@ -12,6 +12,7 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.enums.PathType
 import app.gamegrub.network.NetworkManager
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import com.winlator.core.FileUtils
@@ -483,7 +484,7 @@ class GOGManager @Inject constructor(
                 }
 
                 // Trigger library refresh event
-                app.gamegrub.GameGrubApp.events.emitJava(
+                XServerRuntime.get().events.emitJava(
                     app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(libraryItem.gameId),
                 )
 

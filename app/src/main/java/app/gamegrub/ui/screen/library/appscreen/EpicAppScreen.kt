@@ -28,6 +28,7 @@ import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
@@ -131,9 +132,9 @@ class EpicAppScreen : BaseAppScreen() {
                     }
                 }
             }
-            app.gamegrub.GameGrubApp.events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+            XServerRuntime.get().events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
             onDispose {
-                app.gamegrub.GameGrubApp.events.off<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+                XServerRuntime.get().events.off<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
             }
         }
 
@@ -663,9 +664,9 @@ class EpicAppScreen : BaseAppScreen() {
                 onStateChanged()
             }
         }
-        app.gamegrub.GameGrubApp.events.on<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
+        XServerRuntime.get().events.on<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
         disposables +=
-            { app.gamegrub.GameGrubApp.events.off<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
+            { XServerRuntime.get().events.off<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
 
         // Listen for install status changes
         val installListener: (app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged) -> Unit = { event ->
@@ -676,9 +677,9 @@ class EpicAppScreen : BaseAppScreen() {
                 onStateChanged()
             }
         }
-        app.gamegrub.GameGrubApp.events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+        XServerRuntime.get().events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
         disposables +=
-            { app.gamegrub.GameGrubApp.events.off<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
+            { XServerRuntime.get().events.off<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
 
         // Return cleanup function
         return {
@@ -762,8 +763,8 @@ class EpicAppScreen : BaseAppScreen() {
                             EpicService.deleteGame(context, gameId)
                             withContext(Dispatchers.Main) {
                                 BaseAppScreen.hideInstallDialog(appId)
-                                app.gamegrub.GameGrubApp.events.emit(app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId, false))
-                                app.gamegrub.GameGrubApp.events.emit(app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(gameId))
+                                XServerRuntime.get().events.emit(app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId, false))
+                                XServerRuntime.get().events.emit(app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(gameId))
                             }
                         }
                     }

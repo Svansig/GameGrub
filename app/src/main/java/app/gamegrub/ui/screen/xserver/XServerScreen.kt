@@ -142,7 +142,7 @@ fun XServerScreen(
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     }
 
-    // GameGrubApp.events.emit(AndroidEvent.SetAppBarVisibility(false))
+    // XServerRuntime.get().events.emit(AndroidEvent.SetAppBarVisibility(false))
     XServerRuntime.get().events.emit(AndroidEvent.SetSystemUIVisibility(false))
 
     // seems to be used to indicate when a custom wine is being installed (intent extra "generate_wineprefix")

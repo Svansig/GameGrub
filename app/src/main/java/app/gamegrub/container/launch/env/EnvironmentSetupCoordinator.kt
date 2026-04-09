@@ -17,6 +17,7 @@ import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.ui.data.XServerState
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.alsaserver.ALSAClient
@@ -259,9 +260,9 @@ internal object EnvironmentSetupCoordinator {
                 onError = onGameLaunchError,
             )
             if (preInstallCommands.isNotEmpty()) {
-                GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Installing prerequisites..."))
+                XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Installing prerequisites..."))
             } else {
-                GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Launching game..."))
+                XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Launching game..."))
             }
         }
 
@@ -443,8 +444,10 @@ internal object EnvironmentSetupCoordinator {
                         "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/apps/$achAppId/$it"
                     }
                 } ?: emptyMap()
-                GameGrubApp.achievementWatcher = AchievementWatcher(watchDirs, displayNameMap, iconUrlMap)
-                    .also { it.start() }
+                XServerRuntime.get().setAchievementWatcher(
+
+                AchievementWatcher(watchDirs, displayNameMap, iconUrlMap)
+                    .also { it.start() })
             }
         }
 

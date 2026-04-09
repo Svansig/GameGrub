@@ -36,6 +36,7 @@ import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.steam.SteamService.Companion.getAppDirPath
 import app.gamegrub.service.steam.managers.LaunchIntentResult
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.steam.SteamUtils
@@ -260,7 +261,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         private fun notifyDownloadStarted(appId: Int) {
-            GameGrubApp.events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
+            XServerRuntime.get().events.emit(AndroidEvent.DownloadStatusChanged(appId, true))
         }
 
         /** Returns true if there is an incomplete download on disk (no complete marker). */
@@ -822,7 +823,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 // clean up DB record BEFORE notifying UI to avoid stale "Resume" button
                 instance?.libraryDomain?.deleteDownloadingApp(downloadInfo.gameId)
 
-                GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
+                XServerRuntime.get().events.emit(AndroidEvent.LibraryInstallStatusChanged(downloadInfo.gameId))
 
                 // Clear persisted bytes file on successful completion
                 downloadInfo.clearPersistedBytesDownloaded(appDirPath)
@@ -1129,7 +1130,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 if (clientId != null) PrefManager.clientId = clientId
             }
 
-            GameGrubApp.events.emit(SteamEvent.LogonStarted(username))
+            XServerRuntime.get().events.emit(SteamEvent.LogonStarted(username))
 
             steamUser.logOn(
                 LogOnDetails(
@@ -1242,7 +1243,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             clearUserData(clearCloudSyncState = true)
 
             val event = SteamEvent.LoggedOut(username)
-            GameGrubApp.events.emit(event)
+            XServerRuntime.get().events.emit(event)
 
             cancelLongLivedSteamJobs()
         }
@@ -1379,7 +1380,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             )
         }
 
-        GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         // clear stale download records (completed games) but keep interrupted ones (preserves DLC selection)
         scope.launch {
@@ -1415,7 +1416,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     for ((appId, info) in downloadJobs.entries.toList()) {
                         Timber.d("Pausing download for $appId — WiFi/Ethernet lost")
                         info.cancel()
-                        GameGrubApp.events.emit(AndroidEvent.DownloadPausedDueToConnectivity(appId))
+                        XServerRuntime.get().events.emit(AndroidEvent.DownloadPausedDueToConnectivity(appId))
                         removeDownloadJob(appId)
                     }
                     notificationHelper.notify(getString(R.string.download_paused_wifi))
@@ -1438,7 +1439,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                 Timber.d("Exiting app via notification intent")
 
                 val event = AndroidEvent.EndProcess
-                GameGrubApp.events.emit(event)
+                XServerRuntime.get().events.emit(event)
 
                 return START_NOT_STICKY
             }
@@ -1643,8 +1644,8 @@ class SteamService : Service(), IChallengeUrlChanged {
         isStopping = false
         retryAttempt = 0
 
-        GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
-        GameGrubApp.events.clearAllListenersOf<SteamEvent<Any>>()
+        XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.clearAllListenersOf<SteamEvent<Any>>()
 
         LogManager.removeListener(logger)
     }
@@ -1655,7 +1656,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         isConnected = false
 
         val event = SteamEvent.Disconnected(isTerminal = false)
-        GameGrubApp.events.emit(event)
+        XServerRuntime.get().events.emit(event)
 
         steamClient!!.disconnect()
     }
@@ -1681,7 +1682,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         val event = SteamEvent.Connected(isAutoLoggingIn)
-        GameGrubApp.events.emit(event)
+        XServerRuntime.get().events.emit(event)
     }
 
     private fun onDisconnected(callback: DisconnectedCallback) {
@@ -1696,7 +1697,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             Timber.w("Attempting to reconnect (retry $retryAttempt) after ${backoffMs}ms")
 
             val event = SteamEvent.RemotelyDisconnected
-            GameGrubApp.events.emit(event)
+            XServerRuntime.get().events.emit(event)
 
             reconnectJob = scope.launch {
                 delay(backoffMs)
@@ -1705,7 +1706,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         } else {
             // only terminal when retries exhausted, not when user/system stopped the service
             val event = SteamEvent.Disconnected(isTerminal = !isStopping)
-            GameGrubApp.events.emit(event)
+            XServerRuntime.get().events.emit(event)
 
             clearValues()
 
@@ -1793,7 +1794,7 @@ class SteamService : Service(), IChallengeUrlChanged {
         }
 
         val event = SteamEvent.LogonEnded(PrefManager.username, accountDomain.loginResult.value)
-        GameGrubApp.events.emit(event)
+        XServerRuntime.get().events.emit(event)
     }
 
     private fun onLoggedOff(callback: LoggedOffCallback) {
@@ -1813,7 +1814,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             // received when a client runs an app and wants to forcibly close another
             // client running an app
             val event = SteamEvent.ForceCloseApp
-            GameGrubApp.events.emit(event)
+            XServerRuntime.get().events.emit(event)
 
             reconnect()
         } else {
@@ -1872,7 +1873,7 @@ class SteamService : Service(), IChallengeUrlChanged {
                     accountDomain.userManager.cachePersona(name = playerName, avatarHash = avatarHash)
 
                     val event = SteamEvent.PersonaStateReceived(accountDomain.localPersona.value)
-                    GameGrubApp.events.emit(event)
+                    XServerRuntime.get().events.emit(event)
                 }
             }
         }
@@ -1921,7 +1922,7 @@ class SteamService : Service(), IChallengeUrlChanged {
             }
 
             val event = SteamEvent.QrChallengeReceived(qr.challengeUrl)
-            GameGrubApp.events.emit(event)
+            XServerRuntime.get().events.emit(event)
         } ?: run { Timber.w("QR challenge url was null") }
     }
     // endregion

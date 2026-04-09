@@ -11,6 +11,7 @@ import app.gamegrub.service.gog.api.GOGManifestMeta
 import app.gamegrub.service.gog.api.GOGManifestParser
 import app.gamegrub.service.gog.api.V1DepotFile
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
@@ -116,7 +117,7 @@ class GOGDownloadManager @Inject constructor(
             Timber.tag("GOG").d("Database game ID: ${dbGame.id}, title: ${dbGame.title}")
 
             // Emit download started event so UI can attach progress listeners
-            app.gamegrub.GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId.toIntOrNull() ?: 0, true),
             )
 
@@ -438,7 +439,7 @@ class GOGDownloadManager @Inject constructor(
             downloadInfo.emitProgressChange()
 
             // Emit download stopped event on failure
-            app.gamegrub.GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId.toIntOrNull() ?: 0, false),
             )
 
@@ -514,10 +515,10 @@ class GOGDownloadManager @Inject constructor(
         downloadInfo.emitProgressChange()
         StorageManager.removeMarker(installPath.absolutePath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
         StorageManager.addMarker(installPath.absolutePath, Marker.DOWNLOAD_COMPLETE_MARKER)
-        app.gamegrub.GameGrubApp.events.emitJava(
+        XServerRuntime.get().events.emitJava(
             app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId.toIntOrNull() ?: 0, false),
         )
-        app.gamegrub.GameGrubApp.events.emitJava(
+        XServerRuntime.get().events.emitJava(
             app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(gameId.toIntOrNull() ?: 0),
         )
     }
@@ -718,7 +719,7 @@ class GOGDownloadManager @Inject constructor(
             downloadInfo.setProgress(-1.0f)
             downloadInfo.setActive(false)
             downloadInfo.emitProgressChange()
-            app.gamegrub.GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId.toIntOrNull() ?: 0, false),
             )
             Result.failure(e)

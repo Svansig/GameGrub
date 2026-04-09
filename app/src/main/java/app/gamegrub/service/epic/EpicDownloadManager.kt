@@ -7,6 +7,7 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.service.epic.manifest.ManifestUtils
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -80,7 +81,7 @@ class EpicDownloadManager @Inject constructor(
 
             // Emit download started event so UI can attach progress listeners
             val gameId = game.id
-            app.gamegrub.GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId, true),
             )
 
@@ -362,7 +363,7 @@ class EpicDownloadManager @Inject constructor(
             downloadInfo.emitProgressChange()
 
             // Notify UI that installation status changed
-            app.gamegrub.GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(gameId),
             )
 
@@ -378,7 +379,7 @@ class EpicDownloadManager @Inject constructor(
         } finally {
             // Always emit download stopped event
             val gameId = game.id
-            app.gamegrub.GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 app.gamegrub.events.AndroidEvent.DownloadStatusChanged(gameId, false),
             )
         }

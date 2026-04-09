@@ -20,6 +20,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.MainState
 import app.gamegrub.ui.enums.ConnectionState
 import app.gamegrub.ui.orientation.OrientationPolicy
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.update.UpdateInfo
 import app.gamegrub.utils.container.ContainerUtils
@@ -244,15 +245,15 @@ class MainViewModel @Inject constructor(
         }
 
         // Register event handlers
-        GameGrubApp.events.on<AndroidEvent.BackPressed, Unit>(onBackPressed)
-        GameGrubApp.events.on<AndroidEvent.ExternalGameLaunch, Unit>(onExternalGameLaunch)
-        GameGrubApp.events.on<AndroidEvent.SetBootingSplashText, Unit>(onSetBootingSplashText)
-        GameGrubApp.events.on<SteamEvent.Connected, Unit>(onSteamConnected)
-        GameGrubApp.events.on<SteamEvent.Disconnected, Unit>(onSteamDisconnected)
-        GameGrubApp.events.on<SteamEvent.RemotelyDisconnected, Unit>(onRemotelyDisconnected)
-        GameGrubApp.events.on<SteamEvent.LogonStarted, Unit>(onLoggingIn)
-        GameGrubApp.events.on<SteamEvent.LogonEnded, Unit>(onLogonEnded)
-        GameGrubApp.events.on<SteamEvent.LoggedOut, Unit>(onLoggedOut)
+        XServerRuntime.get().events.on<AndroidEvent.BackPressed, Unit>(onBackPressed)
+        XServerRuntime.get().events.on<AndroidEvent.ExternalGameLaunch, Unit>(onExternalGameLaunch)
+        XServerRuntime.get().events.on<AndroidEvent.SetBootingSplashText, Unit>(onSetBootingSplashText)
+        XServerRuntime.get().events.on<SteamEvent.Connected, Unit>(onSteamConnected)
+        XServerRuntime.get().events.on<SteamEvent.Disconnected, Unit>(onSteamDisconnected)
+        XServerRuntime.get().events.on<SteamEvent.RemotelyDisconnected, Unit>(onRemotelyDisconnected)
+        XServerRuntime.get().events.on<SteamEvent.LogonStarted, Unit>(onLoggingIn)
+        XServerRuntime.get().events.on<SteamEvent.LogonEnded, Unit>(onLogonEnded)
+        XServerRuntime.get().events.on<SteamEvent.LoggedOut, Unit>(onLoggedOut)
 
         // Collect theme preferences
         viewModelScope.launch {
@@ -269,15 +270,15 @@ class MainViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        GameGrubApp.events.off<AndroidEvent.BackPressed, Unit>(onBackPressed)
-        GameGrubApp.events.off<AndroidEvent.ExternalGameLaunch, Unit>(onExternalGameLaunch)
-        GameGrubApp.events.off<AndroidEvent.SetBootingSplashText, Unit>(onSetBootingSplashText)
-        GameGrubApp.events.off<SteamEvent.Connected, Unit>(onSteamConnected)
-        GameGrubApp.events.off<SteamEvent.Disconnected, Unit>(onSteamDisconnected)
-        GameGrubApp.events.off<SteamEvent.RemotelyDisconnected, Unit>(onRemotelyDisconnected)
-        GameGrubApp.events.off<SteamEvent.LogonStarted, Unit>(onLoggingIn)
-        GameGrubApp.events.off<SteamEvent.LogonEnded, Unit>(onLogonEnded)
-        GameGrubApp.events.off<SteamEvent.LoggedOut, Unit>(onLoggedOut)
+        XServerRuntime.get().events.off<AndroidEvent.BackPressed, Unit>(onBackPressed)
+        XServerRuntime.get().events.off<AndroidEvent.ExternalGameLaunch, Unit>(onExternalGameLaunch)
+        XServerRuntime.get().events.off<AndroidEvent.SetBootingSplashText, Unit>(onSetBootingSplashText)
+        XServerRuntime.get().events.off<SteamEvent.Connected, Unit>(onSteamConnected)
+        XServerRuntime.get().events.off<SteamEvent.Disconnected, Unit>(onSteamDisconnected)
+        XServerRuntime.get().events.off<SteamEvent.RemotelyDisconnected, Unit>(onRemotelyDisconnected)
+        XServerRuntime.get().events.off<SteamEvent.LogonStarted, Unit>(onLoggingIn)
+        XServerRuntime.get().events.off<SteamEvent.LogonEnded, Unit>(onLogonEnded)
+        XServerRuntime.get().events.off<SteamEvent.LoggedOut, Unit>(onLoggedOut)
         connectionTimeoutJob?.cancel()
     }
 
@@ -448,7 +449,7 @@ class MainViewModel @Inject constructor(
         // Show booting splash before launching the app
         viewModelScope.launch {
             setShowBootingSplash(true)
-            GameGrubApp.events.emit(
+            XServerRuntime.get().events.emit(
                 AndroidEvent.SetOrientationPolicy(
                     OrientationPolicy.default(PrefManager.allowedOrientation),
                 ),
@@ -558,7 +559,7 @@ class MainViewModel @Inject constructor(
 
                 // Prompt user to save temporary container configuration if one was applied
                 if (hadTemporaryOverride) {
-                    GameGrubApp.events.emit(AndroidEvent.PromptSaveContainerConfig(appId))
+                    XServerRuntime.get().events.emit(AndroidEvent.PromptSaveContainerConfig(appId))
                     // Dialog handler in GameGrubMain manages the save/discard logic
                 }
 

@@ -58,6 +58,7 @@ import app.gamegrub.ui.component.dialog.LoadingDialog
 import app.gamegrub.ui.component.dialog.MessageDialog
 import app.gamegrub.ui.component.dialog.SingleChoiceDialog
 import app.gamegrub.ui.component.settings.SettingsListDropdown
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.theme.settingsTileColorsAlt
 import app.gamegrub.ui.utils.IconSwitcher
@@ -169,11 +170,11 @@ fun SettingsGroupInterface(
             }
         }
 
-        GameGrubApp.events.on<AndroidEvent.GOGAuthCodeReceived, Unit>(onGOGAuthCodeReceived)
+        XServerRuntime.get().events.on<AndroidEvent.GOGAuthCodeReceived, Unit>(onGOGAuthCodeReceived)
         Timber.d("[SettingsGOG]: GOG auth code event listener registered")
 
         onDispose {
-            GameGrubApp.events.off<AndroidEvent.GOGAuthCodeReceived, Unit>(onGOGAuthCodeReceived)
+            XServerRuntime.get().events.off<AndroidEvent.GOGAuthCodeReceived, Unit>(onGOGAuthCodeReceived)
             Timber.d("[SettingsGOG]: GOG auth code event listener unregistered")
         }
     }

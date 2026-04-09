@@ -27,6 +27,7 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.model.CancelDownloadResult
 import app.gamegrub.ui.model.GOGAppScreenViewModel
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.container.ContainerUtils.getContainer
@@ -104,7 +105,7 @@ class GOGAppScreen(
                     refreshTrigger++
                 }
             }
-            app.gamegrub.GameGrubApp.events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+            XServerRuntime.get().events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
         }
 
         var gogGame by remember(gameId, refreshTrigger) { mutableStateOf<GOGGame?>(null) }
@@ -488,9 +489,9 @@ class GOGAppScreen(
                 onStateChanged()
             }
         }
-        app.gamegrub.GameGrubApp.events.on<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
+        XServerRuntime.get().events.on<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
         disposables +=
-            { app.gamegrub.GameGrubApp.events.off<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
+            { XServerRuntime.get().events.off<app.gamegrub.events.AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
 
         // Listen for install status changes
         val installListener: (app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged) -> Unit = { event ->
@@ -501,9 +502,9 @@ class GOGAppScreen(
                 onStateChanged()
             }
         }
-        app.gamegrub.GameGrubApp.events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+        XServerRuntime.get().events.on<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
         disposables +=
-            { app.gamegrub.GameGrubApp.events.off<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
+            { XServerRuntime.get().events.off<app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
 
         // Return cleanup function
         return {

@@ -13,7 +13,7 @@ class XServerLifecycleEventBindingsTest {
 
     @Test
     fun register_registersAllHandlersAndDisposeUnregistersThem() {
-        GameGrubApp.events.clearAllListeners()
+        XServerRuntime.get().events.clearAllListeners()
 
         var debugAddCalls = 0
         var debugRemoveCalls = 0
@@ -38,21 +38,21 @@ class XServerLifecycleEventBindingsTest {
             },
         )
 
-        assertNotNull(GameGrubApp.events.listeners[AndroidEvent.ActivityDestroyed::class])
-        assertNotNull(GameGrubApp.events.listeners[AndroidEvent.KeyEvent::class])
-        assertNotNull(GameGrubApp.events.listeners[AndroidEvent.MotionEvent::class])
-        assertNotNull(GameGrubApp.events.listeners[AndroidEvent.GuestProgramTerminated::class])
-        assertNotNull(GameGrubApp.events.listeners[SteamEvent.ForceCloseApp::class])
+        assertNotNull(XServerRuntime.get().events.listeners[AndroidEvent.ActivityDestroyed::class])
+        assertNotNull(XServerRuntime.get().events.listeners[AndroidEvent.KeyEvent::class])
+        assertNotNull(XServerRuntime.get().events.listeners[AndroidEvent.MotionEvent::class])
+        assertNotNull(XServerRuntime.get().events.listeners[AndroidEvent.GuestProgramTerminated::class])
+        assertNotNull(XServerRuntime.get().events.listeners[SteamEvent.ForceCloseApp::class])
         assertEquals(1, debugAddCalls)
         assertSame(debugCallback, addedCallback)
 
         dispose()
 
-        assertEquals(0, GameGrubApp.events.listeners[AndroidEvent.ActivityDestroyed::class]?.size ?: 0)
-        assertEquals(0, GameGrubApp.events.listeners[AndroidEvent.KeyEvent::class]?.size ?: 0)
-        assertEquals(0, GameGrubApp.events.listeners[AndroidEvent.MotionEvent::class]?.size ?: 0)
-        assertEquals(0, GameGrubApp.events.listeners[AndroidEvent.GuestProgramTerminated::class]?.size ?: 0)
-        assertEquals(0, GameGrubApp.events.listeners[SteamEvent.ForceCloseApp::class]?.size ?: 0)
+        assertEquals(0, XServerRuntime.get().events.listeners[AndroidEvent.ActivityDestroyed::class]?.size ?: 0)
+        assertEquals(0, XServerRuntime.get().events.listeners[AndroidEvent.KeyEvent::class]?.size ?: 0)
+        assertEquals(0, XServerRuntime.get().events.listeners[AndroidEvent.MotionEvent::class]?.size ?: 0)
+        assertEquals(0, XServerRuntime.get().events.listeners[AndroidEvent.GuestProgramTerminated::class]?.size ?: 0)
+        assertEquals(0, XServerRuntime.get().events.listeners[SteamEvent.ForceCloseApp::class]?.size ?: 0)
         assertEquals(1, debugRemoveCalls)
         assertSame(debugCallback, removedCallback)
     }

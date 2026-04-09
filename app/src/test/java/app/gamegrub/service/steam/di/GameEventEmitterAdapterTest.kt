@@ -13,19 +13,19 @@ class GameEventEmitterAdapterTest {
 
     @Before
     fun setUp() {
-        GameGrubApp.events.clearAllListeners()
+        XServerRuntime.get().events.clearAllListeners()
     }
 
     @After
     fun tearDown() {
-        GameGrubApp.events.clearAllListeners()
+        XServerRuntime.get().events.clearAllListeners()
     }
 
     @Test
     fun emitSteamEvent_dispatchesToEventBus() {
         var receivedChallengeUrl: String? = null
 
-        GameGrubApp.events.on<SteamEvent.QrChallengeReceived, Unit> { event ->
+        XServerRuntime.get().events.on<SteamEvent.QrChallengeReceived, Unit> { event ->
             receivedChallengeUrl = event.challengeUrl
         }
 
@@ -38,7 +38,7 @@ class GameEventEmitterAdapterTest {
     fun emitAndroidEvent_dispatchesToEventBus() {
         var backPressedReceived = false
 
-        GameGrubApp.events.on<AndroidEvent.BackPressed, Unit> {
+        XServerRuntime.get().events.on<AndroidEvent.BackPressed, Unit> {
             backPressedReceived = true
         }
 

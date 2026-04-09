@@ -25,6 +25,7 @@ import app.gamegrub.R
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.orientation.OrientationPolicy
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.theme.GameGrubTheme
 import java.util.EnumSet
 
@@ -44,7 +45,7 @@ fun OrientationDialog(
     // Save on close.
     val onClose: () -> Unit = {
         PrefManager.allowedOrientation = EnumSet.copyOf(currentSettings)
-        GameGrubApp.events.emit(
+        XServerRuntime.get().events.emit(
             AndroidEvent.SetOrientationPolicy(
                 OrientationPolicy.default(PrefManager.allowedOrientation),
             ),

@@ -3,7 +3,6 @@ package app.gamegrub.service.gog
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import app.gamegrub.GameGrubApp
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.GOGCredentials
 import app.gamegrub.data.GOGGame
@@ -12,6 +11,7 @@ import app.gamegrub.data.LibraryItem
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.base.GameStoreService
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
@@ -545,7 +545,7 @@ class GOGService : GameStoreService() {
 
         // Initialize notification helper for foreground service
         notificationHelper = NotificationHelper(applicationContext)
-        GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -623,7 +623,7 @@ class GOGService : GameStoreService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         // Cancel sync operations
         backgroundSyncJob?.cancel()

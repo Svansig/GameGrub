@@ -41,6 +41,7 @@ import app.gamegrub.ui.enums.LibraryTab
 import app.gamegrub.ui.enums.LibraryTab.Companion.next
 import app.gamegrub.ui.enums.LibraryTab.Companion.previous
 import app.gamegrub.ui.enums.SortOption
+import app.gamegrub.ui.runtime.XServerRuntime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -322,8 +323,8 @@ class LibraryViewModel @Inject constructor(
             }
         }
 
-        GameGrubApp.events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(onInstallStatusChanged)
-        GameGrubApp.events.on<AndroidEvent.CustomGameImagesFetched, Unit>(onCustomGameImagesFetched)
+        XServerRuntime.get().events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(onInstallStatusChanged)
+        XServerRuntime.get().events.on<AndroidEvent.CustomGameImagesFetched, Unit>(onCustomGameImagesFetched)
     }
 
     /**
@@ -334,8 +335,8 @@ class LibraryViewModel @Inject constructor(
      */
     override fun onCleared() {
         searchDebounceJob?.cancel()
-        GameGrubApp.events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(onInstallStatusChanged)
-        GameGrubApp.events.off<AndroidEvent.CustomGameImagesFetched, Unit>(onCustomGameImagesFetched)
+        XServerRuntime.get().events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(onInstallStatusChanged)
+        XServerRuntime.get().events.off<AndroidEvent.CustomGameImagesFetched, Unit>(onCustomGameImagesFetched)
         super.onCleared()
     }
 

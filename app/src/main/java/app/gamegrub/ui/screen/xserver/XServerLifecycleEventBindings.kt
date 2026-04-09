@@ -3,6 +3,7 @@ package app.gamegrub.ui.screen.xserver
 import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.core.Callback
 import com.winlator.core.ProcessHelper
 
@@ -20,19 +21,19 @@ internal object XServerLifecycleEventBindings {
         addDebugCallback: (Callback<String>) -> Unit = ProcessHelper::addDebugCallback,
         removeDebugCallback: (Callback<String>) -> Unit = ProcessHelper::removeDebugCallback,
     ): () -> Unit {
-        GameGrubApp.events.on<AndroidEvent.ActivityDestroyed, Unit>(onActivityDestroyed)
-        GameGrubApp.events.on<AndroidEvent.KeyEvent, Boolean>(onKeyEvent)
-        GameGrubApp.events.on<AndroidEvent.MotionEvent, Boolean>(onMotionEvent)
-        GameGrubApp.events.on<AndroidEvent.GuestProgramTerminated, Unit>(onGuestProgramTerminated)
-        GameGrubApp.events.on<SteamEvent.ForceCloseApp, Unit>(onForceCloseApp)
+        XServerRuntime.get().events.on<AndroidEvent.ActivityDestroyed, Unit>(onActivityDestroyed)
+        XServerRuntime.get().events.on<AndroidEvent.KeyEvent, Boolean>(onKeyEvent)
+        XServerRuntime.get().events.on<AndroidEvent.MotionEvent, Boolean>(onMotionEvent)
+        XServerRuntime.get().events.on<AndroidEvent.GuestProgramTerminated, Unit>(onGuestProgramTerminated)
+        XServerRuntime.get().events.on<SteamEvent.ForceCloseApp, Unit>(onForceCloseApp)
         addDebugCallback(debugCallback)
 
         return {
-            GameGrubApp.events.off<AndroidEvent.ActivityDestroyed, Unit>(onActivityDestroyed)
-            GameGrubApp.events.off<AndroidEvent.KeyEvent, Boolean>(onKeyEvent)
-            GameGrubApp.events.off<AndroidEvent.MotionEvent, Boolean>(onMotionEvent)
-            GameGrubApp.events.off<AndroidEvent.GuestProgramTerminated, Unit>(onGuestProgramTerminated)
-            GameGrubApp.events.off<SteamEvent.ForceCloseApp, Unit>(onForceCloseApp)
+            XServerRuntime.get().events.off<AndroidEvent.ActivityDestroyed, Unit>(onActivityDestroyed)
+            XServerRuntime.get().events.off<AndroidEvent.KeyEvent, Boolean>(onKeyEvent)
+            XServerRuntime.get().events.off<AndroidEvent.MotionEvent, Boolean>(onMotionEvent)
+            XServerRuntime.get().events.off<AndroidEvent.GuestProgramTerminated, Unit>(onGuestProgramTerminated)
+            XServerRuntime.get().events.off<SteamEvent.ForceCloseApp, Unit>(onForceCloseApp)
             removeDebugCallback(debugCallback)
         }
     }

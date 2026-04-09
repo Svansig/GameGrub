@@ -25,6 +25,7 @@ import app.gamegrub.ui.GameGrubMain
 import app.gamegrub.ui.ImmersiveModeManager
 import app.gamegrub.ui.OrientationManager
 import app.gamegrub.ui.orientation.OrientationPolicy
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.LocaleHelper
 import app.gamegrub.utils.container.ContainerUtils
 import coil.ImageLoader
@@ -87,9 +88,9 @@ class MainActivity : ComponentActivity() {
 
         AppUtils.keepScreenOn(this)
 
-        GameGrubApp.events.on<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
-        GameGrubApp.events.on<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
-        GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.on<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
+        XServerRuntime.get().events.on<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
+        XServerRuntime.get().events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         setContent {
             val shouldRequestNotificationPermission: Boolean = remember {
@@ -126,11 +127,11 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        GameGrubApp.events.emit(AndroidEvent.ActivityDestroyed)
+        XServerRuntime.get().events.emit(AndroidEvent.ActivityDestroyed)
 
-        GameGrubApp.events.off<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
-        GameGrubApp.events.off<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
-        GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.off<AndroidEvent.SetSystemUIVisibility, Unit>(onSetSystemUi)
+        XServerRuntime.get().events.off<AndroidEvent.SetOrientationPolicy, Unit>(onSetOrientationPolicy)
+        XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
 
         ServiceLifecycleManager.onDestroy(isChangingConfigurations)
         super.onDestroy()
@@ -138,11 +139,11 @@ class MainActivity : ComponentActivity() {
 
     private fun hasReadyGameLifecycleState(action: String): Boolean {
         if (!SteamService.keepAlive) return false
-        if (!GameGrubApp.hasValidSuspendPolicyState()) {
+        if (!XServerRuntime.get().hasValidSuspendPolicyState()) {
             Timber.d("Skipping game %s because suspend policy state is not initialized", action)
             return false
         }
-        if (GameGrubApp.xEnvironment == null) {
+        if (XServerRuntime.get().xEnvironment == null) {
             Timber.d("Skipping game %s because xEnvironment is not ready", action)
             return false
         }
@@ -151,25 +152,25 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        GameGrubApp.isActivityInForeground = true
+        XServerRuntime.get().setActivityInForeground(true)
         immersiveModeManager.applyImmersiveMode()
 
         SteamService.autoStopWhenIdle = false
 
         if (hasReadyGameLifecycleState("resume")) {
             when {
-                GameGrubApp.isNeverSuspendMode() -> {
+                XServerRuntime.get().isNeverSuspendMode() -> {
                     Timber.d("Game resume skipped due to suspend policy=never")
                 }
 
-                GameGrubApp.isOverlayPaused -> {
-                    if (GameGrubApp.isManualSuspendMode()) {
+                XServerRuntime.get().isOverlayPaused -> {
+                    if (XServerRuntime.get().isManualSuspendMode()) {
                         Timber.d("Game remains suspended until user presses Resume")
                     }
                 }
 
                 else -> {
-                    GameGrubApp.xEnvironment?.onResume()
+                    XServerRuntime.get().xEnvironment?.onResume()
                     Timber.d("Game resumed")
                 }
             }
@@ -181,17 +182,17 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onPause() {
-        GameGrubApp.isActivityInForeground = false
+        XServerRuntime.get().setActivityInForeground(false)
         if (hasReadyGameLifecycleState("pause")) {
             when {
-                GameGrubApp.isNeverSuspendMode() -> {
+                XServerRuntime.get().isNeverSuspendMode() -> {
                     Timber.d("Game pause skipped due to suspend policy=never")
                 }
 
                 else -> {
-                    GameGrubApp.xEnvironment?.onPause()
-                    if (GameGrubApp.isManualSuspendMode()) {
-                        GameGrubApp.isOverlayPaused = true
+                    XServerRuntime.get().xEnvironment?.onPause()
+                    if (XServerRuntime.get().isManualSuspendMode()) {
+                        XServerRuntime.get().setOverlayPaused(true)
                         Timber.d("Game paused due to app backgrounded (manual resume required)")
                     } else {
                         Timber.d("Game paused due to app backgrounded")
@@ -218,14 +219,14 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("RestrictedApi")
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        var eventDispatched = GameGrubApp.events.emit(AndroidEvent.KeyEvent(event)) { keyEvent ->
+        var eventDispatched = XServerRuntime.get().events.emit(AndroidEvent.KeyEvent(event)) { keyEvent ->
             keyEvent.any { it }
         } == true
 
         if (!eventDispatched) {
             if (event.keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
                 if (SteamService.keepAlive) {
-                    GameGrubApp.events.emit(AndroidEvent.BackPressed)
+                    XServerRuntime.get().events.emit(AndroidEvent.BackPressed)
                     eventDispatched = true
                 }
             }
@@ -235,7 +236,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun dispatchGenericMotionEvent(ev: MotionEvent?): Boolean {
-        val eventDispatched = GameGrubApp.events.emit(AndroidEvent.MotionEvent(ev)) { event ->
+        val eventDispatched = XServerRuntime.get().events.emit(AndroidEvent.MotionEvent(ev)) { event ->
             event.any { it }
         } == true
 

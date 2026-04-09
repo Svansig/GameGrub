@@ -3,6 +3,7 @@ package app.gamegrub.container.launch.unpack
 import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import com.winlator.xenvironment.ImageFs
@@ -37,7 +38,7 @@ internal object UnpackExecutionCoordinator {
 
         if (needsUnpacking || containerVariantChanged) {
             try {
-                GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Installing Mono..."))
+                XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Installing Mono..."))
                 val monoCmd = "wine msiexec /i Z:\\opt\\mono-gecko-offline\\wine-mono-9.0.0-x86.msi && wineserver -k"
                 Timber.i("Install mono command $monoCmd")
                 val monoOutput = guestProgramLauncherComponent.execShellCommand(monoCmd)
@@ -60,7 +61,7 @@ internal object UnpackExecutionCoordinator {
 
         try {
             try {
-                GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Handling DRM..."))
+                XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Handling DRM..."))
                 val origTxtFile = File("${imageFs.wineprefix}/dosdevices/a:/orig_dll_path.txt")
 
                 if (origTxtFile.exists()) {
@@ -124,10 +125,10 @@ internal object UnpackExecutionCoordinator {
                 if (exePaths.isEmpty()) {
                     Timber.w("No executable path set, skipping Steamless")
                 } else {
-                    GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Handling DRM..."))
+                    XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Handling DRM..."))
                     for ((index, executablePath) in exePaths.withIndex()) {
                         if (exePaths.size > 1) {
-                            GameGrubApp.events.emit(
+                            XServerRuntime.get().events.emit(
                                 AndroidEvent.SetBootingSplashText("Handling DRM (${index + 1}/${exePaths.size})"),
                             )
                         }

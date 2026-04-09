@@ -4,6 +4,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.ui.runtime.XServerRuntime
 
 /**
  * Dispatches input events (key and motion) to registered listeners.
@@ -17,7 +18,7 @@ class InputEventDispatcher {
      * @return true if event was consumed by a listener
      */
     fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val eventDispatched = GameGrubApp.events.emit(AndroidEvent.KeyEvent(event)) { keyEvent ->
+        val eventDispatched = XServerRuntime.get().events.emit(AndroidEvent.KeyEvent(event)) { keyEvent ->
             keyEvent.any { it }
         } == true
 
@@ -29,7 +30,7 @@ class InputEventDispatcher {
      * @return true if event was consumed by a listener
      */
     fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
-        val eventDispatched = GameGrubApp.events.emit(AndroidEvent.MotionEvent(event)) { ev ->
+        val eventDispatched = XServerRuntime.get().events.emit(AndroidEvent.MotionEvent(event)) { ev ->
             ev.any { it }
         } == true
 

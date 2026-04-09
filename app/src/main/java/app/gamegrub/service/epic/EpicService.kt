@@ -12,6 +12,7 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.NotificationHelper
 import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
@@ -172,7 +173,7 @@ class EpicService : GameStoreService() {
                 }
 
                 // Trigger library refresh event
-                GameGrubApp.events.emitJava(
+                XServerRuntime.get().events.emitJava(
                     AndroidEvent.LibraryInstallStatusChanged(appId),
                 )
 
@@ -395,7 +396,7 @@ class EpicService : GameStoreService() {
 
         // Initialize notification helper for foreground service
         notificationHelper = NotificationHelper(applicationContext)
-        GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
     }
 
     override fun getServiceTag(): String = "EPIC"
@@ -434,7 +435,7 @@ class EpicService : GameStoreService() {
     override fun onDestroy() {
         super.onDestroy()
         Timber.tag("Epic").i("[EpicService] Service destroyed")
-        GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
         instance = null

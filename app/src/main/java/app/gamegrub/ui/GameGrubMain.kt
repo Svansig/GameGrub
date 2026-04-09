@@ -84,6 +84,7 @@ import app.gamegrub.ui.launch.preLaunchApp
 import app.gamegrub.ui.launch.showGameNotInstalledDialog
 import app.gamegrub.ui.model.MainViewModel
 import app.gamegrub.ui.orientation.OrientationPolicy
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.screen.GameGrubScreen
 import app.gamegrub.ui.screen.HomeScreen
 import app.gamegrub.ui.screen.login.UserLoginScreen
@@ -449,18 +450,18 @@ fun GameGrubMain(
 
             Timber.i("Creating on destination changed listener")
 
-            GameGrubApp.onDestinationChangedListener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            XServerRuntime.get().onDestinationChangedListener = NavController.OnDestinationChangedListener { _, destination, _ ->
                 Timber.i("onDestinationChanged to ${destination.route}")
                 // in order not to trigger the screen changed launch effect
                 viewModel.setCurrentScreen(destination.route)
             }
         } else {
-            GameGrubApp.onDestinationChangedListener?.let {
+            XServerRuntime.get().onDestinationChangedListener?.let {
                 navController.removeOnDestinationChangedListener(it)
             }
         }
 
-        GameGrubApp.onDestinationChangedListener?.let {
+        XServerRuntime.get().onDestinationChangedListener?.let {
             navController.addOnDestinationChangedListener(it)
         }
     }
@@ -475,11 +476,11 @@ fun GameGrubMain(
             if (state.currentScreen != GameGrubScreen.XServer) {
                 // Hide or show status bar based on if in game or not
                 val shouldShowStatusBar = !PrefManager.hideStatusBarWhenNotInGame
-                GameGrubApp.events.emit(AndroidEvent.SetSystemUIVisibility(shouldShowStatusBar))
+                XServerRuntime.get().events.emit(AndroidEvent.SetSystemUIVisibility(shouldShowStatusBar))
 
                 // reset system ui visibility based on user preference
                 // Keep non-game routes fully rotatable.
-                GameGrubApp.events.emit(
+                XServerRuntime.get().events.emit(
                     AndroidEvent.SetOrientationPolicy(
                         OrientationPolicy.unrestricted(PrefManager.allowedOrientation),
                     ),
@@ -534,14 +535,14 @@ fun GameGrubMain(
     }
 
     LaunchedEffect(Unit) {
-        GameGrubApp.events.on<AndroidEvent.PromptSaveContainerConfig, Unit>(onPromptSaveConfig)
-        GameGrubApp.events.on<AndroidEvent.ShowGameFeedback, Unit>(onShowGameFeedback)
+        XServerRuntime.get().events.on<AndroidEvent.PromptSaveContainerConfig, Unit>(onPromptSaveConfig)
+        XServerRuntime.get().events.on<AndroidEvent.ShowGameFeedback, Unit>(onShowGameFeedback)
     }
 
     DisposableEffect(Unit) {
         onDispose {
-            GameGrubApp.events.off<AndroidEvent.PromptSaveContainerConfig, Unit>(onPromptSaveConfig)
-            GameGrubApp.events.off<AndroidEvent.ShowGameFeedback, Unit>(onShowGameFeedback)
+            XServerRuntime.get().events.off<AndroidEvent.PromptSaveContainerConfig, Unit>(onPromptSaveConfig)
+            XServerRuntime.get().events.off<AndroidEvent.ShowGameFeedback, Unit>(onShowGameFeedback)
         }
     }
 
@@ -1170,7 +1171,7 @@ fun GameGrubMain(
                             )
                         },
                         onClickExit = {
-                            GameGrubApp.events.emit(AndroidEvent.EndProcess)
+                            XServerRuntime.get().events.emit(AndroidEvent.EndProcess)
                         },
                         onChat = {
                             navController.navigate(GameGrubScreen.Chat.route(it))

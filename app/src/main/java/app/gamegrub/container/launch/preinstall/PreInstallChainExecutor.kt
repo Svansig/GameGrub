@@ -2,6 +2,7 @@ package app.gamegrub.container.launch.preinstall
 
 import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.container.Container
 import com.winlator.core.Callback
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
@@ -29,7 +30,7 @@ internal object PreInstallChainExecutor {
                 Timber.e("Guest program terminated with status: $status")
                 onGameLaunchError?.invoke("Game terminated with error status: $status")
             }
-            GameGrubApp.events.emit(AndroidEvent.GuestProgramTerminated)
+            XServerRuntime.get().events.emit(AndroidEvent.GuestProgramTerminated)
         }
 
         fun chainPreInstallSteps(remaining: List<PreInstallSteps.PreInstallCommand>) {
@@ -52,9 +53,9 @@ internal object PreInstallChainExecutor {
 
                 val nextRemaining = remaining.drop(1)
                 if (nextRemaining.isEmpty()) {
-                    GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Launching game..."))
+                    XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Launching game..."))
                 } else {
-                    GameGrubApp.events.emit(AndroidEvent.SetBootingSplashText("Installing prerequisites..."))
+                    XServerRuntime.get().events.emit(AndroidEvent.SetBootingSplashText("Installing prerequisites..."))
                 }
                 chainPreInstallSteps(nextRemaining)
                 guestProgramLauncherComponent.start()

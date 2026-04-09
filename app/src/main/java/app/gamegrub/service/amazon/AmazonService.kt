@@ -16,6 +16,7 @@ import app.gamegrub.service.amazon.AmazonService.Companion.getInstallPath
 import app.gamegrub.service.amazon.AmazonService.Companion.getInstance
 import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.EntryPoint
@@ -413,7 +414,7 @@ class AmazonService : GameStoreService() {
             // Fresh install/update run should clear stale completion marker before starting
             StorageManager.removeMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER)
 
-            GameGrubApp.events.emitJava(
+            XServerRuntime.get().events.emitJava(
                 AndroidEvent.DownloadStatusChanged(game.appId, true),
             )
 
@@ -431,7 +432,7 @@ class AmazonService : GameStoreService() {
                         downloadInfo.setActive(false)
                         downloadInfo.clearPersistedBytesDownloaded(installPath)
                         SnackbarManager.show("Download completed: ${game.title}")
-                        GameGrubApp.events.emitJava(
+                        XServerRuntime.get().events.emitJava(
                             AndroidEvent.LibraryInstallStatusChanged(game.appId),
                         )
                     } else {
@@ -452,7 +453,7 @@ class AmazonService : GameStoreService() {
                 } finally {
                     instance.activeDownloads.remove(productId)
                     instance.activeDownloadPaths.remove(productId)
-                    GameGrubApp.events.emitJava(
+                    XServerRuntime.get().events.emitJava(
                         AndroidEvent.DownloadStatusChanged(game.appId, false),
                     )
                 }
@@ -602,7 +603,7 @@ class AmazonService : GameStoreService() {
                         "[UNINSTALL] final_state productId=$productId appId=${game.appId} installDirExists=$postInstallDirExists completeMarker=$completeMarkerExists inProgressMarker=$inProgressMarkerExists",
                     )
 
-                    GameGrubApp.events.emitJava(
+                    XServerRuntime.get().events.emitJava(
                         AndroidEvent.LibraryInstallStatusChanged(game.appId),
                     )
 
@@ -764,7 +765,7 @@ class AmazonService : GameStoreService() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        GameGrubApp.events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.on<AndroidEvent.EndProcess, Unit>(onEndProcess)
         Timber.i("[Amazon] Service created")
     }
 
@@ -775,7 +776,7 @@ class AmazonService : GameStoreService() {
     }
 
     override fun onDestroy() {
-        GameGrubApp.events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
+        XServerRuntime.get().events.off<AndroidEvent.EndProcess, Unit>(onEndProcess)
         stopForeground(STOP_FOREGROUND_REMOVE)
         notificationHelper.cancel()
         instance = null
@@ -820,7 +821,7 @@ class AmazonService : GameStoreService() {
             ContainerUtils.deleteContainer(context, "AMAZON_${game.appId}")
         }
 
-        GameGrubApp.events.emitJava(AndroidEvent.LibraryInstallStatusChanged(game.appId))
+        XServerRuntime.get().events.emitJava(AndroidEvent.LibraryInstallStatusChanged(game.appId))
     }
 
     // ── Instance helpers (for callers that hold a direct reference) ───────────

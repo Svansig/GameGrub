@@ -16,13 +16,13 @@ events/
 ### Publishing Events
 
 ```kotlin
-GameGrubApp.events.emit(GameStoreEvent.LibraryUpdated(GameSource.STEAM))
+XServerRuntime.get().events.emit(GameStoreEvent.LibraryUpdated(GameSource.STEAM))
 ```
 
 ### Subscribing
 
 ```kotlin
-GameGrubApp.events.on<GameStoreEvent.LibraryUpdated> { event ->
+XServerRuntime.get().events.on<GameStoreEvent.LibraryUpdated> { event ->
     // Handle event
 }
 ```
@@ -30,7 +30,7 @@ GameGrubApp.events.on<GameStoreEvent.LibraryUpdated> { event ->
 ### Unsubscribing
 
 ```kotlin
-GameGrubApp.events.off<GameStoreEvent.LibraryUpdated, Unit>(handler)
+XServerRuntime.get().events.off<GameStoreEvent.LibraryUpdated, Unit>(handler)
 ```
 
 ## Event Types

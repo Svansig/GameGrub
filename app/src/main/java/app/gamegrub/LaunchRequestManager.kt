@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.launch.IntentLaunchManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import timber.log.Timber
 
@@ -86,7 +87,7 @@ object LaunchRequestManager {
                         applyTemporaryConfig?.invoke(launchRequest.appId, launchRequest)
                     }
 
-                    GameGrubApp.events.emit(AndroidEvent.ExternalGameLaunch(launchRequest.appId))
+                    XServerRuntime.get().events.emit(AndroidEvent.ExternalGameLaunch(launchRequest.appId))
                 } else {
                     setPendingLaunchRequest(launchRequest)
                     Timber.d("[IntentLaunch]: Stored pending launch request for app ${launchRequest.appId}")

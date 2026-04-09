@@ -52,6 +52,7 @@ import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
 import app.gamegrub.ui.model.SteamAppScreenViewModel
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.screen.library.GameMigrationDialog
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.StoragePermissionGate
@@ -379,9 +380,9 @@ class SteamAppScreen(
                     isInstalled = SteamService.isAppInstalled(gameId)
                 }
             }
-            GameGrubApp.events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
+            XServerRuntime.get().events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
             onDispose {
-                GameGrubApp.events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
+                XServerRuntime.get().events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
             }
         }
 
@@ -548,8 +549,8 @@ class SteamAppScreen(
                 onStateChanged()
             }
         }
-        GameGrubApp.events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
-        disposables += { GameGrubApp.events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
+        XServerRuntime.get().events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+        disposables += { XServerRuntime.get().events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
 
         val downloadStatusListener: (AndroidEvent.DownloadStatusChanged) -> Unit = { event ->
             if (event.appId == appId) {
@@ -567,16 +568,16 @@ class SteamAppScreen(
                 onStateChanged()
             }
         }
-        GameGrubApp.events.on<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
-        disposables += { GameGrubApp.events.off<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
+        XServerRuntime.get().events.on<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
+        disposables += { XServerRuntime.get().events.off<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
 
         val connectivityListener: (AndroidEvent.DownloadPausedDueToConnectivity) -> Unit = { event ->
             if (event.appId == appId) {
                 onStateChanged()
             }
         }
-        GameGrubApp.events.on<AndroidEvent.DownloadPausedDueToConnectivity, Unit>(connectivityListener)
-        disposables += { GameGrubApp.events.off<AndroidEvent.DownloadPausedDueToConnectivity, Unit>(connectivityListener) }
+        XServerRuntime.get().events.on<AndroidEvent.DownloadPausedDueToConnectivity, Unit>(connectivityListener)
+        disposables += { XServerRuntime.get().events.off<AndroidEvent.DownloadPausedDueToConnectivity, Unit>(connectivityListener) }
 
         return {
             progressDisposer?.invoke()
@@ -1356,7 +1357,7 @@ class SteamAppScreen(
                             viewModel.deleteAppWithContainerCleanup(gameId) { result ->
                                 result.fold(
                                     onSuccess = {
-                                        GameGrubApp.events.emit(AndroidEvent.LibraryInstallStatusChanged(gameId))
+                                        XServerRuntime.get().events.emit(AndroidEvent.LibraryInstallStatusChanged(gameId))
                                         SnackbarManager.show(
                                             resources.getString(
                                                 R.string.steam_uninstall_success,

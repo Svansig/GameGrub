@@ -30,6 +30,7 @@ import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.ContainerData
@@ -207,7 +208,7 @@ class CustomGameAppScreen(
         onClickPlay: (Boolean) -> Unit,
     ) {
         // Launch the game; preLaunchApp will show EXECUTABLE_NOT_FOUND if no exe (getLaunchExecutable blank)
-        GameGrubApp.events.emit(AndroidEvent.ExternalGameLaunch(libraryItem.appId))
+        XServerRuntime.get().events.emit(AndroidEvent.ExternalGameLaunch(libraryItem.appId))
     }
 
     override fun onPauseResumeClick(context: Context, libraryItem: LibraryItem) {
@@ -422,7 +423,7 @@ class CustomGameAppScreen(
                             )
 
                             steamGridDB.fetchGameImages(gameName, gameFolderPath)
-                            GameGrubApp.events.emit(AndroidEvent.CustomGameImagesFetched(libraryItem.appId))
+                            XServerRuntime.get().events.emit(AndroidEvent.CustomGameImagesFetched(libraryItem.appId))
                             onAfterFetchImages(context, libraryItem, gameFolderPath)
 
                             SnackbarManager.show(context.getString(R.string.base_app_images_fetched))

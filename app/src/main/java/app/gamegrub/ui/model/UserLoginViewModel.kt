@@ -10,6 +10,7 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.UserLoginState
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.posthog.PostHog
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
 import java.util.concurrent.CompletableFuture
@@ -198,13 +199,13 @@ class UserLoginViewModel : ViewModel() {
     init {
         Timber.tag("UserLoginViewModel").d("init")
 
-        GameGrubApp.events.on<SteamEvent.Connected, Unit>(onSteamConnected)
-        GameGrubApp.events.on<SteamEvent.LogonStarted, Unit>(onLogonStarted)
-        GameGrubApp.events.on<SteamEvent.LogonEnded, Unit>(onLogonEnded)
-        GameGrubApp.events.on<AndroidEvent.BackPressed, Unit>(onBackPressed)
-        GameGrubApp.events.on<SteamEvent.QrChallengeReceived, Unit>(onQrChallengeReceived)
-        GameGrubApp.events.on<SteamEvent.QrAuthEnded, Unit>(onQrAuthEnded)
-        GameGrubApp.events.on<SteamEvent.LoggedOut, Unit>(onLoggedOut)
+        XServerRuntime.get().events.on<SteamEvent.Connected, Unit>(onSteamConnected)
+        XServerRuntime.get().events.on<SteamEvent.LogonStarted, Unit>(onLogonStarted)
+        XServerRuntime.get().events.on<SteamEvent.LogonEnded, Unit>(onLogonEnded)
+        XServerRuntime.get().events.on<AndroidEvent.BackPressed, Unit>(onBackPressed)
+        XServerRuntime.get().events.on<SteamEvent.QrChallengeReceived, Unit>(onQrChallengeReceived)
+        XServerRuntime.get().events.on<SteamEvent.QrAuthEnded, Unit>(onQrAuthEnded)
+        XServerRuntime.get().events.on<SteamEvent.LoggedOut, Unit>(onLoggedOut)
 
         val isLoggedIn = SteamService.isLoggedIn
         Timber.d("Logged in? $isLoggedIn")
@@ -221,13 +222,13 @@ class UserLoginViewModel : ViewModel() {
     override fun onCleared() {
         Timber.tag("UserLoginViewModel").d("onCleared")
 
-        GameGrubApp.events.off<SteamEvent.Connected, Unit>(onSteamConnected)
-        GameGrubApp.events.off<SteamEvent.LogonStarted, Unit>(onLogonStarted)
-        GameGrubApp.events.off<SteamEvent.LogonEnded, Unit>(onLogonEnded)
-        GameGrubApp.events.off<AndroidEvent.BackPressed, Unit>(onBackPressed)
-        GameGrubApp.events.off<SteamEvent.QrChallengeReceived, Unit>(onQrChallengeReceived)
-        GameGrubApp.events.off<SteamEvent.QrAuthEnded, Unit>(onQrAuthEnded)
-        GameGrubApp.events.off<SteamEvent.LoggedOut, Unit>(onLoggedOut)
+        XServerRuntime.get().events.off<SteamEvent.Connected, Unit>(onSteamConnected)
+        XServerRuntime.get().events.off<SteamEvent.LogonStarted, Unit>(onLogonStarted)
+        XServerRuntime.get().events.off<SteamEvent.LogonEnded, Unit>(onLogonEnded)
+        XServerRuntime.get().events.off<AndroidEvent.BackPressed, Unit>(onBackPressed)
+        XServerRuntime.get().events.off<SteamEvent.QrChallengeReceived, Unit>(onQrChallengeReceived)
+        XServerRuntime.get().events.off<SteamEvent.QrAuthEnded, Unit>(onQrAuthEnded)
+        XServerRuntime.get().events.off<SteamEvent.LoggedOut, Unit>(onLoggedOut)
 
         SteamService.stopLoginWithQr()
     }

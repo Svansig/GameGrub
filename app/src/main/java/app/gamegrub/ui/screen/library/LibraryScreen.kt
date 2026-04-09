@@ -79,6 +79,7 @@ import app.gamegrub.ui.enums.PaneType
 import app.gamegrub.ui.enums.SortOption
 import app.gamegrub.ui.internal.fakeAppInfo
 import app.gamegrub.ui.model.LibraryViewModel
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.screen.auth.AmazonOAuthActivity
 import app.gamegrub.ui.screen.auth.EpicOAuthActivity
 import app.gamegrub.ui.screen.auth.GOGOAuthActivity
@@ -633,12 +634,12 @@ private fun LibraryScreenContent(
             }
         }
 
-        GameGrubApp.events.on<AndroidEvent.KeyEvent, Boolean>(onGlobalKeyEvent)
-        GameGrubApp.events.on<AndroidEvent.MotionEvent, Boolean>(onGlobalMotionEvent)
+        XServerRuntime.get().events.on<AndroidEvent.KeyEvent, Boolean>(onGlobalKeyEvent)
+        XServerRuntime.get().events.on<AndroidEvent.MotionEvent, Boolean>(onGlobalMotionEvent)
 
         onDispose {
-            GameGrubApp.events.off<AndroidEvent.KeyEvent, Boolean>(onGlobalKeyEvent)
-            GameGrubApp.events.off<AndroidEvent.MotionEvent, Boolean>(onGlobalMotionEvent)
+            XServerRuntime.get().events.off<AndroidEvent.KeyEvent, Boolean>(onGlobalKeyEvent)
+            XServerRuntime.get().events.off<AndroidEvent.MotionEvent, Boolean>(onGlobalMotionEvent)
         }
     }
 

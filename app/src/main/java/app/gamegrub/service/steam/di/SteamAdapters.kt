@@ -8,6 +8,7 @@ import app.gamegrub.db.dao.EncryptedAppTicketDao
 import app.gamegrub.db.dao.SteamAppDao
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
+import app.gamegrub.ui.runtime.XServerRuntime
 import `in`.dragonbra.javasteam.enums.EOSType
 import `in`.dragonbra.javasteam.enums.EPersonaState
 import `in`.dragonbra.javasteam.steam.authentication.AuthPollResult
@@ -315,7 +316,7 @@ class SteamAppInfoClientAdapter @Inject constructor(
 class GameEventEmitterAdapter @Inject constructor() : GameEventEmitter {
     override fun emitSteamEvent(event: Any) {
         if (event is SteamEvent<*>) {
-            GameGrubApp.events.emitJava(event)
+            XServerRuntime.get().events.emitJava(event)
         } else {
             Timber.w("Ignored non-Steam event in emitSteamEvent: ${event::class.java.name}")
         }
@@ -323,7 +324,7 @@ class GameEventEmitterAdapter @Inject constructor() : GameEventEmitter {
 
     override fun emitAndroidEvent(event: Any) {
         if (event is AndroidEvent<*>) {
-            GameGrubApp.events.emitJava(event)
+            XServerRuntime.get().events.emitJava(event)
         } else {
             Timber.w("Ignored non-Android event in emitAndroidEvent: ${event::class.java.name}")
         }

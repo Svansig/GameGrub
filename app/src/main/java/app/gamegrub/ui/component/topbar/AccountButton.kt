@@ -20,6 +20,7 @@ import app.gamegrub.events.SteamEvent
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.getAvatarURL
 import app.gamegrub.ui.component.dialog.ProfileDialog
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.ui.utils.SteamIconImage
 import `in`.dragonbra.javasteam.enums.EPersonaState
@@ -46,10 +47,10 @@ fun AccountButton(
             persona = event.persona
         }
 
-        GameGrubApp.events.on<SteamEvent.PersonaStateReceived, Unit>(onPersonaStateReceived)
+        XServerRuntime.get().events.on<SteamEvent.PersonaStateReceived, Unit>(onPersonaStateReceived)
 
         onDispose {
-            GameGrubApp.events.off<SteamEvent.PersonaStateReceived, Unit>(onPersonaStateReceived)
+            XServerRuntime.get().events.off<SteamEvent.PersonaStateReceived, Unit>(onPersonaStateReceived)
         }
     }
 

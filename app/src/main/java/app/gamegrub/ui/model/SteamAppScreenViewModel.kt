@@ -10,6 +10,7 @@ import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.domain.SteamInstallDomain
 import app.gamegrub.storage.StorageManager
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.winlator.container.ContainerManager
@@ -168,7 +169,7 @@ class SteamAppScreenViewModel @Inject constructor(
     fun deleteApp(appId: Int, onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
             SteamService.deleteApp(appId)
-            app.gamegrub.GameGrubApp.events.emit(
+            XServerRuntime.get().events.emit(
                 app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
             )
             withContext(Dispatchers.Main) {
@@ -184,7 +185,7 @@ class SteamAppScreenViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             try {
                 val success = SteamService.deleteApp(appId)
-                app.gamegrub.GameGrubApp.events.emit(
+                XServerRuntime.get().events.emit(
                     app.gamegrub.events.AndroidEvent.LibraryInstallStatusChanged(appId),
                 )
                 ContainerUtils.deleteContainer(context, appId.toString())

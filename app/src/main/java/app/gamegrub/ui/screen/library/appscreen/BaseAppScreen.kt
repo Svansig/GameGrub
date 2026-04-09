@@ -34,6 +34,7 @@ import app.gamegrub.ui.component.dialog.ContainerConfigDialog
 import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.ContainerConfigTransfer
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.ui.utils.createPinnedShortcut
@@ -402,7 +403,7 @@ abstract class BaseAppScreen {
         return AppMenuOption(
             optionType = AppOptionMenuType.SubmitFeedback,
             onClick = {
-                GameGrubApp.events.emit(AndroidEvent.ShowGameFeedback(libraryItem.appId))
+                XServerRuntime.get().events.emit(AndroidEvent.ShowGameFeedback(libraryItem.appId))
             },
         )
     }

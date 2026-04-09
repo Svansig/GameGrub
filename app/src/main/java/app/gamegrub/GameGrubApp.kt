@@ -35,13 +35,13 @@ typealias NavChangedListener = NavController.OnDestinationChangedListener
 @HiltAndroidApp
 class GameGrubApp : SplitCompatApplication() {
 
-    @Inject
-    lateinit var gogGameDao: GOGGameDao
+//    @Inject
+//    lateinit var gogGameDao: GOGGameDao
+//
+//    @Inject
+//    lateinit var amazonGameDao: AmazonGameDao
 
-    @Inject
-    lateinit var amazonGameDao: AmazonGameDao
-
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+//    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
@@ -82,12 +82,6 @@ class GameGrubApp : SplitCompatApplication() {
     }
 
     companion object {
-        @JvmField
-        @Deprecated("Use XServerRuntime.get().events instead", ReplaceWith("XServerRuntime.get().events"))
-        val events: EventDispatcher = EventDispatcher()
-
-        @Deprecated("Use XServerRuntime.get() instead")
-        internal var onDestinationChangedListener: NavChangedListener? = null
 
         // TODO: find a way to make this saveable, this is terrible (leak that memory baby)
         @Deprecated("Use XServerRuntime.get().xEnvironment instead")

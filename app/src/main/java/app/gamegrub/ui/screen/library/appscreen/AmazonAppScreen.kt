@@ -32,6 +32,7 @@ import app.gamegrub.ui.data.AppMenuOption
 import app.gamegrub.ui.data.GameDisplayInfo
 import app.gamegrub.ui.enums.AppOptionMenuType
 import app.gamegrub.ui.enums.DialogType
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import app.gamegrub.utils.general.DateTimeUtils
@@ -119,9 +120,9 @@ class AmazonAppScreen : BaseAppScreen() {
                     refreshKey++
                 }
             }
-            GameGrubApp.events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
+            XServerRuntime.get().events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
             onDispose {
-                GameGrubApp.events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
+                XServerRuntime.get().events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(listener)
             }
         }
 
@@ -434,9 +435,9 @@ class AmazonAppScreen : BaseAppScreen() {
                 onStateChanged()
             }
         }
-        GameGrubApp.events.on<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
+        XServerRuntime.get().events.on<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener)
         disposables +=
-            { GameGrubApp.events.off<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
+            { XServerRuntime.get().events.off<AndroidEvent.DownloadStatusChanged, Unit>(downloadStatusListener) }
 
         // Listen for install status changes
         val installListener: (AndroidEvent.LibraryInstallStatusChanged) -> Unit = { event ->
@@ -445,9 +446,9 @@ class AmazonAppScreen : BaseAppScreen() {
                 onStateChanged()
             }
         }
-        GameGrubApp.events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
+        XServerRuntime.get().events.on<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener)
         disposables +=
-            { GameGrubApp.events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
+            { XServerRuntime.get().events.off<AndroidEvent.LibraryInstallStatusChanged, Unit>(installListener) }
 
         return { disposables.forEach { it() } }
     }
@@ -625,8 +626,8 @@ class AmazonAppScreen : BaseAppScreen() {
                             withContext(Dispatchers.Main) {
                                 hideInstallDialog(appId)
                                 val gameId = libraryItem.gameId
-                                GameGrubApp.events.emitJava(AndroidEvent.DownloadStatusChanged(gameId, false))
-                                GameGrubApp.events.emitJava(AndroidEvent.LibraryInstallStatusChanged(gameId))
+                                XServerRuntime.get().events.emitJava(AndroidEvent.DownloadStatusChanged(gameId, false))
+                                XServerRuntime.get().events.emitJava(AndroidEvent.LibraryInstallStatusChanged(gameId))
                             }
                         }
                     }

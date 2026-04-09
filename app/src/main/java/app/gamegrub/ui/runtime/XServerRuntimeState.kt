@@ -71,6 +71,10 @@ class XServerRuntimeState {
         _inputControlsView.value = value
     }
 
+    fun clearInputControlsView() {
+        _inputControlsView.value = null
+    }
+
     fun setInputControlsManager(value: InputControlsManager?) {
         _inputControlsManager.value = value
     }

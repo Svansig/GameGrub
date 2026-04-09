@@ -19,7 +19,7 @@ internal object XServerInputControlsOverlayHelper {
     fun showInputControls(profile: ControlsProfile, winHandler: WinHandler, container: Container) {
         profile.isVirtualGamepad = true
 
-        GameGrubApp.inputControlsView?.let { icView ->
+        XServerRuntime.get().inputControlsView?.let { icView ->
             if (!profile.isElementsLoaded || icView.width == 0 || icView.height == 0) {
                 if (icView.width == 0 || icView.height == 0) {
                     Timber.d("Deferring element loading until view has dimensions")
@@ -63,9 +63,9 @@ internal object XServerInputControlsOverlayHelper {
     }
 
     fun hideInputControls() {
-        GameGrubApp.inputControlsView?.isShowTouchscreenControls = false
-        GameGrubApp.inputControlsView?.visibility = View.GONE
-        GameGrubApp.inputControlsView?.profile = null
+        XServerRuntime.get().inputControlsView?.isShowTouchscreenControls = false
+        XServerRuntime.get().inputControlsView?.visibility = View.GONE
+        XServerRuntime.get().inputControlsView?.profile = null
 
         GameGrubApp.touchpadView?.setSensitivity(1.0f)
         GameGrubApp.touchpadView?.setPointerButtonLeftEnabled(true)
@@ -76,6 +76,6 @@ internal object XServerInputControlsOverlayHelper {
                 XServerRuntime.get().xServerView?.renderer?.setCursorVisible(true)
             }
         }
-        GameGrubApp.inputControlsView?.invalidate()
+        XServerRuntime.get().inputControlsView?.invalidate()
     }
 }

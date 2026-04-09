@@ -82,9 +82,6 @@ class GameGrubApp : SplitCompatApplication() {
     }
 
     companion object {
-        @Deprecated("Use XServerRuntime.get().inputControlsView instead")
-        var inputControlsView: InputControlsView? = null
-
         @Deprecated("Use XServerRuntime.get().inputControlsManager instead")
         var inputControlsManager: InputControlsManager? = null
 

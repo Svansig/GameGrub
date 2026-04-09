@@ -10,7 +10,7 @@
 
 ## Problem
 
-GameGrubApp.events (event bus) is used extensively across UI and services. Need to consolidate to use gateway/state patterns instead.
+XServerRuntime.get().events (event bus) is used extensively across UI and services. Need to consolidate to use gateway/state patterns instead.
 
 ## Scope
 

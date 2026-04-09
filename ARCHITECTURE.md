@@ -218,18 +218,18 @@ Custom event dispatcher for app-wide events:
 ```kotlin
 // Subscribe (with cleanup)
 LaunchedEffect(Unit) {
-    GameGrubApp.events.on<AndroidEvent.BackPressed, Unit> {
+    XServerRuntime.get().events.on<AndroidEvent.BackPressed, Unit> {
         // Handle back press
     }
 }
 DisposableEffect(Unit) {
     onDispose {
-        GameGrubApp.events.off<AndroidEvent.BackPressed, Unit>(handler)
+        XServerRuntime.get().events.off<AndroidEvent.BackPressed, Unit>(handler)
     }
 }
 
 // Emit
-GameGrubApp.events.emit(AndroidEvent.BackPressed)
+XServerRuntime.get().events.emit(AndroidEvent.BackPressed)
 ```
 
 ## Orientation Ownership Contract

@@ -5,9 +5,9 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.service.gog.GOGConstants
 import app.gamegrub.service.gog.GOGService
 import com.winlator.container.Container
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import java.io.File
 
 class GOGDependencyFix(
     override val gameSource: GameSource,

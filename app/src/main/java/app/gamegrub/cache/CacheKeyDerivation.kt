@@ -2,8 +2,8 @@ package app.gamegrub.cache
 
 import app.gamegrub.cache.manifest.CacheManifest
 import app.gamegrub.cache.manifest.CacheType
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 data class CacheKey(
     val baseId: String,
@@ -116,13 +116,17 @@ object CacheInvalidationPolicy {
                 val age = System.currentTimeMillis() - manifest.lastAccessed
                 age > policy.maxAgeMs
             }
+
             is InvalidationPolicy.SizeBased -> {
                 manifest.sizeBytes > policy.maxSizeBytes
             }
+
             is InvalidationPolicy.VersionBased -> {
                 manifest.metadata["version"] != policy.expectedVersion
             }
+
             is InvalidationPolicy.Manual -> true
+
             is InvalidationPolicy.Never -> false
         }
     }
@@ -147,11 +151,11 @@ class CacheGarbageCollector(
 
     fun runGc(manifests: List<CacheManifest>): GcResult {
         val sortedByAge = manifests.sortedBy { it.lastAccessed }
-        
+
         var freedBytes = 0L
         val evicted = mutableListOf<CacheManifest>()
         var currentSize = manifests.sumOf { it.sizeBytes }
-        
+
         val toEvict = mutableListOf<CacheManifest>()
 
         for (manifest in sortedByAge) {
@@ -163,7 +167,7 @@ class CacheGarbageCollector(
         if (currentSize > maxTotalSizeBytes) {
             val targetFreed = currentSize - maxTotalSizeBytes
             var needed = targetFreed
-            
+
             for (manifest in sortedByAge) {
                 if (needed <= 0) break
                 if (manifest !in toEvict) {

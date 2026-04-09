@@ -1,12 +1,12 @@
 package app.gamegrub.runtime.store
 
 import app.gamegrub.runtime.manifest.BaseManifest
-import app.gamegrub.runtime.manifest.RuntimeManifest
 import app.gamegrub.runtime.manifest.DriverManifest
+import app.gamegrub.runtime.manifest.RuntimeManifest
+import java.io.File
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.File
 
 object RuntimeStoreLayout {
     private const val BASE_DIR = "runtime-store"
@@ -40,7 +40,10 @@ sealed class BundleType {
 }
 
 object RuntimeStoreSchema {
-    private val json = Json { prettyPrint = true; prettyPrint = true }
+    private val json = Json {
+        prettyPrint = true
+        prettyPrint = true
+    }
 
     fun verifyDirectoryStructure(rootDir: File): Boolean {
         val bases = RuntimeStoreLayout.basesDir(rootDir)
@@ -116,7 +119,9 @@ object RuntimeStoreSchema {
             val path = RuntimeStoreLayout.baseManifestPath(rootDir, baseId)
             if (path.exists()) {
                 json.decodeFromString<BaseManifest>(path.readText())
-            } else null
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to read BaseManifest for $baseId")
             null
@@ -128,7 +133,9 @@ object RuntimeStoreSchema {
             val path = RuntimeStoreLayout.runtimeManifestPath(rootDir, runtimeId)
             if (path.exists()) {
                 json.decodeFromString<RuntimeManifest>(path.readText())
-            } else null
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to read RuntimeManifest for $runtimeId")
             null
@@ -140,7 +147,9 @@ object RuntimeStoreSchema {
             val path = RuntimeStoreLayout.driverManifestPath(rootDir, driverId)
             if (path.exists()) {
                 json.decodeFromString<DriverManifest>(path.readText())
-            } else null
+            } else {
+                null
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to read DriverManifest for $driverId")
             null

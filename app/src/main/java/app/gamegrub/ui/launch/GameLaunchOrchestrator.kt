@@ -16,12 +16,12 @@ import app.gamegrub.launch.LaunchEngine
 import app.gamegrub.launch.LaunchOptions
 import app.gamegrub.launch.LaunchResult
 import app.gamegrub.launch.trackGameLaunched
-import app.gamegrub.session.SessionAssembler
 import app.gamegrub.service.amazon.AmazonService
 import app.gamegrub.service.epic.EpicCloudSavesManager
 import app.gamegrub.service.epic.EpicService
 import app.gamegrub.service.gog.GOGService
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.session.SessionAssembler
 import app.gamegrub.telemetry.session.LaunchFingerprint
 import app.gamegrub.telemetry.session.LaunchFingerprintEmitter
 import app.gamegrub.telemetry.session.LaunchMilestone
@@ -42,6 +42,9 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import `in`.dragonbra.javasteam.protobufs.steamclient.SteammessagesClientObjects.ECloudPendingRemoteOperation
+import java.io.File
+import java.util.Date
+import kotlin.reflect.KFunction2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -49,9 +52,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import timber.log.Timber
-import java.io.File
-import java.util.Date
-import kotlin.reflect.KFunction2
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -617,7 +617,7 @@ fun preLaunchApp(
             SyncResult.UnknownFail,
             SyncResult.DownloadFail,
             SyncResult.UpdateFail,
-                -> {
+            -> {
                 setMessageDialogState(
                     MessageDialogState(
                         visible = true,
@@ -634,8 +634,8 @@ fun preLaunchApp(
                     "Pending remote operations:${
                         postSyncInfo.pendingRemoteOperations.joinToString("\n") { pro ->
                             "\n\tmachineName: ${pro.machineName}" +
-                                    "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
-                                    "\n\toperation: ${pro.operation}"
+                                "\n\ttimestamp: ${Date(pro.timeLastUpdated * 1000L)}" +
+                                "\n\toperation: ${pro.operation}"
                         }
                     }",
                 )
@@ -736,40 +736,45 @@ fun preLaunchApp(
 
             SyncResult.UpToDate,
             SyncResult.Success,
-                -> {
-                    MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_COMPLETE, mapOf("sessionId" to sessionPlan.sessionId))
+            -> {
+                MilestoneEmitter.record(LaunchMilestone.ASSEMBLY_COMPLETE, mapOf("sessionId" to sessionPlan.sessionId))
 
-                    val launchResult = launchEngine.execute(sessionPlan, LaunchOptions())
+                val launchResult = launchEngine.execute(sessionPlan, LaunchOptions())
 
-                    when (launchResult) {
-                        is LaunchResult.Success -> {
-                            fingerprint.logAtMilestone("LAUNCH_SUCCESS")
-                            MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
-                            MilestoneEmitter.record(LaunchMilestone.GAME_INTERACTIVE)
-                            onSuccess(context, appId)
-                        }
-                        is LaunchResult.Failure -> {
-                            Timber.e("Launch failed: ${launchResult.reason}")
-                            MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf(
+                when (launchResult) {
+                    is LaunchResult.Success -> {
+                        fingerprint.logAtMilestone("LAUNCH_SUCCESS")
+                        MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
+                        MilestoneEmitter.record(LaunchMilestone.GAME_INTERACTIVE)
+                        onSuccess(context, appId)
+                    }
+
+                    is LaunchResult.Failure -> {
+                        Timber.e("Launch failed: ${launchResult.reason}")
+                        MilestoneEmitter.record(
+                            LaunchMilestone.LAUNCH_FAILED,
+                            mapOf(
                                 "reason" to launchResult.reason,
                                 "exitCode" to (launchResult.exitCode?.toString() ?: "none"),
-                            ))
-                            setLoadingDialogVisible(false)
-                            setMessageDialogState(
-                                MessageDialogState(
-                                    visible = true,
-                                    type = DialogType.GAME_LAUNCH_FAILED,
-                                    title = context.getString(R.string.game_launch_failed),
-                                    message = launchResult.reason,
-                                    dismissBtnText = context.getString(R.string.ok),
-                                ),
-                            )
-                        }
-                        is LaunchResult.Cancelled -> {
-                            MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf("reason" to "Launch cancelled"))
-                        }
+                            ),
+                        )
+                        setLoadingDialogVisible(false)
+                        setMessageDialogState(
+                            MessageDialogState(
+                                visible = true,
+                                type = DialogType.GAME_LAUNCH_FAILED,
+                                title = context.getString(R.string.game_launch_failed),
+                                message = launchResult.reason,
+                                dismissBtnText = context.getString(R.string.ok),
+                            ),
+                        )
+                    }
+
+                    is LaunchResult.Cancelled -> {
+                        MilestoneEmitter.record(LaunchMilestone.LAUNCH_FAILED, mapOf("reason" to "Launch cancelled"))
                     }
                 }
+            }
         }
     }
 }

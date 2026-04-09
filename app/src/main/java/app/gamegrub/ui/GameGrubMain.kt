@@ -1005,9 +1005,9 @@ fun GameGrubMain(
 
                     // skip login screen if any service has stored credentials
                     (PrefManager.username.isNotEmpty() && PrefManager.refreshToken.isNotEmpty()) ||
-                            GOGService.hasStoredCredentials(context) ||
-                            EpicService.hasStoredCredentials(context) ||
-                            AmazonService.hasStoredCredentials(context) ->
+                        GOGService.hasStoredCredentials(context) ||
+                        EpicService.hasStoredCredentials(context) ||
+                        AmazonService.hasStoredCredentials(context) ->
                         GameGrubScreen.Home.route + "?offline=true"
 
                     else -> GameGrubScreen.LoginUser.route

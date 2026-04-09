@@ -12,12 +12,12 @@ import app.gamegrub.service.DownloadService
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import com.winlator.container.ContainerManager
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Singleton
 class CustomGameScanner @Inject constructor(
@@ -121,12 +121,12 @@ class CustomGameScanner @Inject constructor(
 
         val steamGridLogo = folder.listFiles { file ->
             file.isFile &&
-                    file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
-                    (
-                            file.name.endsWith(".png", ignoreCase = true) ||
-                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                    file.name.endsWith(".webp", ignoreCase = true)
-                            )
+                file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
+                (
+                    file.name.endsWith(".png", ignoreCase = true) ||
+                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                        file.name.endsWith(".webp", ignoreCase = true)
+                    )
         }?.firstOrNull()
         if (steamGridLogo != null) {
             Timber.tag("CustomGameScanner").d("Found SteamGridDB logo: ${steamGridLogo.absolutePath}")
@@ -164,12 +164,12 @@ class CustomGameScanner @Inject constructor(
 
         val steamGridLogo = folder.listFiles { file ->
             file.isFile &&
-                    file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
-                    (
-                            file.name.endsWith(".png", ignoreCase = true) ||
-                                    file.name.endsWith(".jpg", ignoreCase = true) ||
-                                    file.name.endsWith(".webp", ignoreCase = true)
-                            )
+                file.name.startsWith("steamgriddb_logo", ignoreCase = true) &&
+                (
+                    file.name.endsWith(".png", ignoreCase = true) ||
+                        file.name.endsWith(".jpg", ignoreCase = true) ||
+                        file.name.endsWith(".webp", ignoreCase = true)
+                    )
         }?.firstOrNull()
         if (steamGridLogo != null) {
             Timber.tag("CustomGameScanner").d("Found SteamGridDB logo: ${steamGridLogo.absolutePath}")
@@ -325,15 +325,15 @@ class CustomGameScanner @Inject constructor(
         if (!folder.exists() || !folder.isDirectory) return null
 
         fun File.isValidExe(): Boolean = this.isFile &&
-                this.name.endsWith(".exe", ignoreCase = true) &&
-                !this.name.startsWith("unins", ignoreCase = true)
+            this.name.endsWith(".exe", ignoreCase = true) &&
+            !this.name.startsWith("unins", ignoreCase = true)
 
         val candidates = mutableListOf<String>()
 
         folder.listFiles { f ->
             f.isFile &&
-                    f.name.endsWith(".exe", ignoreCase = true) &&
-                    !f.name.startsWith("unins", ignoreCase = true)
+                f.name.endsWith(".exe", ignoreCase = true) &&
+                !f.name.startsWith("unins", ignoreCase = true)
         }?.forEach { f ->
             candidates.add(f.name)
         }
@@ -342,8 +342,8 @@ class CustomGameScanner @Inject constructor(
         for (sd in subDirs) {
             sd.listFiles { f ->
                 f.isFile &&
-                        f.name.endsWith(".exe", ignoreCase = true) &&
-                        !f.name.startsWith("unins", ignoreCase = true)
+                    f.name.endsWith(".exe", ignoreCase = true) &&
+                    !f.name.startsWith("unins", ignoreCase = true)
             }?.forEach { f ->
                 val rel = sd.name + "/" + f.name
                 candidates.add(rel)
@@ -368,15 +368,15 @@ class CustomGameScanner @Inject constructor(
         if (!folder.exists() || !folder.isDirectory) return emptyList()
 
         fun File.isValidExe(): Boolean = this.isFile &&
-                this.name.endsWith(".exe", ignoreCase = true) &&
-                !this.name.startsWith("unins", ignoreCase = true)
+            this.name.endsWith(".exe", ignoreCase = true) &&
+            !this.name.startsWith("unins", ignoreCase = true)
 
         val candidates = mutableListOf<String>()
 
         folder.listFiles { f ->
             f.isFile &&
-                    f.name.endsWith(".exe", ignoreCase = true) &&
-                    !f.name.startsWith("unins", ignoreCase = true)
+                f.name.endsWith(".exe", ignoreCase = true) &&
+                !f.name.startsWith("unins", ignoreCase = true)
         }?.forEach { f ->
             candidates.add(f.name)
         }
@@ -385,8 +385,8 @@ class CustomGameScanner @Inject constructor(
         for (sd in subDirs) {
             sd.listFiles { f ->
                 f.isFile &&
-                        f.name.endsWith(".exe", ignoreCase = true) &&
-                        !f.name.startsWith("unins", ignoreCase = true)
+                    f.name.endsWith(".exe", ignoreCase = true) &&
+                    !f.name.startsWith("unins", ignoreCase = true)
             }?.forEach { f ->
                 val rel = sd.name + "/" + f.name
                 candidates.add(rel)
@@ -404,7 +404,7 @@ class CustomGameScanner @Inject constructor(
     fun hasStoragePermission(context: Context, path: String): Boolean {
         // Check if path is outside app sandbox
         val isOutsideSandbox = !path.contains("/Android/data/${context.packageName}") &&
-                !path.contains(context.dataDir.path)
+            !path.contains(context.dataDir.path)
 
         if (!isOutsideSandbox) {
             // Path is in app sandbox, no special permission needed
@@ -542,7 +542,7 @@ class CustomGameScanner @Inject constructor(
         val existing = GameMetadataManager.read(folder)
         val metadata = existing // Preserve existing metadata fields, only update appId
             ?.copy(appId = gameId) ?: // Create new metadata with just the appId
-        GameMetadata(appId = gameId)
+            GameMetadata(appId = gameId)
         GameMetadataManager.write(folder, metadata)
     }
 

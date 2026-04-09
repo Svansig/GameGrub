@@ -59,7 +59,13 @@ class SteamInstalledExeManagerTest {
     @Test
     fun resolveInstalledExe_usesPrimaryChooserBeforeLargestDepotFallback() {
         val result = SteamInstalledExeManager.resolveInstalledExe<String>(
-            appInfo = createApp(launchExecutable = "not_present.exe"),
+            appInfo = createApp(
+                depots = mapOf(
+                    100 to createDepot(depotId = 100, manifestSize = 10L),
+                    200 to createDepot(depotId = 200, manifestSize = 5L),
+                ),
+                launchExecutable = "not_present.exe",
+            ),
             canQueryManifests = true,
             fallbackExecutable = { "fallback.exe" },
             loadManifestCandidates = { depotId, _ ->

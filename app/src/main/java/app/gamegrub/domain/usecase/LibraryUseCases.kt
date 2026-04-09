@@ -5,9 +5,9 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.data.SortOption
 import app.gamegrub.gateway.LibraryGateway
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 class GetGamesUseCase @Inject constructor(
     private val libraryGateway: LibraryGateway,

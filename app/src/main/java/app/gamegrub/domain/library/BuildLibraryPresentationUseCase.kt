@@ -64,14 +64,14 @@ class BuildLibraryPresentationUseCase @Inject constructor() {
             currentTab.showCustom
         }
         val includeGog = (
-                if (currentTab == LibraryTab.ALL) currentState.showGOGInLibrary else currentTab.showGoG
-                ) && (input.authGogLoggedIn || currentTab.installedOnly)
+            if (currentTab == LibraryTab.ALL) currentState.showGOGInLibrary else currentTab.showGoG
+            ) && (input.authGogLoggedIn || currentTab.installedOnly)
         val includeEpic = (
-                if (currentTab == LibraryTab.ALL) currentState.showEpicInLibrary else currentTab.showEpic
-                ) && (input.authEpicLoggedIn || currentTab.installedOnly)
+            if (currentTab == LibraryTab.ALL) currentState.showEpicInLibrary else currentTab.showEpic
+            ) && (input.authEpicLoggedIn || currentTab.installedOnly)
         val includeAmazon = (
-                if (currentTab == LibraryTab.ALL) currentState.showAmazonInLibrary else currentTab.showAmazon
-                ) && (input.authAmazonLoggedIn || currentTab.installedOnly)
+            if (currentTab == LibraryTab.ALL) currentState.showAmazonInLibrary else currentTab.showAmazon
+            ) && (input.authAmazonLoggedIn || currentTab.installedOnly)
 
         val sortComparator: Comparator<Entry> = when (currentState.currentSortOption) {
             SortOption.INSTALLED_FIRST -> compareBy<Entry> { if (it.isInstalled) 0 else 1 }
@@ -107,10 +107,10 @@ class BuildLibraryPresentationUseCase @Inject constructor() {
         val pagedList = combined.take(endIndex)
 
         val allCount = (if (currentState.showSteamInLibrary) input.steamCountForBadges else 0) +
-                (if (currentState.showCustomGamesInLibrary) input.customEntries.size else 0) +
-                (if (currentState.showGOGInLibrary && input.authGogLoggedIn) input.gogCountForBadges else 0) +
-                (if (currentState.showEpicInLibrary && input.authEpicLoggedIn) input.epicCountForBadges else 0) +
-                (if (currentState.showAmazonInLibrary && input.authAmazonLoggedIn) input.amazonCountForBadges else 0)
+            (if (currentState.showCustomGamesInLibrary) input.customEntries.size else 0) +
+            (if (currentState.showGOGInLibrary && input.authGogLoggedIn) input.gogCountForBadges else 0) +
+            (if (currentState.showEpicInLibrary && input.authEpicLoggedIn) input.epicCountForBadges else 0) +
+            (if (currentState.showAmazonInLibrary && input.authAmazonLoggedIn) input.amazonCountForBadges else 0)
 
         return Output(
             pagedList = pagedList,
@@ -119,7 +119,7 @@ class BuildLibraryPresentationUseCase @Inject constructor() {
             currentPaginationPage = input.paginationPage + 1,
             allCount = allCount,
             installedCount = input.steamInstalledCount + input.gogInstalledCount +
-                    input.epicInstalledCount + input.amazonInstalledCount + input.customEntries.size,
+                input.epicInstalledCount + input.amazonInstalledCount + input.customEntries.size,
             steamCount = if (currentState.showSteamInLibrary) input.steamCountForBadges else 0,
             gogCount = if (currentState.showGOGInLibrary && input.authGogLoggedIn) input.gogCountForBadges else 0,
             epicCount = if (currentState.showEpicInLibrary && input.authEpicLoggedIn) input.epicCountForBadges else 0,

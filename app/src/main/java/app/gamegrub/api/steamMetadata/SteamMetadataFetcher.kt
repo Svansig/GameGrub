@@ -1,6 +1,9 @@
 package app.gamegrub.api.steamMetadata
 
 import app.gamegrub.network.NetworkManager
+import java.io.IOException
+import java.net.URLEncoder
+import java.util.concurrent.TimeUnit
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Protocol
@@ -8,9 +11,6 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.IOException
-import java.net.URLEncoder
-import java.util.concurrent.TimeUnit
 
 object SteamMetadataFetcher {
 
@@ -25,12 +25,12 @@ object SteamMetadataFetcher {
         val where = URLEncoder.encode("Infobox_game.Steam_AppID HOLDS \"$steamAppId\"", "UTF-8")
         val url =
             "https://pcgamingwiki.com/w/api.php" +
-                    "?action=cargoquery" +
-                    "&tables=Infobox_game,AP" +
-                    "I&join_on=Infobox_game._pageID=API._pageID" +
-                    "&fields=API.Direct3D_versions" +
-                    "&where=$where" +
-                    "&format=json"
+                "?action=cargoquery" +
+                "&tables=Infobox_game,AP" +
+                "I&join_on=Infobox_game._pageID=API._pageID" +
+                "&fields=API.Direct3D_versions" +
+                "&where=$where" +
+                "&format=json"
 
         Timber.i("[DX Fetch] Starting fetchDirect3DMajor for query=%s", url)
 

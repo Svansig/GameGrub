@@ -12,11 +12,11 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.data.LaunchInfo
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.gamefixes.GameFixesRegistry
+import app.gamegrub.launch.ActiveSessionStore
 import app.gamegrub.service.steam.AchievementWatcher
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.service.steam.managers.SteamSessionContext
 import app.gamegrub.ui.data.XServerState
-import app.gamegrub.launch.ActiveSessionStore
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.PrefManager as WinlatorPrefManager
 import com.winlator.alsaserver.ALSAClient
@@ -465,10 +465,10 @@ internal object EnvironmentSetupCoordinator {
      * entries from this list as the corresponding paths are migrated to SessionPlan.
      */
     private val SESSION_ENV_DENYLIST = setOf(
-        "WINEPREFIX",   // managed by imageFs.wineprefix — migration in progress
-        "WINEDEBUG",    // managed by PrefManager.enableWineDebug
-        "LC_ALL",       // managed by container.lC_ALL
-        "MESA_DEBUG",   // hardcoded
+        "WINEPREFIX", // managed by imageFs.wineprefix — migration in progress
+        "WINEDEBUG", // managed by PrefManager.enableWineDebug
+        "LC_ALL", // managed by container.lC_ALL
+        "MESA_DEBUG", // hardcoded
         "MESA_NO_ERROR", // hardcoded
     )
 

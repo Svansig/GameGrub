@@ -1,8 +1,8 @@
 package app.gamegrub.domain.customgame
 
+import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.File
 
 /**
  * Data class representing the metadata stored in a .gamenative file.

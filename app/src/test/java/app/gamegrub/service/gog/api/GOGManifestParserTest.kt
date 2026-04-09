@@ -18,7 +18,7 @@ import org.robolectric.annotation.Config
  * Uses real data classes and JSON parsing
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [28])
+@Config(sdk = [35])
 class GOGManifestParserTest {
     private lateinit var parser: GOGManifestParser
 

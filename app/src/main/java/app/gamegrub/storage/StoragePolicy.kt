@@ -64,9 +64,11 @@ object StoragePolicyHelper {
                 minSpaceBytes = 512L * 1024 * 1024,
                 preferredSpaceBytes = 1024L * 1024 * 1024,
             )
+
             is StoragePolicy.ColdBulk -> policy.minFreeSpace.let {
                 StorageRequirement(minSpaceBytes = it)
             }
+
             is StoragePolicy.Hybrid -> StorageRequirement(
                 minSpaceBytes = 256L * 1024 * 1024,
                 preferredSpaceBytes = 512L * 1024 * 1024,

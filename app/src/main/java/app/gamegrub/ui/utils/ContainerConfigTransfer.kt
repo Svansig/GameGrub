@@ -6,6 +6,9 @@ import app.gamegrub.R
 import app.gamegrub.api.config.BestConfigService
 import app.gamegrub.content.manifest.ManifestInstaller
 import app.gamegrub.utils.container.ContainerUtils
+import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,9 +16,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import org.json.JSONObject
-import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Singleton
 class ContainerConfigTransfer @Inject constructor(

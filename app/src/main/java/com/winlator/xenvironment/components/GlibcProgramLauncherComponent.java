@@ -198,7 +198,7 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
             StringBuilder ldPreload = new StringBuilder();
             if (libredirect64.exists()) ldPreload.append(libredirect64.getPath());
             if (sysvshm64.exists()) {
-                if (!ldPreload.isEmpty()) ldPreload.append(" ");
+                if (ldPreload.length() > 0) ldPreload.append(" ");
                 ldPreload.append(sysvshm64.getPath());
             }
             Timber.tag("GlibcProgramLauncherComponent").d("Setting LD_PRELOAD=" + ldPreload);
@@ -304,7 +304,7 @@ public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent
             StringBuilder ldPreload = new StringBuilder();
             if (libredirect64.exists()) ldPreload.append(libredirect64.getPath());
             if (sysvshm64.exists()) {
-                if (!ldPreload.isEmpty()) ldPreload.append(" ");
+                if (ldPreload.length() > 0) ldPreload.append(" ");
                 ldPreload.append(sysvshm64.getPath());
             }
             Timber.tag("GlibcProgramLauncherComponent").d("Shell LD_PRELOAD=" + ldPreload);

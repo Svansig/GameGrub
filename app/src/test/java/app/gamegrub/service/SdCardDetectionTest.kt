@@ -6,6 +6,7 @@ import app.gamegrub.enums.Marker
 import app.gamegrub.enums.OS
 import app.gamegrub.enums.OSArch
 import app.gamegrub.service.steam.SteamService
+import app.gamegrub.service.steam.managers.SteamLaunchConfigManager
 import java.io.File
 import java.util.EnumSet
 import org.junit.Assert.*
@@ -50,19 +51,19 @@ class SdCardDetectionTest {
     @Test
     fun `valid depot with normal manifest passes filter`() {
         val d = depot(manifests = mapOf("public" to manifest()))
-        assertTrue(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertTrue(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
     fun `depot with 0-byte manifest is rejected`() {
         val d = depot(manifests = mapOf("public" to manifest(size = 0L, download = 0L)))
-        assertFalse(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertFalse(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
     fun `depot with nonzero size but 0-byte download is accepted`() {
         val d = depot(manifests = mapOf("public" to manifest(size = 1000L, download = 0L)))
-        assertTrue(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertTrue(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
@@ -73,7 +74,7 @@ class SdCardDetectionTest {
                 "beta" to manifest(size = 0L, download = 0L),
             ),
         )
-        assertTrue(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertTrue(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
@@ -82,7 +83,7 @@ class SdCardDetectionTest {
             manifests = emptyMap(),
             encryptedManifests = mapOf("public" to manifest()),
         )
-        assertFalse(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertFalse(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
@@ -91,19 +92,19 @@ class SdCardDetectionTest {
             manifests = mapOf("public" to manifest()),
             encryptedManifests = mapOf("beta" to manifest()),
         )
-        assertTrue(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertTrue(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
     fun `depot with empty manifests and no shared install is rejected`() {
         val d = depot(manifests = emptyMap(), sharedInstall = false)
-        assertFalse(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertFalse(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     @Test
     fun `depot with empty manifests but shared install passes`() {
         val d = depot(manifests = emptyMap(), sharedInstall = true)
-        assertTrue(SteamService.filterForDownloadableDepots(d, true, "english", null))
+        assertTrue(SteamLaunchConfigManager.filterForDownloadableDepots(d, true, "english", null))
     }
 
     // -- getAppDirPath: prefer completed installs over partial --

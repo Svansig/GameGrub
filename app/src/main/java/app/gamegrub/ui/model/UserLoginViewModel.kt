@@ -12,6 +12,7 @@ import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.data.UserLoginState
 import com.posthog.PostHog
 import `in`.dragonbra.javasteam.steam.authentication.IAuthenticator
+import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.concurrent.CompletableFuture
 
 class UserLoginViewModel : ViewModel() {
     private val _loginState = MutableStateFlow(UserLoginState())

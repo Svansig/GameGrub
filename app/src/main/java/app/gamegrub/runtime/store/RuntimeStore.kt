@@ -3,13 +3,13 @@ package app.gamegrub.runtime.store
 import app.gamegrub.runtime.manifest.BaseManifest
 import app.gamegrub.runtime.manifest.DriverManifest
 import app.gamegrub.runtime.manifest.RuntimeManifest
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /**
  * Service for managing immutable runtime bundles.
@@ -43,7 +43,7 @@ class RuntimeStore @Inject constructor(
             }
 
             bundleDir.mkdirs()
-            
+
             val contentHash = computeDirectoryHash(contentDir)
             if (contentHash != manifest.contentHash) {
                 bundleDir.deleteRecursively()
@@ -145,12 +145,14 @@ class RuntimeStore @Inject constructor(
                     if (!rootfsDir.exists()) return@withContext false
                     computeDirectoryHash(rootfsDir) == manifest.contentHash
                 }
+
                 is BundleType.Runtime -> {
                     val manifest = RuntimeStoreSchema.readRuntimeManifest(rootDir, bundleId) ?: return@withContext false
                     val contentDir = RuntimeStoreLayout.runtimeDir(rootDir, bundleId)
                     if (!contentDir.exists()) return@withContext false
                     computeDirectoryHash(contentDir) == manifest.contentHash
                 }
+
                 is BundleType.Driver -> {
                     val manifest = RuntimeStoreSchema.readDriverManifest(rootDir, bundleId) ?: return@withContext false
                     val contentDir = RuntimeStoreLayout.driverDir(rootDir, bundleId)

@@ -3,15 +3,15 @@ package app.gamegrub.cache
 import app.gamegrub.cache.manifest.CacheManifest
 import app.gamegrub.cache.manifest.CacheManifestStore
 import app.gamegrub.cache.manifest.CacheType
+import java.io.File
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.io.File
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Controller for managing shader, translator, and probe caches.
@@ -162,7 +162,7 @@ class CacheController @Inject constructor(
     suspend fun deleteCache(cacheId: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val existing = cacheStore.caches[cacheId] ?: return@withContext false
-            
+
             val cacheDir = File(existing.path)
             if (cacheDir.exists()) {
                 cacheDir.deleteRecursively()

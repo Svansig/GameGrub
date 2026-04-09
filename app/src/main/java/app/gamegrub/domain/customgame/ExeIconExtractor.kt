@@ -1,10 +1,10 @@
 package app.gamegrub.domain.customgame
 
-import timber.log.Timber
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import timber.log.Timber
 
 /**
  * Minimal PE resource parser to extract icon(s) from a Windows EXE/DLL.

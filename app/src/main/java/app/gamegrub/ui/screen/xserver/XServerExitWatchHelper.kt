@@ -1,6 +1,7 @@
 package app.gamegrub.ui.screen.xserver
 
 import app.gamegrub.GameGrubApp
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.container.Container
 import com.winlator.widget.FrameRating
 import com.winlator.widget.XServerView
@@ -95,7 +96,7 @@ internal object XServerExitWatchHelper {
                             withContext(Dispatchers.Main) {
                                 XServerExitCoordinator.requestExit(
                                     winHandler = winHandler,
-                                    environment = GameGrubApp.xEnvironment,
+                                    environment = XServerRuntime.get().xEnvironment,
                                     frameRating = frameRating,
                                     appInfo = appInfo,
                                     container = container,

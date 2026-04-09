@@ -378,7 +378,7 @@ fun GameGrubMain(
                                         }
                                     }
                                 }
-                            } else if (GameGrubApp.xEnvironment == null) {
+                            } else if (XServerRuntime.get().xEnvironment == null) {
                                 val currentRoute = navController.currentDestination?.route
                                 val targetRoute = viewModel.getPersistedRoute() ?: GameGrubScreen.Home.route
                                 if (currentRoute == GameGrubScreen.LoginUser.route) {
@@ -1093,7 +1093,7 @@ fun GameGrubMain(
 
                         if (shouldShowDialogs &&
                             !state.annoyingDialogShown &&
-                            GameGrubApp.xEnvironment == null &&
+                            XServerRuntime.get().xEnvironment == null &&
                             !SteamService.keepAlive &&
                             !LaunchRequestManager.wasLaunchedViaExternalIntent
                         ) {

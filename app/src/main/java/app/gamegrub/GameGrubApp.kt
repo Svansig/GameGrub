@@ -82,11 +82,6 @@ class GameGrubApp : SplitCompatApplication() {
     }
 
     companion object {
-
-        // TODO: find a way to make this saveable, this is terrible (leak that memory baby)
-        @Deprecated("Use XServerRuntime.get().xEnvironment instead")
-        internal var xEnvironment: XEnvironment? = null
-
         @Deprecated("Use XServerRuntime.get().xServerView instead")
         internal var xServerView: XServerView? = null
 

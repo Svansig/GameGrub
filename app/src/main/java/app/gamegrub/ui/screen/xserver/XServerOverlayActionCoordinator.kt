@@ -10,6 +10,7 @@ import app.gamegrub.GameGrubApp
 import app.gamegrub.PrefManager
 import app.gamegrub.externaldisplay.IMEInputReceiver
 import app.gamegrub.ui.component.QuickMenuAction
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import com.posthog.PostHog
 import com.winlator.container.Container
@@ -26,7 +27,7 @@ internal object XServerOverlayActionCoordinator {
             Timber.d("Skipping overlay suspend due to suspend policy=never")
             return
         }
-        GameGrubApp.xEnvironment?.onPause()
+        XServerRuntime.get().xEnvironment?.onPause()
         GameGrubApp.isOverlayPaused = true
     }
 
@@ -42,7 +43,7 @@ internal object XServerOverlayActionCoordinator {
             Timber.d("Keeping game suspended until Resume is pressed")
             return
         }
-        GameGrubApp.xEnvironment?.onResume()
+        XServerRuntime.get().xEnvironment?.onResume()
         clearOverlayPauseState()
     }
 
@@ -51,7 +52,7 @@ internal object XServerOverlayActionCoordinator {
             return
         }
         if (!neverSuspend) {
-            GameGrubApp.xEnvironment?.onResume()
+            XServerRuntime.get().xEnvironment?.onResume()
         }
         onKeepPausedForEditorChanged(false)
         clearOverlayPauseState()
@@ -212,7 +213,7 @@ internal object XServerOverlayActionCoordinator {
 
     private fun forceResumeIfSuspended(neverSuspend: Boolean) {
         if (GameGrubApp.isOverlayPaused && !neverSuspend) {
-            GameGrubApp.xEnvironment?.onResume()
+            XServerRuntime.get().xEnvironment?.onResume()
         }
         clearOverlayPauseState()
     }

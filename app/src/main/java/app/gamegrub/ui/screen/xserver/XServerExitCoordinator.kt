@@ -3,6 +3,7 @@ package app.gamegrub.ui.screen.xserver
 import app.gamegrub.GameGrubApp
 import app.gamegrub.LaunchRequestManager
 import app.gamegrub.data.SteamApp
+import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import com.posthog.PostHog
 import com.winlator.container.Container
@@ -62,7 +63,7 @@ internal object XServerExitCoordinator {
         environment?.stopEnvironmentComponents()
         app.gamegrub.service.steam.SteamService.keepAlive = false
         GameGrubApp.clearActiveSuspendState()
-        GameGrubApp.xEnvironment = null
+        XServerRuntime.get().clearXEnvironment()
         GameGrubApp.inputControlsView = null
         GameGrubApp.inputControlsManager = null
         GameGrubApp.touchpadView = null

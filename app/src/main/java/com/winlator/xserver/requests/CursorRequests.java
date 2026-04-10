@@ -53,7 +53,7 @@ public abstract class CursorRequests {
         client.xServer.cursorManager.freeCursor(inputStream.readInt());
     }
 
-    /** RecolorCursor (96): change the fore/back colours of an existing cursor. */
+    /** RecolorCursor (96): change the fore/back colors of an existing cursor. */
     public static void recolorCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) {
         int cursorId = inputStream.readInt();
         byte foreRed   = (byte)inputStream.readShort();

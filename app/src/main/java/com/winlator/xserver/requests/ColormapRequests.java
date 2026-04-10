@@ -14,17 +14,17 @@ import java.io.IOException;
  * Handles X11 colormap opcodes (80–92).
  *
  * This server uses a TrueColor visual; clients compute pixel values directly
- * from colour components. Colormap operations are therefore mostly synthetic
+ * from color components. Colormap operations are therefore mostly synthetic
  * stubs that return plausible replies without maintaining real colormap state.
  */
 public abstract class ColormapRequests {
 
     /**
-     * AllocColor (84): allocate a colour cell in the colormap.
+     * AllocColor (84): allocate a color cell in the colormap.
      *
      * For TrueColor, we just compute the pixel from the 16-bit RGB components
      * (shift each channel down to 8 bits, pack as 0xRRGGBB) and return it.
-     * The exact value is rounded to the server's colour precision (8 bits/channel).
+     * The exact value is rounded to the server's color precision (8 bits/channel).
      */
     public static void allocColor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
         inputStream.skip(4); // colormapId (ignored — we have one implicit colormap)
@@ -59,7 +59,7 @@ public abstract class ColormapRequests {
     }
 
     /**
-     * AllocNamedColor (85): allocate a named colour.
+     * AllocNamedColor (85): allocate a named color.
      * Simplified: return black (pixel=0) for any unknown name.
      */
     public static void allocNamedColor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
@@ -85,7 +85,7 @@ public abstract class ColormapRequests {
     }
 
     /**
-     * AllocColorCells (86): allocate read/write colour cells.
+     * AllocColorCells (86): allocate read/write color cells.
      * Simplified: return an empty allocation (nPixels=0, nMasks=0).
      */
     public static void allocColorCells(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
@@ -102,7 +102,7 @@ public abstract class ColormapRequests {
     }
 
     /**
-     * AllocColorPlanes (87): allocate colour planes.
+     * AllocColorPlanes (87): allocate color planes.
      * Simplified: return empty allocation.
      */
     public static void allocColorPlanes(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
@@ -168,7 +168,7 @@ public abstract class ColormapRequests {
     }
 
     /**
-     * LookupColor (92): look up a named colour.
+     * LookupColor (92): look up a named color.
      * Simplified: return black for any unknown name.
      */
     public static void lookupColor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {

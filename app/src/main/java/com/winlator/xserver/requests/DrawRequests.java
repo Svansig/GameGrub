@@ -304,7 +304,7 @@ public abstract class DrawRequests {
         }
     }
 
-    /** CopyPlane (opcode 61): extract 1-bit plane and blit using GC fg/bg colours.
+    /** CopyPlane (opcode 61): extract 1-bit plane and blit using GC fg/bg colors.
      *  Simplified: treats the plane as a 1-bpp bitmap and draws it via drawImage. */
     public static void copyPlane(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         int srcDrawableId = inputStream.readInt();

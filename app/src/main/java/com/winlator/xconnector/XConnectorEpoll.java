@@ -9,6 +9,9 @@ import timber.log.Timber;
 
 public class XConnectorEpoll implements Runnable {
     private static final String TAG = "XConnectorEpoll";
+    private static final long STOP_JOIN_TIMEOUT_MS = 2000L;
+    private static final long STOP_JOIN_POLL_MS = 100L;
+    private static final long CLIENT_STOP_JOIN_TIMEOUT_MS = 1000L;
 
     private final String connectorLabel;
     private final ConnectionHandler connectionHandler;
@@ -93,12 +96,23 @@ public class XConnectorEpoll implements Runnable {
             Timber.tag(TAG).d(logPrefix() + " Stopping connector thread (connectedClients=" + this.connectedClients.size() + ")");
             this.running = false;
             requestShutdown();
-            while (this.epollThread.isAlive()) {
+
+            long deadline = System.currentTimeMillis() + STOP_JOIN_TIMEOUT_MS;
+            while (this.epollThread.isAlive() && System.currentTimeMillis() < deadline) {
                 try {
-                    this.epollThread.join();
-                } catch (InterruptedException ignored) {
+                    this.epollThread.join(STOP_JOIN_POLL_MS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    Timber.tag(TAG).w(e, logPrefix() + " Interrupted while waiting for connector thread to stop");
+                    break;
                 }
             }
+
+            if (this.epollThread.isAlive()) {
+                Timber.tag(TAG).w(logPrefix() + " Connector thread did not stop within timeout");
+                this.epollThread.interrupt();
+            }
+
             this.epollThread = null;
         }
     }
@@ -169,13 +183,21 @@ public class XConnectorEpoll implements Runnable {
     public void killConnection(Client client) {
         client.connected = false;
         if (this.multithreadedClients) {
-            if (Thread.currentThread() != client.pollThread) {
+            if (client.pollThread != null && Thread.currentThread() != client.pollThread) {
                 client.requestShutdown();
-                while (client.pollThread.isAlive()) {
+                long deadline = System.currentTimeMillis() + CLIENT_STOP_JOIN_TIMEOUT_MS;
+                while (client.pollThread.isAlive() && System.currentTimeMillis() < deadline) {
                     try {
-                        client.pollThread.join();
-                    } catch (InterruptedException ignored) {
+                        client.pollThread.join(STOP_JOIN_POLL_MS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        Timber.tag(TAG).w(e, logPrefix() + " Interrupted while waiting for client poll thread to stop");
+                        break;
                     }
+                }
+                if (client.pollThread.isAlive()) {
+                    Timber.tag(TAG).w(logPrefix() + " Client poll thread did not stop within timeout");
+                    client.pollThread.interrupt();
                 }
                 this.connectionHandler.handleConnectionShutdown(client);
                 client.pollThread = null;

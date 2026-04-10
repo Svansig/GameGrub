@@ -2,10 +2,15 @@ package app.gamegrub.container.launch.preinstall
 
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.ui.runtime.XServerRuntime
+import app.gamegrub.ui.screen.xserver.XServerExitCoordinator
 import com.winlator.container.Container
 import com.winlator.core.Callback
 import com.winlator.xenvironment.components.GuestProgramLauncherComponent
 import timber.log.Timber
+
+internal fun shouldReportGuestTerminationAsError(status: Int, isExitInProgress: Boolean): Boolean {
+    return status != 0 && !isExitInProgress
+}
 
 /**
  * Configures the guest launcher termination flow for optional pre-install steps.
@@ -25,9 +30,11 @@ internal object PreInstallChainExecutor {
         onGameLaunchError: ((String) -> Unit)? = null,
     ) {
         val gameTerminationCallback = Callback<Int> { status ->
-            if (status != 0) {
+            if (shouldReportGuestTerminationAsError(status, XServerExitCoordinator.isExitInProgress())) {
                 Timber.e("Guest program terminated with status: $status")
                 onGameLaunchError?.invoke("Game terminated with error status: $status")
+            } else {
+                Timber.i("Guest program terminated with status: $status")
             }
             XServerRuntime.get().events.emit(AndroidEvent.GuestProgramTerminated)
         }

@@ -15,10 +15,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import timber.log.Timber;
+
 public class XEnvironment implements Iterable<EnvironmentComponent> {
     private final Context context;
     private final ImageFs imageFs;
     private final ArrayList<EnvironmentComponent> components = new ArrayList<>();
+    private volatile EnvironmentStopSummary lastStopSummary = EnvironmentStopSummary.empty();
 
     private boolean winetricksRunning = false;
 
@@ -76,7 +79,41 @@ public class XEnvironment implements Iterable<EnvironmentComponent> {
     }
 
     public void stopEnvironmentComponents() {
-        for (EnvironmentComponent environmentComponent : this) environmentComponent.stop();
+        stopEnvironmentComponentsWithSummary();
+    }
+
+    public EnvironmentStopSummary stopEnvironmentComponentsWithSummary() {
+        long startNs = System.nanoTime();
+        ArrayList<EnvironmentStopSummary.ComponentStopResult> results = new ArrayList<>();
+        for (int i = components.size() - 1; i >= 0; i--) {
+            EnvironmentComponent environmentComponent = components.get(i);
+            long componentStartNs = System.nanoTime();
+            boolean success = true;
+            String errorMessage = null;
+            try {
+                environmentComponent.stop();
+            } catch (RuntimeException e) {
+                success = false;
+                errorMessage = e.getMessage();
+                Timber.tag("XEnvironment").e(e, "Failed stopping component: %s", environmentComponent.getClass().getSimpleName());
+            }
+            long componentDurationMs = (System.nanoTime() - componentStartNs) / 1_000_000L;
+            results.add(
+                    new EnvironmentStopSummary.ComponentStopResult(
+                            environmentComponent.getClass().getSimpleName(),
+                            componentDurationMs,
+                            success,
+                            errorMessage
+                    )
+            );
+        }
+        long totalDurationMs = (System.nanoTime() - startNs) / 1_000_000L;
+        lastStopSummary = new EnvironmentStopSummary(results, totalDurationMs);
+        return lastStopSummary;
+    }
+
+    public EnvironmentStopSummary getLastStopSummary() {
+        return lastStopSummary;
     }
 
     public void onPause() {

@@ -9,6 +9,8 @@ import com.winlator.xserver.events.Event;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import timber.log.Timber;
+
 public class XClient implements XResourceManager.OnResourceLifecycleListener {
     public final XServer xServer;
     private boolean authenticated = false;
@@ -19,6 +21,7 @@ public class XClient implements XResourceManager.OnResourceLifecycleListener {
     private int initialLength;
     private final XInputStream inputStream;
     private final XOutputStream outputStream;
+    private boolean outputClosed = false;
     private final ArrayMap<Window, EventListener> eventListeners = new ArrayMap<>();
     private final ArrayList<XResource> resources = new ArrayList<>();
 
@@ -50,11 +53,15 @@ public class XClient implements XResourceManager.OnResourceLifecycleListener {
     }
 
     public void sendEvent(Event event) {
+        if (outputClosed) {
+            return;
+        }
         try {
             event.send(sequenceNumber, outputStream);
         }
         catch (IOException e) {
-            e.printStackTrace();
+            outputClosed = true;
+            Timber.tag("XClient").d("Dropping X11 events for disconnected client");
         }
     }
 

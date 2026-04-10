@@ -16,6 +16,33 @@ Use this running log to capture opportunities discovered while implementing or r
 ## Entries
 
 - **Date**: `2026-04-09`
+- **Ticket**: `N/A (runtime exit contract + teardown reporting)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Teardown reliability work lacked a single contract and structured outcome signal, making clean-exit verification ad-hoc and log-driven.
+- **Proposed Action**: Define a runtime exit contract, add phase-based teardown reporting, and capture per-component stop summaries to make pass/fail conditions explicit.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-09`
+- **Ticket**: `N/A (Shovel Knight clean-exit classification)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: App-initiated teardown could report non-zero guest termination statuses as launch errors even when an intentional exit was already in progress, creating false-positive failure telemetry and noisy user-facing error logs.
+- **Proposed Action**: Gate non-zero termination error reporting with exit-intent context so intentional shutdowns are logged informationally while preserving error reporting when no exit intent exists.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-09`
+- **Ticket**: `N/A (teardown lifecycle hardening)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: Runtime teardown paths could block indefinitely on connector/server joins and left shutdown thread lifecycle implicit.
+- **Proposed Action**: Add bounded join timeouts and explicit accept/client thread tracking in runtime connectors/servers so session close has deterministic shutdown behavior and observable timeout warnings.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-09`
 - **Ticket**: `N/A (Shovel Knight launch audio + exit-status investigation)`
 - **PR/Commit**: `TBD`
 - **Type**: `Code Quality`

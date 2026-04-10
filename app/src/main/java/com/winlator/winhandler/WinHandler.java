@@ -36,13 +36,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
 
 import timber.log.Timber;
 
 public class WinHandler {
 
     private static final String TAG = "WinHandler";
+    private static final long STOP_JOIN_TIMEOUT_MS = 1000L;
     private final ControllerManager controllerManager;
     public static final int MAX_PLAYERS = 1;
     private final MappedByteBuffer[] extraGamepadBuffers = new MappedByteBuffer[MAX_PLAYERS - 1];
@@ -67,6 +67,9 @@ public class WinHandler {
     private final ArrayList<Integer> xinputProcesses;
     private final XServer xServer;
     private final XServerView xServerView;
+    private Thread sendThread;
+    private Thread receiveThread;
+    private Thread rumblePollerThread;
 
     private InputControlsView inputControlsView;
     private short lastLowFreq = 0;  // Use 'short' instead of uint16_t
@@ -314,19 +317,29 @@ public class WinHandler {
     }
 
     private void startSendThread() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        if (sendThread != null && sendThread.isAlive()) {
+            return;
+        }
+        sendThread = new Thread(() -> {
             while (this.running) {
                 synchronized (this.actions) {
                     while (this.initReceived && !this.actions.isEmpty()) {
                         Objects.requireNonNull(this.actions.poll()).run();
                     }
+                    if (!this.running) {
+                        break;
+                    }
                     try {
                         this.actions.wait();
-                    } catch (InterruptedException ignored) {
+                    } catch (InterruptedException e) {
+                        if (!this.running) {
+                            break;
+                        }
                     }
                 }
             }
-        });
+        }, "WinHandler-Send");
+        sendThread.start();
     }
 
     public void stop() {
@@ -337,8 +350,15 @@ public class WinHandler {
             this.socket = null;
         }
         synchronized (this.actions) {
-            this.actions.notify();
+            this.actions.notifyAll();
         }
+        stopVibration();
+        joinThread(sendThread, "send");
+        joinThread(receiveThread, "receive");
+        joinThread(rumblePollerThread, "rumble");
+        sendThread = null;
+        receiveThread = null;
+        rumblePollerThread = null;
     }
 
     private void handleRequest(byte requestCode, final int port) throws IOException {
@@ -523,7 +543,7 @@ public class WinHandler {
         }
         this.running = true;
         startSendThread();
-        Executors.newSingleThreadExecutor().execute(() -> {
+        receiveThread = new Thread(() -> {
             try {
                 DatagramSocket datagramSocket = new DatagramSocket(null);
                 this.socket = datagramSocket;
@@ -539,11 +559,10 @@ public class WinHandler {
                 }
             } catch (IOException ignored) {
             }
-        });
+        }, "WinHandler-Receive");
+        receiveThread.start();
 
         startRumblePoller();
-        running = true;
-        startSendThread();
     }
 
     private void startRumblePoller() {
@@ -554,7 +573,7 @@ public class WinHandler {
         // Read the rumble values from the shared memory file.
         // Check if the rumble state has changed
         // Poll for new commands 50 times per second
-        Thread rumblePollerThread = new Thread(() -> {
+        rumblePollerThread = new Thread(() -> {
             while (running) {
                 // --- MODIFIED: Get the current profile state on EVERY loop iteration ---
                 try {
@@ -587,6 +606,22 @@ public class WinHandler {
             }
         });
         rumblePollerThread.start();
+    }
+
+    private void joinThread(Thread thread, String name) {
+        if (thread == null) {
+            return;
+        }
+        thread.interrupt();
+        try {
+            thread.join(STOP_JOIN_TIMEOUT_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Timber.tag(TAG).w(e, "Interrupted while waiting for %s thread to stop", name);
+        }
+        if (thread.isAlive()) {
+            Timber.tag(TAG).w("Timed out waiting for %s thread to stop", name);
+        }
     }
 
     private void startVibration(short lowFreq, short highFreq) {

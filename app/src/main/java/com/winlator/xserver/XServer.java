@@ -39,6 +39,11 @@ public class XServer {
     public final GrabManager grabManager;
     private boolean isGrabbed = false;
     private XClient grabbingClient = null;
+    private short screenSaverTimeout = 600;
+    private short screenSaverInterval = 600;
+    private byte screenSaverPreferBlanking = 1;
+    private byte screenSaverAllowExposures = 1;
+    private boolean screenSaverForced = false;
     public final CursorLocker cursorLocker;
     private SHMSegmentManager shmSegmentManager;
     private GLRenderer renderer;
@@ -216,6 +221,37 @@ public class XServer {
             return this.grabbingClient == client;
         }
         return false;
+    }
+
+    public synchronized void setScreenSaverSettings(short timeout, short interval, byte preferBlanking, byte allowExposures) {
+        this.screenSaverTimeout = timeout;
+        this.screenSaverInterval = interval;
+        this.screenSaverPreferBlanking = preferBlanking;
+        this.screenSaverAllowExposures = allowExposures;
+    }
+
+    public synchronized short getScreenSaverTimeout() {
+        return screenSaverTimeout;
+    }
+
+    public synchronized short getScreenSaverInterval() {
+        return screenSaverInterval;
+    }
+
+    public synchronized byte getScreenSaverPreferBlanking() {
+        return screenSaverPreferBlanking;
+    }
+
+    public synchronized byte getScreenSaverAllowExposures() {
+        return screenSaverAllowExposures;
+    }
+
+    public synchronized void setScreenSaverForced(boolean forced) {
+        this.screenSaverForced = forced;
+    }
+
+    public synchronized boolean isScreenSaverForced() {
+        return screenSaverForced;
     }
 
 }

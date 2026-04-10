@@ -3,6 +3,7 @@ package app.gamegrub.ui.screen.xserver
 import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
+import app.gamegrub.ui.runtime.XServerRuntime
 import com.winlator.core.Callback
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

@@ -98,7 +98,7 @@ public class BionicProgramLauncherComponent extends GuestProgramLauncherComponen
                 for (ProcessHelper.ProcessInfo subProcess : subProcesses) {
                     Process.killProcess(subProcess.pid());
                 }
-                SteamService.setKeepAlive(false);
+                pid = -1;
             }
             execShellCommand("wineserver -k");
         }

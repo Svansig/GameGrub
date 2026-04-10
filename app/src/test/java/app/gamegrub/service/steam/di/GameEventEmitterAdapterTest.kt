@@ -3,6 +3,7 @@ package app.gamegrub.service.steam.di
 import app.gamegrub.GameGrubApp
 import app.gamegrub.events.AndroidEvent
 import app.gamegrub.events.SteamEvent
+import app.gamegrub.ui.runtime.XServerRuntime
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before

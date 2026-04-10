@@ -20,5 +20,6 @@ public record EventListener(XClient client, Bitmask eventMask) {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        client.sendEvent(event);
     }
 }

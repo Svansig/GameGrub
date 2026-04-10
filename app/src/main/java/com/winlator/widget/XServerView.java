@@ -2,6 +2,7 @@ package com.winlator.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -9,8 +10,13 @@ import android.widget.FrameLayout;
 import com.winlator.renderer.GLRenderer;
 import com.winlator.xserver.XServer;
 
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLDisplay;
+
 @SuppressLint("ViewConstructor")
 public class XServerView extends GLSurfaceView {
+    private static final int EGL_OPENGL_ES3_BIT_KHR = 0x40;
     private final GLRenderer renderer;
     // private final ArrayList<Callback<MotionEvent>> mouseEventCallbacks = new ArrayList<>();
     private final XServer xServer;
@@ -19,7 +25,8 @@ public class XServerView extends GLSurfaceView {
         super(context);
         setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setEGLContextClientVersion(3);
-        setEGLConfigChooser(8, 8, 8, 8, 0, 0);
+        getHolder().setFormat(PixelFormat.OPAQUE);
+        setEGLConfigChooser(new XServerEglConfigChooser());
         setPreserveEGLContextOnPause(true);
         this.xServer = xServer;
         renderer = new GLRenderer(this, xServer);
@@ -42,6 +49,51 @@ public class XServerView extends GLSurfaceView {
 
     public GLRenderer getRenderer() {
         return renderer;
+    }
+
+    private static final class XServerEglConfigChooser implements EGLConfigChooser {
+        private static final int[][] FALLBACKS = new int[][]{
+                {8, 8, 8, 0},
+                {8, 8, 8, 8},
+                {5, 6, 5, 0}
+        };
+
+        @Override
+        public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
+            for (int[] fallback : FALLBACKS) {
+                EGLConfig config = chooseFirstMatchingConfig(egl, display, fallback[0], fallback[1], fallback[2], fallback[3]);
+                if (config != null) {
+                    return config;
+                }
+            }
+            throw new IllegalArgumentException("No EGL config available for XServerView");
+        }
+
+        private EGLConfig chooseFirstMatchingConfig(EGL10 egl, EGLDisplay display, int r, int g, int b, int a) {
+            int[] attribList = new int[]{
+                    EGL10.EGL_RED_SIZE, r,
+                    EGL10.EGL_GREEN_SIZE, g,
+                    EGL10.EGL_BLUE_SIZE, b,
+                    EGL10.EGL_ALPHA_SIZE, a,
+                    EGL10.EGL_DEPTH_SIZE, 0,
+                    EGL10.EGL_STENCIL_SIZE, 0,
+                    EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+                    EGL10.EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT,
+                    EGL10.EGL_NONE
+            };
+
+            int[] numConfigs = new int[1];
+            if (!egl.eglChooseConfig(display, attribList, null, 0, numConfigs) || numConfigs[0] <= 0) {
+                return null;
+            }
+
+            EGLConfig[] configs = new EGLConfig[numConfigs[0]];
+            if (!egl.eglChooseConfig(display, attribList, configs, configs.length, numConfigs)) {
+                return null;
+            }
+
+            return configs[0];
+        }
     }
 
     // public void addPointerEventListener(Callback<MotionEvent> listener) {

@@ -53,6 +53,44 @@ public abstract class CursorRequests {
         client.xServer.cursorManager.freeCursor(inputStream.readInt());
     }
 
+    /** RecolorCursor (96): change the fore/back colours of an existing cursor. */
+    public static void recolorCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) {
+        int cursorId = inputStream.readInt();
+        byte foreRed   = (byte)inputStream.readShort();
+        byte foreGreen = (byte)inputStream.readShort();
+        byte foreBlue  = (byte)inputStream.readShort();
+        byte backRed   = (byte)inputStream.readShort();
+        byte backGreen = (byte)inputStream.readShort();
+        byte backBlue  = (byte)inputStream.readShort();
+
+        Cursor cursor = client.xServer.cursorManager.getCursor(cursorId);
+        if (cursor != null) {
+            client.xServer.cursorManager.recolorCursor(cursor, foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue);
+        }
+    }
+
+    /**
+     * QueryBestSize (97): echo back the requested dimensions.
+     * We don't have hardware tile/stipple constraints, so the requested size
+     * is always valid.
+     */
+    public static void queryBestSize(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
+        // requestData = class (0=Cursor, 1=Tile, 2=Stipple) — ignored
+        inputStream.skip(4); // drawableId
+        short width  = inputStream.readShort();
+        short height = inputStream.readShort();
+
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte)0);
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(0);
+            outputStream.writeShort(width);
+            outputStream.writeShort(height);
+            outputStream.writePad(20);
+        }
+    }
+
     public static void getPointerMapping(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         try (XStreamLock lock = outputStream.lock()) {
             byte[] buttonsMap = {1, 2, 3};

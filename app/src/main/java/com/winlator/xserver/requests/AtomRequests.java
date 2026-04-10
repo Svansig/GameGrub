@@ -18,8 +18,10 @@ public abstract class AtomRequests {
         short length = inputStream.readShort();
         inputStream.skip(2);
         String name = inputStream.readString8(length);
+        // Per X11 spec: when only-if-exists is True and atom doesn't exist, return None (0) — not an error.
         int id = onlyIfExists ? Atom.getId(name) : Atom.internAtom(name);
-        if (id < 0) throw new BadAtom(id);
+        if (!onlyIfExists && id < 0) throw new BadAtom(id);
+        if (id < 0) id = 0; // onlyIfExists and not found → return None
 
         try (XStreamLock lock = outputStream.lock()) {
             outputStream.writeByte(RESPONSE_CODE_SUCCESS);
@@ -33,7 +35,7 @@ public abstract class AtomRequests {
 
     public static void getAtomName(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError, IOException {
         int id = inputStream.readInt();
-        if (id < 0) {
+        if (id <= 0) {
             throw new BadAtom(id);
         }
         String name = Atom.getName(id);

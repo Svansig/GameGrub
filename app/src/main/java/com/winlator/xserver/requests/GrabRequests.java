@@ -62,4 +62,22 @@ public abstract class GrabRequests {
         inputStream.skip(4);
         client.xServer.grabManager.deactivatePointerGrab();
     }
+
+    public static void grabKeyboard(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+        boolean ownerEvents = client.getRequestData() == 1;
+        int windowId = inputStream.readInt();
+        inputStream.skip(8); // time, pointer-mode, keyboard-mode (4+1+1+2 pad)
+
+        Window window = client.xServer.windowManager.getWindow(windowId);
+        if (window == null) throw new BadWindow(windowId);
+
+        // Simplified: always report success — we don't queue keyboard grabs
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte)Status.SUCCESS.ordinal());
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(0);
+            outputStream.writePad(24);
+        }
+    }
 }

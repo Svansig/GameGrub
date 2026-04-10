@@ -171,6 +171,18 @@ public class Drawable extends XResource {
         fillRect(0, 0, width, height, color);
     }
 
+    /** Fills a rectangle without triggering a texture update. Use forceUpdate() after batching. */
+    public void fillRectNoUpdate(int x, int y, int width, int height, int color) {
+        if (this.data == null) return;
+        x = (short)Mathf.clamp(x, 0, this.width - 1);
+        y = (short)Mathf.clamp(y, 0, this.height - 1);
+        if ((x + width) > this.width) width = this.width - x;
+        if ((y + height) > this.height) height = this.height - y;
+        if (width <= 0 || height <= 0) return;
+        fillRect((short)x, (short)y, (short)width, (short)height, color, this.getStride(), this.data);
+        this.data.rewind();
+    }
+
     public void fillRect(int x, int y, int width, int height, int color) {
         if (this.data == null) {
             return;

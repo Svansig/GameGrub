@@ -19,6 +19,8 @@ import com.winlator.xserver.errors.XRequestError;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import timber.log.Timber;
+
 public class MITSHMExtension implements Extension {
     public static final byte MAJOR_OPCODE = -101;
 
@@ -100,7 +102,7 @@ public class MITSHMExtension implements Extension {
         if (data == null) throw new BadSHMSegment(shmseg);
 
         if (graphicsContext.getFunction() != GraphicsContext.Function.COPY) {
-            throw new UnsupportedOperationException("GC Function other than COPY is not supported.");
+            throw new BadImplementation();
         }
 
         drawable.drawImage(srcX, srcY, dstX, dstY, srcWidth, srcHeight, depth, data, totalWidth, totalHeight);
@@ -129,6 +131,7 @@ public class MITSHMExtension implements Extension {
                 }
                 break;
             default:
+                Timber.w("[MITSHMExtension] Unimplemented opcode: %d", opcode);
                 throw new BadImplementation();
         }
     }

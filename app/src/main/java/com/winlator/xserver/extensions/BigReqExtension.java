@@ -6,6 +6,8 @@ import com.winlator.xconnector.XInputStream;
 import com.winlator.xconnector.XOutputStream;
 import com.winlator.xconnector.XStreamLock;
 import com.winlator.xserver.XClient;
+import com.winlator.xserver.errors.BadRequest;
+import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
@@ -34,7 +36,11 @@ public class BigReqExtension implements Extension {
     }
 
     @Override
-    public void handleRequest(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
+    public void handleRequest(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+        if (client.getRequestData() != 0) {
+            throw new BadRequest(Byte.toUnsignedInt(client.getRequestData()));
+        }
+
         try (XStreamLock lock = outputStream.lock()) {
             outputStream.writeByte(RESPONSE_CODE_SUCCESS);
             outputStream.writeByte((byte)0);

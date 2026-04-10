@@ -29,18 +29,47 @@ import com.winlator.xserver.events.PresentIdleNotify;
 import java.io.IOException;
 import java.util.Objects;
 
+import timber.log.Timber;
+
+/**
+ * X11 Present Extension implementation.
+ * @see <a href="https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/presentproto.txt">Present Protocol Specification</a>
+ */
 public class PresentExtension implements Extension {
     public static final byte MAJOR_OPCODE = -103;
     private static final int FAKE_INTERVAL = 1000000 / 60;
     public enum Kind {PIXMAP, MSC_NOTIFY}
     public enum Mode {COPY, FLIP, SKIP}
+
+    /**
+     * PresentCapability values per spec.
+     * @see <a href="https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/presentproto.txt">Present Protocol - Data Types</a>
+     */
+    private static final int CAPABILITY_ASYNC = 1;
+    private static final int CAPABILITY_FENCE = 2;
+    private static final int CAPABILITY_UST = 4;
+
     private final SparseArray<Event> events = new SparseArray<>();
     private SyncExtension syncExtension;
 
+    /**
+     * Present extension request opcodes.
+     * @see <a href="https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/presentproto.txt">Present Protocol - Extension Requests</a>
+     */
     private static abstract class ClientOpcodes {
         private static final byte QUERY_VERSION = 0;
         private static final byte PRESENT_PIXMAP = 1;
+        /**
+         * PresentNotifyMSC (opcode 2) - Queries the Media Stream Counter for frame timing.
+         * @see <a href="https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/presentproto.txt">PresentNotifyMSC</a>
+         */
+        private static final byte NOTIFY_MSC = 2;
         private static final byte SELECT_INPUT = 3;
+        /**
+         * PresentQueryCapabilities (opcode 4) - Queries supported Present extension capabilities.
+         * @see <a href="https://gitlab.freedesktop.org/xorg/proto/xorgproto/-/blob/master/presentproto.txt">PresentQueryCapabilities</a>
+         */
+        private static final byte QUERY_CAPABILITIES = 4;
     }
 
     private static class Event {
@@ -176,6 +205,47 @@ public class PresentExtension implements Extension {
         }
     }
 
+    private void notifyMsc(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+        inputStream.skip(4);
+        int windowId = inputStream.readInt();
+        inputStream.skip(4);
+
+        Window window = client.xServer.windowManager.getWindow(windowId);
+        if (window == null) throw new BadWindow(windowId);
+
+        long ust = System.nanoTime() / 1000;
+        long msc = ust / FAKE_INTERVAL;
+
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte) 0);
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(0);
+            outputStream.writeInt(0);
+            outputStream.writeLong(ust);
+            outputStream.writeLong(msc);
+            outputStream.writePad(8);
+        }
+    }
+
+    private void queryCapabilities(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+        int target = inputStream.readInt();
+
+        int capabilities = CAPABILITY_ASYNC | CAPABILITY_UST;
+        if (syncExtension != null) {
+            capabilities |= CAPABILITY_FENCE;
+        }
+
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte) 0);
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(0);
+            outputStream.writeInt(capabilities);
+            outputStream.writePad(20);
+        }
+    }
+
     @Override
     public void handleRequest(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
         int opcode = client.getRequestData();
@@ -195,7 +265,14 @@ public class PresentExtension implements Extension {
                     selectInput(client, inputStream, outputStream);
                 }
                 break;
+            case ClientOpcodes.NOTIFY_MSC:
+                notifyMsc(client, inputStream, outputStream);
+                break;
+            case ClientOpcodes.QUERY_CAPABILITIES:
+                queryCapabilities(client, inputStream, outputStream);
+                break;
             default:
+                Timber.w("[PresentExtension] Unimplemented opcode: %d", opcode);
                 throw new BadImplementation();
         }
     }

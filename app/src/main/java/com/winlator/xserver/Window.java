@@ -105,6 +105,14 @@ public class Window extends XResource {
         return properties.get(id);
     }
 
+    /** Returns the atom IDs of all properties currently set on this window. */
+    public int[] getPropertyAtoms() {
+        int size = properties.size();
+        int[] atoms = new int[size];
+        for (int i = 0; i < size; i++) atoms[i] = properties.keyAt(i);
+        return atoms;
+    }
+
     public void addProperty(Property property) {
         properties.put(property.name, property);
     }

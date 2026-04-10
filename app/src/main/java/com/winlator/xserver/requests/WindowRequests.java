@@ -124,7 +124,7 @@ public abstract class WindowRequests {
     public static void reparentWindow(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         int windowId = inputStream.readInt();
         int parentId = inputStream.readInt();
-        inputStream.skip(4);
+        inputStream.skip(4); // x and y (2+2) are parsed but we don't apply placement here
 
         Window window = client.xServer.windowManager.getWindow(windowId);
         if (window == null) throw new BadWindow(windowId);
@@ -439,25 +439,32 @@ public abstract class WindowRequests {
 
     public static void sendEvent(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
         int windowId = inputStream.readInt();
-
-        if (windowId == 0 || windowId == 1) {
-            client.skipRequest();
-            return;
-        }
-
-        Window destination = client.xServer.windowManager.getWindow(windowId);
-        if (destination == null) throw new BadWindow(windowId);
-
         Bitmask eventMask = new Bitmask(inputStream.readInt());
-
         byte[] data = new byte[32];
         inputStream.read(data);
         Event event = new RawEvent(data);
 
-        if (eventMask.isEmpty()) {
-            destination.originClient.sendEvent(event);
+        Window destination;
+        if (windowId == 0) {
+            // PointerWindow: send to the window currently under the pointer
+            short rootX = client.xServer.pointer.getClampedX();
+            short rootY = client.xServer.pointer.getClampedY();
+            destination = client.xServer.windowManager.rootWindow.getChildByCoords(rootX, rootY);
+            if (destination == null) destination = client.xServer.windowManager.rootWindow;
+        } else if (windowId == 1) {
+            // InputFocus: send to the currently focused window
+            destination = client.xServer.windowManager.getFocusedWindow();
+            if (destination == null) destination = client.xServer.windowManager.rootWindow;
+        } else {
+            destination = client.xServer.windowManager.getWindow(windowId);
+            if (destination == null) throw new BadWindow(windowId);
         }
-        else destination.sendEvent(eventMask, event);
+
+        if (eventMask.isEmpty()) {
+            if (destination.originClient != null) destination.originClient.sendEvent(event);
+        } else {
+            destination.sendEvent(eventMask, event);
+        }
     }
 
     public static void getScreenSaver(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
@@ -466,10 +473,148 @@ public abstract class WindowRequests {
             outputStream.writeByte((byte)0);
             outputStream.writeShort(client.getSequenceNumber());
             outputStream.writeInt(0);
-            outputStream.writeShort((short)600);
-            outputStream.writeShort((short)600);
-            outputStream.writeByte((byte)1);
-            outputStream.writeByte((byte)1);
+            outputStream.writeShort(client.xServer.getScreenSaverTimeout());
+            outputStream.writeShort(client.xServer.getScreenSaverInterval());
+            outputStream.writeByte(client.xServer.getScreenSaverPreferBlanking());
+            outputStream.writeByte(client.xServer.getScreenSaverAllowExposures());
+            outputStream.writePad(18);
+        }
+    }
+
+    public static void setScreenSaver(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+        short timeout = inputStream.readShort();
+        short interval = inputStream.readShort();
+        int preferBlanking = inputStream.readUnsignedByte();
+        int allowExposures = inputStream.readUnsignedByte();
+        inputStream.skip(2);
+
+        if (preferBlanking > 2) {
+            throw new BadValue(preferBlanking);
+        }
+        if (allowExposures > 2) {
+            throw new BadValue(allowExposures);
+        }
+
+        client.xServer.setScreenSaverSettings(timeout, interval, (byte)preferBlanking, (byte)allowExposures);
+    }
+
+    public static void forceScreenSaver(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+        int mode = Byte.toUnsignedInt(client.getRequestData());
+        if (mode > 1) {
+            throw new BadValue(mode);
+        }
+        client.xServer.setScreenSaverForced(mode == 1);
+    }
+
+    public static void listProperties(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
+        int windowId = inputStream.readInt();
+        Window window = client.xServer.windowManager.getWindow(windowId);
+        if (window == null) throw new BadWindow(windowId);
+
+        int[] atoms = window.getPropertyAtoms();
+        int n = atoms.length;
+
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte)0);
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(n); // reply length in 4-byte units
+            outputStream.writeShort((short)n);
+            outputStream.writePad(22);
+            for (int atom : atoms) outputStream.writeInt(atom);
+        }
+    }
+
+    public static void unmapSubWindows(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+        int windowId = inputStream.readInt();
+        Window window = client.xServer.windowManager.getWindow(windowId);
+        if (window == null) throw new BadWindow(windowId);
+        for (Window child : window.getChildren()) {
+            client.xServer.windowManager.unmapWindow(child);
+        }
+    }
+
+    /**
+     * RotateProperties (114): rotate the values of a set of window properties by delta positions.
+     *
+     * Given atoms [A, B, C] and delta=1, after the call:
+     *   A holds the old value of C, B holds the old value of A, C holds the old value of B.
+     */
+    public static void rotateProperties(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
+        int windowId = inputStream.readInt();
+        Window window = client.xServer.windowManager.getWindow(windowId);
+        if (window == null) throw new BadWindow(windowId);
+
+        int nAtoms = inputStream.readShort() & 0xFFFF;
+        int delta  = inputStream.readShort(); // INT16
+
+        if (nAtoms == 0) return;
+
+        int[] atoms = new int[nAtoms];
+        for (int i = 0; i < nAtoms; i++) atoms[i] = inputStream.readInt();
+
+        // Collect current property data arrays in order
+        byte[][] datas   = new byte[nAtoms][];
+        Property[] props = new Property[nAtoms];
+        for (int i = 0; i < nAtoms; i++) {
+            props[i] = window.getProperty(atoms[i]);
+            if (props[i] != null) {
+                java.nio.ByteBuffer buf = props[i].data;
+                buf.rewind();
+                datas[i] = new byte[buf.remaining()];
+                buf.get(datas[i]);
+                buf.rewind();
+            } else {
+                datas[i] = new byte[0];
+            }
+        }
+
+        // Apply circular rotation: property[i] gets data[(i - delta) mod nAtoms]
+        int mod = nAtoms;
+        for (int i = 0; i < nAtoms; i++) {
+            int src = ((i - delta) % mod + mod) % mod;
+            if (props[i] != null) props[i].replace(datas[src]);
+        }
+    }
+
+    /**
+     * KillClient (113): forcibly disconnect a client identified by a resource it owns.
+     * Simplified: we log but do not terminate the connection (killing arbitrary clients
+     * requires tracking per-resource ownership across the resource manager).
+     */
+    public static void killClient(XClient client, XInputStream inputStream, XOutputStream outputStream) {
+        inputStream.readInt(); // resource (ignored)
+    }
+
+    /**
+     * ListHosts (110): return the access-control list.
+     * We don't implement host-based access control, so return an empty list with
+     * access-control mode = disabled (0).
+     */
+    public static void listHosts(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte)0); // mode = Disabled
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(0); // reply_length = 0
+            outputStream.writeShort((short)0); // nHosts = 0
+            outputStream.writePad(22);
+        }
+    }
+
+    /**
+     * GetPointerControl (106): return synthetic pointer acceleration defaults.
+     * acceleration = 2/1 (double speed), threshold = 4 pixels.
+     */
+    public static void getPointerControl(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
+        try (XStreamLock lock = outputStream.lock()) {
+            outputStream.writeByte(RESPONSE_CODE_SUCCESS);
+            outputStream.writeByte((byte)0);
+            outputStream.writeShort(client.getSequenceNumber());
+            outputStream.writeInt(0);
+            outputStream.writeShort((short)2);  // acceleration-numerator
+            outputStream.writeShort((short)1);  // acceleration-denominator
+            outputStream.writeShort((short)4);  // threshold (pixels)
             outputStream.writePad(18);
         }
     }

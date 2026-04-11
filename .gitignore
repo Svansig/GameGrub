@@ -61,3 +61,6 @@ app/keystores/*
 *.pyc
 __pycache__/
 resign.keystore
+
+# Build staging outputs
+prebuilt-out/

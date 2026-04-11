@@ -61,6 +61,7 @@ import app.gamegrub.events.AndroidEvent
 import app.gamegrub.externaldisplay.ExternalDisplayInputController
 import app.gamegrub.externaldisplay.ExternalDisplaySwapController
 import app.gamegrub.externaldisplay.SwapInputOverlayView
+import app.gamegrub.launch.IntentLaunchManager
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.ui.component.QuickMenu
 import app.gamegrub.ui.data.PerformanceHudConfig
@@ -159,7 +160,12 @@ fun XServerScreen(
     }
 
     val container = remember(appId) {
-        ContainerUtils.getContainer(context, appId)
+        if (IntentLaunchManager.hasTemporaryOverride(appId)) {
+            Timber.i("[RendererSelection][XServerScreen] appId=%s using temporary override container", appId)
+            ContainerUtils.getOrCreateContainerWithOverride(context, appId)
+        } else {
+            ContainerUtils.getContainer(context, appId)
+        }
     }
 
     val suspendPolicy = remember(container.id) { container.suspendPolicy }

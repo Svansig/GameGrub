@@ -388,3 +388,21 @@ Use this running log to capture opportunities discovered while implementing or r
 - **Owner**: `TBD`
 - **Status**: `Done`
 
+- **Date**: `2026-04-11`
+- **Ticket**: `N/A (JNI runtime measurement pass)`
+- **PR/Commit**: `TBD`
+- **Type**: `Workflow Quality`
+- **Opportunity**: Stop-time-only performance counters were difficult to collect in scripted device runs because the session exit UI path was not reliably automatable from adb.
+- **Proposed Action**: Keep a debug-only on-demand stats dump path available for future runtime investigations so measurement is not blocked on teardown automation.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+
+- **Date**: `2026-04-11`
+- **Ticket**: `N/A (JNI runtime measurement pass)`
+- **PR/Commit**: `TBD`
+- **Type**: `Code Quality`
+- **Opportunity**: External launch could navigate to `XServerScreen` with an empty `launchedAppId`, turning performance measurement into a crash/debugging detour.
+- **Proposed Action**: Reassert launch-critical state at the final launch boundary and add a targeted regression check for external-launch-to-XServer navigation.
+- **Owner**: `Copilot`
+- **Status**: `Done`
+

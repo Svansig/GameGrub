@@ -313,6 +313,13 @@ internal object EnvironmentSetupCoordinator {
             )
         }
 
+        Timber.i(
+            "[RendererSelection][EnvironmentSetup] appId=%s xServerStateDriver=%s containerDriver=%s",
+            appId,
+            xServerState.value.graphicsDriver,
+            nonNullContainer.graphicsDriver,
+        )
+
         if (xServerState.value.graphicsDriver == "virgl") {
             addVirGLRendererComponent(environment, xServer, rootPath)
 

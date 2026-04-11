@@ -75,6 +75,14 @@ object LaunchRequestManager {
 
             if (launchRequest != null) {
                 Timber.d("[IntentLaunch]: Received external launch intent for app ${launchRequest.appId}")
+                val requestedDriver = launchRequest.containerConfig?.graphicsDriver ?: "<none>"
+                Timber.i(
+                    "[RendererSelection][Intent] appId=%s requestedDriver=%s isNewIntent=%s consumePending=%s",
+                    launchRequest.appId,
+                    requestedDriver,
+                    isNewIntent,
+                    consumePending,
+                )
 
                 if (isNewIntent || consumePending) {
                     if (consumePending) {
@@ -83,7 +91,7 @@ object LaunchRequestManager {
 
                     Timber.d("[IntentLaunch]: Emitting ExternalGameLaunch event for app ${launchRequest.appId}")
 
-                    launchRequest.containerConfig?.let { config ->
+                    if (launchRequest.containerConfig != null) {
                         applyTemporaryConfig?.invoke(launchRequest.appId, launchRequest)
                     }
 

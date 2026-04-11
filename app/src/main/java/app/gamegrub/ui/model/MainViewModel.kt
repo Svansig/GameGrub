@@ -447,6 +447,7 @@ class MainViewModel @Inject constructor(
     fun launchApp(context: Context, appId: String) {
         // Show booting splash before launching the app
         viewModelScope.launch {
+            setLaunchedAppId(appId)
             setShowBootingSplash(true)
             XServerRuntime.get().events.emit(
                 AndroidEvent.SetOrientationPolicy(

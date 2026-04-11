@@ -2,6 +2,7 @@ package com.winlator.xconnector;
 
 import android.util.SparseArray;
 import androidx.annotation.Keep;
+import app.gamegrub.BuildConfig;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -36,6 +37,8 @@ public class XConnectorEpoll implements Runnable {
     private native int createEpollFd();
 
     private native int createEventFd();
+
+    public static native String getNativePerfStats(boolean reset);
 
     private native boolean doEpollIndefinitely(int i, int i2, boolean z);
 
@@ -114,6 +117,10 @@ public class XConnectorEpoll implements Runnable {
             }
 
             this.epollThread = null;
+
+            if (BuildConfig.DEBUG) {
+                Timber.tag(TAG).d(logPrefix() + " Native JNI perf: " + getNativePerfStats(true));
+            }
         }
     }
 

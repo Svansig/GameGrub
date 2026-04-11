@@ -13,6 +13,7 @@ import app.gamegrub.enums.PathType
 import app.gamegrub.enums.SaveLocation
 import app.gamegrub.enums.SyncResult
 import app.gamegrub.launch.LaunchEngine
+import app.gamegrub.launch.IntentLaunchManager
 import app.gamegrub.launch.LaunchOptions
 import app.gamegrub.launch.LaunchResult
 import app.gamegrub.launch.trackGameLaunched
@@ -152,8 +153,6 @@ fun preLaunchApp(
 ) {
     setLoadingDialogVisible(true)
 
-    val gameId = ContainerUtils.extractGameIdFromContainerId(appId)
-
     scope.launch(Dispatchers.IO) {
         val containerManager = ContainerManager(context)
         val container = if (useTemporaryOverride) {
@@ -161,6 +160,20 @@ fun preLaunchApp(
         } else {
             ContainerUtils.getOrCreateContainer(context, appId)
         }
+
+        val requestedDriver = IntentLaunchManager.getTemporaryOverride(appId)?.graphicsDriver
+        val source = when {
+            useTemporaryOverride && requestedDriver != null -> "temporary_override"
+            requestedDriver != null -> "override_present_not_requested"
+            else -> "container_base"
+        }
+        Timber.i(
+            "[RendererSelection][PreLaunch] appId=%s requestedDriver=%s resolvedDriver=%s source=%s",
+            appId,
+            requestedDriver ?: "<none>",
+            container.graphicsDriver,
+            source,
+        )
 
         container.clearSessionMetadata()
 

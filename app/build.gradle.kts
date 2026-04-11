@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.room)
 }
 
-val keystorePropertiesFile: File = rootProject.file("app/keystores/keystore.properties")!!
+val keystorePropertiesFile: File = rootProject.file("app/keystores/keystore.properties")
 val keystoreProperties: Properties? = if (keystorePropertiesFile.exists()) {
     Properties().apply {
         load(FileInputStream(keystorePropertiesFile))
@@ -36,7 +36,7 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
 
     // https://developer.android.com/ndk/downloads
 //    ndkVersion = "22.1.7171670"
-    ndkVersion = "27.1.11397112"
+    ndkVersion = "28.2.13676358"
 
     signingConfigs {
         create("gamegrub") {
@@ -78,6 +78,26 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
         ndk {
 //            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
             abiFilters.addAll(listOf("arm64-v8a"))
+        }
+
+        externalNativeBuild {
+            cmake {
+                targets(
+                    "virglrenderer",
+                    "patchelf",
+                    "extras",
+                    "dummyvk",
+                    "evshim",
+                    "hook_impl",
+                    "main_hook",
+                    "winlator",
+                    "winlator_11",
+                    // Third-party source builds for 16 KB page-size compliance.
+                    // See third_party/libsndfile/ and third_party/libltdl/.
+                    "sndfile",
+                    "ltdl",
+                )
+            }
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -168,6 +188,18 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
             // 'extractNativeLibs' was not enough to keep the jniLibs and
             // the libs went missing after adding on-demand feature delivery
             useLegacyPackaging = true
+            // Keep checked-in prebuilts as fallback, but package source-built arm64 outputs from CMake.
+            excludes += "arm64-v8a/libdummyvk.so"
+            excludes += "arm64-v8a/libextras.so"
+            excludes += "arm64-v8a/libhook_impl.so"
+            excludes += "arm64-v8a/libmain_hook.so"
+            excludes += "arm64-v8a/libpatchelf.so"
+            excludes += "arm64-v8a/libvirglrenderer.so"
+            excludes += "arm64-v8a/libwinlator.so"
+            // libsndfile and libltdl are now source-built via CMake (third_party/).
+            // Exclude prebuilts so only the NDK r28+ 16 KB-aligned outputs are packaged.
+            excludes += "arm64-v8a/libsndfile.so"
+            excludes += "arm64-v8a/libltdl.so"
         }
     }
     testOptions {
@@ -185,13 +217,13 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     //     }
     // }
 
-    // cmake on release builds a proot that fails to process ld-2.31.so
-    // externalNativeBuild {
-    //     cmake {
-    //         path = file("src/main/cpp/CMakeLists.txt")
-    //         version = "3.22.1"
-    //     }
-    // }
+    // Build source-owned arm64 native libs with NDK r28+ for 16 KB page-size compliance.
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
+    }
 
     // (For now) Uncomment for LeakCanary to work.
     // configurations {
@@ -199,6 +231,17 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     //         exclude(group = "junit", module = "junit")
     //     }
     // }
+}
+
+tasks.register<Exec>("verifyDebug16KbPageSize") {
+    group = "verification"
+    description = "Verifies arm64-v8a ELF LOAD alignment and APK zip alignment for debug build output"
+    dependsOn(":app:assembleDebug")
+    commandLine(
+        "bash",
+        rootProject.file("scripts/verify-16kb-page-size.sh").absolutePath,
+        rootProject.file("app/build/outputs/apk/debug/app-debug.apk").absolutePath,
+    )
 }
 
 // kotlin {

@@ -10,7 +10,6 @@ import com.winlator.widget.XServerView;
 import com.winlator.xconnector.XInputStream;
 import com.winlator.xconnector.XOutputStream;
 import com.winlator.xconnector.XStreamLock;
-import com.winlator.xenvironment.components.VortekRendererComponent;
 import com.winlator.xserver.Bitmask;
 import com.winlator.xserver.Drawable;
 import com.winlator.xserver.Pixmap;
@@ -180,7 +179,7 @@ public class PresentExtension implements Extension {
             final Texture oldTexture = content.getTexture();
             XServerView xServerView = client.xServer.getRenderer().xServerView;
             Objects.requireNonNull(oldTexture);
-            xServerView.queueEvent(() -> VortekRendererComponent.destroyTexture(oldTexture));
+            xServerView.queueEvent(oldTexture::destroy);
             content.setTexture(new GPUImage(content.width, content.height));
         }
 

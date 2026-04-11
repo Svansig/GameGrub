@@ -314,12 +314,8 @@ internal object EnvironmentSetupCoordinator {
         }
 
         if (xServerState.value.graphicsDriver == "virgl") {
-            environment.addComponent(
-                VirGLRendererComponent(
-                    xServer,
-                    UnixSocketConfig.createSocket(rootPath, UnixSocketConfig.VIRGL_SERVER_PATH),
-                ),
-            )
+            addVirGLRendererComponent(environment, xServer, rootPath)
+
         } else if (
             xServerState.value.graphicsDriver == "vortek" ||
             xServerState.value.graphicsDriver == "adreno" ||
@@ -332,15 +328,27 @@ internal object EnvironmentSetupCoordinator {
                 gcfg.put("adrenotoolsDriver", "vulkan.adreno.so")
                 nonNullContainer.graphicsDriverConfig = gcfg.toString()
             }
-            val options = VortekRendererComponent.Options.fromKeyValueSet(context, gcfg)
-            environment.addComponent(
-                VortekRendererComponent(
-                    xServer,
-                    UnixSocketConfig.createSocket(rootPath, UnixSocketConfig.VORTEK_SERVER_PATH),
-                    options,
-                    context,
-                ),
-            )
+            val vortekAdded = if (VortekRendererComponent.isAvailable()) {
+                runCatching {
+                    val options = VortekRendererComponent.Options.fromKeyValueSet(context, gcfg)
+                    environment.addComponent(
+                        VortekRendererComponent(
+                            xServer,
+                            UnixSocketConfig.createSocket(rootPath, UnixSocketConfig.VORTEK_SERVER_PATH),
+                            options,
+                            context,
+                        ),
+                    )
+                }.onFailure { e ->
+                    Timber.e(e, "[VortekRenderer] Failed to initialize — falling back to VirGL")
+                }.isSuccess
+            } else {
+                Timber.w("[VortekRenderer] Native library unavailable (ashmemCreateRegion missing on API 35+) — falling back to VirGL")
+                false
+            }
+            if (!vortekAdded) {
+                addVirGLRendererComponent(environment, xServer, rootPath)
+            }
         }
 
         guestProgramLauncherComponent.envVars = envVars
@@ -494,5 +502,18 @@ internal object EnvironmentSetupCoordinator {
             }
         }
         if (applied > 0) Timber.d("SessionEnvPlan: applied $applied env var(s) from active session")
+    }
+
+    private fun addVirGLRendererComponent(
+        environment: XEnvironment,
+        xServer: XServer,
+        rootPath: String,
+    ) {
+        environment.addComponent(
+            VirGLRendererComponent(
+                xServer,
+                UnixSocketConfig.createSocket(rootPath, UnixSocketConfig.VIRGL_SERVER_PATH),
+            ),
+        )
     }
 }

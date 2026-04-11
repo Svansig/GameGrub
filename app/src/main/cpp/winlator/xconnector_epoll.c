@@ -114,10 +114,6 @@ Java_com_winlator_xconnector_XConnectorEpoll_createEpollFd(JNIEnv *env, jobject 
     return fd;
 }
 
-JNIEXPORT jint JNICALL
-Java_com_winlator_xconnector_XConnectorEpoll_closeFd(JNIEnv *env, jobject obj, jint fd) {
-    return close(fd);        // direct close, matches stub
-}
 
 JNIEXPORT void JNICALL
 Java_com_winlator_xconnector_XConnectorEpoll_closeFd(JNIEnv *env, jobject obj, jint fd) {

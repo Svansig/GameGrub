@@ -5,14 +5,16 @@ import android.view.View;
 import app.gamegrub.R;
 
 import com.winlator.core.GPUHelper;
-import com.winlator.xenvironment.components.VortekRendererComponent;
 
 /* loaded from: classes.dex */
 public class VortekConfigDialog extends ContentDialog {
+    // Computed independently to avoid triggering VortekRendererComponent class initialization
+    // (and thus the native library load) when this dialog is opened.
+    private static final int DEFAULT_VK_MAX_VERSION_CODE = GPUHelper.vkMakeVersion(1, 3, 128);
     public static final String DEFAULT_VK_MAX_VERSION;
 
     static {
-        int i = VortekRendererComponent.VK_MAX_VERSION;
+        int i = DEFAULT_VK_MAX_VERSION_CODE;
         DEFAULT_VK_MAX_VERSION = GPUHelper.vkVersionMajor(i) +
                 "." +
                 GPUHelper.vkVersionMinor(i);

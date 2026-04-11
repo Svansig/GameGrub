@@ -21,9 +21,11 @@ import com.winlator.xserver.Window;
 import com.winlator.xserver.XServer;
 import java.io.IOException;
 import java.util.Objects;
+import timber.log.Timber;
 
 public class VortekRendererComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     public static final int VK_MAX_VERSION = GPUHelper.vkMakeVersion(1, 3, 128);
+    private static final boolean NATIVE_LIBRARY_LOADED = loadNativeLibrary();
     private XConnectorEpoll connector;
     private final Options options;
     private final UnixSocketConfig socketConfig;
@@ -37,8 +39,22 @@ public class VortekRendererComponent extends EnvironmentComponent implements Con
 
     private native void initVulkanWrapper(String str, String str2);
 
-    static {
-        System.loadLibrary("vortekrenderer");
+    private static boolean loadNativeLibrary() {
+        try {
+            System.loadLibrary("vortekrenderer");
+            return true;
+        } catch (LinkageError e) {
+            Timber.e(e, "[VortekRenderer] Failed to load native library — Vortek renderer unavailable on this device");
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if the Vortek renderer native library loaded successfully.
+     * Must be checked before constructing a VortekRendererComponent.
+     */
+    public static boolean isAvailable() {
+        return NATIVE_LIBRARY_LOADED;
     }
 
     public static class Options {

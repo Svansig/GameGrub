@@ -243,6 +243,8 @@ This section tracks the GameNative → GameGrub runtime architecture migration: 
 | REL-016 | P2 | Add cancellation and explicit fail-state handling for prelaunch pipeline | `ui/GameGrubMain + launch` | `todo/REL-016.md` |
 | REL-017 | P1 | Extract timing and retry literals into named launch/UI policy constants | `ui/model + ui/launch + ui/screen/library + ui/screen/login` | `todo/REL-017.md` |
 | REL-018 | P1 | Harden `GameGrubApp` startup background migration failure handling | `app startup + background migration` | `todo/REL-018.md` |
+| REL-019 | P1 | Add source producers for PulseAudio stack 16 KB compliance | `native packaging + pulseaudio runtime` | `todo/REL-019.md` |
+| REL-020 | P1 | Add source producers for Vortek renderer chain 16 KB compliance | `native packaging + graphics driver runtime` | `todo/REL-020.md` |
 
 ## Backlog - Testing
 

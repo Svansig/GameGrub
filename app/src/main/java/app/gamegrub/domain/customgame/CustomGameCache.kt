@@ -1,10 +1,10 @@
 package app.gamegrub.domain.customgame
 
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
-import timber.log.Timber
 
 /**
  * Manages caching of Custom Game app IDs and their folder paths.

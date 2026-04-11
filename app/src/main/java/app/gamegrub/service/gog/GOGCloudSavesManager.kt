@@ -2,14 +2,6 @@ package app.gamegrub.service.gog
 
 import android.content.Context
 import app.gamegrub.Constants
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.security.MessageDigest
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -18,6 +10,14 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import timber.log.Timber
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.security.MessageDigest
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPOutputStream
 
 class GOGCloudSavesManager(
     private val context: Context,

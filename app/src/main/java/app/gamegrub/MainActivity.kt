@@ -34,8 +34,8 @@ import com.skydoves.landscapist.coil.LocalCoilImageLoader
 import com.winlator.core.AppUtils
 import com.winlator.inputcontrols.ControllerManager
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -3,9 +3,9 @@ package app.gamegrub.graphics.diagnostics
 import android.opengl.EGL14
 import android.opengl.EGLConfig
 import app.gamegrub.BuildConfig
+import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.concurrent.thread
-import timber.log.Timber
 
 /**
  * Captures EGL capabilities that influence HWUI swap behavior fallbacks.
@@ -99,7 +99,11 @@ object EglHwuiCapabilityProbe {
 
             if (samples.size < 5) {
                 val alphaSize = getConfigAttrib(display, config, EGL14.EGL_ALPHA_SIZE)
-                samples += "surf=${describeSurfaceType(surfaceType)} alpha=$alphaSize renderable=0x${renderableType.toString(16)} swap=${describeSwapBehavior(swapBehavior)}"
+                samples += "surf=${describeSurfaceType(surfaceType)} alpha=$alphaSize renderable=0x${renderableType.toString(16)} swap=${
+                    describeSwapBehavior(
+                        swapBehavior,
+                    )
+                }"
             }
         }
 

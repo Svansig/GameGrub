@@ -10,8 +10,8 @@ import com.winlator.widget.FrameRating
 import com.winlator.winhandler.WinHandler
 import com.winlator.xenvironment.EnvironmentStopSummary
 import com.winlator.xenvironment.XEnvironment
-import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 
 internal object XServerExitCoordinator {
     private val isExiting = AtomicBoolean(false)

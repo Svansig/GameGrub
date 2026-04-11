@@ -22,12 +22,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import java.io.File
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
+import javax.inject.Inject
 
 /** Amazon Games foreground service. */
 @AndroidEntryPoint
@@ -243,7 +243,7 @@ class AmazonService : GameStoreService() {
                     Marker.DOWNLOAD_COMPLETE_MARKER.fileName,
                     Marker.DOWNLOAD_IN_PROGRESS_MARKER.fileName,
                     ".DownloadInfo",
-                    -> {
+                        -> {
                         child.isDirectory && (child.listFiles()?.any { it.isFile && it.length() > 0L } == true)
                     }
 
@@ -465,7 +465,7 @@ class AmazonService : GameStoreService() {
                             val amazonRoot = File(AmazonConstants.defaultAmazonGamesPath(context)).canonicalFile
                             val installCanonical = installDir.canonicalFile
                             val isUnderAmazonRoot = installCanonical.path == amazonRoot.path ||
-                                installCanonical.path.startsWith("${amazonRoot.path}${File.separator}")
+                                    installCanonical.path.startsWith("${amazonRoot.path}${File.separator}")
 
                             if (isUnderAmazonRoot) {
                                 installCanonical.deleteRecursively()
@@ -625,7 +625,7 @@ class AmazonService : GameStoreService() {
                         Timber.tag("Amazon").w(
                             "%snull",
                             "Verification FAILED: ${result.verifiedOk}/${result.totalFiles} OK, " +
-                                "${result.missingFiles} missing, ${result.sizeMismatch} size mismatch, ",
+                                    "${result.missingFiles} missing, ${result.sizeMismatch} size mismatch, ",
                         )
                     }
 

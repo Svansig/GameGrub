@@ -30,7 +30,7 @@ object SteamInstalledExeManager {
         val installDir = appInfo.config.installDir.ifEmpty { appInfo.name }
         val depots = appInfo.depots.values.filter { depot ->
             !depot.sharedInstall &&
-                (depot.osList.isEmpty() || depot.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) })
+                    (depot.osList.isEmpty() || depot.osList.any { it.name.equals("windows", true) || it.name.equals("none", true) })
         }
         val launchTargets = appInfo.config.launch.map { it.executable.lowercase() }.toSet()
 

@@ -48,9 +48,9 @@ import com.winlator.core.envvars.EnvVarInfo
 import com.winlator.core.envvars.EnvVars
 import com.winlator.fexcore.FEXCorePreset
 import com.winlator.fexcore.FEXCorePresetManager
-import java.util.Locale
 import org.json.JSONArray
 import timber.log.Timber
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -235,7 +235,7 @@ fun FEXCorePresetsDialog(
                                 IconButton(
                                     onClick = {
                                         val resName = "fexcore_env_var_help__" +
-                                            varName.removePrefix("FEX_").lowercase(Locale.getDefault())
+                                                varName.removePrefix("FEX_").lowercase(Locale.getDefault())
                                         StringUtils.getString(context, resName)
                                             ?.let { infoMsg = it }
                                             ?: Timber.w("Could not find string resource of $resName")

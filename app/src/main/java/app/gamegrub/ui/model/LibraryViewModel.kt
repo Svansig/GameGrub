@@ -43,11 +43,6 @@ import app.gamegrub.ui.enums.SortOption
 import app.gamegrub.ui.runtime.XServerRuntime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import java.util.EnumSet
-import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -57,6 +52,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
+import java.util.EnumSet
+import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 
 /**
@@ -864,7 +864,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { item ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        installedFilterEnabled
+                            installedFilterEnabled
                     if (installedOnly) {
                         isSteamInstalled(item)
                     } else {
@@ -909,7 +909,7 @@ class LibraryViewModel @Inject constructor(
 
             val shouldResolveSteamSize =
                 currentState.currentSortOption == SortOption.SIZE_SMALLEST ||
-                    currentState.currentSortOption == SortOption.SIZE_LARGEST
+                        currentState.currentSortOption == SortOption.SIZE_LARGEST
             val steamSizeCache = mutableMapOf<Int, Long>()
 
             val steamEntries: List<LibraryEntry> = filteredSteamApps.map { item ->
@@ -966,7 +966,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        installedFilterEnabled
+                            installedFilterEnabled
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -1006,7 +1006,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        installedFilterEnabled
+                            installedFilterEnabled
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -1046,7 +1046,7 @@ class LibraryViewModel @Inject constructor(
                 }
                 .filter { game ->
                     val installedOnly = currentState.currentTab.installedOnly ||
-                        installedFilterEnabled
+                            installedFilterEnabled
                     if (installedOnly) {
                         game.isInstalled
                     } else {
@@ -1134,7 +1134,7 @@ class LibraryViewModel @Inject constructor(
                     .d(
                         "%snull",
                         "Saved counts - Custom: ${customGameItems.size}, Steam: ${steamFilteredBeforeCompatibility.size}, " +
-                            "GOG: ${filteredGOGGames.size}, GOG installed: $gogInstalledCount, Epic: ${filteredEpicGames.size}, ",
+                                "GOG: ${filteredGOGGames.size}, GOG installed: $gogInstalledCount, Epic: ${filteredEpicGames.size}, ",
                     )
             }
 

@@ -129,9 +129,9 @@ class SteamTokenHelper {
 
             for (i in 0 until len step 2) {
                 data[i / 2] = (
-                    (Character.digit(cleanHex[i], 16) shl 4) +
-                        Character.digit(cleanHex[i + 1], 16)
-                    ).toByte()
+                        (Character.digit(cleanHex[i], 16) shl 4) +
+                                Character.digit(cleanHex[i + 1], 16)
+                        ).toByte()
             }
             return data
         }

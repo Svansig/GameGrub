@@ -4,23 +4,21 @@ import android.content.Context
 import android.content.Intent
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.GameSource
-import app.gamegrub.events.AndroidEvent
 import app.gamegrub.service.base.GameStoreCoordinator
 import app.gamegrub.service.base.GameStoreService
-import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.ui.utils.SnackbarManager
 import com.winlator.container.Container
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class GOGStoreCoordinator @Inject constructor(
@@ -44,6 +42,7 @@ class GOGStoreCoordinator @Inject constructor(
     internal fun onServiceStarted() {
         _isRunning = true
     }
+
     internal fun onServiceStopped() {
         _isRunning = false
     }
@@ -186,6 +185,6 @@ class GOGStoreCoordinator @Inject constructor(
     suspend fun syncCloudSaves(appId: String, preferredAction: String = "none"): Boolean =
         GOGService.syncCloudSaves(context, appId, preferredAction)
 
-    fun getScriptInterpreterPartsForLaunch(appId: String): List<String>? =
+    fun getScriptInterpreterPartsForLaunch(appId: String): List<String> =
         gogManager.getScriptInterpreterPartsForLaunchSync(appId)
 }

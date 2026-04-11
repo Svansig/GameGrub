@@ -4,11 +4,11 @@ import app.gamegrub.session.model.SessionPlan
 import app.gamegrub.session.model.SessionState
 import app.gamegrub.telemetry.session.LaunchMilestone
 import app.gamegrub.telemetry.session.MilestoneEmitter
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Result of a launch execution attempt.
@@ -73,8 +73,7 @@ class LaunchEngine @Inject constructor(
                 return@withContext LaunchResult.Success(sessionId)
             }
 
-            val compose = sessionPlan.composition
-            val container = when (compose) {
+            val container = when (val compose = sessionPlan.composition) {
                 is app.gamegrub.session.model.SessionComposition.Full -> compose.container
 
                 is app.gamegrub.session.model.SessionComposition.Partial -> compose.container
@@ -88,7 +87,7 @@ class LaunchEngine @Inject constructor(
 
             MilestoneEmitter.record(LaunchMilestone.PROCESS_SPAWNED)
 
-            val finalPlan = updatedPlan.copy(state = SessionState.LAUNCHED)
+            updatedPlan.copy(state = SessionState.LAUNCHED)
             Timber.i("LaunchEngine launched session: $sessionId with processId: $processId")
 
             LaunchResult.Success(sessionId, processId)
@@ -105,7 +104,7 @@ class LaunchEngine @Inject constructor(
         options: LaunchOptions,
     ): Long {
         val containerRoot = containerStore.getRootDir().absolutePath
-        val containerDir = "$containerRoot/containers/${container.id}"
+        "$containerRoot/containers/${container.id}"
 
         Timber.d("Executing container launch: ${container.id}")
         Timber.d("Wine prefix: ${envPlan.winePrefix}")

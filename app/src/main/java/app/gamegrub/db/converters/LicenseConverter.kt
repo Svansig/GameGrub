@@ -4,8 +4,8 @@ import androidx.room.TypeConverter
 import `in`.dragonbra.javasteam.enums.ELicenseFlags
 import `in`.dragonbra.javasteam.enums.ELicenseType
 import `in`.dragonbra.javasteam.enums.EPaymentMethod
-import java.util.EnumSet
 import kotlinx.serialization.json.Json
+import java.util.EnumSet
 
 class LicenseConverter {
 

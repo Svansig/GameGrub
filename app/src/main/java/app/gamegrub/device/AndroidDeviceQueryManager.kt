@@ -265,9 +265,9 @@ class AndroidDeviceQueryManager @Inject constructor(
     override fun readGpuTempC(): Int? {
         return readTemperatureC(
             listOf("/sys/class/kgsl/kgsl-3d0/temp") +
-                discoverThermalZoneTempPaths { type ->
-                    type.contains("gpu") || type.contains("kgsl")
-                },
+                    discoverThermalZoneTempPaths { type ->
+                        type.contains("gpu") || type.contains("kgsl")
+                    },
         )
     }
 

@@ -14,12 +14,12 @@ import app.gamegrub.service.base.GameStoreService
 import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
+import javax.inject.Inject
 
 /**
  * GOG Service - thin abstraction layer that delegates to managers.
@@ -150,8 +150,8 @@ class GOGService : GameStoreService() {
         suspend fun downloadDependencies(
             gameId: String,
             dependencies: List<String>,
-            gameDir: java.io.File,
-            supportDir: java.io.File,
+            gameDir: File,
+            supportDir: File,
             onProgress: ((Float) -> Unit) = {},
         ): Result<Unit> = getInstance()?.gogDownloadManager?.downloadDependenciesWithProgress(
             gameId = gameId,

@@ -8,6 +8,13 @@ import app.gamegrub.service.epic.manifest.EpicManifest
 import app.gamegrub.service.epic.manifest.ManifestUtils
 import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.runtime.XServerRuntime
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import timber.log.Timber
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -16,13 +23,6 @@ import java.util.concurrent.TimeUnit
 import java.util.zip.Inflater
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import timber.log.Timber
 
 /**
  * EpicDownloadManager handles downloading Epic games

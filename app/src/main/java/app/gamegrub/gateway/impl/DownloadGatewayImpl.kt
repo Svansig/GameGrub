@@ -3,10 +3,10 @@ package app.gamegrub.gateway.impl
 import app.gamegrub.data.DownloadInfo
 import app.gamegrub.data.LibraryItem
 import app.gamegrub.gateway.DownloadGateway
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class DownloadGatewayImpl @Inject constructor() : DownloadGateway {

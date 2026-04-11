@@ -41,7 +41,7 @@ internal object XServerRendererLifecycleCoordinator {
             when (event) {
                 Lifecycle.Event.ON_PAUSE,
                 Lifecycle.Event.ON_RESUME,
-                -> {
+                    -> {
                     Timber.d("Synchronizing XServerView renderer for lifecycle event: %s", event)
                     syncRendererToCurrentLifecycleState()
                 }

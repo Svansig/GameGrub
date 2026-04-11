@@ -115,7 +115,7 @@ object StoragePolicyHelper {
 
             StorageLocation.AUTO -> {
                 isLocationAvailable(StorageLocation.INTERNAL, context) ||
-                    isLocationAvailable(StorageLocation.EXTERNAL, context)
+                        isLocationAvailable(StorageLocation.EXTERNAL, context)
             }
         }
     }

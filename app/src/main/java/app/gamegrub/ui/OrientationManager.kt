@@ -6,9 +6,9 @@ import android.view.OrientationEventListener
 import android.view.OrientationEventListener.ORIENTATION_UNKNOWN
 import app.gamegrub.ui.enums.Orientation
 import app.gamegrub.ui.orientation.OrientationPolicy
+import timber.log.Timber
 import java.util.EnumSet
 import kotlin.math.abs
-import timber.log.Timber
 
 /**
  * Manages device orientation changes and applies orientation constraints.

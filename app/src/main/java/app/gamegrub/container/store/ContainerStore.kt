@@ -2,13 +2,13 @@ package app.gamegrub.container.store
 
 import app.gamegrub.container.manifest.ContainerConfiguration
 import app.gamegrub.container.manifest.ContainerManifest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.File
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 /**
  * Service for managing per-game container state.

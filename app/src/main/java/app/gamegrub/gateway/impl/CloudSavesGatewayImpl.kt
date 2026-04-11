@@ -3,10 +3,10 @@ package app.gamegrub.gateway.impl
 import app.gamegrub.gateway.CloudSaveResolution
 import app.gamegrub.gateway.CloudSaveSyncStatus
 import app.gamegrub.gateway.CloudSavesGateway
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class CloudSavesGatewayImpl @Inject constructor() : CloudSavesGateway {

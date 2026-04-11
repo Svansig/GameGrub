@@ -5,9 +5,9 @@ import app.gamegrub.data.GameSource
 import app.gamegrub.service.base.GameStoreCoordinator
 import app.gamegrub.service.steam.SteamService
 import dagger.hilt.android.qualifiers.ApplicationContext
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
-import timber.log.Timber
 
 /**
  * Manages lifecycle of background services (Steam, GOG, Epic).

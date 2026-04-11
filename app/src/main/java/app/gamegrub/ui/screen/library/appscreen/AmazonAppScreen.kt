@@ -103,7 +103,7 @@ class AmazonAppScreen : BaseAppScreen() {
         val productId = productIdOf(libraryItem)
         Timber.tag(TAG).d(
             "getGameDisplayInfo: productId=$productId name=${libraryItem.name} " +
-                "gameId=${libraryItem.gameId}",
+                    "gameId=${libraryItem.gameId}",
         )
 
         var game by remember(productId) { mutableStateOf<AmazonGame?>(null) }
@@ -129,8 +129,8 @@ class AmazonAppScreen : BaseAppScreen() {
             game = AmazonService.getAmazonGameOf(productId)
             Timber.tag(TAG).d(
                 "Loaded game: title=${game?.title}, developer=${game?.developer}, " +
-                    "releaseDate=${game?.releaseDate}, artUrl=${game?.artUrl?.take(60)}, " +
-                    "heroUrl=${game?.heroUrl?.take(60)}, downloadSize=${game?.downloadSize}, ",
+                        "releaseDate=${game?.releaseDate}, artUrl=${game?.artUrl?.take(60)}, " +
+                        "heroUrl=${game?.heroUrl?.take(60)}, downloadSize=${game?.downloadSize}, ",
             )
             // Proactively fetch size from manifest if not yet cached
             val g = game
@@ -191,7 +191,7 @@ class AmazonAppScreen : BaseAppScreen() {
 
     override fun isValidToDownload(context: Context, libraryItem: LibraryItem): Boolean =
         !isInstalled(context, libraryItem) &&
-            AmazonService.getDownloadInfoByAppId(libraryItem.gameId) == null
+                AmazonService.getDownloadInfoByAppId(libraryItem.gameId) == null
 
     override fun isDownloading(context: Context, libraryItem: LibraryItem): Boolean =
         AmazonService.getDownloadInfoByAppId(libraryItem.gameId) != null

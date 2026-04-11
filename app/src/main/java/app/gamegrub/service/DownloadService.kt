@@ -2,13 +2,14 @@ package app.gamegrub.service
 
 import android.content.Context
 import android.os.Environment
+import app.gamegrub.service.DownloadService.populateDownloadService
 import app.gamegrub.service.steam.SteamPaths
 import app.gamegrub.service.steam.SteamService
 import app.gamegrub.storage.StorageManager
-import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
 
 /**
  * Shared download service - provides download paths across all platforms.

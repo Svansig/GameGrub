@@ -14,12 +14,12 @@ import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.runtime.XServerRuntime
 import app.gamegrub.utils.container.ContainerUtils
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
+import javax.inject.Inject
 
 /**
  * Epic Games Service - thin coordinator that delegates to other Epic managers.

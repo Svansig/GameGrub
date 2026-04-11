@@ -5,9 +5,9 @@ import android.os.Handler
 import android.os.Looper
 import com.winlator.core.FileUtils
 import com.winlator.xenvironment.ImageFs
-import java.io.File
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
 
 /**
  * Handles migration of legacy container formats.
@@ -86,13 +86,13 @@ object ContainerMigrator {
             // Find all legacy numeric container directories
             val legacyContainers = homeDir.listFiles()?.filter { file ->
                 file.isDirectory &&
-                    file.name != ImageFs.USER &&
-                    // Skip active symlink
-                    file.name.startsWith("${ImageFs.USER}-") &&
-                    // Must have xuser- prefix
-                    file.name.removePrefix("${ImageFs.USER}-").matches(Regex("\\d+")) &&
-                    // Numeric ID after prefix
-                    File(file, ".container").exists() // Has container config
+                        file.name != ImageFs.USER &&
+                        // Skip active symlink
+                        file.name.startsWith("${ImageFs.USER}-") &&
+                        // Must have xuser- prefix
+                        file.name.removePrefix("${ImageFs.USER}-").matches(Regex("\\d+")) &&
+                        // Numeric ID after prefix
+                        File(file, ".container").exists() // Has container config
             } ?: emptyList()
 
             val totalContainers = legacyContainers.size

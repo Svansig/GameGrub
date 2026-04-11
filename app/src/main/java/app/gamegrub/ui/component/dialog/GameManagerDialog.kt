@@ -59,10 +59,10 @@ import app.gamegrub.ui.theme.GameGrubTheme
 import app.gamegrub.utils.steam.SteamUtils
 import com.skydoves.landscapist.ImageOptions
 import com.skydoves.landscapist.coil.CoilImage
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import timber.log.Timber
 
 data class InstallSizeInfo(
     val downloadSize: String,
@@ -133,10 +133,10 @@ fun GameManagerDialog(
                 val installed = SteamService.getInstalledApp(depotInfo.dlcAppId)
                 selectedAppIds[depotInfo.dlcAppId] =
                     installed != null ||
-                    // For installed Base Game and Indirect DLC App
-                    installedDlcIds.contains(depotInfo.dlcAppId) ||
-                    // For installed DLC from Main Depot
-                    (!indirectDlcAppIds.contains(depotInfo.dlcAppId) && !optionalDlcIds.contains(depotInfo.dlcAppId)) // Not in indirect DLC and not in optional DLC ids
+                            // For installed Base Game and Indirect DLC App
+                            installedDlcIds.contains(depotInfo.dlcAppId) ||
+                            // For installed DLC from Main Depot
+                            (!indirectDlcAppIds.contains(depotInfo.dlcAppId) && !optionalDlcIds.contains(depotInfo.dlcAppId)) // Not in indirect DLC and not in optional DLC ids
 
                 enabledAppIds[depotInfo.dlcAppId] = !installedDlcIds.contains(depotInfo.dlcAppId) && installed == null
             }

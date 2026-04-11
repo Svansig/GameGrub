@@ -15,11 +15,6 @@ import app.gamegrub.ui.utils.SnackbarManager
 import app.gamegrub.utils.container.ContainerUtils
 import com.winlator.container.Container
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,6 +22,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class AmazonStoreCoordinator @Inject constructor(
@@ -51,6 +51,7 @@ class AmazonStoreCoordinator @Inject constructor(
     internal fun onServiceStarted() {
         _isRunning = true
     }
+
     internal fun onServiceStopped() {
         _isRunning = false
     }
@@ -100,7 +101,7 @@ class AmazonStoreCoordinator @Inject constructor(
             }
             ?: return false
         return StorageManager.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER) &&
-            !StorageManager.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                !StorageManager.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
     }
 
     override suspend fun getInstallPath(appId: Int): String? {

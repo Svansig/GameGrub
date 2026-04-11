@@ -67,7 +67,7 @@ class CompleteLibraryOAuthUseCase @Inject constructor(
 
             GameSource.STEAM,
             GameSource.CUSTOM_GAME,
-            -> Result.failure(IllegalArgumentException("OAuth completion is unsupported for source=$source"))
+                -> Result.failure(IllegalArgumentException("OAuth completion is unsupported for source=$source"))
         }
     }
 }

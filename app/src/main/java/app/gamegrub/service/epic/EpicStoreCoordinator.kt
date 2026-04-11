@@ -11,17 +11,17 @@ import app.gamegrub.storage.StorageManager
 import app.gamegrub.ui.utils.SnackbarManager
 import com.winlator.container.Container
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.io.File
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import timber.log.Timber
+import java.io.File
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class EpicStoreCoordinator @Inject constructor(
@@ -45,6 +45,7 @@ class EpicStoreCoordinator @Inject constructor(
     internal fun onServiceStarted() {
         _isRunning = true
     }
+
     internal fun onServiceStopped() {
         _isRunning = false
     }
@@ -94,7 +95,7 @@ class EpicStoreCoordinator @Inject constructor(
             }
             ?: return false
         return StorageManager.hasMarker(installPath, Marker.DOWNLOAD_COMPLETE_MARKER) &&
-            !StorageManager.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
+                !StorageManager.hasMarker(installPath, Marker.DOWNLOAD_IN_PROGRESS_MARKER)
     }
 
     override suspend fun getInstallPath(appId: Int): String? {

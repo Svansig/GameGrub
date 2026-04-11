@@ -16,6 +16,11 @@ import java.util.concurrent.Executors;
 
 import timber.log.Timber;
 
+/**
+ * Utility class for managing and interacting with native processes in the container.
+ * Provides process spawning, signal handling, process monitoring, and debugging
+ * capabilities for the Wine runtime and its child processes.
+ */
 public abstract class ProcessHelper {
     public static final boolean PRINT_DEBUG = true; // FIXME change to false
     private static final ArrayList<Callback<String>> debugCallbacks = new ArrayList<>();

@@ -5,6 +5,11 @@ import android.content.Context;
 import java.nio.charset.Charset;
 import java.util.Locale;
 
+/**
+ * Utility class for string manipulation operations.
+ * Provides helper methods for path parsing, escaping, and text formatting
+ * used throughout the Wine container and Windows path handling.
+ */
 public class StringUtils {
     public static String removeEndSlash(String value) {
         while (value.endsWith("/") || value.endsWith("\\")) value = value.substring(0, value.length()-1);

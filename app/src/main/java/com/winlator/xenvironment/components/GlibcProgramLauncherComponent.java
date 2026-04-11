@@ -26,6 +26,10 @@ import java.util.List;
 import app.gamegrub.service.steam.SteamService;
 import timber.log.Timber;
 
+/**
+ * Environment component that launches guest programs in glibc containers.
+ * Uses box64 directly without proot for native x86_64 emulation.
+ */
 public class GlibcProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;
     private static int pid = -1;

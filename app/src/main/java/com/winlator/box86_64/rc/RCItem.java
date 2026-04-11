@@ -3,6 +3,10 @@ package com.winlator.box86_64.rc;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Represents a single process-specific configuration entry within an RC group. Contains the
+ * target process name, description, and a map of environment variable name-value pairs.
+ */
 public class RCItem implements Comparable<RCItem> {
     private String processName;
     private String itemDesc;

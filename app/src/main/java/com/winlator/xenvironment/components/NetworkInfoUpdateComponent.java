@@ -15,6 +15,10 @@ import java.util.List;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that updates network information files for Wine.
+ * Maintains /etc/hosts and network interface address files based on Android network state.
+ */
 public class NetworkInfoUpdateComponent extends EnvironmentComponent {
     private BroadcastReceiver broadcastReceiver;
 

@@ -26,6 +26,11 @@ import java.nio.ByteOrder;
 
 import timber.log.Timber;
 
+/**
+ * Handles incoming X11 client requests by dispatching them to the appropriate request handlers.
+ * Manages authentication, protocol negotiation, and request routing based on opcode, including
+ * window, graphics, font, keyboard, and extension requests.
+ */
 public class XClientRequestHandler implements RequestHandler {
     public static final byte RESPONSE_CODE_ERROR = 0;
     public static final byte RESPONSE_CODE_SUCCESS = 1;

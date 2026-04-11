@@ -21,6 +21,11 @@ import com.winlator.core.Callback;
 
 import java.util.ArrayList;
 
+/**
+ * Base dialog class for content configuration dialogs in the application.
+ * Provides a reusable dialog framework with confirm/cancel callbacks and
+ * a content view layout for displaying configuration options.
+ */
 public class ContentDialog extends Dialog {
     private Runnable onConfirmCallback;
     private Runnable onCancelCallback;

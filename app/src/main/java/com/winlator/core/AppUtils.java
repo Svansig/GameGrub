@@ -22,6 +22,11 @@ import android.widget.Spinner;
 
 import java.util.ArrayList;
 
+/**
+ * Utility class for Android application-level operations.
+ * Provides helpers for UI management, window handling, input methods,
+ * and activity lifecycle utilities used throughout the application.
+ */
 public abstract class AppUtils {
 
     public static void keepScreenOn(Activity activity) {

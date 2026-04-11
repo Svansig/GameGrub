@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window resize is requested by the window manager.
+ * Notifies the client that the window dimensions should change,
+ * commonly triggered during window dragging or fullscreen toggles.
+ */
 public class ResizeRequest extends Event {
     private final Window window;
     private final short width;

@@ -25,6 +25,10 @@ import java.util.Collections;
 
 import timber.log.Timber;
 
+/**
+ * Manages input control profiles for the application.
+ * Handles loading, creating, importing, exporting, and duplicating control profiles.
+ */
 public class InputControlsManager {
     private final Context context;
     private ArrayList<ControlsProfile> profiles;

@@ -4,6 +4,21 @@ import com.winlator.xconnector.XOutputStream;
 
 import java.io.IOException;
 
+/**
+ * Event - Base class for X11 events.
+ * 
+ * X11 events are asynchronous notifications sent to clients.
+ * Common events:
+ * - KeyPress/Release: Keyboard input
+ * - ButtonPress/Release: Mouse buttons
+ * - MotionNotify: Mouse movement
+ * - Expose: Window needs redraw
+ * - ConfigureNotify: Window resized
+ * - Map/Unmap: Visibility changed
+ * - Focus: Keyboard focus changed
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Events</a>
+ */
 public abstract class Event {
     public static final int KEY_PRESS = 1;
     public static final int KEY_RELEASE = 1<<1;

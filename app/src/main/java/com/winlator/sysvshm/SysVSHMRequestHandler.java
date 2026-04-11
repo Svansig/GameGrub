@@ -8,6 +8,10 @@ import com.winlator.xconnector.XStreamLock;
 
 import java.io.IOException;
 
+/**
+ * Request handler for SysV SHM protocol, processing SHMget, getFd, and delete operations.
+ * Routes requests to the SysVSharedMemory manager for shared memory segment management.
+ */
 public class SysVSHMRequestHandler implements RequestHandler {
     @Override
     public boolean handleRequest(Client client) throws IOException {

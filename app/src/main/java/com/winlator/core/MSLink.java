@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Handles Windows .lnk (shortcut) file format parsing and creation.
+ * Provides read/write capabilities for Windows shortcut files used for
+ * application launching within the Wine environment.
+ */
 public abstract class MSLink {
     public static final byte SW_SHOWNORMAL = 1;
     public static final byte SW_SHOWMAXIMIZED = 3;

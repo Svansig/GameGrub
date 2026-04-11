@@ -7,6 +7,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * Base class for X11 pointer events with window coordinates.
+ * Handles EnterNotify, LeaveNotify, and similar events that include
+ * both root window and event window coordinates for cursor tracking.
+ */
 public abstract class PointerWindowEvent extends Event {
     public enum Detail {ANCESTOR, VIRTUAL, INFERIOR, NONLINEAR, NONLINEAR_VIRTUAL}
     public enum Mode {NORMAL, GRAB, UNGRAB}

@@ -4,6 +4,10 @@ import androidx.annotation.Keep;
 import com.winlator.xserver.Drawable;
 import java.nio.ByteBuffer;
 
+/**
+ * GPU-based image texture using Android AHardwareBuffer and EGLImage.
+ * Provides efficient texture updates via hardware buffers for X server window rendering.
+ */
 public class GPUImage extends Texture {
     private long hardwareBufferPtr;
     private long imageKHRPtr;

@@ -13,6 +13,10 @@ import com.winlator.xconnector.XStreamLock;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * Request handler for ALSA server IPC commands.
+ * Processes audio control requests and manages shared memory for audio buffers.
+ */
 public class ALSARequestHandler implements RequestHandler {
     private int maxSHMemoryId = 0;
 

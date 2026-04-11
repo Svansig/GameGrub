@@ -12,6 +12,11 @@ import java.io.File;
 
 import timber.log.Timber;
 
+/**
+ * Creates Windows Start Menu entries and shortcuts within the Wine container.
+ * Generates .desktop-style menu items and directory structures for
+ * application shortcuts in the Wine environment.
+ */
 public abstract class WineStartMenuCreator {
     private static int parseShowCommand(String value) {
         if (value.equals("SW_SHOWMAXIMIZED")) {

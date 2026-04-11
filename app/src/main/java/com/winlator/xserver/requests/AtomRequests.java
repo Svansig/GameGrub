@@ -12,6 +12,10 @@ import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
+/**
+ * X server request handlers for X atom operations.
+ * Handles InternAtom and GetAtomName requests.
+ */
 public abstract class AtomRequests {
     public static void internAtom(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
         boolean onlyIfExists = client.getRequestData() == 1;

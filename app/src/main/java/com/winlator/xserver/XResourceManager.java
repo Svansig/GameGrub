@@ -2,6 +2,15 @@ package com.winlator.xserver;
 
 import java.util.ArrayList;
 
+/**
+ * XResourceManager - Base class for X11 resource managers.
+ * 
+ * Manages X11 resource lifecycle:
+ * - Windows, Pixmaps, Graphics Contexts, Cursors
+ * - Notifies listeners on create/free
+ * 
+ * Provides observer pattern for resource tracking.
+ */
 public abstract class XResourceManager {
     private final ArrayList<OnResourceLifecycleListener> onResourceLifecycleListeners = new ArrayList<>();
 

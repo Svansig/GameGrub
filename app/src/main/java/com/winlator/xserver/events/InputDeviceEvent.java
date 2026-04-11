@@ -7,6 +7,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * Base class for X11 input device events ( XI2 extension events).
+ * Encapsulates timestamp, root window, event window, coordinates,
+ * and button/key state for extended input device handling.
+ */
 public class InputDeviceEvent extends Event {
     private final byte detail;
     private final int timestamp;

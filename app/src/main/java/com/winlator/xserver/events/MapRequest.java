@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window requests to be mapped.
+ * Notifies the window manager to handle the mapping request,
+ * allowing the WM to apply positioning or other policies.
+ */
 public class MapRequest extends Event {
     private final Window parent;
     private final Window window;

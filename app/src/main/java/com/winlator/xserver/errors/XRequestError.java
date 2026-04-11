@@ -8,6 +8,18 @@ import com.winlator.xserver.XClient;
 
 import java.io.IOException;
 
+/**
+ * XRequestError - Base X11 protocol error.
+ * 
+ * X11 errors are sent to clients when requests fail.
+ * Each error has:
+ * - Error code (BadWindow, BadDrawable, etc.)
+ * - Data (invalid resource ID, bad value, etc.)
+ * - Sequence number
+ * - Major/minor opcode
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Errors</a>
+ */
 public class XRequestError extends Exception  {
     private final byte code;
     private final int data;

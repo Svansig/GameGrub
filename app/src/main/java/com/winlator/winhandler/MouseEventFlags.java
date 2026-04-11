@@ -2,6 +2,10 @@ package com.winlator.winhandler;
 
 import com.winlator.xserver.Pointer;
 
+/**
+ * Constants for mouse event flags used in Windows mouse input events.
+ * Maps X server pointer buttons to Windows mouse event flags.
+ */
 public abstract class MouseEventFlags {
     public static final int MOVE = 0x0001;
     public static final int LEFTDOWN = 0x0002;

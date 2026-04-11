@@ -9,6 +9,10 @@ import com.winlator.xserver.XServer;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that manages the X server.
+ * Starts and stops the X server socket listener using XConnectorEpoll.
+ */
 public class XServerComponent extends EnvironmentComponent {
     private XConnectorEpoll connector;
     private final XServer xServer;

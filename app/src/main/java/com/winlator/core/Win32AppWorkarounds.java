@@ -8,6 +8,11 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
+/**
+ * Provides workarounds for specific Windows application compatibility issues.
+ * Applies environment variables, registry settings, and X11 configuration
+ * tweaks to resolve common issues with game launching and runtime behavior.
+ */
 /* loaded from: classes.dex */
 public class Win32AppWorkarounds {
     private final XServer xServer;

@@ -4,6 +4,20 @@ import android.util.SparseArray;
 
 import java.nio.IntBuffer;
 
+/**
+ * CursorManager - Manages X11 cursors.
+ * 
+ * Manages cursor objects:
+ * - Creates/destroys cursors
+ * - Tracks cursors by ID
+ * - Masks for cursor shape
+ * - Hotspot position
+ * 
+ * Cursors define the mouse pointer appearance.
+ * Can use custom bitmaps or system cursors.
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Cursors</a>
+ */
 public class CursorManager extends XResourceManager {
     private final SparseArray<Cursor> cursors = new SparseArray<>();
     private final DrawableManager drawableManager;

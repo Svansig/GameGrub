@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 
+/**
+ * Low-level socket wrapper for X11 client connections using native JNI methods. Handles reading,
+ * writing, and ancillary file descriptor passing for Unix domain socket transport.
+ */
 public class ClientSocket {
     public final int fd;
     private final ArrayDeque<Integer> ancillaryFds = new ArrayDeque<>();

@@ -39,6 +39,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import timber.log.Timber;
 
+/**
+ * WinHandler - Windows application handler.
+ * 
+ * Manages Wine/Windows application in the container:
+ * - Input injection (keyboard, mouse, gamepad)
+ * - Process management
+ * - Wine configuration
+ * - Shared memory for gamepad state
+ * - UDP communication with app
+ * 
+ * This bridges Android input to the Windows application
+ * running in the container.
+ */
 public class WinHandler {
 
     private static final String TAG = "WinHandler";

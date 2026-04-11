@@ -21,6 +21,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that manages the VirGL renderer server.
+ * Provides OpenGL ES emulation for Wine/Windows games via virglrenderer.
+ */
 public class VirGLRendererComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     private static final String TAG = "VirGLRendererComponent";
     private static final long EGL_CONTEXT_WAIT_TIMEOUT_MS = 250L;

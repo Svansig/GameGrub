@@ -6,6 +6,11 @@ import app.gamegrub.R;
 
 import com.winlator.core.GPUHelper;
 
+/**
+ * Dialog for configuring Vortek Vulkan renderer settings.
+ * Allows users to specify maximum Vulkan API version for Vortek renderer
+ * compatibility with different GPU drivers.
+ */
 /* loaded from: classes.dex */
 public class VortekConfigDialog extends ContentDialog {
     // Computed independently to avoid triggering VortekRendererComponent class initialization

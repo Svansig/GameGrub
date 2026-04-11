@@ -7,6 +7,11 @@ import com.winlator.xenvironment.ImageFs;
 
 import java.io.File;
 
+/**
+ * Helper class for DXVK (DirectX to Vulkan) configuration and environment setup.
+ * Manages DXVK state cache, environment variables, and configuration parsing
+ * for graphics rendering within the Wine container.
+ */
 public class DXVKHelper {
     public static final String DEFAULT_CONFIG = "version="+DefaultVersion.DXVK+",framerate=0,maxDeviceMemory=0";
 

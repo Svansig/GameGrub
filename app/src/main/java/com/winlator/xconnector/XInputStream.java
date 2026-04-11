@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Buffered input stream for reading X11 protocol data from clients. Supports reading protocol
+ * data types (bytes, shorts, ints, strings) with automatic buffer growth and ancillary file
+ * descriptor passing for Unix domain socket transport.
+ */
 public class XInputStream {
     private ByteBuffer activeBuffer;
     private ByteBuffer buffer;

@@ -4,6 +4,11 @@ import com.winlator.renderer.GLRenderer;
 import com.winlator.renderer.material.ScreenMaterial;
 import com.winlator.renderer.material.ShaderMaterial;
 
+/**
+ * Post-processing effect simulating NTSC composite video on a CRT.
+ * Applies YIQ color space separation for chroma bleeding, scanlines,
+ * and barrel distortion for authentic retro TV aesthetics.
+ */
 public class NTSCCombinedEffect extends Effect {
     private int frameCount = 0;
 

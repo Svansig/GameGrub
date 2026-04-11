@@ -5,6 +5,19 @@ import android.util.SparseArray;
 import com.winlator.core.Callback;
 import com.winlator.renderer.Texture;
 
+/**
+ * DrawableManager - Manages X11 drawable surfaces.
+ * 
+ * Manages all Drawables (Windows and Pixmaps share this):
+ * - Creates drawable surfaces
+ * - Tracks active drawables by ID
+ * - Coordinates with PixmapManager
+ * 
+ * Both Windows and Pixmaps use Drawable for their content.
+ * The DrawableManager is the central registry.
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Drawables</a>
+ */
 public class DrawableManager extends XResourceManager implements XResourceManager.OnResourceLifecycleListener {
     private final XServer xServer;
     private final SparseArray<Drawable> drawables = new SparseArray<>();

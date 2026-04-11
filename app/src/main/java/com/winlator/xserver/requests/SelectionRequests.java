@@ -14,6 +14,10 @@ import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
+/**
+ * X server request handlers for X selection operations.
+ * Handles SetSelectionOwner and GetSelectionOwner requests.
+ */
 public abstract class SelectionRequests {
     public static void setSelectionOwner(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {
         int windowId = inputStream.readInt();

@@ -1,5 +1,9 @@
 package com.winlator.steampipeserver;
 
+/**
+ * Request codes for Steam Pipe server IPC communication.
+ * Defines messages for Steam client lifecycle and callback management.
+ */
 public abstract class RequestCodes {
     public static final int MSG_INIT = 1;
     public static final int MSG_SHUTDOWN = 2;

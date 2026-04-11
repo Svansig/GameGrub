@@ -27,6 +27,10 @@ import java.util.Objects;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that launches guest programs (Wine/Windows applications) using proot.
+ * Supports both 32-bit and 64-bit x86 emulation via box86/box64.
+ */
 public class GuestProgramLauncherComponent extends EnvironmentComponent {
     private String guestExecutable;
     private static int pid = -1;

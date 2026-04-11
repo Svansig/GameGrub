@@ -18,6 +18,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * ControlElement - On-screen input control element.
+ * 
+ * Represents UI controls for touch input:
+ * - BUTTON: Simple button
+ * - DPAD: Directional pad
+ * - JOYSTICK: Virtual joystick
+ * - SCROLLER: Range scroll (F1-F12, etc.)
+ * - TOUCHPAD: Mouse touchpad
+ * - SHOOTER: FPS control scheme
+ * 
+ * Each element has:
+ * - Position (x, y), Size (scale)
+ * - Shape (CIRCLE, RECTANGLE)
+ * - Bindings (up to 4 gamepad states)
+ * - States (pressed, etc.)
+ */
+
 import java.util.Arrays;
 
 public class ControlElement {

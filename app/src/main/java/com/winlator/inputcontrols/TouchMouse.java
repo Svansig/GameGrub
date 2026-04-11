@@ -18,6 +18,17 @@ import com.winlator.xserver.XServer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * TouchMouse - Touch-to-mouse input translation.
+ * 
+ * Converts touch gestures to mouse events:
+ * - Single touch: Mouse movement
+ * - Tap: Left click
+ * - Long press: Right click
+ * - Two finger: Scroll
+ * - Drag: Click and drag
+ */
+
 public class TouchMouse {
     private static final byte MAX_FINGERS = 4;
     private static final short MAX_TWO_FINGERS_SCROLL_DISTANCE = 350;

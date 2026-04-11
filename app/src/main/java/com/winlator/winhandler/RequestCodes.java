@@ -1,5 +1,9 @@
 package com.winlator.winhandler;
 
+/**
+ * Request codes for WinHandler IPC communication.
+ * Defines commands for process management, mouse/keyboard events, and window control.
+ */
 abstract class RequestCodes {
     public static final byte EXIT = 0;
     public static final byte INIT = 1;

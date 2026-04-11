@@ -24,6 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
+/**
+ * Manages runtime configuration (RC) files for box86/box64. Handles loading, creating, saving,
+ * duplicating, removing, and exporting RC files. RC files contain environment variable rules
+ * grouped by process name for per-application emulation settings.
+ */
 public class RCManager {
     private LinkedList<RCFile> rcfiles;
     private final Context context;

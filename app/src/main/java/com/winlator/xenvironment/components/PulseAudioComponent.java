@@ -17,6 +17,10 @@ import java.io.File;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that manages the PulseAudio server.
+ * Provides audio functionality using Android's AAudio backend.
+ */
 public class PulseAudioComponent extends EnvironmentComponent {
     private final UnixSocketConfig socketConfig;
     private static int pid = -1;

@@ -6,6 +6,11 @@ import java.nio.ByteOrder;
 
 import timber.log.Timber;
 
+/**
+ * Represents a connected X11 client session, managing I/O streams and client state. Each client
+ * has its own input/output streams and can be tagged with application-specific data (such as
+ * the XClient object) for request handling.
+ */
 public class Client {
     public final ClientSocket clientSocket;
     private final XConnectorEpoll connector;

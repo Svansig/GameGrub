@@ -4,6 +4,11 @@ import androidx.annotation.NonNull;
 
 import java.util.Iterator;
 
+/**
+ * Utility class for X11 bitmask operations on event masks and flags.
+ * Provides convenient methods for setting, testing, and iterating
+ * over bit flags used throughout the X protocol.
+ */
 public class Bitmask implements Iterable<Integer> {
     private int bits = 0;
 

@@ -22,6 +22,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 import timber.log.Timber;
 
+/**
+ * Retrieves GPU information and capabilities from the device's OpenGL/Vulkan implementation.
+ * Provides data about renderer, vendor, extensions, and supported features
+ * for configuring graphics drivers in the Wine container environment.
+ */
 public abstract class GPUInformation {
 
     static {

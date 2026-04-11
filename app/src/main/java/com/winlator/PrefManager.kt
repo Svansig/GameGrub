@@ -19,8 +19,12 @@ import kotlinx.coroutines.runBlocking
 import timber.log.Timber
 
 /**
- * Kind of ugly, but works to be a universal preference manager.
+ * Universal preference manager for application settings using Jetpack DataStore.
+ * Provides a centralized store for user preferences including app configuration,
+ * first-run state, and other application-level settings.
+ * Uses coroutines for asynchronous read/write operations.
  */
+
 object PrefManager {
 
     private val Context.datastore by preferencesDataStore(

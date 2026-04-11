@@ -3,6 +3,10 @@ package com.winlator.core;
 import android.graphics.PointF;
 import android.view.animation.Interpolator;
 
+/**
+ * Implements a cubic bezier curve interpolator for animations.
+ * Provides smooth easing functions for UI transitions and animations.
+ */
 public class CubicBezierInterpolator implements Interpolator {
     public final PointF start;
     public final PointF end;

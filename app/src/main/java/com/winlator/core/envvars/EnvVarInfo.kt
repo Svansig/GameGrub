@@ -1,5 +1,11 @@
 package com.winlator.core.envvars
 
+/**
+ * Data class representing metadata about an environment variable.
+ * Contains information about known environment variables including their
+ * identifier, selection type (toggle, multi-select), and possible values.
+ */
+
 data class EnvVarInfo(
     val identifier: String,
     val selectionType: EnvVarSelectionType = EnvVarSelectionType.NONE,

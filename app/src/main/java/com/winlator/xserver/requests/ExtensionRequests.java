@@ -11,6 +11,10 @@ import com.winlator.xserver.extensions.Extension;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * X server request handlers for extension operations.
+ * Handles ListExtensions and QueryExtension requests.
+ */
 public abstract class ExtensionRequests {
     public static void listExtensions(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         // Collect extension names

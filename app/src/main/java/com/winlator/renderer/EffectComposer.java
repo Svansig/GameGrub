@@ -8,6 +8,11 @@ import com.winlator.renderer.material.ShaderMaterial;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages post-processing effect pipeline for the X11 display.
+ * Applies effects in sequence using double-buffered framebuffers,
+ * enabling real-time visual filters like CRT, NTSC, and color effects.
+ */
 public class EffectComposer {
     private final ArrayList<Effect> effects = new ArrayList<>();
     private final RenderTarget readBuffer = new RenderTarget();

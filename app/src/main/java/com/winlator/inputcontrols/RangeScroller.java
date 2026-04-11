@@ -8,6 +8,14 @@ import com.winlator.widget.TouchpadView;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * RangeScroller - Scrollable range control (F1-F12, etc.).
+ * 
+ * Handles scrolling behavior for range controls:
+ * - Horizontal swipe: scroll through range
+ * - Tap: select item
+ * - Auto-repeat after hold
+ */
 public class RangeScroller {
     private final InputControlsView inputControlsView;
     private final ControlElement element;

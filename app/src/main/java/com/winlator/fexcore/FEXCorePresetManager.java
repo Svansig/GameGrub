@@ -14,6 +14,11 @@ import java.util.Iterator;
 import app.gamegrub.R;
 import timber.log.Timber;
 
+/**
+ * Manages FEXCore runtime presets for x86_64 emulation on ARM.
+ * Provides predefined environment variable configurations for
+ * stability, compatibility, and performance optimization.
+ */
 public abstract class FEXCorePresetManager {
     public static EnvVars getEnvVars(Context context, String id) {
         EnvVars envVars = new EnvVars();

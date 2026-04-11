@@ -19,6 +19,21 @@ import com.winlator.xserver.events.UnmapNotify;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * WindowManager - Manages X11 window tree.
+ * 
+ * Manages all X11 windows in the server:
+ * - Creates/destroys windows
+ * - Tracks window hierarchy (parent/children)
+ * - Handles window mapping (visibility)
+ * - Focus management (keyboard input)
+ * - Window modification listeners
+ * 
+ * The root window is created on initialization and spans
+ * the entire screen. All other windows are children.
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Window Manager</a>
+ */
 public class WindowManager extends XResourceManager {
     public enum FocusRevertTo {NONE, POINTER_ROOT, PARENT}
     public final Window rootWindow;

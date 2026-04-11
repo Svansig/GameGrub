@@ -23,6 +23,19 @@ import com.winlator.xserver.ScreenInfo;
 import com.winlator.xserver.XKeycode;
 import com.winlator.xserver.XServer;
 
+/**
+ * TouchpadView - On-screen touch pad for input.
+ * 
+ * Emulates a touchpad for mouse input:
+ * - Single finger: Mouse movement
+ * - Tap: Left click
+ * - Two finger: Right click / scroll
+ * - Pinch: Zoom
+ * - Supports gestures and multi-touch
+ * 
+ * Provides mouse/keyboard input where physical
+ * input is unavailable.
+ */
 public class TouchpadView extends View implements View.OnCapturedPointerListener {
     private static final byte MAX_FINGERS = 4;
     private static final short MAX_TWO_FINGERS_SCROLL_DISTANCE = 350;

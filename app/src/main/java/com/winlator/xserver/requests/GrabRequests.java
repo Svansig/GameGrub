@@ -13,6 +13,10 @@ import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
+/**
+ * X server request handlers for pointer and keyboard grab operations.
+ * Handles GrabPointer, UngrabPointer, and GrabKeyboard requests.
+ */
 public abstract class GrabRequests {
     private enum Status {SUCCESS, ALREADY_GRABBED, INVALID_TIME, NOT_VIEWABLE, FROZEN}
 

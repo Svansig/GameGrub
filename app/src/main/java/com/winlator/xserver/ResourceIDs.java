@@ -4,6 +4,11 @@ import androidx.collection.ArraySet;
 
 import java.util.Iterator;
 
+/**
+ * Manages X11 resource ID allocation across multiple clients.
+ * Distributes unique resource IDs to connected X clients using
+ * a pool-based allocation scheme.
+ */
 public class ResourceIDs {
     private final ArraySet<Integer> idBases = new ArraySet<>();
     public final int idMask;

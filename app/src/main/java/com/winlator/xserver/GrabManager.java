@@ -3,6 +3,10 @@ package com.winlator.xserver;
 import com.winlator.xserver.events.Event;
 import com.winlator.xserver.events.PointerWindowEvent;
 
+/**
+ * Manages pointer and keyboard grab state for the X server.
+ * Handles grab activation, deactivation, and automatic release when windows are unmapped.
+ */
 public class GrabManager implements WindowManager.OnWindowModificationListener {
     private Window window;
     private boolean ownerEvents;

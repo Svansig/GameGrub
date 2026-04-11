@@ -4,6 +4,11 @@ import androidx.collection.ArrayMap;
 
 import java.util.Map;
 
+/**
+ * Provides desktop integration utilities for the X server.
+ * Handles focus management, pointer motion tracking, and X resource setup
+ * for proper desktop environment integration.
+ */
 public abstract class DesktopHelper {
     public static void attachTo(final XServer xServer) {
         setupXResources(xServer);

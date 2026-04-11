@@ -16,6 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Represents a runtime configuration (RC) file for box86/box64, containing multiple RC groups.
+ * RC files can be serialized to/from JSON for storage and loaded to generate box86/box64
+ * configuration files.
+ */
 public class RCFile implements Comparable<RCFile> {
     public final int id;
     private String name = "";

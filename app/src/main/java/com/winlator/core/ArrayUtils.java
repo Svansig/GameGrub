@@ -7,6 +7,10 @@ import java.util.Arrays;
 
 import timber.log.Timber;
 
+/**
+ * Utility class for array manipulation operations.
+ * Provides helper methods for concatenating and manipulating byte and object arrays.
+ */
 public abstract class ArrayUtils {
     public static byte[] concat(byte[]... elements) {
         byte[] result = Arrays.copyOf(elements[0], elements[0].length);

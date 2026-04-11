@@ -14,6 +14,11 @@ import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
+/**
+ * X server request handlers for keyboard operations.
+ * Handles QueryKeymap, GetKeyboardMapping, ChangeKeyboardMapping,
+ * GetKeyboardControl, and GetModifierMapping requests.
+ */
 public abstract class KeyboardRequests {
     public static void queryKeymap(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException {
         byte[] keymap = new byte[32];

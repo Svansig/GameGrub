@@ -10,6 +10,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
+/**
+ * Window - X11 window object.
+ * 
+ * Represents an X11 window in the server's window tree.
+ * Windows have:
+ * - Position (x, y) relative to parent
+ * - Size (width, height)
+ * - Border width
+ * - Content (Drawable - the actual image data)
+ * - Parent/children hierarchy
+ * - Attributes (window class, visual, event masks, etc.)
+ * - Properties (WM_: window manager properties)
+ * - Event listeners (for delivering events)
+ * - MapState (UNMAPPED, UNVIEWABLE, VIEWABLE)
+ * 
+ * The window tree is hierarchical: root window at top, child windows below.
+ * Windows can be mapped (visible) or unmapped (hidden).
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Window Specification</a>
+ */
 public class Window extends XResource {
     public static final int FLAG_X = 1;
     public static final int FLAG_Y = 1<<1;

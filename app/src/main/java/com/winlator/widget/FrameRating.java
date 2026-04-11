@@ -22,6 +22,11 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Android overlay widget displaying real-time frame rate metrics.
+ * Shows current FPS, tracks min/max/average FPS over a session,
+ * and logs performance data to help diagnose rendering issues.
+ */
 public class FrameRating extends FrameLayout implements Runnable {
     private long lastTime = 0;
     private int frameCount = 0;

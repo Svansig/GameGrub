@@ -1,5 +1,10 @@
 package com.winlator.xserver;
 
+/**
+ * X11 visual structure describing color representation capabilities.
+ * Defines properties like depth, colormap size, and RGB masks
+ * for the screen's display configuration.
+ */
 public class Visual {
     public final int id;
     public final byte visualClass = 4;

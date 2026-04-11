@@ -4,6 +4,10 @@ import android.opengl.GLES20;
 
 import androidx.collection.ArrayMap;
 
+/**
+ * Base class for OpenGL ES shader materials.
+ * Provides shader compilation, uniform management, and program linking.
+ */
 public class ShaderMaterial {
     public int programId;
     private final ArrayMap<String, Integer> uniforms = new ArrayMap<>();

@@ -4,6 +4,11 @@ import android.opengl.GLES20;
 
 import timber.log.Timber;
 
+/**
+ * OpenGL framebuffer object (FBO) wrapper for offscreen rendering.
+ * Provides a texture-backed framebuffer for double-buffered rendering,
+ * enabling post-processing effects and GPU-accelerated compositing.
+ */
 public class RenderTarget extends Texture {
     private static final String TAG = "RenderTarget";
     private int framebuffer = 0;

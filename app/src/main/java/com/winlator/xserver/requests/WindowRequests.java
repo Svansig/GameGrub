@@ -27,6 +27,22 @@ import com.winlator.xserver.events.RawEvent;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * WindowRequests - X11 window-related request handlers.
+ * 
+ * This class handles X11 requests related to window management:
+ * - CreateWindow: Creates new windows
+ * - DestroyWindow/SubWindows: Removes windows
+ * - Map/UnmapWindow: Shows/hides windows
+ * - ReparentWindow: Changes window parent
+ * - ConfigureWindow: Changes window properties
+ * - GetWindowAttributes: Returns window configuration
+ * - ChangeWindowAttributes: Modifies window properties
+ * - SendEvent: Sends arbitrary events
+ * - And many more...
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Window System Specification</a>
+ */
 public abstract class WindowRequests {
     public static void createWindow(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         byte depth = client.getRequestData();

@@ -10,6 +10,25 @@ import com.winlator.xserver.GraphicsContext;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Drawable - X11 drawable surface (window or pixmap content).
+ * 
+ * A Drawable is a surface that can be drawn upon. Both Windows and Pixmaps
+ * contain a Drawable for their image data.
+ * 
+ * Features:
+ * - Width/height dimensions
+ * - Visual (color configuration)
+ * - ByteBuffer for pixel data (RGBA format)
+ * - OpenGL texture for GPU rendering
+ * - Rendering methods (drawImage, copyArea, drawLine, fillRect, etc.)
+ * - Synchronization (renderLock for thread safety)
+ * 
+ * The native methods (winlator_11 library) perform efficient
+ * software rendering for X11 operations.
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Drawable Specification</a>
+ */
 public class Drawable extends XResource {
     private ByteBuffer data;
     public final short height;

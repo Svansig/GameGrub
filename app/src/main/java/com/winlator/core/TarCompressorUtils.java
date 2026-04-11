@@ -27,6 +27,11 @@ import java.io.OutputStream;
 
 import timber.log.Timber;
 
+/**
+ * Utility class for handling tar archive compression and decompression.
+ * Supports multiple compression formats including XZ and Zstandard.
+ * Used for extracting and creating container rootfs and component archives.
+ */
 public abstract class TarCompressorUtils {
     public enum Type {XZ, ZSTD}
 

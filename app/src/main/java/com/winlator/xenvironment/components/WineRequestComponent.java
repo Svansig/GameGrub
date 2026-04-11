@@ -20,6 +20,10 @@ import java.util.concurrent.Executors;
 import app.gamegrub.ui.screen.auth.EpicOAuthActivity;
 import timber.log.Timber;
 
+/**
+ * Environment component that handles requests from Wine applications.
+ * Currently handles URL opening requests from Wine to launch external browsers.
+ */
 public class WineRequestComponent extends EnvironmentComponent {
     abstract static class RequestCodes {
         static final int OPEN_URL = 1;

@@ -10,6 +10,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 
+/**
+ * Manages System V Shared Memory segments for the X server's MIT-SHM extension. Handles
+ * creation, attachment, detachment, and deletion of shared memory regions using ashmem
+ * or Android SharedMemory APIs.
+ */
 public class SysVSharedMemory {
     private final SparseArray<SHMemory> shmemories = new SparseArray<>();
     private int maxSHMemoryId = 0;

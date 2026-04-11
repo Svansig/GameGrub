@@ -4,6 +4,11 @@ import com.winlator.renderer.GLRenderer;
 import com.winlator.renderer.material.ScreenMaterial;
 import com.winlator.renderer.material.ShaderMaterial;
 
+/**
+ * Post-processing color correction effect for display adjustment.
+ * Provides brightness, contrast, and gamma controls to fine-tune
+ * the visual output for different display panels and preferences.
+ */
 public class ColorEffect extends Effect {
     private float brightness = 0.0f;
     private float contrast = 0.0f;

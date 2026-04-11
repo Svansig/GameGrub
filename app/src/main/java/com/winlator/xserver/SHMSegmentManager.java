@@ -6,6 +6,11 @@ import com.winlator.sysvshm.SysVSharedMemory;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Manages System V shared memory segments for the X server.
+ * Handles attachment and detachment of shared memory regions used by X clients
+ * for efficient image data sharing via the MIT-SHM extension.
+ */
 public class SHMSegmentManager {
     private final SysVSharedMemory sysVSharedMemory;
     private final SparseArray<ByteBuffer> shmSegments = new SparseArray<>();

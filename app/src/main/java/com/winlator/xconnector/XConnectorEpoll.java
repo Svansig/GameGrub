@@ -8,6 +8,21 @@ import java.nio.ByteBuffer;
 
 import timber.log.Timber;
 
+/**
+ * XConnectorEpoll - X11 client connection handler using epoll.
+ * 
+ * Main X11 connection server:
+ * - Uses epoll for efficient I/O multiplexing
+ * - Manages Unix domain socket connections
+ * - Handles multiple X11 clients
+ * - Calls ConnectionHandler for new connections
+ * - Calls RequestHandler for requests
+ * 
+ * The epoll-based design handles many concurrent
+ * X11 clients efficiently.
+ * 
+ * @see <a href="https://man7.org/linux/man-pages/man7/epoll.7.html">epoll(7)</a>
+ */
 public class XConnectorEpoll implements Runnable {
     private static final String TAG = "XConnectorEpoll";
     private static final long STOP_JOIN_TIMEOUT_MS = 2000L;

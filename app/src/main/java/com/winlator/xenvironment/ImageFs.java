@@ -10,6 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 
+/**
+ * Represents the Wine container's filesystem image (imagefs).
+ * Provides paths and utilities for accessing the Wine prefix, home directory,
+ * cache, configuration, and various system directories within the container.
+ */
 public class ImageFs {
     private static volatile ImageFs INSTANCE;
 

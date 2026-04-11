@@ -1,5 +1,10 @@
 package com.winlator.xserver;
 
+/**
+ * Represents an X11 Graphics Context (GC), which encapsulates drawing state used by the X server
+ * when rendering to drawables. Contains properties such as foreground/background colors, line width,
+ * clip rectangles, raster operation function, and subwindow mode.
+ */
 public class GraphicsContext extends XResource {
     public static final int FLAG_FUNCTION = 1;
     public static final int FLAG_PLANE_MASK = 1<<1;

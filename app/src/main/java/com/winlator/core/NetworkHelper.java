@@ -16,6 +16,11 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Helper class for network operations within the container environment.
+ * Provides network interface information, IP address management,
+ * and connectivity status utilities for the Wine runtime.
+ */
 public class NetworkHelper {
     private final ConnectivityManager connectivityManager;
 

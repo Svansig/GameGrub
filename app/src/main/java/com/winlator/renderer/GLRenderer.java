@@ -30,6 +30,25 @@ import java.util.ArrayList;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+/**
+ * GLRenderer - OpenGL ES 2.0 renderer for X11 windows.
+ * 
+ * This is the core renderer that draws X11 windows to the Android display using OpenGL ES 2.0.
+ * It implements GLSurfaceView.Renderer for the GL thread and manages:
+ * - Window rendering (each mapped X11 window renders to the display)
+ * - Cursor rendering (X11 cursors are drawn over windows)
+ * - View transformations (scaling, offset for different screen sizes)
+ * - Post-processing effects (CRT, color correction, etc.)
+ * - Fullscreen handling
+ * - Magnifier for accessibility
+ * 
+ * The rendering pipeline:
+ * 1. onSurfaceCreated: Initialize GL state and textures
+ * 2. onSurfaceChanged: Set up viewport
+ * 3. onDrawFrame: Draw all visible windows and cursors
+ * 
+ * @see <a href="https://developer.android.com/guide/topics/graphics/opengl">Android OpenGL ES</a>
+ */
 public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindowModificationListener, Pointer.OnPointerMotionListener {
     public final XServerView xServerView;
     private final XServer xServer;

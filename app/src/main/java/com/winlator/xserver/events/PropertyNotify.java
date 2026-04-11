@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window property is changed or deleted.
+ * Notifies clients of property modifications on their windows,
+ * enabling dynamic UI updates and state synchronization.
+ */
 public class PropertyNotify extends Event {
     private final Window window;
     private final int atom;

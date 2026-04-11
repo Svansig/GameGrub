@@ -19,6 +19,11 @@ import java.util.Locale;
 import java.util.function.ToIntFunction;
 import timber.log.Timber;
 
+/**
+ * Editor for Wine registry files (system.reg, userdef.reg, user.reg).
+ * Provides read and write access to the Wine registry format, allowing
+ * modification of registry keys and values within container configurations.
+ */
 public class WineRegistryEditor implements Closeable {
     private final File file;
     private final File cloneFile;

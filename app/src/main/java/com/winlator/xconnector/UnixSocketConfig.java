@@ -4,6 +4,11 @@ import com.winlator.core.FileUtils;
 
 import java.io.File;
 
+/**
+ * Configuration utility for Unix domain socket paths used by various X server components
+ * and services (X11, SysV SHM, ALSA, PulseAudio, VirGL, Steam). Provides factory method to
+ * create socket configurations at specified paths within a root directory.
+ */
 public class UnixSocketConfig {
     public static final String SYSVSHM_SERVER_PATH = "/tmp/.sysvshm/SM0";
     public static final String ALSA_SERVER_PATH = "/tmp/.sound/AS0";

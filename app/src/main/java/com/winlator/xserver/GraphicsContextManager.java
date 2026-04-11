@@ -4,6 +4,11 @@ import android.util.SparseArray;
 
 import com.winlator.xconnector.XInputStream;
 
+/**
+ * Manages X11 graphics contexts (GC), which hold drawing state such as foreground/background colors,
+ * line width, clip regions, and raster operation modes. Provides creation, retrieval, updating,
+ * and deletion of graphics contexts within the X server.
+ */
 public class GraphicsContextManager extends XResourceManager {
     private final SparseArray<GraphicsContext> graphicsContexts = new SparseArray<>();
 

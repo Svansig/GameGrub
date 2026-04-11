@@ -1,5 +1,9 @@
 package com.winlator.math;
 
+/**
+ * Mathematical utility functions for floating-point and integer operations.
+ * Provides common operations such as clamping, rounding, and sign detection.
+ */
 public abstract class Mathf {
     public static float clamp(float x, float min, float max) {
         return (x < min) ? min : (Math.min(x, max));

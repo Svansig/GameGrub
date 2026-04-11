@@ -1,5 +1,9 @@
 package com.winlator.alsaserver;
 
+/**
+ * Request codes for ALSA server IPC communication.
+ * Defines commands for audio stream control operations.
+ */
 public abstract class RequestCodes {
     public static final byte CLOSE = 0;
     public static final byte START = 1;

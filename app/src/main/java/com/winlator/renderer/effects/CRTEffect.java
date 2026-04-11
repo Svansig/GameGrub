@@ -3,6 +3,18 @@ package com.winlator.renderer.effects;
 import com.winlator.renderer.material.ScreenMaterial;
 import com.winlator.renderer.material.ShaderMaterial;
 
+/**
+ * CRTEffect - CRT monitor simulation shader.
+ * 
+ * Post-processing effect that simulates:
+ * - Chromatic aberration
+ * - Scanlines
+ * - Screen curvature
+ * - Phosphor glow
+ * - Vignette
+ * 
+ * Makes games appear on old CRT monitors.
+ */
 public class CRTEffect extends Effect {
     @Override
     protected ShaderMaterial createMaterial() {

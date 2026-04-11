@@ -4,6 +4,11 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
+/**
+ * Data class representing a downloadable runtime content profile.
+ * Defines metadata for Wine, Proton, DXVK, VKD3D, and other runtimes
+ * including version info, file lists, and installation paths.
+ */
 public class ContentProfile {
     public static final String MARK_TYPE = "type";
     public static final String MARK_VERSION_NAME = "versionName";

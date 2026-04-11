@@ -4,6 +4,20 @@ import android.util.SparseArray;
 
 import com.winlator.xserver.events.SelectionClear;
 
+/**
+ * SelectionManager - Manages X11 selections (clipboard).
+ * 
+ * Manages X11 selection ownership:
+ * - PRIMARY, SECONDARY, CLIPBOARD
+ * - Ownership tracking
+ * - SelectionClear events
+ * 
+ * X11 selections are like clipboard with notifications.
+ * When data is copied, selection owner changes.
+ * Applications can request selection data.
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Selections</a>
+ */
 public class SelectionManager implements XResourceManager.OnResourceLifecycleListener {
     private final SparseArray<Selection> selections = new SparseArray<>();
 

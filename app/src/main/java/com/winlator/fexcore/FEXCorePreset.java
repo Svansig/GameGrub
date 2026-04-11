@@ -2,6 +2,11 @@ package com.winlator.fexcore;
 
 import androidx.annotation.NonNull;
 
+/**
+ * Data class representing a FEXCore runtime preset configuration.
+ * Defines preset identifiers for stability, compatibility, performance,
+ * and custom user-defined profiles used in x86_64 emulation.
+ */
 public class FEXCorePreset {
     public static final String STABILITY = "STABILITY";
     public static final String COMPATIBILITY = "COMPATIBILITY";

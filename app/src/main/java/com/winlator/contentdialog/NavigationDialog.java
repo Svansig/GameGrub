@@ -18,6 +18,11 @@ import androidx.core.content.res.ResourcesCompat;
 import app.gamegrub.R;
 import com.winlator.inputcontrols.ControllerManager;
 
+/**
+ * Dialog providing in-game navigation and controller action options.
+ * Displays a grid of actions like keyboard, input controls, exit game,
+ * and controller configuration for quick access during gameplay.
+ */
 public class NavigationDialog extends ContentDialog {
 
     public static final int ACTION_KEYBOARD = 1;

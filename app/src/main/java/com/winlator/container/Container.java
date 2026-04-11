@@ -2,6 +2,8 @@ package com.winlator.container;
 
 import android.os.Environment;
 
+import androidx.annotation.NonNull;
+
 import com.winlator.box86_64.Box86_64Preset;
 import com.winlator.core.DefaultVersion;
 import com.winlator.core.FileUtils;
@@ -21,6 +23,12 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
+/**
+ * Represents a Wine/Proton container for running Windows applications on Android.
+ * Manages container configuration including display settings, graphics drivers,
+ * environment variables, Wine components, and runtime behavior.
+ * Acts as the core data model for container instances in the system.
+ */
 public class Container {
     public enum XrControllerMapping {
         BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y, BUTTON_GRIP, BUTTON_TRIGGER,
@@ -935,26 +943,32 @@ public class Container {
 
             KeyValueSet wincomponents1 = new KeyValueSet(DEFAULT_WINCOMPONENTS);
             KeyValueSet wincomponents2 = new KeyValueSet(data.getString("wincomponents"));
-            StringBuilder result = new StringBuilder();
-
-            for (String[] wincomponent1 : wincomponents1) {
-                String value = wincomponent1[1];
-
-                for (String[] wincomponent2 : wincomponents2) {
-                    if (wincomponent1[0].equals(wincomponent2[0])) {
-                        value = wincomponent2[1];
-                        break;
-                    }
-                }
-
-                result.append((result.length() > 0) ? "," : "").append(wincomponent1[0]).append("=").append(value);
-            }
+            StringBuilder result = getWincomponentsString(wincomponents1, wincomponents2);
 
             data.put("wincomponents", result.toString());
         }
         catch (JSONException e) {
             Timber.tag("Container").e("Failed to check obsolete or missing properties: " + e);
         }
+    }
+
+    @NonNull
+    private static StringBuilder getWincomponentsString(KeyValueSet wincomponents1, KeyValueSet wincomponents2) {
+        StringBuilder result = new StringBuilder();
+
+        for (String[] wincomponent1 : wincomponents1) {
+            String value = wincomponent1[1];
+
+            for (String[] wincomponent2 : wincomponents2) {
+                if (wincomponent1[0].equals(wincomponent2[0])) {
+                    value = wincomponent2[1];
+                    break;
+                }
+            }
+
+            result.append((result.length() > 0) ? "," : "").append(wincomponent1[0]).append("=").append(value);
+        }
+        return result;
     }
 
     public boolean isForceDlc() {

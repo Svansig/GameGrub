@@ -3,6 +3,10 @@ package com.winlator.alsaserver;
 import com.winlator.xconnector.Client;
 import com.winlator.xconnector.ConnectionHandler;
 
+/**
+ * Connection handler for incoming ALSA client connections.
+ * Creates and manages ALSAClient instances for each connected client.
+ */
 public class ALSAClientConnectionHandler implements ConnectionHandler {
     private final ALSAClient.Options options;
     private final String containerVariant;

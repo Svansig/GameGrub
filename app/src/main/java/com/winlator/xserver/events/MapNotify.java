@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window is mapped (made visible).
+ * Notifies clients that their window is now displayed on screen,
+ * enabling them to begin rendering and update their visible state.
+ */
 public class MapNotify extends Event {
     private final Window event;
     private final Window window;

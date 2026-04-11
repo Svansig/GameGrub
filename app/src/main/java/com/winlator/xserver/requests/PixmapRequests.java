@@ -9,6 +9,10 @@ import com.winlator.xserver.errors.BadDrawable;
 import com.winlator.xserver.errors.BadIdChoice;
 import com.winlator.xserver.errors.XRequestError;
 
+/**
+ * X server request handlers for pixmap operations.
+ * Handles CreatePixmap and FreePixmap requests.
+ */
 public abstract class PixmapRequests {
     public static void createPixmap(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         byte depth = client.getRequestData();

@@ -3,6 +3,11 @@ package com.winlator.core;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Represents a Windows LOGFONT structure for font configuration.
+ * Used for configuring Wine font rendering and managing Windows
+ * font metrics within the container environment.
+ */
 public class MSLogFont {
     private int height = -11;
     private int width = 0;

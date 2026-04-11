@@ -14,6 +14,12 @@ import java.util.Iterator;
 
 import timber.log.Timber;
 
+/**
+ * Represents a Windows application shortcut within a container.
+ * Contains metadata about the shortcut including name, path, icon, and
+ * associated executable information. Used for creating and managing
+ * application launch shortcuts in the Wine environment.
+ */
 public class Shortcut {
     public final Container container;
     public final String name;

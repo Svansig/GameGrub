@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window is unmapped (hidden from display).
+ * Used to notify clients that their window is no longer visible,
+ * allowing them to suspend rendering or resource usage.
+ */
 public class UnmapNotify extends Event {
     private final Window event;
     private final Window window;

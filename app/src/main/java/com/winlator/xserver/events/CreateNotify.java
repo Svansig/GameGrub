@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window is created.
+ * Notifies clients and the window manager that a new window exists,
+ * enabling preparation of window-related state and resources.
+ */
 public class CreateNotify extends Event {
     private final Window parent;
     private final Window window;

@@ -10,6 +10,11 @@ import java.util.regex.Pattern;
 
 import timber.log.Timber;
 
+/**
+ * Helper class for GPU/Vulkan operations in the container environment.
+ * Provides native methods for querying Vulkan API version and
+ * managing GPU-related configuration for Wine graphics drivers.
+ */
 public abstract class GPUHelper {
     public static final int VK_API_VERSION_1_3 = vkMakeVersion(1, 3, 0);
 

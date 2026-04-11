@@ -9,6 +9,25 @@ import androidx.collection.ArraySet;
 
 import java.util.ArrayList;
 
+/**
+ * Keyboard - X11 keyboard device.
+ * 
+ * Manages X11 keyboard state including:
+ * - Keysysms (keycode to keysym mapping)
+ * - Modifier state (Shift, Ctrl, Alt, etc.)
+ * - Key repeat handling
+ * - Keycode mapping (Android to X11)
+ * 
+ * X11 keycodes are 8-255 (248 keycodes).
+ * Each keycode maps to 2 keysyms (normal and shifted).
+ * 
+ * Used to:
+ * - Translate Android key events to X11
+ * - Generate key events for clients
+ * - Track modifier keys
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Keyboard Device</a>
+ */
 public class Keyboard {
     public static final byte KEYSYMS_PER_KEYCODE = 2;
     public static final short KEYS_COUNT = 248;

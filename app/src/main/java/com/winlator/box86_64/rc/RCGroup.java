@@ -3,6 +3,10 @@ package com.winlator.box86_64.rc;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Represents a group of RC items within an RC file. Groups contain multiple RC items with
+ * process-specific environment variable configurations and can be enabled/disabled as a unit.
+ */
 public class RCGroup implements Comparable<RCGroup> {
     private String groupName;
     private String groupDesc;

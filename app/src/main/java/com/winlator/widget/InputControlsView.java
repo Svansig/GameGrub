@@ -40,6 +40,11 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * Android View that manages on-screen gamepad controls and input handling.
+ * Renders touch-based control elements (buttons, sticks, D-pads) and converts
+ * touchscreen/gamepad input to X11 pointer and keyboard events for Wine apps.
+ */
 public class InputControlsView extends View {
     public static final float DEFAULT_OVERLAY_OPACITY = 0.4f;
     private boolean editMode = false;

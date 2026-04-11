@@ -8,6 +8,10 @@ import com.winlator.xenvironment.EnvironmentComponent;
 import com.winlator.alsaserver.ALSAClient;
 import com.winlator.xenvironment.ImageFs;
 
+/**
+ * Environment component that manages the ALSA audio server.
+ * Provides audio functionality for Wine/Windows applications.
+ */
 public class ALSAServerComponent extends EnvironmentComponent {
     private XConnectorEpoll connector;
     private final ALSAClient.Options options;

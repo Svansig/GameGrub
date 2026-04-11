@@ -1,5 +1,10 @@
 package com.winlator.math;
 
+/**
+ * 2D transformation matrix operations.
+ * Provides methods for creating, composing, and applying affine transformations
+ * including translation, rotation, scaling, and matrix multiplication.
+ */
 public class XForm {
     private static final float[] tmpXForm = XForm.getInstance();
 

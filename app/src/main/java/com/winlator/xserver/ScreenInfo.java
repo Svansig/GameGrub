@@ -2,6 +2,11 @@ package com.winlator.xserver;
 
 import androidx.annotation.NonNull;
 
+/**
+ * X11 screen information container for display dimensions and DPI.
+ * Stores screen width/height in pixels and physical dimensions
+ * for display configuration and resolution reporting.
+ */
 public class ScreenInfo {
     public final short width;
     public final short height;

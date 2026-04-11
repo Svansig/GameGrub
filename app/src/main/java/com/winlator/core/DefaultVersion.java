@@ -4,6 +4,11 @@ import static com.winlator.container.Container.STEAM_TYPE_NORMAL;
 
 import com.winlator.container.Container;
 
+/**
+ * Provides default version constants for Wine runtime components and graphics drivers.
+ * Defines baseline versions for DXVK, VKD3D, Box86/64, Turnip, and other
+ * container dependencies.
+ */
 public abstract class DefaultVersion {
 
     public static final String BOX86 = "0.3.2";

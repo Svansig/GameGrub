@@ -4,6 +4,15 @@ import com.winlator.xserver.events.Event;
 
 import java.io.IOException;
 
+/**
+ * EventListener - X11 event listener for a client-window pair.
+ * 
+ * Record holding:
+ * - client: The interested XClient
+ * - eventMask: Events the client wants for this window
+ * 
+ * Filters and delivers events to interested clients.
+ */
 public record EventListener(XClient client, Bitmask eventMask) {
 
     public boolean isInterestedIn(int eventId) {

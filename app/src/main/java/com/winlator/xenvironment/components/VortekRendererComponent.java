@@ -23,6 +23,10 @@ import java.io.IOException;
 import java.util.Objects;
 import timber.log.Timber;
 
+/**
+ * Environment component that manages the Vortek Vulkan renderer server.
+ * Provides Vulkan emulation for Wine/Windows games using native Android Vulkan.
+ */
 public class VortekRendererComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     public static final int VK_MAX_VERSION = GPUHelper.vkMakeVersion(1, 3, 128);
     private static final boolean NATIVE_LIBRARY_LOADED = loadNativeLibrary();

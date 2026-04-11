@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window loses selection ownership.
+ * Notifies clients that another window has claimed the selection,
+ * enabling clipboard and drag-and-drop ownership transfers.
+ */
 public class SelectionClear extends Event {
     private final int timestamp;
     private final Window owner;

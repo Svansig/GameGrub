@@ -41,6 +41,10 @@ import java.util.Objects;
 import app.gamegrub.service.steam.SteamService;
 import timber.log.Timber;
 
+/**
+ * Environment component that launches guest programs in Bionic containers.
+ * Uses proot with box64 for x86_64 emulation in an Android/Bionic environment.
+ */
 public class BionicProgramLauncherComponent extends GuestProgramLauncherComponent {
     private String guestExecutable;
     private static int pid = -1;

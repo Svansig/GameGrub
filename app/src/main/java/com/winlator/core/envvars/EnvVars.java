@@ -5,6 +5,11 @@ import androidx.annotation.NonNull;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+/**
+ * Represents a collection of environment variables as key-value pairs.
+ * Provides utilities for managing and manipulating environment variable
+ * configurations used by Wine and container runtime.
+ */
 public class EnvVars implements Iterable<String> {
     private final LinkedHashMap<String, String> data = new LinkedHashMap<>();
 

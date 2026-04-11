@@ -6,6 +6,18 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * Expose - Window needs redraw event.
+ * 
+ * Event code 12: Notifies client that window content
+ * needs to be redrawn.
+ * Sent when:
+ * - Window becomes visible
+ * - Previously hidden window is exposed
+ * - Part of window is revealed
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Expose Event</a>
+ */
 public class Expose extends Event {
     private final Window window;
     private final short width;

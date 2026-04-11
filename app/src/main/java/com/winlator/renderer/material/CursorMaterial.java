@@ -1,5 +1,10 @@
 package com.winlator.renderer.material;
 
+/**
+ * OpenGL shader material for rendering mouse cursor sprites.
+ * Similar to WindowMaterial but supports alpha blending for cursor
+ * transparency, enabling smooth cursor overlay on the desktop.
+ */
 public class CursorMaterial extends ShaderMaterial {
     public CursorMaterial() {
         setUniformNames("xform", "viewSize", "texture");

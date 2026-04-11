@@ -5,6 +5,11 @@ import com.winlator.xconnector.XStreamLock;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when key or pointer button mapping changes.
+ * Notifies clients to refresh their input mappings after X modifier,
+ * keyboard, or pointer button mapping changes (e.g., via xmodmap).
+ */
 public class MappingNotify extends Event {
     public enum Request {MODIFIER, KEYBOARD, POINTER}
     private final Request request;

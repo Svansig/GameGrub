@@ -11,6 +11,10 @@ import android.view.InputDevice;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages physical game controller detection and player slot assignments.
+ * Supports up to 4 player slots with device assignment and enabled state tracking.
+ */
 public class ControllerManager {
 
     @SuppressLint("StaticFieldLeak")

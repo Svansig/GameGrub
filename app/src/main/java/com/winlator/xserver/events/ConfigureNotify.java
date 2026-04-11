@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window's configuration changes.
+ * Notifies clients of window position, size, or stacking order changes,
+ * enabling UI layout synchronization and repaint triggering.
+ */
 public class ConfigureNotify extends Event {
     private final Window event;
     private final Window window;

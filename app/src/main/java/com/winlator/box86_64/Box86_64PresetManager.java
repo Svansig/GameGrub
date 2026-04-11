@@ -15,6 +15,11 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
+/**
+ * Manages box86/box64 emulation presets, providing built-in presets (Stability, Compatibility,
+ * Intermediate, Performance, Denuvo, Unity) and custom user-defined presets. Handles preset
+ * retrieval, editing, duplication, removal, and UI spinner population.
+ */
 public abstract class Box86_64PresetManager {
     public static EnvVars getEnvVars(String prefix, Context context, String id) {
         String ucPrefix = prefix.toUpperCase(Locale.ENGLISH);

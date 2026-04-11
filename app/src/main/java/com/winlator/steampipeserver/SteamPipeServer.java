@@ -16,6 +16,16 @@ import java.util.Set;
 
 import timber.log.Timber;
 
+/**
+ * SteamPipeServer - Inter-process communication for Steam games.
+ * 
+ * Implements named pipe-like communication for Steam:
+ * - SteamPipe protocol (game theater, Big Picture)
+ * - Multi-client support
+ * - TCP socket-based communication
+ * 
+ * Many Steam games require IPC that this provides.
+ */
 public class SteamPipeServer {
     private static final int PORT = 34865;
     private static final long STOP_JOIN_TIMEOUT_MS = 2000L;

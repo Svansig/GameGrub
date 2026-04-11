@@ -1,5 +1,9 @@
 package com.winlator.xserver;
 
+/**
+ * Defines X11 protocol request opcode constants (1-127). These opcodes identify the type of request
+ * sent by X clients to the server, such as creating windows, drawing graphics, or managing resources.
+ */
 public abstract class ClientOpcodes {
     public static final byte CREATE_WINDOW = 1;
     public static final byte CHANGE_WINDOW_ATTRIBUTES = 2;

@@ -14,6 +14,17 @@ import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLDisplay;
 
+/**
+ * XServerView - OpenGL view for X11 rendering.
+ * 
+ * Android GLSurfaceView that hosts the XServer:
+ * - Uses OpenGL ES 3.0 for rendering
+ * - Hosts the GLRenderer
+ * - Handles touch/keyboard input
+ * - Renders X11 window contents
+ * 
+ * This is the main view displayed to users.
+ */
 @SuppressLint("ViewConstructor")
 public class XServerView extends GLSurfaceView {
     private static final int EGL_OPENGL_ES3_BIT_KHR = 0x40;

@@ -17,6 +17,11 @@ import java.util.regex.Pattern;
 import app.gamegrub.R;
 import timber.log.Timber;
 
+/**
+ * Represents a Wine/Proton distribution with version, type, and architecture information.
+ * Provides metadata about available Wine versions including their installation
+ * paths and version parsing capabilities.
+ */
 public class WineInfo implements Parcelable {
     public static final WineInfo MAIN_WINE_VERSION = new WineInfo("wine", "9.2", "x86_64");
     private static final Pattern pattern = Pattern.compile("^(wine|proton|Proton)\\-([0-9\\.]+)(?:\\-([0-9\\.]+))?\\-(x86|x86_64|arm64ec)(?:\\-([0-9]+))?$");

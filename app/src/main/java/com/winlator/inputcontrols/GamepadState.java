@@ -2,6 +2,17 @@ package com.winlator.inputcontrols;
 
 import java.nio.ByteBuffer;
 
+/**
+ * GamepadState - Gamepad controller input state.
+ * 
+ * Tracks gamepad input:
+ * - Thumb sticks (L/R x/y)
+ * - Triggers (L/R)
+ * - D-pad directions
+ * - Button states
+ * 
+ * Used for Wine/input injection.
+ */
 public class GamepadState {
     public float thumbLX = 0;
     public float thumbLY = 0;

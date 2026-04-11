@@ -11,6 +11,11 @@ import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
+/**
+ * X server request handlers for font operations.
+ * Handles OpenFont, QueryTextExtents, ListFonts, QueryFont, ListFontsWithInfo,
+ * SetFontPath, and GetFontPath requests.
+ */
 public abstract class FontRequests {
     public static void openFont(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         inputStream.skip(4);

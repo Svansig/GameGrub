@@ -10,6 +10,11 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Manages downloadable Wine runtime components such as DXVK, VKD3D, Turnip drivers,
+ * and Box64. Handles component versioning, download, and installation for
+ * supporting various graphics APIs and emulation layers.
+ */
 public abstract class GeneralComponents {
 
     public enum Type {

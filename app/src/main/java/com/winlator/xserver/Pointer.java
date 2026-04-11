@@ -4,6 +4,21 @@ import com.winlator.math.Mathf;
 
 import java.util.ArrayList;
 
+/**
+ * Pointer - X11 pointer (mouse) device.
+ * 
+ * Manages the X11 pointer state including:
+ * - Position (x, y coordinates)
+ * - Button state (which buttons are pressed)
+ * - Motion listeners (for cursor movement)
+ * 
+ * Used to:
+ * - Track mouse position
+ * - Generate pointer events (button press/release, motion)
+ * - Support up to 7 buttons (left, middle, right, scroll)
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Pointer Device</a>
+ */
 public class Pointer {
     public enum Button {
         BUTTON_LEFT, BUTTON_MIDDLE, BUTTON_RIGHT, BUTTON_SCROLL_UP, BUTTON_SCROLL_DOWN, BUTTON_SCROLL_CLICK_LEFT, BUTTON_SCROLL_CLICK_RIGHT;

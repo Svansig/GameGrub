@@ -6,6 +6,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 event sent when a window is destroyed.
+ * Notifies clients that their window has been destroyed,
+ * enabling cleanup of window-related resources and state.
+ */
 public class DestroyNotify extends Event {
     private final Window event;
     private final Window window;

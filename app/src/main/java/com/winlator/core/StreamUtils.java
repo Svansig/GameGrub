@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Utility class for stream operations including copying and buffering.
+ * Provides helper methods for I/O operations used throughout the application.
+ */
 public class StreamUtils {
     public static final int BUFFER_SIZE = 64 * 1024;
 

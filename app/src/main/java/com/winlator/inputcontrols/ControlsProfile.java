@@ -19,6 +19,15 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
+/**
+ * ControlsProfile - Input control configuration profile.
+ * 
+ * Stores control layout settings:
+ * - Name, cursor speed
+ * - Control elements (JSON)
+ * - Custom bindings
+ * - Profile persistence
+ */
 public class ControlsProfile implements Comparable<ControlsProfile> {
     public final int id;
     private String name;

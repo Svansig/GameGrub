@@ -4,6 +4,11 @@ import androidx.annotation.NonNull;
 
 import java.io.File;
 
+/**
+ * Provides native ELF binary patching functionality.
+ * Uses native library to load and modify ELF executables for
+ * compatibility fixes within the Wine container environment.
+ */
 public class PatchElf {
     static {
         System.loadLibrary("winlator");

@@ -9,6 +9,23 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Property - X11 window property (key-value data).
+ * 
+ * X11 windows can have arbitrary properties attached:
+ * - WM_NAME: Window title
+ * - WM_CLASS: Application class
+ * - WM_HINTS: Window manager hints
+ * - _NET_WM_*: Extended window manager properties
+ * 
+ * Properties have:
+ * - Name (atom): Property identifier
+ * - Type (atom): Data type (STRING, INTEGER, WINDOW, etc.)
+ * - Format (8, 16, 32): Bits per value
+ * - Data: Actual property data
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Properties</a>
+ */
 public class Property {
     public enum Mode {REPLACE, PREPEND, APPEND}
     public enum Format {

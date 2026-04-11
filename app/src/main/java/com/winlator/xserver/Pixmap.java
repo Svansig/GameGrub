@@ -4,6 +4,11 @@ import android.graphics.Bitmap;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Represents an X11 pixmap, an off-screen image buffer that can be drawn to and used as a source
+ * for image operations. Pixmaps are managed resources identified by XID and can be converted to
+ * Android Bitmaps for rendering to the screen.
+ */
 public class Pixmap extends XResource {
     public final Drawable drawable;
 

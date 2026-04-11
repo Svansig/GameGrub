@@ -1,5 +1,10 @@
 package com.winlator.renderer.material;
 
+/**
+ * OpenGL shader material for rendering X11 window content.
+ * Applies a 2D affine transformation matrix (xform) to window coordinates
+ * and maps texture to the view, supporting window positioning and scaling.
+ */
 public class WindowMaterial extends ShaderMaterial {
     public WindowMaterial() {
         setUniformNames("xform", "viewSize", "texture");

@@ -12,6 +12,10 @@ import com.winlator.xserver.errors.BadIdChoice;
 import com.winlator.xserver.errors.BadValue;
 import com.winlator.xserver.errors.XRequestError;
 
+/**
+ * X server request handlers for graphics context operations.
+ * Handles CreateGC, CopyGC, ChangeGC, FreeGC, and SetClipRectangles requests.
+ */
 public abstract class GraphicsContextRequests {
     public static void createGC(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         int gcId = inputStream.readInt();

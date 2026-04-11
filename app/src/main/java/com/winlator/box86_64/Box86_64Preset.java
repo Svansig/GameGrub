@@ -2,6 +2,10 @@ package com.winlator.box86_64;
 
 import androidx.annotation.NonNull;
 
+/**
+ * Represents a box86/box64 emulation preset with an identifier and display name. Presets define
+ * environment variables that configure the emulation engine's behavior (dynarec settings, features).
+ */
 public class Box86_64Preset {
     public static final String STABILITY = "STABILITY";
     public static final String COMPATIBILITY = "COMPATIBILITY";

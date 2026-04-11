@@ -2,6 +2,10 @@ package com.winlator.renderer;
 
 import com.winlator.xserver.Drawable;
 
+/**
+ * Represents a window that can be rendered by the GPU renderer.
+ * Contains the drawable content and position information for window rendering.
+ */
 class RenderableWindow {
     final Drawable content;
     short rootX;

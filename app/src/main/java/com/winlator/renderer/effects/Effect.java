@@ -3,6 +3,11 @@ package com.winlator.renderer.effects;
 import com.winlator.renderer.GLRenderer;
 import com.winlator.renderer.material.ShaderMaterial;
 
+/**
+ * Base class for post-processing visual effects.
+ * Provides lifecycle management for shader-based screen effects
+ * like CRT, NTSC, FXAA, color correction, and toon shading.
+ */
 public abstract class Effect {
     private ShaderMaterial material;
 

@@ -27,6 +27,12 @@ import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/**
+ * Manager class for handling Wine/Proton container lifecycle operations.
+ * Responsible for loading, creating, saving, and deleting container instances.
+ * Maintains an in-memory collection of containers and provides utilities for
+ * container manipulation such as creating shortcuts and managing drives.
+ */
 public class ContainerManager {
     private final ArrayList<Container> containers = new ArrayList<>();
     private final File homeDir;
@@ -59,7 +65,7 @@ public class ContainerManager {
                             String configContent = FileUtils.readString(configFile);
 
                             if (configContent.trim().isEmpty()) {
-                                Timber.tag("ContainerManager").w("Container config file is null or empty, skipping: " + containerId);
+                                Timber.tag("ContainerManager").w("Container config file is null or empty, skipping: %s", containerId);
                                 continue;
                             }
 
@@ -183,7 +189,7 @@ public class ContainerManager {
             return container;
         }
         catch (JSONException e) {
-            Timber.tag("ContainerManager").e("Failed to create container: " + e);
+            Timber.tag("ContainerManager").e(e, "Failed to create container.");
         }
         return null;
     }

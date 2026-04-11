@@ -11,6 +11,10 @@ import com.winlator.xserver.XServer;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that manages System V shared memory.
+ * Provides shared memory functionality for X server MIT-SHM extension.
+ */
 public class SysVSharedMemoryComponent extends EnvironmentComponent {
     private XConnectorEpoll connector;
     public final UnixSocketConfig socketConfig;

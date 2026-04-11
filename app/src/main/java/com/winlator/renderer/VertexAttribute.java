@@ -5,6 +5,11 @@ import android.opengl.GLES20;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
+/**
+ * OpenGL vertex attribute wrapper for shader input management.
+ * Manages VBO allocation, data upload, and attribute binding
+ * for rendering geometry in the GPU pipeline.
+ */
 public class VertexAttribute {
     private Buffer buffer;
     private int bufferId = 0;

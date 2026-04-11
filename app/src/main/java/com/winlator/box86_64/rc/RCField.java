@@ -5,6 +5,10 @@ import androidx.annotation.NonNull;
 import java.util.Collections;
 import java.util.LinkedList;
 
+/**
+ * Enumeration of available box64 environment variable fields for RC configuration. Each field
+ * has a name, default enabled state, and optional selection values for UI presentation.
+ */
 public enum RCField {
     BOX64_LOG("BOX64_LOG", false),
     BOX64_ROLLING_LOG("BOX64_ROLLING_LOG", false),

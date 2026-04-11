@@ -19,6 +19,11 @@ import java.util.Locale;
 
 import timber.log.Timber;
 
+/**
+ * Utility class providing Wine-specific operations within the container environment.
+ * Handles Wine registry operations, dosdevice symlinks, wineprefix management,
+ * and other Wine-specific functionality needed for running Windows applications.
+ */
 public abstract class WineUtils {
     public static void createDosdevicesSymlinks(Container container) {
         String dosdevicesPath = (new File(container.getRootDir(), ".wine/dosdevices")).getPath();

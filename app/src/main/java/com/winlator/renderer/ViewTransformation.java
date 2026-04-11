@@ -1,5 +1,10 @@
 package com.winlator.renderer;
 
+/**
+ * Manages view transformation and aspect ratio calculations for rendering.
+ * Computes scaling, offsets, and dimensions to fit the X11 desktop
+ * into the Android view while preserving the correct aspect ratio.
+ */
 public class ViewTransformation {
     public int viewOffsetX;
     public int viewOffsetY;

@@ -8,6 +8,11 @@ import com.winlator.xserver.extensions.PresentExtension;
 
 import java.io.IOException;
 
+/**
+ * X11 Present extension event notifying when a pixmap is no longer in use.
+ * Signals the client that it can reuse or release the associated pixmap,
+ * enabling efficient GPU memory management for direct rendering.
+ */
 public class PresentIdleNotify extends Event {
     private final int eventId;
     private final Window window;

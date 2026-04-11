@@ -28,6 +28,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Handles installation and extraction of the Wine container filesystem image.
+ * Manages installation from assets or downloaded archives, Wine extraction,
+ * and guest library installation.
+ */
 public abstract class ImageFsInstaller {
     public static final byte LATEST_VERSION = 26;
 

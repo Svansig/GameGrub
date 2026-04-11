@@ -3,6 +3,11 @@ package com.winlator.renderer.effects;
 import com.winlator.renderer.material.ScreenMaterial;
 import com.winlator.renderer.material.ShaderMaterial;
 
+/**
+ * Post-processing edge detection effect for cel-shaded toon rendering.
+ * Applies simple Sobel-based edge detection to create outline effects,
+ * giving a stylized cartoon appearance to the displayed content.
+ */
 public class ToonEffect extends Effect {
     @Override
     protected ShaderMaterial createMaterial() {

@@ -18,6 +18,23 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+/**
+ * DrawRequests - X11 drawing-related request handlers.
+ * 
+ * Handles X11 requests for drawing operations:
+ * - PutImage: Upload image data to a drawable
+ * - GetImage: Download image data from a drawable
+ * - CopyArea: Copy a region from one drawable to another
+ * - CopyPlane: Copy a single bit plane
+ * - PolyPoint/Line/Segment/Rectangle: Basic shapes
+ * - FillPoly: Filled polygons
+ * - And more...
+ * 
+ * These operations draw on Drawable surfaces (Windows and Pixmaps).
+ * GraphicsContext (GC) provides drawing parameters (foreground, background, etc.)
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Drawing Requests Specification</a>
+ */
 public abstract class DrawRequests {
     public enum Format {BITMAP, XY_PIXMAP, Z_PIXMAP}
     private enum CoordinateMode {ORIGIN, PREVIOUS}

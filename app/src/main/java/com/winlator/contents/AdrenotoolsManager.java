@@ -28,6 +28,11 @@ import org.json.JSONObject;
 
 import timber.log.Timber;
 
+/**
+ * Manages Adrenotools GPU driver installation and configuration.
+ * Handles extraction, installation, and environment variable setup
+ * for custom Qualcomm GPU drivers to improve Wine game compatibility.
+ */
 public class AdrenotoolsManager {
 
     private final File adrenotoolsContentDir;

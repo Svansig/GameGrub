@@ -7,6 +7,11 @@ import com.winlator.xserver.Window;
 
 import java.io.IOException;
 
+/**
+ * X11 ConfigureRequest event sent to clients when a window's configuration changes (position,
+ * size, border width, or stacking order). Includes the affected window, its parent, sibling,
+ * and the new configuration values.
+ */
 public class ConfigureRequest extends Event {
     private final Window parent;
     private final Window window;

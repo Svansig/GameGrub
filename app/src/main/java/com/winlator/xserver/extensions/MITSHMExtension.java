@@ -21,6 +21,11 @@ import java.nio.ByteBuffer;
 
 import timber.log.Timber;
 
+/**
+ * X11 MIT-SHM extension for shared memory pixmaps. Enables efficient image transfer between
+ * client and server by using shared memory segments instead of socket data transfer. Supports
+ * query version, attach, detach, and put image operations.
+ */
 public class MITSHMExtension implements Extension {
     public static final byte MAJOR_OPCODE = -101;
 

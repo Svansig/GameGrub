@@ -22,6 +22,19 @@ import java.util.List;
 import java.util.Locale;
 import timber.log.Timber;
 
+/**
+ * FEXCoreManager - Wine/Proton compatibility layer manager.
+ * 
+ * FEX (Fermost Emulator) is a Linux-to-Wine translation layer.
+ * This manager handles:
+ * - FEX installation/updates
+ * - Preset management (game-specific configs)
+ * - Application compatibility fixes
+ * - Container integration
+ * 
+ * FEXCore is the core of Wine/Proton that translates
+ * Linux syscalls to Windows equivalents.
+ */
 public final class FEXCoreManager {
 
     private static final String[] APP_CONFIG_EXE_NAMES = {

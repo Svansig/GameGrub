@@ -15,6 +15,10 @@ import com.winlator.xserver.errors.XRequestError;
 
 import java.io.IOException;
 
+/**
+ * X server request handlers for cursor operations.
+ * Handles CreateCursor, FreeCursor, RecolorCursor, QueryBestSize, and GetPointerMapping requests.
+ */
 public abstract class CursorRequests {
     public static void createCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         int cursorId = inputStream.readInt();

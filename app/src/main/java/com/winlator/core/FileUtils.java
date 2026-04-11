@@ -36,6 +36,11 @@ import java.util.zip.ZipInputStream;
 
 import timber.log.Timber;
 
+/**
+ * Utility class providing file system operations for the Wine container environment.
+ * Handles file I/O, directory management, asset extraction, compression,
+ * and Android-specific file operations such as SAF (Storage Access Framework) handling.
+ */
 public abstract class FileUtils {
     public static byte[] read(Context context, String assetFile) {
         try (InputStream inStream = context.getAssets().open(assetFile)) {

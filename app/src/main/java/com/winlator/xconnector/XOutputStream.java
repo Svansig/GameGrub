@@ -7,6 +7,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Buffered output stream for writing X11 protocol data to clients. Provides methods for writing
+ * protocol data types (bytes, shorts, ints, strings) with automatic buffer expansion and supports
+ * thread-safe locking during write operations.
+ */
 public class XOutputStream {
     private static final byte[] ZERO = new byte[64];
     public ByteBuffer buffer;

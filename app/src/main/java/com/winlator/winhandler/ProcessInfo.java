@@ -4,6 +4,10 @@ import com.winlator.core.StringUtils;
 
 import java.util.ArrayList;
 
+/**
+ * Represents information about a Windows process.
+ * Contains process ID, name, memory usage, CPU affinity mask, and WoW64 status.
+ */
 public class ProcessInfo {
     public final int pid;
     public final String name;

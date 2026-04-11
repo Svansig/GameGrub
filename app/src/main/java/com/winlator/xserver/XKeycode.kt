@@ -1,5 +1,11 @@
 package com.winlator.xserver
 
+/**
+ * Enum representing X11 keyboard keycodes for the X server.
+ * Maps Android key events to X11 keycodes for keyboard input handling
+ * in the Wine container environment.
+ */
+
 enum class XKeycode(val id: Byte) {
     KEY_NONE(0),
     KEY_ESC(9),

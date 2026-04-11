@@ -8,6 +8,10 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Represents a controller button/axis binding for external controllers.
+ * Maps Android input events (key codes, axes) to internal binding types.
+ */
 public class ExternalControllerBinding {
     public static final byte AXIS_X_NEGATIVE = -1;
     public static final byte AXIS_X_POSITIVE = -2;

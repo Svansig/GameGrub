@@ -3,6 +3,11 @@ package com.winlator.renderer.effects;
 import com.winlator.renderer.material.ScreenMaterial;
 import com.winlator.renderer.material.ShaderMaterial;
 
+/**
+ * Post-processing anti-aliasing effect using the FXAA algorithm.
+ * Detects edges based on luminance and applies efficient smoothing
+ * to reduce jagged aliasing artifacts without multi-sampling overhead.
+ */
 public class FXAAEffect extends Effect {
     @Override
     protected ShaderMaterial createMaterial() {

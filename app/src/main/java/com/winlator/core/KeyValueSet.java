@@ -4,6 +4,11 @@ import androidx.annotation.NonNull;
 
 import java.util.Iterator;
 
+/**
+ * Represents a set of key=value pairs for configuration strings.
+ * Used throughout the application for parsing and manipulating
+ * container configuration parameters.
+ */
 public class KeyValueSet implements Iterable<String[]> {
     private String data;
 

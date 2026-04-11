@@ -8,6 +8,11 @@ import java.util.TimerTask;
 
 import timber.log.Timber;
 
+/**
+ * Locks the cursor position within a bounded region on the X server display.
+ * Used to confine mouse pointer movement to a specific area, typically
+ * for game controller input handling or pointer containment.
+ */
 public class CursorLocker extends TimerTask {
     private final XServer xServer;
     private float damping = 0.25f;

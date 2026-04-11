@@ -17,6 +17,21 @@ import com.winlator.xserver.events.MappingNotify;
 import com.winlator.xserver.events.MotionNotify;
 import com.winlator.xserver.events.PointerWindowEvent;
 
+/**
+ * InputDeviceManager - Manages X11 input devices.
+ * 
+ * Routes Android input to X11 clients:
+ * - Convert Android events to X11 events
+ * - Focus management
+ * - Keyboard mapping
+ * - Mouse/keyboard grabs
+ * - Auto-repeat
+ * 
+ * Translates Android input events to X11 protocol events
+ * and delivers them to focused windows.
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Input Devices</a>
+ */
 public class InputDeviceManager implements Pointer.OnPointerMotionListener, Keyboard.OnKeyboardListener, WindowManager.OnWindowModificationListener, XResourceManager.OnResourceLifecycleListener {
     private static final byte MOUSE_WHEEL_DELTA = 120;
     private Window pointWindow;

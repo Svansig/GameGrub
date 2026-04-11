@@ -8,6 +8,10 @@ import com.winlator.xenvironment.EnvironmentComponent;
 
 import timber.log.Timber;
 
+/**
+ * Environment component that manages the Steam client socket server.
+ * Handles Steam IPC communication for game integration.
+ */
 public class SteamClientComponent extends EnvironmentComponent implements ConnectionHandler, RequestHandler {
     // public abstract static class RequestCodes {
     //     public static final byte INIT = 0;

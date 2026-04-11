@@ -7,6 +7,11 @@ import com.winlator.xserver.extensions.PresentExtension;
 
 import java.io.IOException;
 
+/**
+ * X11 Present extension event notifying when a flip or copy completes.
+ * Provides timing info (UST/MSC) for frame presentation synchronization,
+ * enabling smooth vertical blank and display refresh coordination.
+ */
 public class PresentCompleteNotify extends Event {
     private final int eventId;
     private final Window window;

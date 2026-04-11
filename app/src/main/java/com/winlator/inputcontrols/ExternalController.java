@@ -15,6 +15,16 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+/**
+ * ExternalController - External gamepad controller support.
+ * 
+ * Manages physical USB/Bluetooth gamepads:
+ * - Device detection
+ * - Input polling
+ * - Dead zone handling
+ * - Event generation
+ * - Multiple controller support
+ */
 public class ExternalController {
     public static final float STICK_DEAD_ZONE = 0.15f;
     public static final byte IDX_BUTTON_A = 0;

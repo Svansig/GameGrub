@@ -17,6 +17,11 @@ import com.winlator.xserver.ScreenInfo;
 
 import java.io.File;
 
+/**
+ * Manages Wine desktop theme settings including background images and colors.
+ * Provides configuration for the Wine desktop environment appearance
+ * and handles theme persistence within container configurations.
+ */
 public abstract class WineThemeManager {
     public enum Theme {LIGHT, DARK}
     public enum BackgroundType {IMAGE, COLOR}

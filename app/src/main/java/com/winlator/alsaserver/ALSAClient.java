@@ -13,6 +13,11 @@ import com.winlator.sysvshm.SysVSharedMemory;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Represents an ALSA client for audio playback.
+ * Handles audio stream configuration, playback control, and shared memory integration
+ * for low-latency audio in Wine containers.
+ */
 public class ALSAClient {
     private static short framesPerBuffer = 256;
     private ByteBuffer auxBuffer;

@@ -17,6 +17,12 @@ import java.util.Iterator;
 
 import timber.log.Timber;
 
+/**
+ * Manages the Wine environment and its components.
+ * Provides lifecycle management for all environment components including X server,
+ * audio servers, program launchers, and system services.
+ * Implements Iterable to allow iteration over components.
+ */
 public class XEnvironment implements Iterable<EnvironmentComponent> {
     private final Context context;
     private final ImageFs imageFs;

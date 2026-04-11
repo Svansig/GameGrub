@@ -8,6 +8,11 @@ import com.winlator.xserver.Drawable;
 
 import java.nio.ByteBuffer;
 
+/**
+ * OpenGL 2D texture wrapper for X11 drawable content.
+ * Manages texture allocation, updates from X server drawables,
+ * and GPU memory handling for efficient X11 window rendering.
+ */
 public class Texture {
     protected int textureId = 0;
     protected int format = GLES11Ext.GL_BGRA;

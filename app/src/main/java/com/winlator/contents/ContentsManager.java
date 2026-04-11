@@ -26,6 +26,17 @@ import java.util.Objects;
 
 import timber.log.Timber;
 
+/**
+ * ContentsManager - Wine/Proton container manager.
+ * 
+ * Manages game containers:
+ * - Container extraction/installation
+ * - Content profiles (Wine, Proton)
+ * - Updates and versioning
+ * - File management
+ * 
+ * Handles the Wine/Proton runtime environment.
+ */
 public class ContentsManager {
     public static final String PROFILE_NAME = "profile.json";
     public static final String REMOTE_PROFILES_URL = "https://raw.githubusercontent.com/longjunyu2/winlator/main/content/metadata.json";

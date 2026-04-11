@@ -1,5 +1,12 @@
 package com.winlator.container
 
+/**
+ * Immutable data class representing the configuration and state of a Wine/Proton container.
+ * Contains all user-configurable settings including display, graphics, audio, drives,
+ * environment variables, and runtime options. Used as a serializable data model
+ * that can be persisted and restored for container configurations.
+ */
+
 import androidx.compose.runtime.saveable.mapSaver
 import com.winlator.box86_64.Box86_64Preset
 import com.winlator.core.DefaultVersion

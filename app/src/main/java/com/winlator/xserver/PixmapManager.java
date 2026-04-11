@@ -3,6 +3,21 @@ package com.winlator.xserver;
 import android.graphics.Bitmap;
 import android.util.SparseArray;
 
+/**
+ * PixmapManager - Manages X11 pixmaps (offscreen images).
+ * 
+ * Manages offscreen rendering surfaces (Pixmaps):
+ * - Creates/destroys pixmaps
+ * - Tracks supported visuals
+ * - Manages PixmapFormats
+ * 
+ * Pixmaps are offscreen drawables used for:
+ * - Back buffers for double-buffering
+ * - Temporary image storage
+ * - Cursor images
+ * 
+ * @see <a href="https://www.x.org/wiki/X11/">X11 Pixmaps</a>
+ */
 public class PixmapManager extends XResourceManager {
     public final Visual visual;
     public final Visual[] supportedVisuals;

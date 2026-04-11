@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * Utility class for handling Windows BMP (bitmap) file format operations.
+ * Provides reading and writing of BMP images for Wine theme and
+ * icon management within the container environment.
+ */
 public abstract class MSBitmap {
     public static Bitmap open(File targetFile) {
         if (!targetFile.isFile()) return null;

@@ -2,6 +2,11 @@ package com.winlator.xserver;
 
 import com.winlator.xconnector.XInputStream;
 
+/**
+ * Represents the attributes of an X window.
+ * Contains properties such as backing store, gravity, event masks, cursor, and window class.
+ * Provides methods to read and update window attributes from X client requests.
+ */
 public class WindowAttributes {
     public static final int FLAG_BACKGROUND_PIXMAP = 1;
     public static final int FLAG_BACKGROUND_PIXEL = 1<<1;
